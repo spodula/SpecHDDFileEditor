@@ -1,6 +1,9 @@
 # SpecHDDFileEditor
 This is a java based editor for either Realsoft HDF files or Raw disk Image files in both 8 and 16 bit versions.
 
+'''Features:
+
+
 File system documentation:
 * HDF files: https://sinclair.wiki.zxnet.co.uk/wiki/HDF_format
 * IDEDOS: https://sinclair.wiki.zxnet.co.uk/wiki/IDEDOS / http://zxvgs.yarek.com/en-idedos.html
