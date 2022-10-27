@@ -1,7 +1,12 @@
 # SpecHDDFileEditor
 This is a java based editor for either Realsoft HDF files or Raw disk Image files in both 8 and 16 bit versions.
 
-'''Features:
+Features:
+* Open Raw Disk image files OR HDF files in both 8 or 16 bit variabts. 
+* Convert between file types
+* Add and remove spectrum +3 files:
+** Basic files as both text and pre-tokenised. 
+
 
 
 File system documentation:
