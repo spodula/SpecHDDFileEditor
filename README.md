@@ -37,4 +37,7 @@ Alternatively, from the command line:
 
   Java -jar HDDEditorxxx.jar
   
+Documentation:
+https://github.com/spodula/SpecHDDFileEditor/wiki
+  
 
