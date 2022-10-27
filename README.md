@@ -34,6 +34,7 @@ Should leave a JAR file in the target folder.
 Running:
 Depending on your java installation and OS, you may be able to double-click on the file. 
 Alternatively, from the command line:
+
   Java -jar HDDEditorxxx.jar
   
 
