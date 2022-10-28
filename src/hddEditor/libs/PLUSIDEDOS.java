@@ -1,6 +1,9 @@
 package hddEditor.libs;
 
 public class PLUSIDEDOS {
+	/*
+	 * Partition types. 
+	 */
 	public static final int PARTITION_UNUSED = 0x00;
 	public static final int PARTITION_SYSTEM = 0x01;
 	public static final int PARTITION_SWAP = 0x02;
@@ -21,6 +24,18 @@ public class PLUSIDEDOS {
 	public static final int PARTITION_BAD = 0xFE;
 	public static final int PARTITION_FREE = 0xFF;
 
+	/*
+	 * Partition flags
+	 */
+	public static int PART_ALLOCATABLE = 1;
+	public static int PART_PARTITION = 2;
+	public static int PART_DISKIMAGE = 4;
+	public static int PART_SPECIAL = 8;
+	public static int PART_CPM = 16;
+	
+	/*
+	 * Index object
+	 */
 	public static class PARTSTRING {
 		public String Name;
 		public byte PartID;
@@ -32,12 +47,10 @@ public class PLUSIDEDOS {
 			this.flags = flags;
 		}
 	}
-	public static int PART_ALLOCATABLE = 1;
-	public static int PART_PARTITION = 2;
-	public static int PART_DISKIMAGE = 4;
-	public static int PART_SPECIAL = 8;
-	public static int PART_CPM = 16;
 	
+	/*
+	 * List of partition types, names and flags. 
+	 */
 	public static PARTSTRING[] PartTypes = {
 			new PARTSTRING(PARTITION_UNUSED, "Unused", PART_SPECIAL|PART_ALLOCATABLE),
 			new PARTSTRING(PARTITION_SYSTEM, "System",PART_SPECIAL),
@@ -60,5 +73,138 @@ public class PLUSIDEDOS {
 			new PARTSTRING(PARTITION_FREE, "Free disk space",PART_SPECIAL),
 	};
 	
+	/**
+	 * Generate the generic bits of an IDEDOS partition (name, type, locations, sector location)
+	 * 
+	 * @param name
+	 * @param type
+	 * @param startCyl
+	 * @param startHead
+	 * @param endCyl
+	 * @param endHead
+	 * @param lastSector
+	 * @return
+	 */
+	public static byte[] MakeGenericIDEDOSPartition(String name, int type, int startCyl, int startHead, int endCyl, int endHead, int lastSector ) {
+			byte Part[] = new byte[0x40];
+			for (int i = 0; i < Part.length; i++) {
+				Part[i] = 0x00;
+			}
+			
+			//Partition name
+			while (name.length() < 0x10)
+				name = name + " ";
+			byte NameStr[] = name.getBytes();
+			System.arraycopy(NameStr, 0, Part, 0, 16);
+			Part[0x10] = (byte) (type & 0xff);
 
+			// Start CH
+			Part[0x11] = (byte) (startCyl & 0xff); // \
+			Part[0x12] = (byte) ((startCyl / 0x100) & 0xff);// /starting cyl=0
+			Part[0x13] = (byte) (startHead & 0xff); // starting head
+
+			// End Ch
+			Part[0x14] = (byte) (endCyl & 0xff);; // \
+			Part[0x15] = (byte) ((endCyl / 0x100) & 0xff);; // / End Cylinder
+			Part[0x16] = (byte) (endHead & 0xff); // End head
+
+			// Largest logical sector.
+			Part[0x17] = (byte) (lastSector & 0xff); 
+			lastSector = lastSector / 0x100;
+			Part[0x18] = (byte) (lastSector & 0xff);
+			lastSector = lastSector / 0x100;
+			Part[0x19] = (byte) (lastSector & 0xff);
+			lastSector = lastSector / 0x100;
+			Part[0x1A] = (byte) (lastSector & 0xff);
+			return(Part);
+	}
+
+	/**
+	 * Generate the system partition. 
+	 * The first partition entry in the partition table is always the IDEDOS system partition. There must only be one System Partition on a hard disk. The partition label must always be the string "PLUSIDEDOS" followed by six spaces (ascii 0x20) as this string is used to determine whether the disk was created using an 8 or 16-bit interface. The starting head and ending head are either zero or one depending on where the partition table has been written. The drive geometry is written in the type specific data in the bytes 0x0020 to 0x0027
+	 * 
+	 * @param cyl
+	 * @param head
+	 * @param spt
+	 * @param sectorSz
+	 * @param Write8Bit
+	 * @return
+	 */
+	public static byte[] GetSystemPartition(int DiskCyl, int DiskHead, int DiskSPT, int sectorSz, boolean Write8Bit) {
+		byte SysPart[] = MakeGenericIDEDOSPartition("PLUSIDEDOS", PLUSIDEDOS.PARTITION_SYSTEM, 0,0,0,0, DiskSPT);
+		/*
+		 * System partition specific information
+		 */
+		// Disk parameters
+		SysPart[0x20] = (byte) ((DiskCyl / 0x100) & 0xff);
+		SysPart[0x21] = (byte) (DiskCyl & 0xff);
+		SysPart[0x22] = (byte) (DiskHead & 0xff);
+		SysPart[0x23] = (byte) (DiskSPT & 0xff);
+		
+		//Sectors per Cylinder (As opposed by Sectors per track)
+		int SPC = DiskSPT * DiskHead;
+		SysPart[0x24] = (byte) ((SPC / 0x100) & 0xff);
+		SysPart[0x25] = (byte) (SPC & 0xff);
+
+		// Max partitions - Limit to 63 partitons
+		int MaxPartitions = (DiskSPT * sectorSz / 0x40) - 1;
+		if (MaxPartitions > 63) {
+			MaxPartitions = 63;
+		}
+		SysPart[0x26] = (byte) ((MaxPartitions / 0x100) & 0xff);
+		SysPart[0x27] = (byte) (SPC & 0xff);
+
+		// Colour attribute byte (Paper white, Ink black 0011 1000)
+		SysPart[0x27] = (byte) 0x38;
+
+		// Basic attribute byte (Paper white, Ink black 0011 1000)
+		SysPart[0x28] = (byte) 0x38;
+
+		// UA, UB, UM, M0 M1 MR, DD left at 0
+
+		if (Write8Bit) {
+			SysPart = DoubleSector(SysPart);
+		}
+		return(SysPart);
+	}
+
+	/**
+	 * Get a free space partition
+	 * Partition Type 0xFF - Free Disk Space
+	 * A Type 0xFF partition entry as created by the +3e ROMs is all blank except for the type byte and the location and size information. The type specific information is not used.
+	 * 
+	 * @param DiskCyl
+	 * @param DiskHead
+	 * @param DiskSPT
+	 * @param sectorSz
+	 * @param Write8Bit
+	 * @return
+	 */
+	public static byte[] GetFreeSpacePartition(int StartCyl, int StartHead, int EndCyl, int EndHead, int sectorSz, boolean Write8Bit) {
+		byte FSPart[] = MakeGenericIDEDOSPartition("               ", PLUSIDEDOS.PARTITION_FREE, StartCyl,StartHead,EndCyl,EndHead, sectorSz);
+		
+		//Blank partition name
+		for(int i=0;i<0x10;i++) {
+			FSPart[i] = 0x00;
+		}
+		
+		return(FSPart);
+	}
+	
+	/**
+	 * process the sector to expand it to 16 bits
+	 * 
+	 * @param Sector
+	 * @return
+	 */
+	public static byte[] DoubleSector(byte Sector[]) {
+		byte result[] = new byte[Sector.length * 2];
+
+		int ptr = 0;
+		for (int i = 0; i < Sector.length; i++) {
+			result[ptr++] = Sector[i];
+			result[ptr++] = 0;
+		}
+		return (result);
+	}
 }

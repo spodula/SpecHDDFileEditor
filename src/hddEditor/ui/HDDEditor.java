@@ -1,4 +1,5 @@
 package hddEditor.ui;
+//TODO: Values calculated seems to be wrong for new free space partition (Create new item of 1Gb)
 
 /**
  * Main UI.
@@ -60,6 +61,8 @@ public class HDDEditor {
 
 	private FileConversionForm fileConvForm = null;
 	private FileNewForm fileNewForm = null;
+	
+	private String helpcontext="Main";
 
 	/**
 	 * Make the menus
@@ -152,9 +155,8 @@ public class HDDEditor {
 		helpGetHelpItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				HtmlHelp.DoHelp("Main");
+				HtmlHelp.DoHelp(helpcontext);
 			}
-
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 				widgetSelected(arg0);
@@ -254,11 +256,9 @@ public class HDDEditor {
 	public static void main(String[] args) {
 		HDDEditor hdi = new HDDEditor();
 		hdi.MakeForm();
-//		hdi.LoadFile("/data1/IDEDOS/2gtesta.img");
-//		hdi.LoadFile("/data1/IDEDOS/2gdeletedpart.img");
-//		hdi.LoadFile("/data1/IDEDOS/idedos.dsk");
-//		hdi.LoadFile("/data1/IDEDOS/Workbench2.3_4Gb_8Bits.hdf");
-//		hdi.LoadFile("/data1/IDEDOS/Workbench2.3_4Gb_8Bits.img");
+		if (args.length>0) {
+			hdi.LoadFile(args[0]);
+		}
 		hdi.loop();
 	}
 
@@ -372,6 +372,7 @@ public class HDDEditor {
 			PartitionDropdown.setText(result);
 		}
 		IDEDosPartition part = CurrentHandler.GetPartitionByName(name);
+		helpcontext = "partition_type_"+String.valueOf( part.GetPartType() );
 		PopulatePartitionScreen(part);
 	}
 

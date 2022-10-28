@@ -6,7 +6,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class HtmlHelp {
-	public static String baseURL = "https://salkin.co.uk/~wiki/index.php/HDDEditor/";
+	public static String baseURL = "https://github.com/spodula/SpecHDDFileEditor/wiki/";
 	
 	public static void DoHelp(String context)  {
 		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {

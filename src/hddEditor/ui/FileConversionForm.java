@@ -1,5 +1,4 @@
 package hddEditor.ui;
-//TODO new disk
 /**
  * Convert between file types
  */
@@ -20,11 +19,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.HDFUtils;
+import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.IDEDosDisk;
 import hddEditor.libs.disks.RS_IDEDosDisk;
@@ -260,7 +259,7 @@ public class FileConversionForm {
 	}
 
 	/**
-	 * 
+	 * Actually convert the file
 	 */
 	protected void DoConvert() {
 		ProgesssForm pf = new ProgesssForm(display);
@@ -306,7 +305,7 @@ public class FileConversionForm {
 					for (int sectorNum = 0; (sectorNum < Numsectors) && !cancelled; sectorNum++) {
 						byte sector[] = SourceDisk.GetBytesStartingFromSector(sectorNum, SectorSz);
 						if (IsTarget8Bit & !IsTargetHDF) {
-							sector = DoubleSector(sector);
+							sector = PLUSIDEDOS.DoubleSector(sector);
 						}
 						TargetFile.write(sector);
 						if (sectorNum % 100000 == 0) {
@@ -350,23 +349,5 @@ public class FileConversionForm {
 			CloseBtn.setText("Close");
 			pf.close();
 		}
-	}
-
-
-	/**
-	 * process the sector to expand it to 16 bits
-	 * 
-	 * @param Sector
-	 * @return
-	 */
-	private byte[] DoubleSector(byte Sector[]) {
-		byte result[] = new byte[Sector.length * 2];
-
-		int ptr = 0;
-		for (int i = 0; i < Sector.length; i++) {
-			result[ptr++] = Sector[i];
-			result[ptr++] = 0;
-		}
-		return (result);
 	}
 }

@@ -314,66 +314,16 @@ public class FileNewForm {
 						HDFUtils.WriteHDFFileHeader(TargetFile, IsTarget8Bit, cyl, head, spt);
 					}
 					// write out an IDEDOS header
-					byte SysPart[] = new byte[0x40];
-					for (int i = 0; i < SysPart.length; i++) {
-						SysPart[i] = 0x00;
-					}
-
-					// 0123456789ABCDEF
-					byte NameStr[] = "PLUSIDEDOS      ".getBytes();
-					System.arraycopy(NameStr, 0, SysPart, 0, 16);
-					SysPart[0x10] = PLUSIDEDOS.PARTITION_SYSTEM;
-
-					SysPart[0x11] = 0; // \
-					SysPart[0x12] = 0; // /starting cyl=0
-					SysPart[0x13] = 0; // starting head=0
-
-					SysPart[0x14] = 0; // \
-					SysPart[0x15] = 0; // / End Cylinder
-					SysPart[0x16] = 0; // End head
-
-					// Largest logical sector.
-
-					int LastSector = spt;
-					SysPart[0x17] = (byte) (LastSector & 0xff); // = 30 sectors
-					SysPart[0x18] = 0;
-					SysPart[0x19] = 0;
-					SysPart[0x1A] = 0;
-
-					/*
-					 * System partition specific information
-					 */
-					// Disk parameters
-					SysPart[0x20] = (byte) ((cyl / 0x100) & 0xff);
-					SysPart[0x21] = (byte) (cyl & 0xff);
-					SysPart[0x22] = (byte) (head & 0xff);
-					SysPart[0x23] = (byte) (spt & 0xff);
-					int SPC = spt * head;
-					SysPart[0x24] = (byte) ((SPC / 0x100) & 0xff);
-					SysPart[0x25] = (byte) (SPC & 0xff);
-
-					// Max partitions - Limit to 63 partitons
-					int MaxPartitions = (LastSector * sectorSz / 0x40) - 1;
-					if (MaxPartitions > 63) {
-						MaxPartitions = 63;
-					}
-					SysPart[0x26] = (byte) ((MaxPartitions / 0x100) & 0xff);
-					SysPart[0x27] = (byte) (SPC & 0xff);
-
-					// Colour attribute byte (Paper white, Ink black 0011 1000)
-					SysPart[0x27] = (byte) 0x38;
-
-					// Basic attribute byte (Paper white, Ink black 0011 1000)
-					SysPart[0x28] = (byte) 0x38;
-
-					// UA, UB, UM, M0 M1 MR, DD left at 0
-
-					if (IsTarget8Bit && !IsTargetHDF) {
-						SysPart = DoubleSector(SysPart);
-					}
-
+					byte SysPart[] = PLUSIDEDOS.GetSystemPartition(cyl, head, spt, sectorSz, IsTarget8Bit && !IsTargetHDF);
 					TargetFile.write(SysPart);
-					// Write a blank file for the rest.
+					
+					// WRite out the free space header
+					byte FsPart[] = PLUSIDEDOS.GetFreeSpacePartition(0,1,cyl,1,sectorSz, IsTarget8Bit && !IsTargetHDF);
+					TargetFile.write(FsPart);
+					/*
+					 * Write a blank file for the rest. 
+					 */
+					
 					int NumLogicalSectors = (cyl * head * spt) - spt + 1;
 
 					byte oneSector[] = new byte[512];
@@ -443,23 +393,6 @@ public class FileNewForm {
 		if (!shell.isDisposed()) {
 			shell.dispose();
 		}
-	}
-
-	/**
-	 * process the sector to expand it to 16 bits
-	 * 
-	 * @param Sector
-	 * @return
-	 */
-	private byte[] DoubleSector(byte Sector[]) {
-		byte result[] = new byte[Sector.length * 2];
-
-		int ptr = 0;
-		for (int i = 0; i < Sector.length; i++) {
-			result[ptr++] = Sector[i];
-			result[ptr++] = 0;
-		}
-		return (result);
 	}
 
 }
