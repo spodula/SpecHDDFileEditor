@@ -137,6 +137,12 @@ public class IDEDosPartition {
 		SetEndSector((long)NumSectors);
 	}
 
+	/**
+	 * Get the End sector
+	 * Note, this is in 512 byte sectors regardless of disk size.
+	 * 
+	 * @return
+	 */
 	public long GetEndSector() {
 		//endsector is a 4 byte value
 		long EndSector = (int) (RawPartition[25] & 0xff) + ((RawPartition[26] & 0xff) * 0x100);
@@ -144,7 +150,13 @@ public class IDEDosPartition {
 		EndSector = EndSector + (int) (RawPartition[23] & 0xff) + ((RawPartition[24] & 0xff) * 0x100);
 		return (EndSector); 
 	}
-	
+
+	/**
+	 * Set the end sector
+	 * Note this is in 512 byte sectors regardless of disk size
+	 * 
+	 * @param endsector
+	 */
 	public void SetEndSector(Long endsector) {
 		int lsb = (int) (endsector % 0x10000);
 		int msb = (int) (endsector / 0x10000);
@@ -155,6 +167,12 @@ public class IDEDosPartition {
 		RawPartition[26] = (byte) (msb / 0x100);
 	}
 	
+	/**
+	 * get the 5 unused bytes normally at the end of the partition.
+	 * These are mostly unused, but are used in SYSTEM partition. 
+	 * 
+	 * @return
+	 */
 	public byte[] getUnused() {
 		byte Unused[] = new byte[5];
 		System.arraycopy(RawPartition, 27, Unused, 0, 5);
@@ -162,16 +180,31 @@ public class IDEDosPartition {
 		
 	}
 	
+	/**
+	 * Set the 5 unused bytes
+	 * 
+	 * @param unused
+	 */
 	public void SetUnused(byte unused[]) {
 		System.arraycopy(unused,0,RawPartition, 27, 5);
 	}
 
+	/**
+	 * Get the second half of the partition data used for partition specific information. 
+	 * 
+	 * @return
+	 */
 	public byte[] getExtra() {
 		byte extra[] = new byte[32];
 		System.arraycopy(RawPartition, 0x20, extra, 0, 0x20);
 		return(extra);		
 	}
 	
+	/**
+	 * Set the second half of the partition data used for partition specific information. 
+	 * 
+	 * @return
+	 */
 	public void SetExtra(byte extra[]) {
 		System.arraycopy(extra,0,RawPartition, 0x20, 0x20);
 	}
@@ -198,10 +231,18 @@ public class IDEDosPartition {
 		}
 	}
 	
+	/**
+	 * Get the size in Kbytes of the partition. Note, sectors are treated as 512 bytes regardless of actual disk size.  
+	 * 
+	 * @return
+	 */
 	public int GetSizeK() {
 		return((int)GetEndSector() / 2);
 	}
-	
+
+	/**
+	 * Used when creating a partition. Overridden by specific partitions
+	 */
 	public void SetSensibleDefaults() {
 		
 	}
@@ -212,12 +253,20 @@ public class IDEDosPartition {
 	 * @param ideDosHandler
 	 * @param RawPartition
 	 */
-	public IDEDosPartition(int DirentLocation, Disk ideDosHandler, byte RawPartition[], int DirentNum) {
+	public IDEDosPartition(int DirentLocation, Disk ideDosHandler, byte RawPartition[], int DirentNum, boolean Initialise) {
 		CurrentDisk = ideDosHandler;
 		this.DirentLocation = DirentLocation;
 		this.DirentNum = DirentNum;
 		this.RawPartition = RawPartition;
 		PopulateData(RawPartition);
+		if (Initialise) {
+			SetSensibleDefaults();
+		} else {
+			try {
+				LoadPartitionSpecificInformation();
+			} catch (IOException e) {
+			}
+		}
 	}
 
 	/**
@@ -375,6 +424,14 @@ public class IDEDosPartition {
 	public void Reload() {
 		
 	}
+	
+	/**
+	 * 
+	 */
+	protected void LoadPartitionSpecificInformation() throws IOException {
+		
+	}
+	
 
 
 }

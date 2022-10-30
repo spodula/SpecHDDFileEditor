@@ -40,15 +40,15 @@ public class NonCPMDiskImagePartition extends IDEDosPartition {
 	 * @param disk
 	 * @param RawPartition
 	 */
-	public NonCPMDiskImagePartition(int tag, Disk disk, byte[] RawPartition,int DirentNum) {
-		super(tag, disk, RawPartition,DirentNum);
-		PopulateDiskImageSpecificData();
+	public NonCPMDiskImagePartition(int tag, Disk disk, byte[] RawPartition,int DirentNum, boolean Initialise) {
+		super(tag, disk, RawPartition,DirentNum, Initialise);
 	}
 	
 	/**
 	 * Disk specific information for this class of disks.
 	 */
-	private void PopulateDiskImageSpecificData() {
+	@Override
+	protected void LoadPartitionSpecificInformation() {
 	    byte Unused[] = getUnused();
 		SectorShift = (Unused[0] & 0xff);
 		VirtualSectorShift = (Unused[1] & 0xff);

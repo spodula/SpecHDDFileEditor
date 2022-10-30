@@ -318,7 +318,7 @@ public class FileNewForm {
 					TargetFile.write(SysPart);
 					
 					// WRite out the free space header
-					byte FsPart[] = PLUSIDEDOS.GetFreeSpacePartition(0,1,cyl,1,sectorSz, IsTarget8Bit && !IsTargetHDF);
+					byte FsPart[] = PLUSIDEDOS.GetFreeSpacePartition(0,1,cyl,1,sectorSz, IsTarget8Bit && !IsTargetHDF, head, spt);
 					TargetFile.write(FsPart);
 					/*
 					 * Write a blank file for the rest. 

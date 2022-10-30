@@ -12,8 +12,8 @@ import hddEditor.libs.disks.Disk;
 
 public class FreePartition extends IDEDosPartition {
 
-	public FreePartition(int tag, Disk ideDosHandler, byte[] RawPartition,int DirentNum) {
-		super(tag, ideDosHandler, RawPartition,DirentNum);
+	public FreePartition(int tag, Disk ideDosHandler, byte[] RawPartition,int DirentNum, boolean Initialise) {
+		super(tag, ideDosHandler, RawPartition,DirentNum,Initialise);
 	}
 
 }

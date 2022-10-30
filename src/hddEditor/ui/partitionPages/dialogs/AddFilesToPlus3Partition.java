@@ -39,9 +39,9 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.CPM;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
-import hddEditor.libs.partitions.cpm.CPM;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 

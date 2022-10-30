@@ -36,17 +36,10 @@ public class PLUS3DOSPartition extends CPMPartition {
 	 * @param RawPartition
 	 * @throws IOException
 	 */
-	public PLUS3DOSPartition(int tag, Disk disk, byte[] RawPartition,int DirentNum) throws IOException {
-		super(tag, disk, RawPartition,DirentNum);
-		PopulatePlus3SpecificData();
+	public PLUS3DOSPartition(int tag, Disk disk, byte[] RawPartition,int DirentNum, boolean Initialise) throws IOException {
+		super(tag, disk, RawPartition,DirentNum, Initialise);
 	}
 	
-	/**
-	 * 
-	 */
-	public void UpdateRawPartition() {
-		
-	}
 	
 	/**
 	 * This function populates the +3 specific information The first 28 bytes of the
@@ -54,7 +47,8 @@ public class PLUS3DOSPartition extends CPMPartition {
 	 * assigned
 	 * @throws IOException 
 	 */
-	private void PopulatePlus3SpecificData() throws IOException {
+	@Override
+	protected void LoadPartitionSpecificInformation() throws IOException {
 		byte extra[] = getExtra();
 		// First, sort out the drive letter
 		DriveLetter = letterOrBlank(extra[28]);
@@ -192,8 +186,8 @@ public class PLUS3DOSPartition extends CPMPartition {
 		// Now the XDPB
 		//Records per track.
 		byte extra[] = getExtra();
-		extra[1] = 0x02;
 		extra[0] = 0x00;
+		extra[1] = 0x02;
 
 		//Block size shift (8192)
 		extra[2] = 0x06; 
@@ -261,18 +255,21 @@ public class PLUS3DOSPartition extends CPMPartition {
 		extra[30] = 0x00;
 		extra[31] = 0x00;
 		
-		//Max block number		
-		//Assumptions: block = 8192 bytes 
-		MaxBlock = ((GetStartCyl() - GetEndCyl()) * CurrentDisk.GetNumSectors() + GetEndHead()-GetStartHead()) * CurrentDisk.GetSectorSize() / 8192;
+		//Max block number (Note, +3Dos assumes sectors are always 512 bytes)
+		//Assumptions: block = 8192 bytes. 
+		MaxBlock = (int) (GetEndSector() * 512) / 8192;
 		extra[5] = (byte) ((MaxBlock % 0x100) & 0xff);
 		extra[6] = (byte) ((MaxBlock / 0x100) & 0xff);
 		
-		//Backfill to the local variables.
+		SetExtra(extra);
+		
+		
 		try {
 			//Set the defaults..
 			CreateBlankDirectoryArea();
-
-			PopulatePlus3SpecificData();
+			
+			//Backfill to the local variables.
+			LoadPartitionSpecificInformation();
 		} catch (IOException e) {
 		}
 	}

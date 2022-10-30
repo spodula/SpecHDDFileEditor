@@ -66,7 +66,7 @@ public class IDEDosHandler extends OSHandler {
 				byte partitiondata[] = new byte[64];
 				System.arraycopy(PartData, ptr, partitiondata, 0, 64);
 				int PartType = (partitiondata[0x10] & 0xff);
-				IDEDosPartition idp = GetNewPartitionByType(PartType, ptr, CurrentDisk, partitiondata, partnum++);
+				IDEDosPartition idp = GetNewPartitionByType(PartType, ptr, CurrentDisk, partitiondata, partnum++, false);
 
 				if (PartType == 1) {
 					SystemPart = (SystemPartition)idp;
@@ -166,22 +166,33 @@ public class IDEDosHandler extends OSHandler {
 		return result;
 	}	
 	
-	public static IDEDosPartition GetNewPartitionByType(int PartType, int DirentLocation, Disk CurrentDisk, byte partitiondata[], int partnum) {
+	/**
+	 * Get a new partition of the given type
+	 * 
+	 * @param PartType - type
+	 * @param DirentLocation - Address in dirent block
+	 * @param CurrentDisk - disk
+	 * @param partitiondata - Partiton hex data
+	 * @param partnum - Partition number
+	 * @param Initialise - if TRUE, initialise parititon with data, if FALSE, just load. 
+	 * @return
+	 */
+	public static IDEDosPartition GetNewPartitionByType(int PartType, int DirentLocation, Disk CurrentDisk, byte partitiondata[], int partnum, boolean Initialise) {
 		IDEDosPartition idp = null;
 		try {
 		if (PartType == 1) {
-			idp = new SystemPartition(DirentLocation, CurrentDisk, partitiondata,partnum);
+			idp = new SystemPartition(DirentLocation, CurrentDisk, partitiondata,partnum, Initialise);
 		} else if (PartType == 2) {
-			idp = new SwapPartition(DirentLocation, CurrentDisk, partitiondata,partnum);
+			idp = new SwapPartition(DirentLocation, CurrentDisk, partitiondata,partnum, Initialise);
 		} else if (PartType == 3) {
-			idp = new PLUS3DOSPartition(DirentLocation, CurrentDisk, partitiondata,partnum);
+			idp = new PLUS3DOSPartition(DirentLocation, CurrentDisk, partitiondata,partnum, Initialise);
 		} else if (PartType < 0x40 && PartType > 0x29) {
-			idp = new NonCPMDiskImagePartition(DirentLocation, CurrentDisk, partitiondata,partnum);
+			idp = new NonCPMDiskImagePartition(DirentLocation, CurrentDisk, partitiondata,partnum, Initialise);
 		} else if (PartType == 0xff) {
-			idp = new FreePartition(DirentLocation, CurrentDisk, partitiondata,partnum);
+			idp = new FreePartition(DirentLocation, CurrentDisk, partitiondata,partnum, Initialise);
 		} else {
 			//generic partition
-			idp = new IDEDosPartition(DirentLocation, CurrentDisk, partitiondata,partnum);
+			idp = new IDEDosPartition(DirentLocation, CurrentDisk, partitiondata,partnum, Initialise);
 		}
 		} catch (Exception E) {
 			E.printStackTrace();

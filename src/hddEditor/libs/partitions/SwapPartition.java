@@ -27,15 +27,15 @@ public class SwapPartition extends IDEDosPartition {
 	 * @param disk
 	 * @param RawPartition
 	 */
-	public SwapPartition(int tag, Disk disk, byte[] RawPartition,int DirentNum) {
-		super(tag, disk, RawPartition, DirentNum);
-		PopulateSwapSpecificData();
+	public SwapPartition(int tag, Disk disk, byte[] RawPartition,int DirentNum, boolean Initialise) {
+		super(tag, disk, RawPartition, DirentNum, Initialise);
 	}
 
 	/**
 	 * populate specific data
 	 */
-	private void PopulateSwapSpecificData() {
+	@Override
+	protected void LoadPartitionSpecificInformation() {
 	    byte Unused[] = getUnused();
 
 		SwapblockSize = (Unused[0] & 0xff);

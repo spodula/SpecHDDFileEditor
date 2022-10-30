@@ -191,9 +191,7 @@ public class FileConversionForm {
 			public void widgetSelected(SelectionEvent arg0) {
 				if (!running) {
 					shell.close();
-				} else {
-					cancelled = true;
-				}
+				} 
 			}
 
 			@Override
@@ -270,11 +268,11 @@ public class FileConversionForm {
 			TargetFileType.setEnabled(false);
 			SelectSourceFileBtn.setEnabled(false);
 			SelectTargetFileBtn.setEnabled(false);
+			CloseBtn.setEnabled(false);
+			
 			running = true;
 			cancelled = false;
-			CloseBtn.setText("Stop conversion");
 			display.readAndDispatch();
-			
 
 			String srcfile = Sourcefile.getText();
 			String targFile = Targetfile.getText();
@@ -346,7 +344,6 @@ public class FileConversionForm {
 			SelectSourceFileBtn.setEnabled(true);
 			SelectTargetFileBtn.setEnabled(true);
 			running = false;
-			CloseBtn.setText("Close");
 			pf.close();
 		}
 	}

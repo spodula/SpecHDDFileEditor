@@ -189,8 +189,8 @@ public class SystemPartition extends IDEDosPartition {
 	 * @param disk
 	 * @param RawPartition
 	 */
-	public SystemPartition(int DirentLocation, Disk disk, byte[] RawPartition, int DirentNum) {
-		super(DirentLocation, disk, RawPartition, DirentNum);
+	public SystemPartition(int DirentLocation, Disk disk, byte[] RawPartition, int DirentNum, boolean Initialise) {
+		super(DirentLocation, disk, RawPartition, DirentNum, Initialise);
 	}
 
 	/**

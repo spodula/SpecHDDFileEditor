@@ -16,41 +16,41 @@ import hddEditor.ui.partitionPages.dialogs.AddressNote;
 
 public class CPMPartition extends IDEDosPartition {
 	// This data needs to be populated by an inherited class.
-	public int BlockSize = 0;
-	public int RecordsPerTrack = 0;
-	public int BlockSizeShift = 0;
-	public int BLM = 0;
-	public int ExtentMask = 0;
-	public int MaxBlock = 0;
-	public int MaxDirent = 0;
-	public int AL0 = 0;
-	public int AL1 = 0;
-	public int CheckSumVectorSize = 0;
-	public int ReservedTracks = 0;
-	public int SectorSizeShift = 0;
-	public int PHMSectorSize = 0;
-	public int Sidedness = 0;
-	public int TracksPerSide = 0;
-	public int SectorsPerTrack = 0;
-	public int FirstSector = 0;
-	public int SectorSize = 0;
-	public int GapLengthRW = 0;
-	public int GapLengthFmt = 0;
-	public int Flags = 0;
-	public Dirent[] Dirents = null;
-	public DirectoryEntry[] DirectoryEntries = null;
-	public boolean[] bam = null;
+	public int BlockSize;
+	public int RecordsPerTrack;
+	public int BlockSizeShift;
+	public int BLM;
+	public int ExtentMask;
+	public int MaxBlock;
+	public int MaxDirent;
+	public int AL0;
+	public int AL1;
+	public int CheckSumVectorSize;
+	public int ReservedTracks;
+	public int SectorSizeShift;
+	public int PHMSectorSize;
+	public int Sidedness;
+	public int TracksPerSide;
+	public int SectorsPerTrack;
+	public int FirstSector;
+	public int SectorSize;
+	public int GapLengthRW;
+	public int GapLengthFmt;
+	public int Flags;
+	public Dirent[] Dirents;
+	public DirectoryEntry[] DirectoryEntries;
+	public boolean[] bam;
 
 	// Calculated fields.
-	public int DirectoryBlocks = 0; // Number of blocks reserved for the directory
-	public int usedblocks = 0; // Blocks that are allocated already
-	public int usedDirEnts = 0; // Number of entries in the directory map that are used
-	public int diskSize = 0; // Calculated max disk space in Kbytes
-	public int freeSpace = 0; // Calculated free space in Kbytes
+	public int DirectoryBlocks; // Number of blocks reserved for the directory
+	public int usedblocks; // Blocks that are allocated already
+	public int usedDirEnts; // Number of entries in the directory map that are used
+	public int diskSize; // Calculated max disk space in Kbytes
+	public int freeSpace; // Calculated free space in Kbytes
 
-	public CPMPartition(int tag, Disk ideDosHandler, byte[] RawPartition, int DirentNum) {
-		super(tag, ideDosHandler, RawPartition, DirentNum);
-	}
+	public CPMPartition(int tag, Disk ideDosHandler, byte[] RawPartition, int DirentNum, boolean Initialise) {
+		super(tag, ideDosHandler, RawPartition, DirentNum, Initialise);
+	} 
 
 	/**
 	 * Get the logical CPM block relative to this partition.
@@ -354,7 +354,7 @@ public class CPMPartition extends IDEDosPartition {
 		while (bytesLoaded < bytesRequired) {
 			byte block[] = GetLogicalBlock(blockId);
 			if (block.length > 0) {
-				System.arraycopy(block, 0, rawDirents, bytesLoaded, block.length);
+				System.arraycopy(block, 0, rawDirents, bytesLoaded, Math.min(block.length, bytesRequired - bytesLoaded));
 				blockId++;
 				bytesLoaded = bytesLoaded + block.length;
 			} else {
@@ -448,6 +448,8 @@ public class CPMPartition extends IDEDosPartition {
 				System.out.println("Filename: '" + d.filename() + "' - " + d.Errors);
 			}
 		}
+		
+		System.out.println("Loaded "+DirectoryEntries.length+" files.");
 
 	}
 
@@ -486,6 +488,10 @@ public class CPMPartition extends IDEDosPartition {
 		result = result + "\t\tFree space: " + freeSpace + "k";
 
 		result = result + "\nNon-blank Dirents:\n";
+		System.out.println(result);
+		if (Dirents == null) {
+			System.out.println("NULL DIRENTS!");
+		}
 		for (Dirent d : Dirents) {
 			if (d.getType() == Dirent.DIRENT_FILE)
 				result = result + d.toString() + "\n";
@@ -511,7 +517,7 @@ public class CPMPartition extends IDEDosPartition {
 	 * @throws IOException
 	 */
 	public void CreateBlankDirectoryArea() throws IOException {
-		int DirentSize = 0x1ff * 64;
+		int DirentSize = 16384; //2 blocks
 		// Read the entire DIRENT
 		byte data[] = GetDataInPartition(0, DirentSize);
 		// update the data with this partition
@@ -558,6 +564,12 @@ public class CPMPartition extends IDEDosPartition {
 			ExtractDirectoryListing();
 		} catch (IOException E) {
 		}
+	}
+	
+	@Override
+	protected void LoadPartitionSpecificInformation() throws IOException {
+		super.LoadPartitionSpecificInformation();
+		ExtractDirectoryListing();
 	}
 
 }

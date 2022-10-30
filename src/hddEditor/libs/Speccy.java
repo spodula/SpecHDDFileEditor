@@ -6,11 +6,13 @@ import org.eclipse.swt.graphics.PaletteData;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 
 public class Speccy {
+		// Colour names
 		public final static String[] SPECTRUM_COLOURS = {"Black","Blue","Red","Magenta","Green","Cyan","Yellow","White"};
-		// Start of the commands in the character set. Tokenising starts here.
+		
+		// Start of the commands in the Spectrum character set. Tokenising starts here.
 		public final static int SPECCY_CMD_START = 0xA3;
 
-		// Prefix for numbers.
+		// Prefix for numbers in basic files. 
 		public final static byte NUMSTART = 0x0E;
 
 		/**

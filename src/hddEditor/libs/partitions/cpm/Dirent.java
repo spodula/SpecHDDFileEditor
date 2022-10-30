@@ -1,5 +1,7 @@
 package hddEditor.libs.partitions.cpm;
 
+import hddEditor.libs.CPM;
+
 /**
  * This encapsulates a directory entry structure. Details are from here:
  * http://www.cpcwiki.eu/index.php/Disk_structure

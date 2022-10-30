@@ -619,7 +619,7 @@ public class SystemPartPage extends GenericPage {
 							}
 							FoundPartiton = IDEDosHandler.GetNewPartitionByType(NewPartDialog.PartType,
 									FoundPartiton.DirentLocation, FoundPartiton.CurrentDisk, FoundPartiton.RawPartition,
-									FoundPartiton.DirentNum);
+									FoundPartiton.DirentNum, false);
 							SystemPartition.partitions[FoundPartiton.DirentNum] = FoundPartiton;
 							FoundPartiton.SetName(NewPartDialog.Name);
 
@@ -657,7 +657,7 @@ public class SystemPartPage extends GenericPage {
 										NewRawPartition.length);
 
 								NewFreePartition = new FreePartition(FoundPartiton.DirentLocation + 0x40,
-										FoundPartiton.CurrentDisk, NewRawPartition, FoundPartiton.DirentNum + 1);
+										FoundPartiton.CurrentDisk, NewRawPartition, FoundPartiton.DirentNum + 1, false);
 								// Update the cylinder
 								int NewTrack = FoundPartiton.GetStartCyl() + Tracks;
 								int NewHead = FoundPartiton.GetStartHead() + Heads;
@@ -696,12 +696,13 @@ public class SystemPartPage extends GenericPage {
 							FoundPartiton.SetPartType(NewPartDialog.PartType);
 							FoundPartiton.SetEndCyl(Tracks);
 							FoundPartiton.SetEndHead(Heads);
-
+							
 							// Re-create as the proper type
 							FoundPartiton = IDEDosHandler.GetNewPartitionByType(NewPartDialog.PartType,
 									FoundPartiton.DirentLocation, FoundPartiton.CurrentDisk, FoundPartiton.RawPartition,
-									FoundPartiton.DirentNum);
-							FoundPartiton.SetSensibleDefaults();
+									FoundPartiton.DirentNum, true);
+
+							
 							SystemPartition.partitions[FoundPartiton.DirentNum] = FoundPartiton;
 						}
 						RootPage.UpdateDropdown();
@@ -739,7 +740,7 @@ public class SystemPartPage extends GenericPage {
 					part.SetPartType(PLUSIDEDOS.PARTITION_FREE);
 
 					IDEDosPartition NewFreePartition = IDEDosHandler.GetNewPartitionByType(PLUSIDEDOS.PARTITION_FREE,
-							part.DirentLocation, part.CurrentDisk, part.RawPartition, part.DirentNum);
+							part.DirentLocation, part.CurrentDisk, part.RawPartition, part.DirentNum, false);
 
 					NewFreePartition.SetPartType(PLUSIDEDOS.PARTITION_FREE);
 

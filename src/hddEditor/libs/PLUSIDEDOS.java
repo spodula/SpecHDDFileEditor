@@ -85,7 +85,7 @@ public class PLUSIDEDOS {
 	 * @param lastSector
 	 * @return
 	 */
-	public static byte[] MakeGenericIDEDOSPartition(String name, int type, int startCyl, int startHead, int endCyl, int endHead, int lastSector ) {
+	public static byte[] MakeGenericIDEDOSPartition(String name, int type, int startCyl, int startHead, int endCyl, int endHead, long lastSector ) {
 			byte Part[] = new byte[0x40];
 			for (int i = 0; i < Part.length; i++) {
 				Part[i] = 0x00;
@@ -104,8 +104,8 @@ public class PLUSIDEDOS {
 			Part[0x13] = (byte) (startHead & 0xff); // starting head
 
 			// End Ch
-			Part[0x14] = (byte) (endCyl & 0xff);; // \
-			Part[0x15] = (byte) ((endCyl / 0x100) & 0xff);; // / End Cylinder
+			Part[0x14] = (byte) (endCyl & 0xff); // \
+			Part[0x15] = (byte) ((endCyl / 0x100) & 0xff); // / End Cylinder
 			Part[0x16] = (byte) (endHead & 0xff); // End head
 
 			// Largest logical sector.
@@ -151,14 +151,14 @@ public class PLUSIDEDOS {
 		if (MaxPartitions > 63) {
 			MaxPartitions = 63;
 		}
-		SysPart[0x26] = (byte) ((MaxPartitions / 0x100) & 0xff);
-		SysPart[0x27] = (byte) (SPC & 0xff);
+		SysPart[0x26] = (byte) (MaxPartitions & 0xff);
+		SysPart[0x27] = (byte) ((MaxPartitions / 0x100) & 0xff);
 
 		// Colour attribute byte (Paper white, Ink black 0011 1000)
-		SysPart[0x27] = (byte) 0x38;
+		SysPart[0x28] = (byte) 0x38;
 
 		// Basic attribute byte (Paper white, Ink black 0011 1000)
-		SysPart[0x28] = (byte) 0x38;
+		SysPart[0x29] = (byte) 0x38;
 
 		// UA, UB, UM, M0 M1 MR, DD left at 0
 
@@ -180,12 +180,19 @@ public class PLUSIDEDOS {
 	 * @param Write8Bit
 	 * @return
 	 */
-	public static byte[] GetFreeSpacePartition(int StartCyl, int StartHead, int EndCyl, int EndHead, int sectorSz, boolean Write8Bit) {
-		byte FSPart[] = MakeGenericIDEDOSPartition("               ", PLUSIDEDOS.PARTITION_FREE, StartCyl,StartHead,EndCyl,EndHead, sectorSz);
+	public static byte[] GetFreeSpacePartition(int StartCyl, int StartHead, int EndCyl, int EndHead, int sectorSz, boolean Write8Bit,int DiskHeads, int DiskSPT) {
+		int NumTracks = ((EndCyl-StartCyl) * DiskHeads) + EndHead - StartHead;
+		long NumSectors = NumTracks * DiskSPT;
+
+		byte FSPart[] = MakeGenericIDEDOSPartition("               ", PLUSIDEDOS.PARTITION_FREE, StartCyl,StartHead,EndCyl,EndHead, NumSectors);
 		
 		//Blank partition name
 		for(int i=0;i<0x10;i++) {
 			FSPart[i] = 0x00;
+		}
+		
+		if (Write8Bit) {
+			FSPart = DoubleSector(FSPart);
 		}
 		
 		return(FSPart);
