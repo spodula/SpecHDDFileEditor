@@ -73,6 +73,8 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 
 	/**
 	 * ToString overridden to show local flags
+	 * 
+	 * @return 
 	 */
 	@Override
 	public String toString() {
@@ -102,6 +104,13 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 		}
 	}
 
+	/**
+	 * Get the specified number of bytes beginning at the given logical sector.
+	 * 
+	 * @param SectorNum
+	 * @param sz 
+	 * @return 
+	 */
 	@Override
 	public byte[] GetBytesStartingFromSector(int SectorNum, int sz) throws IOException {
 		byte bytes[] = super.GetBytesStartingFromSector(SectorNum, sz);
@@ -109,7 +118,10 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 	}
 
 	/**
-	 * SetLogicalSector modified to take account of half sectors.
+	 * Fill a byte array from the given SectorNum
+	 * 
+	 * @param SectorNum
+	 * @param result[]
 	 */
 	@Override
 	public void SetLogicalBlockFromSector(int SectorNum, byte result[]) throws IOException {

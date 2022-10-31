@@ -1,5 +1,4 @@
 package hddEditor.libs.partitions;
-
 /**
  * Handler for CPM partitions.
  * Note, this wont work by itself. it needs to have the param data
@@ -15,7 +14,8 @@ import hddEditor.libs.partitions.cpm.Dirent;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 
 public class CPMPartition extends IDEDosPartition {
-	// This data needs to be populated by an inherited class.
+	// This data needs to be populated by an inherited class. 
+	//It forms the CPM DPB for the disk.  
 	public int BlockSize;
 	public int RecordsPerTrack;
 	public int BlockSizeShift;
@@ -48,6 +48,15 @@ public class CPMPartition extends IDEDosPartition {
 	public int diskSize; // Calculated max disk space in Kbytes
 	public int freeSpace; // Calculated free space in Kbytes
 
+	/**
+	 * Constuctor
+	 * 
+	 * @param tag
+	 * @param ideDosHandler
+	 * @param RawPartition
+	 * @param DirentNum
+	 * @param Initialise
+	 */
 	public CPMPartition(int tag, Disk ideDosHandler, byte[] RawPartition, int DirentNum, boolean Initialise) {
 		super(tag, ideDosHandler, RawPartition, DirentNum, Initialise);
 	} 
@@ -302,6 +311,7 @@ public class CPMPartition extends IDEDosPartition {
 	}
 
 	/**
+	 * Set a logical block within the Partition
 	 * 
 	 * @param Record
 	 * @param Block
@@ -454,8 +464,9 @@ public class CPMPartition extends IDEDosPartition {
 	}
 
 	/**
-	 * @throws IOException
+	 * ToString overridden to provide CPM specific information
 	 * 
+	 * @throws IOException
 	 */
 	public String toString() {
 		String result = super.toString() + " ";
@@ -529,7 +540,9 @@ public class CPMPartition extends IDEDosPartition {
 	}
 
 	/**
-	 * 
+	 * Get the array of Address/Notes as used by the search function to identify what a particular address contains
+	 *  
+	 * @return
 	 */
 	@Override
 	public AddressNote[] GetAddressNotes() {
@@ -566,6 +579,9 @@ public class CPMPartition extends IDEDosPartition {
 		}
 	}
 	
+	/**
+	 * Load the partition spoecific information
+	 */
 	@Override
 	protected void LoadPartitionSpecificInformation() throws IOException {
 		super.LoadPartitionSpecificInformation();

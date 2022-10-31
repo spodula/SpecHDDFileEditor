@@ -30,6 +30,7 @@ import hddEditor.libs.disks.RS_IDEDosDisk;
 import hddEditor.ui.partitionPages.dialogs.ProgesssForm;
 
 public class FileConversionForm {
+	//Form details
 	private Display display = null;
 	private Shell shell = null;
 
@@ -40,8 +41,11 @@ public class FileConversionForm {
 	private Button SelectTargetFileBtn = null;
 	private Button CloseBtn = null;
 	private Button ConvertBtn = null;
-	
+
+	//reset when the conversion is running. Set by the Cancel button 
 	private boolean cancelled = false;
+
+	//Set so the form cant close when the conversion is running. 
 	private boolean running = false;
 
 	/**
@@ -228,28 +232,28 @@ public class FileConversionForm {
 	}
 
 	/**
-	 * Try to identify the Disk format
+	 * Try to identify the Disk format or NULL
 	 * 
-	 * @param selected
+	 * @param Filename
 	 * @return
 	 */
-	private Disk GetCorrectDiskFromFile(String selected) {
+	private Disk GetCorrectDiskFromFile(String Filename) {
 		Disk result = null;
 		try {
-			if (new IDEDosDisk().IsMyFileType(new File(selected))) {
-				result = new IDEDosDisk(selected);
-			} else if (new RS_IDEDosDisk().IsMyFileType(new File(selected))) {
-				result = new RS_IDEDosDisk(selected);
+			if (new IDEDosDisk().IsMyFileType(new File(Filename))) {
+				result = new IDEDosDisk(Filename);
+			} else if (new RS_IDEDosDisk().IsMyFileType(new File(Filename))) {
+				result = new RS_IDEDosDisk(Filename);
 			} else {
 				MessageBox messageBox = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-				messageBox.setMessage("File " + selected + " is not a Raw HD image or RS HDF drive image.");
-				messageBox.setText("File " + selected + " is not a Raw HD image or RS HDF drive image.");
+				messageBox.setMessage("File " + Filename + " is not a Raw HD image or RS HDF drive image.");
+				messageBox.setText("File " + Filename + " is not a Raw HD image or RS HDF drive image.");
 				messageBox.open();
 			}
 		} catch (IOException e) {
 			MessageBox messageBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-			messageBox.setMessage("Error openning file " + selected + " " + e.getMessage());
-			messageBox.setText("Error openning file " + selected + " " + e.getMessage());
+			messageBox.setMessage("Error openning file " + Filename + " " + e.getMessage());
+			messageBox.setText("Error openning file " + Filename + " " + e.getMessage());
 			messageBox.open();
 			e.printStackTrace();
 		}
@@ -262,6 +266,7 @@ public class FileConversionForm {
 	protected void DoConvert() {
 		ProgesssForm pf = new ProgesssForm(display);
 		try {
+			//Disable all the buttons
 			ConvertBtn.setEnabled(false);
 			Sourcefile.setEnabled(false);
 			Targetfile.setEnabled(false);
@@ -270,19 +275,21 @@ public class FileConversionForm {
 			SelectTargetFileBtn.setEnabled(false);
 			CloseBtn.setEnabled(false);
 			
+			//Set running flags. 
 			running = true;
 			cancelled = false;
 			display.readAndDispatch();
 
+			//Filenames
 			String srcfile = Sourcefile.getText();
 			String targFile = Targetfile.getText();
-
 			pf.Show("Converting...", "Converting "+new File(srcfile).getName()+" to "+new File(targFile).getName());
 
 			// Open the disk.
 			System.out.println("Loading " + srcfile);
 			Disk SourceDisk = GetCorrectDiskFromFile(srcfile);
 
+			//File flags
 			boolean IsTarget8Bit = TargetFileType.getText().contains("8 bit");
 			boolean IsTargetHDF = TargetFileType.getText().contains("HDF");
 
@@ -291,6 +298,7 @@ public class FileConversionForm {
 
 				FileOutputStream TargetFile = new FileOutputStream(targFile);
 				try {
+					//Write HDF file if needed
 					if (IsTargetHDF) {
 						HDFUtils.WriteHDFFileHeader(SourceDisk, TargetFile, IsTarget8Bit);
 					}
@@ -306,6 +314,7 @@ public class FileConversionForm {
 							sector = PLUSIDEDOS.DoubleSector(sector);
 						}
 						TargetFile.write(sector);
+						//update progress
 						if (sectorNum % 100000 == 0) {
 							System.out.print("\n" + sectorNum + " ");
 						}
@@ -336,6 +345,7 @@ public class FileConversionForm {
 				e.printStackTrace();
 			}
 		} finally {
+			//re-enable all buttons and close file.
 			ConvertBtn.setEnabled(true);
 			CloseBtn.setEnabled(true);
 			Sourcefile.setEnabled(true);

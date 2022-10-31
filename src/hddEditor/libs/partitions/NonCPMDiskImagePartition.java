@@ -35,6 +35,7 @@ public class NonCPMDiskImagePartition extends IDEDosPartition {
 	int VirtualSectors=0;
 
 	/**
+	 * Constructor
 	 *
 	 * @param tag
 	 * @param disk

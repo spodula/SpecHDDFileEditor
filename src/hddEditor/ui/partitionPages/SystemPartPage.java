@@ -1,4 +1,7 @@
 package hddEditor.ui.partitionPages;
+/**
+ * Implementation of the System partition page. 
+ */
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,6 +40,7 @@ import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.NewPartitionDialog;
 
 public class SystemPartPage extends GenericPage {
+	// Sub-forms so we can close them if they are still open when the page changes. 
 	HexEditDialog HxEditDialog = null;
 	NewPartitionDialog NewPartDialog = null;
 
@@ -76,15 +80,21 @@ public class SystemPartPage extends GenericPage {
 	// Partition table
 	Table PartitionTable = null;
 
+	//Colours for the default colour combos.
 	Color colours[] = { new Color(0, 0, 0), new Color(0, 0, 255), new Color(255, 0, 0), new Color(255, 0, 255),
 			new Color(0, 255, 0), new Color(0, 255, 255), new Color(255, 255, 0), new Color(255, 255, 255) };
 
+	/**
+	 * Set the colour for a given colour combo taking into account we actually want to be
+	 * able to read it afterwards. 
+	 * @param comp
+	 */
 	public void SetComponentColour(Combo comp) {
 		int index = TextToIndex(comp.getText(), Speccy.SPECTRUM_COLOURS);
 
-		if (index < 4) {
+		if (index < 4) { //If dark colour, set ink to white
 			comp.setForeground(colours[7]);
-		} else {
+		} else { //if light colour set ink to black
 			comp.setForeground(colours[0]);
 		}
 		comp.setBackground(colours[index]);
@@ -409,7 +419,7 @@ public class SystemPartPage extends GenericPage {
 	}
 
 	/**
-	 * Apply the top of the form.
+	 * Save the top of the form to the partition.
 	 */
 	private void DoApply() {
 		int beInk = TextToIndex(becInk.getText(), Speccy.SPECTRUM_COLOURS);
@@ -487,7 +497,7 @@ public class SystemPartPage extends GenericPage {
 
 	/**
 	 * Enable and disable buttons according to the partition type selected.
-	 * Basically, you cant delete the System or free space partition, and you cant
+	 * Basically, you can't delete the System or free space partition, and you can't
 	 * edit or goto the free space partition.
 	 */
 	private void DoPartitionSelectionChange() {
@@ -541,10 +551,6 @@ public class SystemPartPage extends GenericPage {
 		if (SystemPartition == null) {
 			ErrorBox("Error creating partition: System partition not found.");
 		} else {
-//			System.out.println("-------------------------------------");
-//			TestUtils.DumpPartitionList(SystemPartition);
-//			System.out.println("-------------------------------------");
-
 			ArrayList<String> ExistingPartitions = new ArrayList<String>();
 			for (IDEDosPartition p : SystemPartition.partitions) {
 				if (p.GetPartType() != 0) {
@@ -712,8 +718,6 @@ public class SystemPartPage extends GenericPage {
 				NewPartDialog = null;
 			}
 		}
-		// System.out.println("-------------------------------------");
-		// TestUtils.DumpPartitionList(SystemPartition);
 	}
 
 	/**

@@ -1,4 +1,7 @@
 package hddEditor.ui.partitionPages.dialogs;
+/**
+ * Implement the hex editors SAVE AS dialog
+ */
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -20,6 +23,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 public class SaveAsDialog {
+	//Form components
 	private Display display = null;
 	private Shell shell = null;
 	
@@ -27,17 +31,32 @@ public class SaveAsDialog {
 	private Text lengthEdit=null;
 	private Text FileNameEdit=null;
 	
-	
-	
+	/**
+	 * Constructor
+	 * 
+	 * @param display
+	 */
 	public SaveAsDialog(Display display) {
 		this.display = display;
 	}
 	
+	/**
+	 * Show the form
+	 * 
+	 * @param data
+	 * @param title
+	 */
 	public void Show(byte[] data, String title) {
 		Createform(data, title);
 		loop();
 	}
 	
+	/**
+	 * Create the form.
+	 * 
+	 * @param data
+	 * @param title
+	 */
 	private void Createform(byte[] data, String title) {
 		shell = new Shell(display);
 		shell.setSize(900, 810);
@@ -170,7 +189,7 @@ public class SaveAsDialog {
 	}
 
 	/**
-	 * 
+	 * Select the file to save as
 	 */
 	public void SelectFile() {
 		FileDialog fd = new FileDialog(shell, SWT.SAVE);
@@ -183,6 +202,11 @@ public class SaveAsDialog {
 		}
 	}
 	
+	/**
+	 * Actually save the file.
+	 * 
+	 * @param data
+	 */
 	public void DoSaveFile(byte[] data) {
 		FileOutputStream outputStream;
 		try {

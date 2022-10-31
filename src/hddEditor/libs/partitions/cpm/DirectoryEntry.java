@@ -1,4 +1,18 @@
 package hddEditor.libs.partitions.cpm;
+/**
+ * Implementation of a standard CPM 2.2 directory entry
+ * This contains one or more Dirents. (Each Dirent records 8 or 16 block numbers) 
+ * 
+ * Note, this was originally written for another project and contains workarounds for attempts
+ * at primitive floppy disk protection via messing up the block numbers and text. 
+ * This shouldn't affect the IDEDOS, as most disks are from one source and copy protection
+ * is not required, but its left in, in case i decide to add Floppy support later. 
+ * 
+ * 
+ * Details of CPMs directory structure can be found here:
+ * https://www.seasip.info/Cpm/format22.html
+ * http://www.cpcwiki.eu/index.php/Disk_structure
+ */
 
 import java.io.IOException;
 
@@ -29,6 +43,7 @@ public class DirectoryEntry {
 	//used to validate Dirent. 
 	private int maxBlocks=0;
 	
+	//Any errors parsing the Directory entry.
 	public String Errors="";
 
 
@@ -94,7 +109,7 @@ public class DirectoryEntry {
 	}
 
 	/**
-	 * Get the list of blocks in the filename. Note we are doing it using a sub
+	 * Get the list of blocks in the file. Note we are doing it using a sub
 	 * function to get the numbered extent, rather than just iterating because
 	 * although all the disks i have looked at so far put the dirents for a given
 	 * file consecutively, i can't find anything in any documentation that actually
@@ -178,6 +193,12 @@ public class DirectoryEntry {
 
 	}
 	
+	/**
+	 * Get the last dirent of a file. 
+	 * This dirent will be the one that is not full
+	 * 
+	 * @return
+	 */
 	private Dirent GetLastDirent() {
 		Dirent result = dirents[0];
 		int MaxExtentNum = result.GetLogicalExtentNum();
@@ -343,11 +364,9 @@ public class DirectoryEntry {
 				}
 			}
 		}
-
 		// fix sectors
 		ThisPartition.updateDirentBlocks();
 		ThisPartition.setModified(true);
-
 	}
 
 
@@ -367,6 +386,11 @@ public class DirectoryEntry {
 		ThisPartition.updateDirentBlocks();
 	}
 	
+	/**
+	 * ToString overridden to provide information for the directory entry
+	 * 
+	 * @return
+	 */
 	@Override
 	public String toString() {
 		String result="";

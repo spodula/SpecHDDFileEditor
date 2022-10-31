@@ -23,11 +23,15 @@ import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 
 public class BasicRenderer extends FileRenderer {
+	//Components
 	private Text StartLineEdit = null;
 	private Text VariableStartEdit = null;
 	private Table Listing = null;
 	private Table Variables = null;
 
+	/**
+	 * Render the page to the composite
+	 */
 	@Override
 	public void Render(Composite mainPage, byte data[], String Filename) {
 		super.Render(mainPage, data, Filename);
@@ -252,6 +256,13 @@ public class BasicRenderer extends FileRenderer {
 	}
 	
 
+	/**
+	 * Decode the variables
+	 * 
+	 * @param mainPage
+	 * @param file
+	 * @param header
+	 */
 	private void DecodeVariables(Composite mainPage, byte[] file, Plus3DosFileHeader header) {
 		System.out.println("Variables offset = "+header.VariablesOffset);
 		System.out.println("FileLength = "+header.filelength);

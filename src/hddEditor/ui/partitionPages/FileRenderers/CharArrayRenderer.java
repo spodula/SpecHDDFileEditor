@@ -1,5 +1,7 @@
 package hddEditor.ui.partitionPages.FileRenderers;
-
+/**
+ * Render a character array
+ */
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,6 +24,9 @@ import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 public class CharArrayRenderer extends FileRenderer {
 	Text VariableEdit=null;
 
+	/**
+	 * Render the character array to the composite.
+	 */
 	@Override
 	public void Render(Composite mainPage, byte data[], String Filename) {
 		super.Render(mainPage, data, Filename);
@@ -171,11 +176,16 @@ public class CharArrayRenderer extends FileRenderer {
 
 		ArrayEdit.setText(sb.toString());
 		ArrayEdit.setFont(mono);
-		
-
+	
 	    mainPage.pack();
 	}
 
+	/**
+	 * Save the character array
+	 * @param data
+	 * @param mainPage
+	 * @param p3d
+	 */
 	protected void DoSaveArrayAsText(byte[] data, Composite mainPage, Plus3DosFileHeader p3d) {
 		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
 		fd.setText("Save Array as");
@@ -271,6 +281,4 @@ public class CharArrayRenderer extends FileRenderer {
 			}
 		}
 	}
-
-	
 }

@@ -194,7 +194,9 @@ public class SystemPartition extends IDEDosPartition {
 	}
 
 	/**
-	 * Debug information
+	 * ToString overridden to provide System partition specific information 
+	 * 
+	 * @return
 	 */
 	public String toString() {
 		String result = super.toString();
@@ -251,7 +253,7 @@ public class SystemPartition extends IDEDosPartition {
 	}
 	
 	/**
-	 * Update this Dirent ONLY.
+	 * Update this Dirent ONLY from the raw data
 	 */
 	public void UpdateSystemPartitionOnDisk() {
 		try {
@@ -296,7 +298,6 @@ public class SystemPartition extends IDEDosPartition {
 			System.out.println("Error updating System DIRENT: " + e.getMessage());
 			e.printStackTrace();
 		}
-
 	}
 
 	/**

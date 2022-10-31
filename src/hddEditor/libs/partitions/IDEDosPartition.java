@@ -38,7 +38,10 @@ public class IDEDosPartition {
 
 	public byte RawPartition[] = null;
 	
-	//Fields directly extracted from the partition data
+	/**
+	 * Update and set the Partition name
+	 * @return
+	 */
 	public String GetName() {
 		if (GetPartType() == PLUSIDEDOS.PARTITION_FREE) {
 			return("<Free space>");
@@ -48,8 +51,7 @@ public class IDEDosPartition {
 		}
 	}
 	public void SetName(String name) {
-		//make sure the filename doesnt contain any dubios characters
-		//name = CPM.FixFilePart(name);
+		//make sure the filename doesn't contain any dubious characters
 		name = name.replace(" ", "_");
 		//pad to at least 16 bytes
 		name = name+"                ";
@@ -60,7 +62,10 @@ public class IDEDosPartition {
 		}
 	}
 	
-	//Partition type flag.
+	/**
+	 * Update and set the Partition type flag.
+	 * @param PartType
+	 */
 	public void SetPartType(int PartType) {
 		RawPartition[16] = (byte)(PartType & 0xff);
 	}
@@ -68,7 +73,9 @@ public class IDEDosPartition {
 		return(RawPartition[16] & 0xff);		
 	}
 	
-	//StartCyl
+	/**
+	 * Update and set the start cylinder
+	 */
 	public void SetStartCyl(int startcyl) {
 		int msb = startcyl / 0x100;
 		int lsb = startcyl % 0x100;
@@ -80,7 +87,9 @@ public class IDEDosPartition {
 		return((int) (RawPartition[17] & 0xff) + ((RawPartition[18] & 0xff) * 256));		
 	}
 
-	//StartHead
+	/**
+	 * Update and set the start head
+	 */
 	public void SetStartHead(int startHead) {
 		RawPartition[19] = (byte)startHead;
 		UpdateEndSector();
@@ -89,7 +98,10 @@ public class IDEDosPartition {
 		return((int) (RawPartition[19] & 0xff));
 	}
 
-	//EndCyl
+	/**
+	 * Update and set the end cylinder
+	 * @param EndCyl
+	 */
 	public void SetEndCyl(int EndCyl) {
 		int msb = EndCyl / 0x100;
 		int lsb = EndCyl % 0x100;
@@ -101,7 +113,10 @@ public class IDEDosPartition {
 		return((int) (RawPartition[20] & 0xff) + ((RawPartition[21] & 0xff) * 256));
 	}
 	
-	//EndHead
+	/**
+	 * Update and set the End head. 
+	 * @param startHead
+	 */
 	public void SetEndHead(int startHead) {
 		RawPartition[22] = (byte)startHead;
 		UpdateEndSector();
@@ -110,6 +125,9 @@ public class IDEDosPartition {
 		return((int) (RawPartition[22] & 0xff));
 	}
 
+	/**
+	 * Update the end sector ID. 
+	 */
 	public void UpdateEndSector() {
 		byte systemdets[] = null;
 		try {
@@ -426,7 +444,8 @@ public class IDEDosPartition {
 	}
 	
 	/**
-	 * 
+	 * Load the partition specific information. Should be overridden to parse out 
+	 * the information from the second part of the partition  
 	 */
 	protected void LoadPartitionSpecificInformation() throws IOException {
 		

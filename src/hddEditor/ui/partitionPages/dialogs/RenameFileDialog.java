@@ -1,4 +1,7 @@
 package hddEditor.ui.partitionPages.dialogs;
+/**
+ * very simple Rename file dialog
+ */
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -14,17 +17,29 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 public class RenameFileDialog {
+	//Form components
 	private Display display = null;
 	public Shell shell = null;
 	private Text NewNameEdit = null;
-	public String NewName = "";
 	
+	//return values
+	public String NewName = "";
 	private boolean result = false;
 	
+	/**
+	 * Constructor
+	 * @param display
+	 */
 	public RenameFileDialog(Display display) {
 		this.display = display;
 	}
 
+	/**
+	 * Show the form
+	 * 
+	 * @param OldName
+	 * @return
+	 */
 	public boolean Show(String OldName) {
 		Createform(OldName);
 		loop();
@@ -130,6 +145,9 @@ public class RenameFileDialog {
 		NewNameEdit.setText(OldName);
 	}
 
+	/**
+	 * Force the form closed. Called when the parent form closes.
+	 */
 	public void close() {
 		shell.close();
 		if (!shell.isDisposed()) {

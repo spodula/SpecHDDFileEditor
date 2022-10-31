@@ -17,11 +17,15 @@ package hddEditor.libs.partitions;
 import hddEditor.libs.disks.Disk;
 
 public class SwapPartition extends IDEDosPartition {
+	// Block size in sectors (1 to 32)
 	public int SwapblockSize=0;
+	// Current block number (0 to 65535)
 	public int CurrentBlock=0;
+	// Maximum block number (0 to 65535)
 	public int MaxBlock=0;
 
 	/**
+	 * Constructor
 	 * 
 	 * @param tag
 	 * @param disk
@@ -44,7 +48,9 @@ public class SwapPartition extends IDEDosPartition {
 	}
 
 	/**
-	 * Output specific data.
+	 * ToString overridden for swap specific information
+	 * 
+	 * @return
 	 */
 	public String toString() {
 		String result = super.toString();

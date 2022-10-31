@@ -1,4 +1,7 @@
 package hddEditor.ui.partitionPages;
+/**
+ * implementation of the +3DOS partition specific partition pages 
+ */
 
 
 import java.io.File;

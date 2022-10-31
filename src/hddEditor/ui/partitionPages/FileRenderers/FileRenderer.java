@@ -1,4 +1,7 @@
 package hddEditor.ui.partitionPages.FileRenderers;
+/**
+ * This provides some helper functions for the rendering pages. 
+ */
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -12,17 +15,30 @@ import org.eclipse.swt.widgets.MessageBox;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 
 public class FileRenderer {
+	//Storage for the file details
 	String filename="";
 	byte data[] = null;
 	Composite MainPage =null;
 	
+	/**
+	 * Generic constructor. 
+	 * 
+	 * @param mainPage
+	 * @param data
+	 * @param Filename
+	 */
 	public void Render(Composite mainPage, byte data[], String Filename) {
 		this.filename = Filename;
 		this.MainPage = mainPage;
 		this.data = data;
 	}
 	
-	
+	/**
+	 * Save file as Hex. 
+	 * @param data
+	 * @param mainPage
+	 * @param p3d
+	 */
 	public void DoSaveFileAsHex(byte[] data, Composite mainPage, Plus3DosFileHeader p3d) {
 		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
 		fd.setText("Save Assembly file as");
@@ -91,7 +107,14 @@ public class FileRenderer {
 		}
 	}
 
-
+	/**
+	 * Save file as raw binary.
+	 * 
+	 * @param data
+	 * @param mainPage
+	 * @param InclHeader
+	 * @param p3d
+	 */
 	protected void DoSaveFileAsBin(byte data[], Composite mainPage, boolean InclHeader, Plus3DosFileHeader p3d) {
 		FileDialog fd = new FileDialog(mainPage.getShell(), SWT.SAVE);
 		fd.setText("Save Binary file as");

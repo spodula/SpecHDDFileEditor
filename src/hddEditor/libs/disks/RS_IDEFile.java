@@ -1,5 +1,9 @@
 package hddEditor.libs.disks;
-//https://sinclair.wiki.zxnet.co.uk/wiki/HDF_format
+/**
+ * Wrapper from V1.0 and V1.1 HDF hard disks as defined by RealSpectrum by Ramsoft. 
+ * 
+ * https://sinclair.wiki.zxnet.co.uk/wiki/HDF_format
+ */
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,46 +29,59 @@ public class RS_IDEFile implements Disk {
 	public int NumHeads = 0;
 	public int NumSectors = 0;
 
+	/**
+	 * Get and set the filename
+	 */
 	public String GetFilename() {
 		return (filename);
 	}
-
 	public void SetFilename(String filename) {
 		this.filename = filename;
 	}
 
+	/**
+	 * Get and set the sector size
+	 */
 	public int GetSectorSize() {
 		return (SectorSize);
 	}
-
 	public void SetSectorSize(int sz) {
 		this.SectorSize = sz;
 	}
 
+	/**
+	 * Get and set the number of cylinders
+	 */
 	public int GetNumCylinders() {
 		return (NumCylinders);
 	}
-
 	public void SetNumCylinders(int sz) {
 		this.NumCylinders = sz;
 	}
 
+	/**
+	 * Get the file size
+	 */
 	public long GetFileSize() {
 		return (FileSize);
 	}
 
+	/**
+	 * Get and set the number of heads
+	 */
 	public int GetNumHeads() {
 		return (NumHeads);
 	}
-
 	public void SetNumHeads(int sz) {
 		this.NumHeads = sz;
 	}
 
+	/**
+	 * Get and set the number of sectors
+	 */
 	public int GetNumSectors() {
 		return (NumSectors);
 	}
-
 	public void SetNumSectors(int sz) {
 		this.NumSectors = sz;
 	}
@@ -73,6 +90,7 @@ public class RS_IDEFile implements Disk {
 	private byte[] cache;
 	private int cachedSector = -1;
 
+	//Raw header data
 	private byte RawHeaderData[] = null;
 
 	/**
@@ -92,6 +110,7 @@ public class RS_IDEFile implements Disk {
 	}
 
 	/**
+	 * Parse the RS_IDE disk and check the header
 	 * 
 	 * @throws IOException
 	 */
@@ -118,6 +137,7 @@ public class RS_IDEFile implements Disk {
 	}
 
 	/**
+	 * Get the start of disk data in the file.
 	 * 
 	 * @return
 	 */
@@ -127,6 +147,7 @@ public class RS_IDEFile implements Disk {
 	}
 
 	/**
+	 * CHeck if the sector is 8 or 16 bit long
 	 * 
 	 * @return
 	 */
@@ -195,6 +216,7 @@ public class RS_IDEFile implements Disk {
 	}
 
 	/**
+	 * Get the File revision. 
 	 * 
 	 * @return
 	 */
@@ -221,7 +243,10 @@ public class RS_IDEFile implements Disk {
 	}
 
 	/**
+	 * Set the given block of data from the given logical sector. 
 	 * 
+	 * @param SectorNum
+	 * @param result
 	 */
 	public void SetLogicalBlockFromSector(int SectorNum, byte result[]) throws IOException {
 		cachedSector = -1;
@@ -233,17 +258,16 @@ public class RS_IDEFile implements Disk {
 		inFile.write(result);
 		cachedSector = -1;
 
-//		System.out.print("Writing " + result.length + " bytes to sr:" + SectorNum + " loc:" + location + " :");
 		inFile.seek(location);
 		inFile.read(result);
-//		for (int i = 0; i < 32; i++) {
-//			System.out.print(String.format("%02x ", result[i]));
-//		}
-//		System.out.println();
 	}
 
 	/**
+	 * Get the data starting from the given Logical sector
 	 * 
+	 * @param SectorNum
+	 * @param sz
+	 * @return
 	 */
 	public byte[] GetBytesStartingFromSector(int SectorNum, int sz) throws IOException {
 		if ((cachedSector == SectorNum) && (cache.length == sz)) {
@@ -255,13 +279,8 @@ public class RS_IDEFile implements Disk {
 
 		location = location + GetHDDataOffset();
 
-//		System.out.print("Reading " + sz + " bytes from sr:" + SectorNum + " loc:" + location + " :");
 		inFile.seek(location);
 		inFile.read(result);
-//		for (int i = 0; i < 32; i++) {
-//			System.out.print(String.format("%02x ", result[i]));
-//		}
-//		System.out.println();
 
 		cache = new byte[result.length];
 		System.arraycopy(result, 0, cache, 0, cache.length);
@@ -272,6 +291,9 @@ public class RS_IDEFile implements Disk {
 
 	/**
 	 * Check to see if the given file has a valid HDF header.
+	 * 
+	 * @param filename
+	 * @return 
 	 */
 	@Override
 	public Boolean IsMyFileType(File filename) throws IOException {

@@ -1,4 +1,7 @@
 package hddEditor.ui.partitionPages.dialogs;
+/**
+ * Save As ASCII dialog used for the Hex edit. 
+ */
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -25,6 +28,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 public class SaveAsAsciiDialog {
+	//Form components
 	private Display display = null;
 	private Shell shell = null;
 
@@ -43,16 +47,30 @@ public class SaveAsAsciiDialog {
 
 	private int DataLength = 0;
 
+	/**
+	 * Constructor
+	 * @param display
+	 */
 	public SaveAsAsciiDialog(Display display) {
 		this.display = display;
 	}
 
+	/**
+	 * Show the dialog
+	 *
+	 * @param data
+	 * @param title
+	 */
 	public void Show(byte[] data, String title) {
 		DataLength = data.length;
 		Createform(data, title);
 		loop();
 	}
 
+	/**
+	 * This listener is added to a lot of the components to update the example label
+	 * when formatting has changed
+	 */
 	SelectionListener ExampleListener = new SelectionListener() {
 		@Override
 		public void widgetSelected(SelectionEvent arg0) {
@@ -82,6 +100,18 @@ public class SaveAsAsciiDialog {
 		}
 	};
 
+	/**
+	 * Format the text as per the parameters set on the form.
+	 * 
+	 * @param data - Data being formatted
+	 * @param ptr - Pointer within the data
+	 * @param Address - displayed start address
+	 * @param IsHex - Hex or Dec?
+	 * @param ShowAddress - Show start address at the start of the line?
+	 * @param seperator - Seperator between values
+	 * @param ShowAscii - Show ascii table at the end
+	 * @return - formatted String
+	 */
 	private String FormatLine(byte[] data, int ptr, int Address, boolean IsHex, boolean ShowAddress, String seperator,
 			boolean ShowAscii) {
 		String DisplayFormat = "%Ad";
@@ -127,6 +157,12 @@ public class SaveAsAsciiDialog {
 		return (result);
 	}
 
+	/**
+	 * create the form
+	 * 
+	 * @param data
+	 * @param title
+	 */
 	private void Createform(byte[] data, String title) {
 		shell = new Shell(display);
 		shell.setSize(900, 810);
@@ -321,7 +357,7 @@ public class SaveAsAsciiDialog {
 	}
 
 	/**
-	 * 
+	 * Select a file to save as
 	 */
 	public void SelectFile() {
 		FileDialog fd = new FileDialog(shell, SWT.SAVE);
@@ -334,6 +370,10 @@ public class SaveAsAsciiDialog {
 		}
 	}
 
+	/**
+	 * Actually save the file.
+	 * @param data
+	 */
 	public void DoSaveFile(byte[] data) {
 		FileOutputStream outputStream;
 		try {

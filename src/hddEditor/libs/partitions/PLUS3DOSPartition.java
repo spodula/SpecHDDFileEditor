@@ -14,19 +14,21 @@ package hddEditor.libs.partitions;
 
 import java.io.IOException;
 
+import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
 
 public class PLUS3DOSPartition extends CPMPartition {
+	//+3DOS version information
 	public static final int PLUS3ISSUE = 1;
 	public static final int PLUS3VERSION = 0;
 
-	public static final int BASIC_BASIC = 0x00;
-	public static final int BASIC_NUMARRAY = 0x01;
-	public static final int BASIC_CHRARRAY = 0x02;
-	public static final int BASIC_CODE = 0x03;
+	//+3DOS file header identifier
 	public static final byte stdheader[] = { 'P', 'L', 'U', 'S', '3', 'D', 'O', 'S', 0x1a, PLUS3ISSUE, PLUS3VERSION };
 
+	//Assigned drive letter for the drive
 	public String DriveLetter = "";
+	
+	//Freeze flag for the XDPB Not really used
 	public boolean FreezeFlag = false;
 	
 	/**
@@ -96,7 +98,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 	 * @param data
 	 */
 	public void AddRawCodeFile(String filename, int address, byte[] data) {
-		AddPlusThreeFile(filename, data, address, 0, BASIC_CODE);
+		AddPlusThreeFile(filename, data, address, 0, Speccy.BASIC_CODE);
 	}
 
 	/**
@@ -107,7 +109,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 	 * @param basicoffset
 	 */
 	public void AddBasicFile(String nameOnDisk, byte[] basicAsBytes, int line, int basicoffset) {
-		AddPlusThreeFile(nameOnDisk, basicAsBytes, line, basicoffset, BASIC_BASIC);
+		AddPlusThreeFile(nameOnDisk, basicAsBytes, line, basicoffset, Speccy.BASIC_BASIC);
 	}
 
 	/**

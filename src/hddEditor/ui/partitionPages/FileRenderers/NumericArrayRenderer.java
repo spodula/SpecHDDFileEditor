@@ -1,5 +1,9 @@
 package hddEditor.ui.partitionPages.FileRenderers;
 
+/**
+ * Render a numeric array
+ */
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,8 +24,12 @@ import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 
 public class NumericArrayRenderer extends FileRenderer {
+	// Variable name edit box.
 	Text VariableEdit = null;
 
+	/**
+	 * render the array to the given composite.
+	 */
 	@Override
 	public void Render(Composite mainPage, byte data[], String Filename) {
 		super.Render(mainPage, data, Filename);
@@ -176,6 +184,13 @@ public class NumericArrayRenderer extends FileRenderer {
 		mainPage.pack();
 	}
 
+	/**
+	 * Save the array to file
+	 * 
+	 * @param data
+	 * @param mainPage
+	 * @param p3d
+	 */
 	protected void DoSaveArrayAsText(byte[] data, Composite mainPage, Plus3DosFileHeader p3d) {
 		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
 		fd.setText("Save Array as");
@@ -200,20 +215,20 @@ public class NumericArrayRenderer extends FileRenderer {
 						dimsize = dimsize + (data[location++] & 0xff) * 0x100;
 						Dimsizes[dimnum] = dimsize;
 					}
-					String s = "DIM "+p3d.VarName + "(";
+					String s = "DIM " + p3d.VarName + "(";
 					for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
 						if (dimnum > 0)
 							s = s + ",";
 						s = s + String.valueOf(Dimsizes[dimnum]);
 					}
-					s = s +") = "+System.lineSeparator();
+					s = s + ") = " + System.lineSeparator();
 					file.write(s.getBytes());
-					
+
 					// count of what dimensions have been processed.
 					int DimCounts[] = new int[numDimensions];
 					for (int dimnum = 0; dimnum < numDimensions; dimnum++)
 						DimCounts[dimnum] = 0;
-					
+
 					StringBuffer sb = new StringBuffer();
 					boolean complete = false;
 					while (!complete) {
@@ -232,7 +247,7 @@ public class NumericArrayRenderer extends FileRenderer {
 								sb.append((int) x);
 							}
 							location = location + 5;
-						} 
+						}
 						sb.append(System.lineSeparator());
 						int diminc = Dimsizes.length - 2;
 						boolean doneInc = false;
@@ -253,8 +268,7 @@ public class NumericArrayRenderer extends FileRenderer {
 							}
 						}
 					}
-					file.write(sb.toString().getBytes());					
-					
+					file.write(sb.toString().getBytes());
 
 				} finally {
 					file.close();

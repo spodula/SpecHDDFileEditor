@@ -1,4 +1,7 @@
 package hddEditor.libs.partitions.cpm;
+
+import hddEditor.libs.Speccy;
+
 /**
  * This is a wrapper around a spectrum +3 dos file, its header and file types. 
  * 
@@ -29,15 +32,15 @@ package hddEditor.libs.partitions.cpm;
  *This is similar to the tape header minus the filename. 
  *See https://sinclair.wiki.zxnet.co.uk/wiki/Spectrum_tape_interface#Header_block   for that information. 
  *------------------------------
- * 0       File type (0=PROG, 1=Number array, 3=Character array, 4=code
+ * 0       File type (0=BASIC, 1=Number array, 2=Character array, 3=code)
  * 1-2     File length as seen by +3 BASIC
  * 3-4     PROG: Program auto-Run line; 0x8000 = dont autorun.
  *         ARRAYS [4] = encoded 1 chr variable name [1] 
  *         CODE: default load address
  * 5-6     PROG: Start of variable area. Unused for CODE, arrays. 
  *  
- *  [1] Note for Character arrays, The array name (ALways 1 char) is encoded as follows:
- *         1Y0XXXXX     where Y=1 for String array, 0 for numeric. and XXXXX is the charcter - 0x60/ 
+ *  [1] Note for Character arrays, The array name (Always 1 char) is encoded as follows:
+ *         1Y0XXXXX     where Y=1 for String array, 0 for numeric. and XXXXX is the charcter - 0x60
  *
  * Sources:
  * https://retrocomputing.stackexchange.com/questions/14486/what-file-formats-were-used-for-binary-executable-files-on-later-sinclair-zx-spe
@@ -74,8 +77,6 @@ public class Plus3DosFileHeader {
 	public static int FILETYPE_NUMARRAY=1;
 	public static int FILETYPE_CHRARRAY=2;
 	public static int FILETYPE_CODE=3;
-	
-	private String[] filetypes = {"Basic","Numeric array","Char array","Code"};
 	
 	/**
 	 * Create the object and populated from the passed block. This block must be > 127 bytes
@@ -143,7 +144,7 @@ public class Plus3DosFileHeader {
 	public String getTypeDesc() {
 		String result = "Invalid";
 		if (filetype> -1 && filetype < 4) {
-			result = filetypes[filetype];
+			result = Speccy.filetypeNames[filetype];
 		}
 		return(result);
 	}

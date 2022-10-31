@@ -1,6 +1,9 @@
 package hddEditor.ui.partitionPages;
 /**
  * Generic partition page. 
+ * 
+ * This unit provides some useful functions for partition pages including handling the 
+ * composite parenting and removal details. 
  */
 
 import org.eclipse.swt.SWT;

@@ -1,4 +1,7 @@
 package hddEditor.ui.partitionPages.dialogs;
+/**
+ * FIle edit dialog for the +3DOS partition page
+ */
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
@@ -10,7 +13,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-import hddEditor.libs.partitions.PLUS3DOSPartition;
+import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.cpm.Dirent;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
@@ -21,25 +24,35 @@ import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 
 public class SpectrumFileEditDialog {
+	//Title of the page
 	private String Title = "";
 
+	//Form details
 	private Shell shell;
 	private Display display;
-
-	private boolean result = false;
-
-	public byte[] data = new byte[0];
-
-	private DirectoryEntry ThisEntry = null;
-
+	
+	//Composite we are parented to
 	private Composite MainPage = null;
 
+	//Result
+	private boolean result = false;
+
+	//Data for the file
+	public byte[] data = new byte[0];
+
+	//Directory entry of the file being displayed
+	private DirectoryEntry ThisEntry = null;
+
+	//Current renderer being used for this file. 
 	private FileRenderer CurrentRenderer = null;
 
 	// size of the data as as +3 Basic sees it (With +3Header)
 	// This is used to trim off excess records before rendering.
 	private int Plus3Size = 0;
 
+	/*
+	 * Set modified text in the title
+	 */
 	private void SetModified(boolean Modified) {
 		String s = Title;
 		if (Modified) {
@@ -48,10 +61,22 @@ public class SpectrumFileEditDialog {
 		shell.setText(s);
 	}
 
+	/**
+	 * Constructor
+	 * @param display
+	 */
 	public SpectrumFileEditDialog(Display display) {
 		this.display = display;
 	}
 
+	/**
+	 * Show the form
+	 * 
+	 * @param data
+	 * @param title
+	 * @param entry
+	 * @return
+	 */
 	public boolean Show(byte[] data, String title, DirectoryEntry entry) {
 		this.result = false;
 		this.ThisEntry = entry;
@@ -63,6 +88,9 @@ public class SpectrumFileEditDialog {
 		return (result);
 	}
 
+	/**
+	 * Loop and wait
+	 */
 	public void loop() {
 		shell.open();
 		while (!shell.isDisposed()) {
@@ -71,6 +99,9 @@ public class SpectrumFileEditDialog {
 		}
 	}
 
+	/**
+	 * Create the form
+	 */
 	private void Createform() {
 		shell = new Shell(display);
 		shell.setSize(900, 810);
@@ -131,23 +162,25 @@ public class SpectrumFileEditDialog {
 		shell.pack();
 	}
 
+	/**
+	 * Render the correct page for the file.
+	 */
 	private void RenderAppropriatePage() {
-
 		Plus3DosFileHeader p3d = ThisEntry.GetPlus3DosHeader();
 		if (!p3d.IsPlusThreeDosFile) {
 			CurrentRenderer = new FileRenderer();
 		} else {
 			switch (p3d.filetype) {
-			case PLUS3DOSPartition.BASIC_BASIC:
+			case Speccy.BASIC_BASIC:
 				CurrentRenderer = new BasicRenderer();
 				break;
-			case PLUS3DOSPartition.BASIC_CHRARRAY:
+			case Speccy.BASIC_CHRARRAY:
 				CurrentRenderer = new CharArrayRenderer();
 				break;
-			case PLUS3DOSPartition.BASIC_NUMARRAY:
+			case Speccy.BASIC_NUMARRAY:
 				CurrentRenderer = new NumericArrayRenderer();
 				break;
-			case PLUS3DOSPartition.BASIC_CODE:
+			case Speccy.BASIC_CODE:
 				CurrentRenderer = new CodeRenderer();
 				break;
 			}

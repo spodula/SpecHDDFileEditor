@@ -1,11 +1,13 @@
 package hddEditor.ui.partitionPages.dialogs;
+/*
+ * New partition dialog
+ */
 
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -27,21 +29,37 @@ public class NewPartitionDialog {
 	private Shell shell = null;
 	private Combo PartitionTypeDropdown = null;
 
+	//Created list of Combo entry numbers vs IDS and descriptions
 	private byte[] PartTypesIDs = null;
 	private String[] PartTypeDesc = null;
+	
+	//List of existing partitions. 
 	private String[] ExistingParts;
 
+	/*
+	 * Return values. 
+	 */
 	public byte PartType = 0x00;
 	public int SizeMB = 0;
 	public String PartTypeSelected = "";
 	public String Name = "";
-
 	private boolean result = false;
 
+	/**
+	 * Constructor
+	 * 
+	 * @param display
+	 */
 	public NewPartitionDialog(Display display) {
 		this.display = display;
 	}
 
+	/**
+	 * Show the form
+	 * 
+	 * @param ExistingPartitions
+	 * @return
+	 */
 	public boolean Show(String ExistingPartitions[]) {
 		ExistingParts = ExistingPartitions;
 		for (int i = 0; i < ExistingPartitions.length; i++) {
@@ -65,6 +83,9 @@ public class NewPartitionDialog {
 		}
 	}
 
+	/**
+	 * Create form.
+	 */
 	private void Createform() {
 		shell = new Shell(display);
 		shell.setSize(400, 200);
@@ -75,17 +96,19 @@ public class NewPartitionDialog {
 		gridLayout.makeColumnsEqualWidth = true;
 		shell.setLayout(gridLayout);
 
+		/*
+		 * Create a list of partition type IDs and names vs Index in the dropdown.
+		 */
 		ArrayList<PLUSIDEDOS.PARTSTRING> ItemList = new ArrayList<PLUSIDEDOS.PARTSTRING>();
-
 		for (PLUSIDEDOS.PARTSTRING ps : PLUSIDEDOS.PartTypes) {
 			if ((ps.flags & PLUSIDEDOS.PART_ALLOCATABLE) != 0) {
 				ItemList.add(ps);
 			}
 		}
-
 		PartTypesIDs = new byte[ItemList.size()];
 		PartTypeDesc = new String[ItemList.size()];
 
+		//get the text of the default +3DOS partition type
 		int i = 0;
 		String defaultText = "";
 		for (PLUSIDEDOS.PARTSTRING ps : ItemList) {
@@ -120,12 +143,7 @@ public class NewPartitionDialog {
 		PartitionTypeDropdown = new Combo(shell, SWT.DROP_DOWN);
 		PartitionTypeDropdown.setItems(PartTypeDesc);
 		PartitionTypeDropdown.setText(defaultText);
-		PartitionTypeDropdown.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				ComboChanged();
-			}
-		});
+
 		gridData = new GridData();
 		gridData.horizontalAlignment = GridData.FILL;
 		gridData.grabExcessHorizontalSpace = true;
@@ -300,9 +318,6 @@ public class NewPartitionDialog {
 		});
 
 		shell.pack();
-	}
-
-	protected void ComboChanged() {
 	}
 
 	public void close() {

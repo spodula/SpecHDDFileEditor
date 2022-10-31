@@ -1,4 +1,7 @@
 package hddEditor.ui.partitionPages.dialogs;
+/**
+ * Implementation of a generic hex editor. 
+ */
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ControlEditor;
@@ -31,32 +34,33 @@ import org.eclipse.swt.widgets.Text;
 import hddEditor.libs.TestUtils;
 
 public class HexEditDialog {
+	//result to be returned
 	private boolean result = false;
+	//Modified flag
 	private boolean xModified = false;
+	//Data being edited
+	public byte[] Data = null;
+	//Original title 
+	private String Title = "";
+	
+	//Form details
 	private Display display = null;
 	private Shell shell = null;
-
-	public byte[] Data = null;
-
-	private String Title = "";
-
-	private Menu menuBar, fileMenu, helpMenu, editMenu;
-
-	private MenuItem fileMenuHeader, helpMenuHeader, editMenuHeader;
-	private MenuItem fileExitItem, fileSaveAsciiItem, fileSaveItem;
-	private MenuItem helpGetHelpItem;
-	private MenuItem editSearchItem;
-
 	private Table HexTable = null;
 	private Label InfoLabel = null;
+	
+	//used when editing
 	private boolean FirstChar = false;
 
+	//List of addresses and what they contain for searching. 
 	private AddressNote[] notes = null;
 
+	//Sub-dialogs so we can close them when this form closes.
 	private SearchReplaceDialog SearchReplaceDlg = null;
 	private SaveAsAsciiDialog SaveAsAsciiDlg = null;
 	private SaveAsDialog SaveAsDlg = null;
 
+	//Generic texts.
 	private String EDIT_LABEL = "Press ENTER to edit byte";
 	private String EDITING_LABEL = "Press ENTER to set byte or ESCAPE to cancel";
 
@@ -101,7 +105,7 @@ public class HexEditDialog {
 	}
 
 	/**
-	 * 
+	 * Create form
 	 */
 	private void Createform() {
 		shell = new Shell(display);
@@ -359,23 +363,23 @@ public class HexEditDialog {
 	}
 
 	/**
-	 * 
+	 * Create menus 
 	 */
 	private void MakeMenus() {
 		Label label = new Label(shell, SWT.CENTER);
 		label.setBounds(shell.getClientArea());
 
-		menuBar = new Menu(shell, SWT.BAR);
+		Menu menuBar = new Menu(shell, SWT.BAR);
 		/**
 		 * File menu
 		 */
-		fileMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
+		MenuItem fileMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
 		fileMenuHeader.setText("&File");
 
-		fileMenu = new Menu(shell, SWT.DROP_DOWN);
+		Menu fileMenu = new Menu(shell, SWT.DROP_DOWN);
 		fileMenuHeader.setMenu(fileMenu);
 
-		fileSaveItem = new MenuItem(fileMenu, SWT.PUSH);
+		MenuItem fileSaveItem = new MenuItem(fileMenu, SWT.PUSH);
 		fileSaveItem.setText("&Save As");
 		fileSaveItem.addSelectionListener(new SelectionListener() {
 			@Override
@@ -389,7 +393,7 @@ public class HexEditDialog {
 			}
 		});
 
-		fileSaveAsciiItem = new MenuItem(fileMenu, SWT.PUSH);
+		MenuItem fileSaveAsciiItem = new MenuItem(fileMenu, SWT.PUSH);
 		fileSaveAsciiItem.setText("&Save As ascii");
 		fileSaveAsciiItem.addSelectionListener(new SelectionListener() {
 			@Override
@@ -403,7 +407,7 @@ public class HexEditDialog {
 			}
 		});
 
-		fileExitItem = new MenuItem(fileMenu, SWT.PUSH);
+		MenuItem fileExitItem = new MenuItem(fileMenu, SWT.PUSH);
 		fileExitItem.setText("E&xit");
 		fileExitItem.addSelectionListener(new SelectionListener() {
 			@Override
@@ -419,13 +423,13 @@ public class HexEditDialog {
 		/**
 		 * Edit menu
 		 */
-		editMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
+		MenuItem editMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
 		editMenuHeader.setText("&Edit");
 
-		editMenu = new Menu(shell, SWT.DROP_DOWN);
+		Menu editMenu = new Menu(shell, SWT.DROP_DOWN);
 		editMenuHeader.setMenu(editMenu);
 
-		editSearchItem = new MenuItem(editMenu, SWT.PUSH);
+		MenuItem editSearchItem = new MenuItem(editMenu, SWT.PUSH);
 		editSearchItem.setText("&Search");
 		editSearchItem.addSelectionListener(new SelectionListener() {
 			@Override
@@ -442,19 +446,20 @@ public class HexEditDialog {
 		/**
 		 * Help menu
 		 */
-		helpMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
+		MenuItem helpMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
 		helpMenuHeader.setText("&Help");
 
-		helpMenu = new Menu(shell, SWT.DROP_DOWN);
+		Menu helpMenu = new Menu(shell, SWT.DROP_DOWN);
 		helpMenuHeader.setMenu(helpMenu);
 
-		helpGetHelpItem = new MenuItem(helpMenu, SWT.PUSH);
+		MenuItem helpGetHelpItem = new MenuItem(helpMenu, SWT.PUSH);
 		helpGetHelpItem.setText("&Get Help");
 
 		shell.setMenuBar(menuBar);
 	}
 
 	/**
+	 * Ask if we really want to closed
 	 * 
 	 */
 	protected void DoCloseQuestion() {
@@ -486,6 +491,7 @@ public class HexEditDialog {
 	}
 
 	/**
+	 * Test harness
 	 * 
 	 * @param args
 	 */
@@ -497,6 +503,7 @@ public class HexEditDialog {
 	}
 
 	/**
+	 * SAVE AS dialog
 	 * 
 	 * @param SaveAscii
 	 */
@@ -513,7 +520,7 @@ public class HexEditDialog {
 	}
 
 	/**
-	 * 
+	 * Search dialog
 	 */
 	protected void DoSearchDialog() {
 		if (SearchReplaceDlg != null) {
@@ -554,7 +561,7 @@ public class HexEditDialog {
 	}
 	
 	/**
-	 * 
+	 * Close dialog
 	 */
 	public void close() {
 		CloseSubWindows();

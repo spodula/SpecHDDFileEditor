@@ -15,17 +15,17 @@ import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 
 public class ProgesssForm {
+	//Form details
 	private Display display = null;
 	private Shell shell = null;
-
 	private ProgressBar progress = null;
-
-	private boolean cancelled = true;
-
 	private Label MessageLabel = null;
+
+	//result
+	private boolean cancelled = true;
 	
 	/**
-	 * 
+	 * Check if the form has been cancelled 
 	 * @return
 	 */
 	public boolean IsCancelled() {
@@ -42,6 +42,7 @@ public class ProgesssForm {
 	}
 
 	/**
+	 * Show the form and reset the cancelled flag
 	 * 
 	 */
 	public void Show(String title, String message) {
@@ -51,6 +52,7 @@ public class ProgesssForm {
 	}
 
 	/**
+	 * Set the max value
 	 * 
 	 * @param max
 	 */
@@ -60,6 +62,7 @@ public class ProgesssForm {
 	}
 
 	/**
+	 * Set the current value
 	 * 
 	 * @param value
 	 */

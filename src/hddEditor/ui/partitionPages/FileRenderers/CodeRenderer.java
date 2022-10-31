@@ -1,4 +1,7 @@
 package hddEditor.ui.partitionPages.FileRenderers;
+/**
+ * Render a CODE file
+ */
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -30,13 +33,19 @@ import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 
 public class CodeRenderer extends FileRenderer {
+	//components
 	private Text StartAddress = null;
 	private Combo CodeTypeDropDown = null;
-	private String[] CODETYPES = { "Binary", "Screen", "Assembly" };
-
 	private Table HexTable = null;
 	private Label ImageLabel = null;
+	
+	//Rendering options
+	private String[] CODETYPES = { "Binary", "Screen", "Assembly" };
 
+
+	/**
+	 * Render the page.
+	 */
 	@Override
 	public void Render(Composite mainPage, byte data[], String Filename) {
 		super.Render(mainPage, data, Filename);
@@ -163,6 +172,11 @@ public class CodeRenderer extends FileRenderer {
 	}
 
 
+	/**
+	 * Add the BIN (hex) option
+	 * @param data
+	 * @param p3d
+	 */
 	private void AddBin(byte data[], Plus3DosFileHeader p3d) {
 		int AddressLength = String.format("%X", data.length - 1).length();
 
@@ -227,7 +241,11 @@ public class CodeRenderer extends FileRenderer {
 		}
 	}
 
-
+	/**
+	 * Render the data as a Screen
+	 *  
+	 * @param data
+	 */
 	private void AddScreen(byte data[]) {
 		ImageData image = Speccy.GetImageFromFileArray(data, 0x80);
 		Image img = new Image(MainPage.getDisplay(), image);
@@ -241,12 +259,24 @@ public class CodeRenderer extends FileRenderer {
 		MainPage.pack();
 	}
 
+	/**
+	 * Render the code file as selected in the combo.
+	 * @param data
+	 * @param p3d
+	 */
 	private void CodeTypeComboChanged(byte data[], Plus3DosFileHeader p3d) {
 		String s = CodeTypeDropDown.getText().trim();
 		DoChangeCodeType(s, data, p3d);
 	}
 
+	/**
+	 * Actually render
+	 * @param s
+	 * @param data
+	 * @param p3d
+	 */
 	private void DoChangeCodeType(String s, byte data[], Plus3DosFileHeader p3d) {
+		//Dispose of any items that are already on the form
 		if (HexTable != null) {
 			HexTable.dispose();
 			HexTable = null;
@@ -257,6 +287,7 @@ public class CodeRenderer extends FileRenderer {
 			ImageLabel = null;
 		}
 
+		// Render the appropriate type
 		if (s.equals(CODETYPES[1])) {
 			AddScreen(data);
 		} else if (s.equals(CODETYPES[2])) {
@@ -267,6 +298,11 @@ public class CodeRenderer extends FileRenderer {
 		MainPage.pack();
 	}
 
+	/**
+	 * Render the code as ASM.
+	 * @param data
+	 * @param startaddress
+	 */
 	private void AddAsm(byte data[], int startaddress) {
 		HexTable = new Table(MainPage, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		HexTable.setLinesVisible(true);
@@ -341,6 +377,12 @@ public class CodeRenderer extends FileRenderer {
 	}
 
 
+	/**
+	 * Save the file as ASM
+	 * @param data
+	 * @param mainPage2
+	 * @param p3d
+	 */
 	protected void DoSaveFileAsAsm(byte[] data, Composite mainPage2, Plus3DosFileHeader p3d) {
 		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
 		fd.setText("Save Assembly file as");
@@ -420,7 +462,13 @@ public class CodeRenderer extends FileRenderer {
 		}
 	}
 
-	
+	/**
+	 * Save the file as an image file. (Note, this will be 256x192 of whatever format is selected)
+	 * 
+	 * @param data
+	 * @param mainPage
+	 * @param p3d
+	 */
 	protected void DoSaveFileAsPic(byte[] data, Composite mainPage, Plus3DosFileHeader p3d) {
 		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
 		fd.setText("Save Assembly file as");

@@ -1,23 +1,32 @@
 package hddEditor.libs.disks;
+/**
+ * This is the interface to a generic disk 
+ */
 
 import java.io.File;
 import java.io.IOException;
 
 public interface Disk {
+	//Disk filename
 	public String GetFilename();
 	public void SetFilename(String filename);
 	
+	//Real Sector size of the disk.
 	public int GetSectorSize();
 	public void SetSectorSize(int sz);
 	
+	//Number of cylinders for the disk
 	public int GetNumCylinders();
 	public void SetNumCylinders(int sz);
 
+	//Get the file size 
 	public long GetFileSize();
 
+	//Number of heads for the disk
 	public int GetNumHeads();
 	public void SetNumHeads(int sz);
 
+	//Number of sectors per track
 	public int GetNumSectors();
 	public void SetNumSectors(int sz);
 

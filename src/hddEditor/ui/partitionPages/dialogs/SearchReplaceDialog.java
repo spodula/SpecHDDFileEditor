@@ -1,4 +1,7 @@
 package hddEditor.ui.partitionPages.dialogs;
+/**
+ * Implementation of the Hexedits Search/replace dialog
+ */
 
 
 import org.eclipse.swt.SWT;
@@ -19,9 +22,9 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 public class SearchReplaceDialog {
+	//Form components
 	private Display display = null;
 	public Shell shell = null;
-
 	private Button binAscii = null;
 	private Label HexAsciiLabel = null;
 	private Text replaceEdit = null;
@@ -29,14 +32,25 @@ public class SearchReplaceDialog {
 	private Table ResultList = null;
 	private Label InfoLabel = null;
 
+	//result
 	private boolean result = false;
 
+	//List of what the bytes of actually are.
 	private AddressNote Notes[] = null;
+	
+	//Data to search
 	public byte[] Searchdata = null;
 
 	private static String FormatHex = "Format: XX XX XX XX";
 	private static String FormatAsc = "Format: ABCDEFGH";
 
+	/**
+	 * Constructor
+	 * 
+	 * @param display
+	 * @param src
+	 * @param notes
+	 */
 	public SearchReplaceDialog(Display display, byte src[], AddressNote notes[]) {
 		this.display = display;
 		Searchdata = new byte[src.length];
@@ -44,6 +58,10 @@ public class SearchReplaceDialog {
 		Notes = notes;
 	}
 
+	/**
+	 * Show the form
+	 * @return
+	 */
 	public boolean Show() {
 		Createform();
 		loop();
@@ -240,15 +258,11 @@ public class SearchReplaceDialog {
 	 * @return
 	 */
 	protected boolean IsHexNum(char c) {
-		boolean result = true;
-		if ("ABCDEFabcdef0123456789".indexOf(c) == -1) {
-			result = false;
-		}
-		return (result);
+		return ("ABCDEFabcdef0123456789".indexOf(c) != -1);
 	}
 
 	/**
-	 * Handler for SEARCH.
+	 * Actually do the search.
 	 */
 	protected void DoSearch() {
 		ResultList.removeAll();
@@ -377,7 +391,7 @@ public class SearchReplaceDialog {
 	}
 
 	/**
-	 * 
+	 * Implement the replace.
 	 */
 	protected void DoReplace() {
 		String txt = searchEdit.getText();

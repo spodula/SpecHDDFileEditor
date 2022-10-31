@@ -140,9 +140,14 @@ public class IDEDosDisk extends RawHDDFile {
 		}
 	}
 
+	/**
+	 * Get the specified number of bytes beginning at the given logical sector.
+	 * 
+	 * @param SectorNum
+	 * @param sz 
+	 */
 	@Override
 	public byte[] GetBytesStartingFromSector(int SectorNum, int sz) throws IOException {
-
 		if (!is8Bit) {
 			byte bytes[] = super.GetBytesStartingFromSector(SectorNum, sz);
 			return (bytes);
@@ -156,6 +161,9 @@ public class IDEDosDisk extends RawHDDFile {
 
 	/**
 	 * SetLogicalSector modified to take account of half sectors.
+	 * 
+	 * @param SectorNum
+	 * @param result 
 	 */
 	@Override
 	public void SetLogicalBlockFromSector(int SectorNum, byte result[]) throws IOException {
@@ -168,7 +176,9 @@ public class IDEDosDisk extends RawHDDFile {
 	}
 
 	/**
+	 * Check to see if i can identify this file as one i can open...
 	 * 
+	 * @param filename
 	 */
 	@Override
 	public Boolean IsMyFileType(File filename) throws IOException {

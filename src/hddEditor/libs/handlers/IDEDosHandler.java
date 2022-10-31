@@ -24,6 +24,7 @@ public class IDEDosHandler extends OSHandler {
 	//Max partitions as loaded from the disk
 	public int MaxPartitions = 0;
 	
+	//Storage for the System partition
 	public SystemPartition SystemPart = null;
 	
 	/**
@@ -172,9 +173,9 @@ public class IDEDosHandler extends OSHandler {
 	 * @param PartType - type
 	 * @param DirentLocation - Address in dirent block
 	 * @param CurrentDisk - disk
-	 * @param partitiondata - Partiton hex data
+	 * @param partitiondata - Partition hex data
 	 * @param partnum - Partition number
-	 * @param Initialise - if TRUE, initialise parititon with data, if FALSE, just load. 
+	 * @param Initialise - if TRUE, initialise Partition with some default data, if FALSE, just load. 
 	 * @return
 	 */
 	public static IDEDosPartition GetNewPartitionByType(int PartType, int DirentLocation, Disk CurrentDisk, byte partitiondata[], int partnum, boolean Initialise) {

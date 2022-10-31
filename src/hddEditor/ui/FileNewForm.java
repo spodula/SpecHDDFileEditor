@@ -1,5 +1,7 @@
 package hddEditor.ui;
-//TODO: write some help
+/**
+ * New file form...
+ */
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,6 +28,7 @@ import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.ui.partitionPages.dialogs.ProgesssForm;
 
 public class FileNewForm {
+	//Form components
 	private Display display = null;
 	private Shell shell = null;
 
@@ -40,8 +43,10 @@ public class FileNewForm {
 	private Text Spt = null;
 	private Text SizeMB = null;
 	
+	//Result to return. 
 	private String result = null;
 
+	//Flag to prevent an endless loop when the boxes are being edited. 
 	private boolean ModInProgress = false;
 
 	/**
@@ -224,6 +229,9 @@ public class FileNewForm {
 		UpdateCyls();
 	}
 
+	/**
+	 * THis updates the CYLs text box when the MB size text box is modified
+	 */
 	protected void UpdateCyls() {
 		if (!ModInProgress && !SizeMB.isDisposed())
 			try {
@@ -251,7 +259,7 @@ public class FileNewForm {
 	}
 
 	/**
-	 * 
+	 * This updates the size MB fields when either Cyls, Heads, or SPT are modified. 
 	 */
 	protected void UpdateSizeMBField() {
 		if (!ModInProgress && !SizeMB.isDisposed())
@@ -275,6 +283,7 @@ public class FileNewForm {
 	}
 
 	/**
+	 * Actually create the file.
 	 * 
 	 * @return TRUE if file successfully created.
 	 */
@@ -310,6 +319,7 @@ public class FileNewForm {
 
 				FileOutputStream TargetFile = new FileOutputStream(targFile);
 				try {
+					//For HDF files, write the HDF header
 					if (IsTargetHDF) {
 						HDFUtils.WriteHDFFileHeader(TargetFile, IsTarget8Bit, cyl, head, spt);
 					}
@@ -320,14 +330,15 @@ public class FileNewForm {
 					// WRite out the free space header
 					byte FsPart[] = PLUSIDEDOS.GetFreeSpacePartition(0,1,cyl,1,sectorSz, IsTarget8Bit && !IsTargetHDF, head, spt);
 					TargetFile.write(FsPart);
+					
 					/*
 					 * Write a blank file for the rest. 
 					 */
-					
 					int NumLogicalSectors = (cyl * head * spt) - spt + 1;
 
 					byte oneSector[] = new byte[512];
-					if (IsTarget8Bit && !IsTargetHDF) {
+					if (IsTarget8Bit && IsTargetHDF) {
+						//for raw files, still want to write 512 byte sectors even if only half is used. 
 						oneSector = new byte[256];
 					}
 					pf.SetMax(NumLogicalSectors);

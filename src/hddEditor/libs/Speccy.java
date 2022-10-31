@@ -1,5 +1,7 @@
 package hddEditor.libs;
 
+import java.util.ArrayList;
+
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 
@@ -14,7 +16,15 @@ public class Speccy {
 
 		// Prefix for numbers in basic files. 
 		public final static byte NUMSTART = 0x0E;
+		
+		//Spectrum file types
+		public static final int BASIC_BASIC = 0x00;
+		public static final int BASIC_NUMARRAY = 0x01;
+		public static final int BASIC_CHRARRAY = 0x02;
+		public static final int BASIC_CODE = 0x03;
 
+		public static final String[] filetypeNames = {"Basic","Numeric array","Char array","Code"};
+		
 		/**
 		 * Testing for the number conversion
 		 * 
@@ -469,7 +479,7 @@ public class Speccy {
 		 * @return
 		 * @throws Exception
 		 */
-		private static int VariableType2(StringBuilder sb, int Address, int chr, byte[] file ) {
+		public static int VariableType2(StringBuilder sb, int Address, int chr, byte[] file ) {
 			int varname = chr & 0x3f;
 			varname = varname + 0x40;
 			int lsb = (file[Address++] & 0xff);
@@ -499,7 +509,7 @@ public class Speccy {
 		 * @return
 		 * @throws Exception
 		 */
-		private static int VariableType3(StringBuilder sb, int Address, int  chr, byte[] file ) {
+		public  static int VariableType3(StringBuilder sb, int Address, int  chr, byte[] file ) {
 			int varname = chr & 0x3f;
 			varname = varname + 0x40;
 			double value = GetNumberAtByte(file,Address);
@@ -531,7 +541,7 @@ public class Speccy {
 		 * @return
 		 * @throws Exception
 		 */
-		private static int VariableType4(StringBuilder sb, int Address, int  chr, byte[] file ) { 
+		public  static int VariableType4(StringBuilder sb, int Address, int  chr, byte[] file ) { 
 			try {
 			int varname = chr & 0x3f;
 			varname = varname + 0x40;
@@ -620,7 +630,7 @@ public class Speccy {
 		 * @return
 		 * @throws Exception
 		 */
-		private static int VariableType5(StringBuilder sb, int Address, int  chr, byte[] file ) { 
+		public  static int VariableType5(StringBuilder sb, int Address, int  chr, byte[] file ) { 
 			sb.append("Number ");
 			boolean done = false;
 			while (!done) {
@@ -664,7 +674,7 @@ public class Speccy {
 		 * @return
 		 * @throws Exception
 		 */
-		private static int VariableType6(StringBuilder sb, int Address, int  chr, byte[] file ) {  
+		public  static int VariableType6(StringBuilder sb, int Address, int  chr, byte[] file ) {  
 			int varname = (chr & 0x3f);
 			varname = varname +0x40;
 			String txt = "Character array " + String.valueOf((char) varname) + "$(";
@@ -750,7 +760,7 @@ public class Speccy {
 		 * @return
 		 * @throws Exception
 		 */
-		private static int VariableType7(StringBuilder sb, int Address, int  chr, byte[] file ) {  
+		public  static int VariableType7(StringBuilder sb, int Address, int  chr, byte[] file ) {  
 			int varname = (chr & 0x3f);
 			varname = varname +0x40;
 			String txt = "For/Next " + String.valueOf((char) varname);
@@ -782,7 +792,7 @@ public class Speccy {
 		 * @param filebase
 		 * @return
 		 */
-		public static ImageData GetImageFromFileArray(byte file[], int filebase) {
+		public  static ImageData GetImageFromFileArray(byte file[], int filebase) {
 			PaletteData palette = new PaletteData(0xFF, 0xFF00, 0xFF0000);
 			ImageData imageData = new ImageData(256, 192, 24, palette);
 			// If the file is incomplete, pad to the correct size.
@@ -842,5 +852,262 @@ public class Speccy {
 				}
 			}
 			return (imageData);
+		}
+		
+		/**
+		 * Try to tokenise a the given basic line.
+		 * 
+		 * @param Line         - Line to tokenise
+		 * @param BasicAsBytes - Target array
+		 * @param TargetPtr    - Target ptr
+		 * @return - Next byte in the target array
+		 */
+		public static int DecodeBasicLine(String Line, byte BasicAsBytes[], int TargetPtr) {
+			ArrayList<Byte> NewLine = new ArrayList<Byte>();
+			Line = Line.trim();
+			String err = "";
+			// split line
+			ArrayList<String> TokenList = SplitLine(Line);
+			// read the line number
+			if (TokenList.size() > 0) {
+				// get the initial token Should be the line number
+				String token = TokenList.get(0);
+				int linenum = 0;
+				try {
+					linenum = Integer.parseInt(token);
+				} catch (NumberFormatException nfe) {
+					err = "Bad lineno: " + linenum;
+				}
+				if (err.isBlank()) {
+					// Tokenise the rest of the line.
+					int tokenptr = 1;
+					while (tokenptr < TokenList.size()) {
+						token = TokenList.get(tokenptr++);
+						String tkn = Speccy.DecodeToken(token);
+						for (int i = 0; i < tkn.length(); i++) {
+							int c = tkn.charAt(i);
+							NewLine.add((byte) c);
+						}
+					}
+
+				}
+				// Add in the EOL chararacter.
+				NewLine.add((byte) 0x0d);
+
+				// Add in the line number
+				BasicAsBytes[TargetPtr++] = (byte) ((linenum / 0x100) & 0xff);
+				BasicAsBytes[TargetPtr++] = (byte) (linenum & 0xff);
+				// Add in the line size
+				BasicAsBytes[TargetPtr++] = (byte) (NewLine.size() & 0xff);
+				BasicAsBytes[TargetPtr++] = (byte) ((NewLine.size() / 0x100) & 0xff);
+				// copy line into byte array
+				for (byte b : NewLine) {
+					BasicAsBytes[TargetPtr++] = b;
+				}
+			}
+			return (TargetPtr);
+		}
+
+		/**
+		 * Tokenise the given line. Will do this using a state machine.
+		 * 
+		 * @param line Line to parse
+		 * @return Token list.
+		 */
+		public static ArrayList<String> SplitLine(String line) {
+			// values for the state machine.
+			int STATE_NONE = 0;
+			int STATE_NUMBER = 1;
+			int STATE_STRING = 2;
+			int STATE_MISC = 3;
+			int STATE_OPERATOR = 4;
+			int STATE_REM = 5;
+
+			// some preprocessing
+			line = CISreplace(line, "GO SUB", "GOSUB");
+			line = CISreplace(line, "GO TO", "GOTO");
+			line = CISreplace(line, "CLOSE #", "CLOSE#");
+			line = CISreplace(line, "OPEN #", "OPEN#");
+
+			int state = STATE_NONE;
+			String curritem = "";
+			ArrayList<String> result = new ArrayList<String>();
+			for (int i = 0; i < line.length(); i++) {
+				char chr = line.charAt(i);
+				if (state == STATE_REM) {
+					// if we have found a rem, just add everything from here on.
+					// Dont try to switch states going forward.
+					curritem = curritem + chr;
+				} else if (state == STATE_NONE) {
+					// if we are in state_none, swtich to another state.
+					if (IsNumber(chr)) {
+						state = STATE_NUMBER;
+						curritem = curritem + chr;
+					} else if (IsOperator(chr)) {
+						state = STATE_OPERATOR;
+						curritem = curritem + chr;
+					} else if (chr == '"') {
+						state = STATE_STRING;
+						curritem = curritem + '"';
+					} else if (chr != ' ') {
+						state = STATE_MISC;
+						curritem = curritem + chr;
+					}
+				} else if (state == STATE_NUMBER) {
+					if (IsNumber(chr)) {
+						curritem = curritem + chr;
+					} else {
+						result.add(curritem);
+						curritem = "";
+						// ok we are not a number, Lets decide the next state
+						if (IsSeperator(chr)) {
+							result.add("" + chr);
+							state = STATE_MISC;
+						} else if (IsOperator(chr)) {
+							state = STATE_OPERATOR;
+							curritem = curritem + chr;
+						} else if (chr == '"') {
+							curritem = curritem + '"';
+							state = STATE_STRING;
+						} else if (chr != ' ') {
+							state = STATE_MISC;
+							curritem = curritem + chr;
+						}
+					}
+				} else if (state == STATE_STRING) {
+					if (chr == '"') {
+						state = STATE_NONE;
+						curritem = curritem + '"';
+						result.add(curritem);
+						curritem = "";
+					} else {
+						curritem = curritem + chr;
+					}
+				} else if (state == STATE_MISC) {
+					if (curritem.toUpperCase().contentEquals("REM")) {
+						result.add(curritem);
+						curritem = "" + chr;
+						state = STATE_REM;
+					}
+					if (IsNumber(chr)) {
+						// are we a continuation of an identifier? If so, dont switch state.
+						if (curritem.isEmpty()) {
+							state = STATE_NUMBER;
+							result.add(curritem);
+							curritem = "" + chr;
+						} else {
+							curritem = curritem + chr;
+						}
+					} else if (IsOperator(chr)) {
+						state = STATE_OPERATOR;
+						result.add(curritem);
+						curritem = "" + chr;
+					} else if (chr == '"') {
+						state = STATE_STRING;
+						result.add(curritem);
+						curritem = "\"";
+					} else if (IsSeperator(chr)) {
+						result.add(curritem);
+						result.add("" + chr);
+						curritem = "";
+
+					} else if (chr != ' ') {
+						curritem = curritem + chr;
+					} else { // is space
+						result.add(curritem);
+						curritem = "";
+					}
+				} else if (state == STATE_OPERATOR) {
+					if (IsOperator(chr)) {
+						curritem = curritem + chr;
+					} else {
+						result.add(curritem);
+						curritem = "";
+						// ok we are not a number, Lets decide the next state
+						if (IsSeperator(chr)) {
+							result.add("" + chr);
+						} else if (IsNumber(chr)) {
+							state = STATE_NUMBER;
+							curritem = curritem + chr;
+						} else if (chr == '"') {
+							state = STATE_STRING;
+							curritem = "\"";
+						} else if (chr != ' ') {
+							state = STATE_MISC;
+							curritem = curritem + chr;
+						}
+					}
+				}
+			}
+			result.add(curritem);
+
+			// remove the spaces
+			ArrayList<String> result2 = new ArrayList<String>();
+			for (String sr : result) {
+				sr = sr.trim();
+				if (!sr.isBlank()) {
+					result2.add(sr);
+				}
+			}
+			return (result2);
+		}
+
+		/**
+		 * Is the character part of a number?
+		 * 
+		 * @param chr
+		 * @return TRUE if number 0-9 or -
+		 */
+		private static boolean IsNumber(char chr) {
+			String numbers = "0123456789.";
+			return (numbers.indexOf(chr) > -1);
+		}
+
+		/**
+		 * Is the character a logical or math operator?
+		 * 
+		 * @param chr
+		 * @return TRUE if an operator character
+		 */
+		private static boolean IsOperator(char chr) {
+			String operators = "()+-/*<>&=";
+			return (operators.indexOf(chr) > -1);
+		}
+
+		/**
+		 * Is the character something used to separate statements?
+		 * 
+		 * @param chr
+		 * @return TRUE if a seperator character
+		 */
+		private static boolean IsSeperator(char chr) {
+			String seperators = ":, ";
+			return (seperators.indexOf(chr) > -1);
+		}
+		
+		/**
+		 * Case insensitive replace from
+		 * https://stackoverflow.com/questions/5054995/how-to-replace-case-insensitive-literal-substrings-in-java
+		 * 
+		 * @param source
+		 * @param target
+		 * @param replacement
+		 */
+		private static String CISreplace(String source, String target, String replacement) {
+			StringBuilder sbSource = new StringBuilder(source);
+			StringBuilder sbSourceLower = new StringBuilder(source.toLowerCase());
+			String searchString = target.toLowerCase();
+
+			int idx = 0;
+			while ((idx = sbSourceLower.indexOf(searchString, idx)) != -1) {
+				sbSource.replace(idx, idx + searchString.length(), replacement);
+				sbSourceLower.replace(idx, idx + searchString.length(), replacement);
+				idx += replacement.length();
+			}
+			sbSourceLower.setLength(0);
+			sbSourceLower.trimToSize();
+			sbSourceLower = null;
+
+			return sbSource.toString();
 		}
 }

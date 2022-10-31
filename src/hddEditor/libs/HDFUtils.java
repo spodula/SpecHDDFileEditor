@@ -6,6 +6,14 @@ import java.io.IOException;
 import hddEditor.libs.disks.Disk;
 
 public class HDFUtils {
+	/**
+	 * Write a generic HDF file header.
+	 * 
+	 * @param sourceDisk
+	 * @param targetFile2
+	 * @param isTarget8Bit
+	 * @throws IOException
+	 */
 	public static void WriteHDFFileHeader(Disk sourceDisk, FileOutputStream targetFile2, boolean isTarget8Bit) 
 			throws IOException {
 		WriteHDFFileHeader(targetFile2, isTarget8Bit, sourceDisk.GetNumCylinders(), sourceDisk.GetNumHeads(), sourceDisk.GetNumSectors());

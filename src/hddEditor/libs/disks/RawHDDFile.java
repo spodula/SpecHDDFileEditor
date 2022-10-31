@@ -1,7 +1,7 @@
 package hddEditor.libs.disks;
 
 /**
- * This is a wrapper around a file acting as a disk. It can be any format.
+ * This is a wrapper around a file with no header acting as a disk. It can be any format.
  * 
  * Note, the CHS values are not set at this level usually.
  * It basically provides some low level disk access, which can be overridden by superclasses
@@ -34,52 +34,65 @@ public class RawHDDFile implements Disk {
 	private byte[] cache;
 	private int cachedSector = -1;
 
+	/**
+	 * Get and set the filename
+	 */
 	public String GetFilename() {
 		return (filename);
 	}
-
 	public void SetFilename(String filename) {
 		this.filename = filename;
 	}
 
+	/**
+	 * Get and set the sector size
+	 */
 	public int GetSectorSize() {
 		return (SectorSize);
 	}
-
 	public void SetSectorSize(int sz) {
 		this.SectorSize = sz;
 	}
 
+	/**
+	 * Get and set the number of cylinders
+	 */
 	public int GetNumCylinders() {
 		return (NumCylinders);
 	}
-
 	public void SetNumCylinders(int sz) {
 		this.NumCylinders = sz;
 	}
 
+	/**
+	 * Get the file size
+	 */
 	public long GetFileSize() {
 		return (FileSize);
 	}
 
+	/**
+	 * Get and set the number of heads
+	 */
 	public int GetNumHeads() {
 		return (NumHeads);
 	}
-
 	public void SetNumHeads(int sz) {
 		this.NumHeads = sz;
 	}
 
+	/**
+	 * Get and set the number of sectors
+	 */
 	public int GetNumSectors() {
 		return (NumSectors);
 	}
-
 	public void SetNumSectors(int sz) {
 		this.NumSectors = sz;
 	}
 
 	/**
-	 * Constructor
+	 * Constructor specifying file to load
 	 * 
 	 * @param filename
 	 * @throws FileNotFoundException
@@ -90,6 +103,9 @@ public class RawHDDFile implements Disk {
 		FileSize = new File(filename).length();
 	}
 	
+	/**
+	 * Constructor creating an unopened file object
+	 */
 	public RawHDDFile() {
 		super();
 	}
@@ -142,7 +158,7 @@ public class RawHDDFile implements Disk {
 	}
 
 	/**
-	 * Returns TRUE if the file openned correctly.
+	 * Returns TRUE if the file opened correctly.
 	 * 
 	 * @return
 	 */
@@ -167,6 +183,7 @@ public class RawHDDFile implements Disk {
 	}
 
 	/**
+	 * Set data from the given logical sector with the specified data. 
 	 * 
 	 * @param SectorNum
 	 * @param result
@@ -180,17 +197,12 @@ public class RawHDDFile implements Disk {
 		inFile.write(result);
 		cachedSector = -1;
 
-//		System.out.print("Writing " + result.length + " bytes to sr:" + SectorNum + " loc:" + location + " :");
 		inFile.seek(location);
 		inFile.read(result);
-//		for (int i = 0; i < 32; i++) {
-//			System.out.print(String.format("%02x ", result[i]));
-//		}
-//		System.out.println();
-
 	}
 
 	/**
+	 * Get a byte array of the specified size from the given sector number
 	 * 
 	 * @param SectorNum
 	 * @param sz
@@ -205,13 +217,8 @@ public class RawHDDFile implements Disk {
 		byte result[] = new byte[sz];
 		long location = SectorNum * SectorSize;
 
-//		System.out.print("Reading " + sz + " bytes from sr:" + SectorNum + " loc:" + location + " :");
 		inFile.seek(location);
 		inFile.read(result);
-//		for (int i = 0; i < 32; i++) {
-//			System.out.print(String.format("%02x ", result[i]));
-//		}
-//		System.out.println();
 
 		cache = new byte[result.length];
 		System.arraycopy(result, 0, cache, 0, cache.length);
@@ -221,7 +228,10 @@ public class RawHDDFile implements Disk {
 	}
 
 	/**
-	 * Check to see if the given file has a valid IDEDOS header.
+	 * Check to see if i can identify this file as one i can open...
+	 * At this level, always false. 
+	 * 
+	 * @param filename
 	 */
 	@Override
 	public Boolean IsMyFileType(File filename) throws IOException {
