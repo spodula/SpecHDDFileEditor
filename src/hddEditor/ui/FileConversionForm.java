@@ -1,4 +1,5 @@
 package hddEditor.ui;
+//TODO: HDF files created 8 bit should not be doubled
 /**
  * Convert between file types
  */

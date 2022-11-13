@@ -1,6 +1,5 @@
 package hddEditor.libs.disks;
 
-
 /**
  * This is a wrapper around an IDE dos raw disk, which extracts the disk parameters
  * from the IDEDOS partition.  it will also transparently handle 8/16 bit access.
@@ -30,7 +29,7 @@ import hddEditor.libs.TestUtils;
 
 public class RS_IDEDosDisk extends RS_IDEFile {
 	public static final String IDEDOSHEADER = "PLUSIDEDOS";
-	public boolean is8Bit = false;
+	public boolean DataHalved = false;
 
 	/**
 	 * Constructor.
@@ -58,11 +57,23 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 		 * CHeck to see if we are only using the first 8 bytes of a word.
 		 */
 		byte FirstSector[] = GetBytesStartingFromSector(0, 512);
-		if (new String(FirstSector, StandardCharsets.UTF_8).startsWith(IDEDOSHEADER)) {
-			is8Bit = (SectorSize==256);
+	
+		String s = new String(FirstSector, StandardCharsets.UTF_8);
+		if (s.startsWith(IDEDOSHEADER)) {
+			//for HDF files, sectors can come pre-halved. 
+			DataHalved = IsSectorHalved();
+			if (DataHalved) {
+				SectorSize = 256;
+			}
 		} else {
-			close();
-			throw new IOException("Not an PlusIDEDOS Disk!");
+			FirstSector = HalfSector(FirstSector);
+			if (new String(FirstSector, StandardCharsets.UTF_8).startsWith(IDEDOSHEADER)) {
+				DataHalved = true;
+				SectorSize = 256;
+			} else {
+				close();
+				throw new IOException("Not an PlusIDEDOS Disk!");
+			}
 		}
 
 		// Parse the cylinders from PLUSIDEDOS header.
@@ -79,7 +90,7 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 	@Override
 	public String toString() {
 		String result = super.toString();
-		result = result + "\nIs 8 bit?: " + is8Bit;
+		result = result + "\nData halved?: " + DataHalved;
 		return (result);
 	}
 
@@ -91,7 +102,8 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 	public static void main(String[] args) {
 		RS_IDEDosDisk h;
 		try {
-			h = new RS_IDEDosDisk("/data1/IDEDOS/Workbench2.3_4Gb_8Bits.hdf");
+			//h = new RS_IDEDosDisk("/data1/IDEDOS/Workbench2.3_4Gb_8Bits.hdf");
+			h = new RS_IDEDosDisk("/home/graham/2gtest.hdf");
 			System.out.println(h);
 			//First sector:
 			byte data[] = h.GetBytesStartingFromSector(0,512);
@@ -113,8 +125,17 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 	 */
 	@Override
 	public byte[] GetBytesStartingFromSector(int SectorNum, int sz) throws IOException {
-		byte bytes[] = super.GetBytesStartingFromSector(SectorNum, sz);
-		return (bytes);
+		boolean NeedTohalf = !IsSectorHalved() && DataHalved;
+		
+		if (!NeedTohalf) {
+			byte bytes[] = super.GetBytesStartingFromSector(SectorNum, sz);
+			return (bytes);
+		} else {
+			byte rawsector[] = super.GetBytesStartingFromSector(SectorNum*2, sz * 2);
+			byte HalvedSector[] = HalfSector(rawsector);
+
+			return (HalvedSector);
+		}
 	}
 
 	/**
@@ -125,7 +146,48 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 	 */
 	@Override
 	public void SetLogicalBlockFromSector(int SectorNum, byte result[]) throws IOException {
-		super.SetLogicalBlockFromSector(SectorNum, result);
+		boolean NeedToDouble = !IsSectorHalved() && DataHalved;
+		if (!NeedToDouble) {
+			super.SetLogicalBlockFromSector(SectorNum, result);
+		} else {
+			byte[] doubledData = DoubleSector(result);
+			super.SetLogicalBlockFromSector(SectorNum*2, doubledData);
+		}
 	}
+	
+	/**
+	 * process the sector to extract the 8 bit data.
+	 * 
+	 * @param Sector
+	 * @return
+	 */
+	private byte[] HalfSector(byte Sector[]) {
+		byte result[] = new byte[Sector.length / 2];
+
+		for (int i = 0; i < result.length; i++) {
+			result[i] = Sector[i * 2];
+		}
+
+		return (result);
+	}
+
+	/**
+	 * process the sector to expand it to 16 bits
+	 * 
+	 * @param Sector
+	 * @return
+	 */
+	private byte[] DoubleSector(byte Sector[]) {
+		byte result[] = new byte[Sector.length * 2];
+
+		int ptr = 0;
+		for (int i = 0; i < Sector.length; i++) {
+			result[ptr++] = Sector[i];
+			result[ptr++] = 0;
+		}
+
+		return (result);
+	}
+
 
 }

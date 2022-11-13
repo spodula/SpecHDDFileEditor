@@ -146,10 +146,11 @@ public class PLUSIDEDOS {
 		SysPart[0x24] = (byte) ((SPC / 0x100) & 0xff);
 		SysPart[0x25] = (byte) (SPC & 0xff);
 
-		// Max partitions - Limit to 63 partitons
+		// Max partitions - Limit to 31 partitions
+		//GDS: bugfix. limit to 31 partition
 		int MaxPartitions = (DiskSPT * sectorSz / 0x40) - 1;
-		if (MaxPartitions > 63) {
-			MaxPartitions = 63;
+		if (MaxPartitions > 31) {
+			MaxPartitions = 31;
 		}
 		SysPart[0x26] = (byte) (MaxPartitions & 0xff);
 		SysPart[0x27] = (byte) ((MaxPartitions / 0x100) & 0xff);

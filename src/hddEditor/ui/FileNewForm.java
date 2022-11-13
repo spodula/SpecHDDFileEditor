@@ -1,4 +1,5 @@
 package hddEditor.ui;
+//TODO: HDF files created 8 bit should not be doubled
 /**
  * New file form...
  */
@@ -319,15 +320,15 @@ public class FileNewForm {
 
 				FileOutputStream TargetFile = new FileOutputStream(targFile);
 				try {
-					//For HDF files, write the HDF header
+					// For HDF files, write the HDF header
 					if (IsTargetHDF) {
 						HDFUtils.WriteHDFFileHeader(TargetFile, IsTarget8Bit, cyl, head, spt);
 					}
-					// write out an IDEDOS header
+					// Write out an IDEDOS header
 					byte SysPart[] = PLUSIDEDOS.GetSystemPartition(cyl, head, spt, sectorSz, IsTarget8Bit && !IsTargetHDF);
 					TargetFile.write(SysPart);
 					
-					// WRite out the free space header
+					// Write out the free space header
 					byte FsPart[] = PLUSIDEDOS.GetFreeSpacePartition(0,1,cyl,1,sectorSz, IsTarget8Bit && !IsTargetHDF, head, spt);
 					TargetFile.write(FsPart);
 					

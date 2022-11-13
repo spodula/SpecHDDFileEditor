@@ -63,9 +63,9 @@ public class HDFUtils {
 		ATA_IDENTIFY[0x00] = (byte) (0x8A & 0xff); // Magnetic device + some unused bits
 		ATA_IDENTIFY[0x01] = (byte) (0x84 & 0xff); // Removable media + some unused bits
 
-		//Logical cylinders LSB first
-		ATA_IDENTIFY[0x03] = (byte) (logicalCyls & 0xff);
-		ATA_IDENTIFY[0x02] = (byte) ((logicalCyls / 0x100) & 0xff);
+		//Logical cylinders 
+		ATA_IDENTIFY[0x02] = (byte) (logicalCyls & 0xff);
+		ATA_IDENTIFY[0x03] = (byte) ((logicalCyls / 0x100) & 0xff);
 		
 		// 4+5 reserved
 		ATA_IDENTIFY[0x06] = (byte) (logicalHeads & 0xff);
