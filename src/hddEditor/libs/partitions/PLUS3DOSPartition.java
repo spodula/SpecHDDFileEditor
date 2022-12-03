@@ -86,7 +86,6 @@ public class PLUS3DOSPartition extends CPMPartition {
 			BlockSize++;
 		}
 		
-		System.out.println("Extracting dir listing for "+GetName());
 		ExtractDirectoryListing();
 	}
 
@@ -174,7 +173,9 @@ public class PLUS3DOSPartition extends CPMPartition {
 		} else {
 			result = result + "\ndrive letter: " + DriveLetter + ": ";
 		}
-		result = result + "\t\tFreeze Flag: "+FreezeFlag+"\n"+super.toString();
+		result = result + "\tValid: "+IsValid;
+		result = result + "\tFreeze Flag: "+FreezeFlag+"\n"+super.toString();
+		
 		return(result);
 	}
 
@@ -276,5 +277,4 @@ public class PLUS3DOSPartition extends CPMPartition {
 		}
 	}
 	
-
 }

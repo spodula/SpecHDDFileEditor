@@ -1,5 +1,4 @@
 package hddEditor.ui.partitionPages.FileRenderers;
-//TODO: BASICRenderer: Display variables - Not working properly.
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -19,6 +18,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 
@@ -264,28 +264,26 @@ public class BasicRenderer extends FileRenderer {
 	 * @param header
 	 */
 	private void DecodeVariables(Composite mainPage, byte[] file, Plus3DosFileHeader header) {
-		System.out.println("Variables offset = "+header.VariablesOffset);
-		System.out.println("FileLength = "+header.filelength);
-		System.out.println("FileSize = "+header.fileSize);
-		System.out.println("file.length = "+file.length);
 		int ptr = 0x80; // skip the file header
 		ptr = ptr + header.VariablesOffset;
-		if (ptr >= header.filelength + 0x80) {
+		if (ptr >= (header.filelength+0x80)) {
 			TableItem Row = new TableItem(Variables, SWT.NONE);
 			Row.setText(new String[] {"No Variables","",""});
 		} else {
 			while (ptr < header.filelength+0x80) {
 				int var = (int) (file[ptr++] & 0xff);
-				int vartype = var /0x20;
-				if (var == 0x00) {
+				int vartype = var / 0x20;
+			//	char c = (char) ((var & 0x1f) + 0x60);
+				
+				if (vartype == 0x00) {
 					//anything after this marker is junk so just skip it.
 					TableItem Row = new TableItem(Variables, SWT.NONE);
 					Row.setText(new String[] {"End of variables","",""});
-					ptr = file.length;
+					ptr =  header.filelength+0x80;
 				} else if (vartype == 1) {
 					TableItem Row = new TableItem(Variables, SWT.NONE);
 					Row.setText(new String[] {"Unknown type","",""});
-					ptr = file.length;
+					ptr = header.filelength+0x80;
 				} else if (vartype == 2) { // string
 					ptr = VariableType2(ptr, var, file );
 				} else if (vartype == 3) { // number (1 letter)
@@ -309,7 +307,7 @@ public class BasicRenderer extends FileRenderer {
 
 	/**
 	 * Handler for type 7 variables (FOR/NEXT variables)
-	 * Variable name is parsed from the original marker (first 5 bytes) + 0x40
+	 * Variable name is parsed from the original marker (first 5 bytes) + 0x60
 	 *  format is:
 	 *  byte:
 	 *  [0-4] 	Current Value of variable (Speccy FP representation)
@@ -327,8 +325,8 @@ public class BasicRenderer extends FileRenderer {
 	 * @throws Exception
 	 */
 	private int  VariableType7(int Address, int chr, byte[] file ) {
-		int varname = (chr & 0x3f);
-		varname = varname +0x40;
+		int varname = (chr & 0x1f);
+		varname = varname +0x60;
 		String txt = "Value=" + String.valueOf(Speccy.GetNumberAtByte(file, Address));
 		Address = Address + 5;
 		txt = txt + " Limit=" + String.valueOf(Speccy.GetNumberAtByte(file, Address));
@@ -357,7 +355,7 @@ public class BasicRenderer extends FileRenderer {
 
 	/**
 	 * Handler for type 6 variables (Character arrays)
-	 * Variable name is parsed from the original marker (first 5 bytes) + 0x40
+	 * Variable name is parsed from the original marker (first 5 bytes) + 0x60
 	 * format is:
 	 *  [0-1] data length (Used to quickly skip over variable when searching)
 	 *  [2] Number of dimensions (1-255)
@@ -378,8 +376,11 @@ public class BasicRenderer extends FileRenderer {
 	 * @throws Exception
 	 */
 	private int  VariableType6(int Address, int chr, byte[] file ) {
-		int varname = (chr & 0x3f);
-		varname = varname +0x40;
+		int varname = (chr & 0x1f);
+		varname = varname +0x60;
+		
+		System.out.println(GeneralUtils.HexDump(file, Address, file.length-Address));
+		
 		String txt = "(";
 		Address = Address + 2;
 		int dimensions =  (file[Address++] & 0xff);
@@ -400,7 +401,7 @@ public class BasicRenderer extends FileRenderer {
 		TableItem Row = new TableItem(Variables, SWT.NONE);
 		String row[] = new String[3];
 		row[0] = (char)varname+"";
-		row[1] = "Number array";
+		row[1] = "Character array";
 		row[2] = txt;
 		Row.setText(row);
 		
@@ -410,7 +411,7 @@ public class BasicRenderer extends FileRenderer {
 	/**
 	 * Handler for type 5 variables (Number with a name > 1)
 	 * Format:
-	 *   (Original char) [101XXXXX] where XXXXX = char of name - 0x40
+	 *   (Original char) [101XXXXX] where XXXXX = char of name - 0x60
 	 *   [0] [000XXXXX] where XXXXX = char of name - 0x40
 	 *   ...
 	 *   [Y] [100XXXXX] where XXXXX = char of name - 0x40 (Bit 7 is set to terminate string)
@@ -426,8 +427,8 @@ public class BasicRenderer extends FileRenderer {
 		boolean done = false;
 		String vn = "";
 		while (!done) {
-			int varname = (chr & 0x3f);
-			varname = varname +0x40;
+			int varname = (chr & 0x1f);
+			varname = varname +0x60;
 			vn = vn + String.valueOf((char) varname);
 			chr = file[Address++];
 			done = (chr & 0x80) == 0x80;
@@ -472,8 +473,8 @@ public class BasicRenderer extends FileRenderer {
 	 */
 	private int VariableType4(int Address, int chr, byte[] file ) {
 		try {
-		int varname = chr & 0x3f;
-		varname = varname + 0x40;
+		int varname = chr & 0x1f;
+		varname = varname + 0x60;
 		String txt = "(";
 		Address = Address + 2;
 		int dimensions =  (file[Address++] & 0xff);
@@ -509,7 +510,7 @@ public class BasicRenderer extends FileRenderer {
 
 	/**
 	 * Handler for type 3 variables (Numbers with a one character name)
-	 * Variable name is parsed from the original marker (first 5 bytes) + 0x40
+	 * Variable name is parsed from the original marker (first 5 bits) + 0x40
 	 * [12345] Speccy floating point representation of the value.  
 	 * 
 	 * @param keys
@@ -519,8 +520,8 @@ public class BasicRenderer extends FileRenderer {
 	 * @throws Exception
 	 */
 	private int  VariableType3(int Address, int chr, byte[] file ) {
-		int varname = chr & 0x3f;
-		varname = varname + 0x40;
+		int varname = chr & 0x1f;
+		varname = varname + 0x60;
 		double value = Speccy.GetNumberAtByte(file,Address);
 		String sValue = String.valueOf(value);
 		
@@ -537,7 +538,7 @@ public class BasicRenderer extends FileRenderer {
 
 	/**
 	 * Handler for type 2 variables (Strings)
-	 * Variable name is parsed from the original marker (first 5 bytes) + 0x40
+	 * Variable name is parsed from the original marker (first 5 bits) + 0x40
 	 * [1..2] String length lsb first
 	 * [3..x] Characters making up the string. 
 	 * 
@@ -548,8 +549,8 @@ public class BasicRenderer extends FileRenderer {
 	 * @throws Exception
 	 */
 	private int VariableType2(int Address, int chr, byte[] file ) {
-		int varname = chr & 0x3f;
-		varname = varname + 0x40;
+		int varname = chr & 0x1f;
+		varname = varname + 0x60;
 		int lsb = (file[Address++] & 0xff);
 		int msb = (file[Address++] & 0xff);
 		int length =  (msb*256) + lsb;

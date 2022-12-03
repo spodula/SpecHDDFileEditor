@@ -34,6 +34,10 @@ import java.io.IOException;
 import hddEditor.libs.disks.Disk;
 
 public class SystemPartition extends IDEDosPartition {
+	//Flag set by handlers that create this partition as a dummy for the editor. 
+	//This flag will stop the partition trying to update the disk if its modified.
+	public Boolean DummySystemPartiton = false;
+	
 	// Number of Cylinders as described in the XDPB
 	private int GetNumCyls() {
 		int NumCyls = ((RawPartition[0x20 + 1] & 0xff) * 0x100) + (RawPartition[0x20] & 0xff);
@@ -256,6 +260,7 @@ public class SystemPartition extends IDEDosPartition {
 	 * Update this Dirent ONLY from the raw data
 	 */
 	public void UpdateSystemPartitionOnDisk() {
+		if (!DummySystemPartiton)
 		try {
 			/*
 			 * Copy the raw dirent over
@@ -280,6 +285,7 @@ public class SystemPartition extends IDEDosPartition {
 	 * Update the entire disk partition list.
 	 */
 	public void UpdatePartitionListOnDisk() {
+		if (!DummySystemPartiton)
 		try {
 			/*
 			 * Copy the raw dirent over

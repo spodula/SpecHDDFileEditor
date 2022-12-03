@@ -176,20 +176,24 @@ public class DirectoryEntry {
 		//On a normal +3 disk, all dirents except the last one will be full.
 		//This doesn't seem to be the case for PLUSIDEPOS, so just get the number of blocks, and
 		//use that.
-		
-		int blocks[] = getBlocks();
-		
-		int filesize =  (blocks.length -1) * ThisPartition.BlockSize;
-
-		// Get the number of records used in the last dirent.
+		//GDS 25/12/2022 - The bytes in the last logical Dirent are the bytes for the last DIRENT not Block. 
+		//                  So ignore the last Dirent in file size calculations.
+		int BytesInRestOfDirents = 0; 
 		Dirent lastdirent = GetLastDirent();
-		int bytesinllb = 0;
+		for(Dirent d:dirents) {
+			if (d != lastdirent) {
+				BytesInRestOfDirents = BytesInRestOfDirents + (d.getBlocks().length * ThisPartition.BlockSize);
+			}
+		}	
+		
+		// Get the number of records used in the last dirent.
+		int bytesinlld = 0;
 		if (lastdirent == null) {
 			System.out.println("Cant get last dirent for " + filename());
 		} else {
-			bytesinllb = lastdirent.GetBytesInLastLogicalBlock();
+			bytesinlld = lastdirent.GetBytesInLastDirent();
 		}
-		return (bytesinllb + filesize);
+		return (bytesinlld + BytesInRestOfDirents);
 
 	}
 	
@@ -238,8 +242,9 @@ public class DirectoryEntry {
 				if (resultptr < eob) {
 					result[resultptr++] = x;
 				}
-			}
+			} 
 		}
+
 		return (result);
 	}
 

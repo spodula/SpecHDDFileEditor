@@ -16,13 +16,13 @@ public class FreePartition extends IDEDosPartition {
 	 * Constructor
 	 * 
 	 * @param tag
-	 * @param ideDosHandler
+	 * @param RawDisk
 	 * @param RawPartition
 	 * @param DirentNum
 	 * @param Initialise
 	 */
-	public FreePartition(int tag, Disk ideDosHandler, byte[] RawPartition,int DirentNum, boolean Initialise) {
-		super(tag, ideDosHandler, RawPartition,DirentNum,Initialise);
+	public FreePartition(int tag, Disk RawDisk, byte[] RawPartition,int DirentNum, boolean Initialise) {
+		super(tag, RawDisk, RawPartition,DirentNum,Initialise);
 	}
 
 }

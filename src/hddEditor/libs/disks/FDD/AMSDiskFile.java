@@ -1,0 +1,402 @@
+package hddEditor.libs.disks.FDD; 
+
+/**
+
+ * Wrapper around an AMS file. (Used for Amstrad CPC and Spectrum +3 Disk images) 
+ * Handles low level Sector/track parsing and reading the disk information 
+ * structures.
+ *
+ * (NOTE: most of this information was gathered from  https://www.cpcwiki.eu/index.php/Format:DSK_disk_image_file_format )
+ * 
+ * AMS file:
+ * The first 256 bytes are the "disk information block".
+ * There are two types, Normal and Extended (I have found +3 disks in both) 
+ * 
+ * the main differences are:
+ *   for NORMAL disks, the track size is defined in the DIB. 
+ *   For EXTENDED disks, each track size is defined individually from byte $34 onwards. 
+ *   Extended disks enable the encoding of copy-protected disks with variable sector and track sizes. 
+ *   
+ * 
+ * Normal:
+ * 	00-16 "MV - CPCEMU Disk-File\r\n"
+ * 	17-21 "Disk-Info\r\n"
+ * 	22-2f Name of the creator
+ * 	30    Number of tracks
+ * 	31    Number of sides
+ * 	32-33 Track size 
+ * 	34-FF Unused
+ * 	
+ * Extended:
+ * 	00-16 "EXTENDED CPC DSK File\r\n"
+ * 	17-21 "Disk-Info\r\n"
+ * 	22-2f Name of the creator
+ * 	30    Number of tracks
+ * 	31    Number of sides
+ * 	32-33 Not used
+ * 	34-FF For each track, one byte representing MSB of track size, 
+ * 				Eg, of the track length is 4864 (0x1300 = 9 sectors of 512 bytes + 256 bytes for the track header)
+ * 					then the byte would be 13
+ * 
+ * From $100 onwards is the track data. 
+ * For each track:
+ *	00-0b "Track Info\r\n"
+ *	0c-0f unused
+ *	10    Track number
+ *	11    Side number
+ *	12-13 unused
+ *	14    Sector size (1=256, 2=512, 3=1024 ect) 
+ *	15    Number of sectors 
+ *	16    Gap#3 length
+ *	17    Filler byte
+ *
+ * Next from 18 onwards, is the sector list information.
+ * Note that the sectors in the file are not nesserilly consecutive (Indeed i have found they are mostly interleaved)  
+ * This list is the same order as the data in the file
+ * There are 8 bytes per record
+ *  00    Track (Equivalent to "C" parameter in the 765 FDC)
+ *  01    Side   (Equivalent to "H" parameter in the 765 FDC)
+ *  02    Sector ID (Equivalent to "R" parameter in the 765 FDC) (These are 1-9 for +3 disks, Others use $40-49 and $C0-C9)
+ *  03    Sector size  (Equivalent to "N" parameter in the 765 FDC) should be the same as #14 above
+ *  04    FDC status register 1 after reading
+ *  05    FDC status register 2 after reading
+ *  06-07 Actual data length of the sector in bytes
+ *   
+ * At the next $100 boundary, the actual data starts.
+ * this is just a stream of data for each sector in the same order and with the same size as the data above. 
+ * 
+ */
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
+
+import hddEditor.libs.GeneralUtils;
+
+public class AMSDiskFile extends FloppyDisk {
+
+	private String Creator = "";
+
+
+	// Copy of the disk information block at the start of the DSK file
+	private byte DiskInfoBlock[] = new byte[256];
+
+	// Parsed version of above.
+	private DiskInfo ParsedDiskInfo = null;
+
+
+	public boolean IsValid = false;
+
+	public AMSDiskFile(String filename) throws IOException, BadDiskFileException {
+		super(filename);
+		IsValid = false;
+		ParseDisk();
+	}
+
+	public AMSDiskFile() {
+		inFile = null;
+		filename = "";
+		IsValid = false;
+		SetNumCylinders(0);
+	}
+
+	private void ParseDisk() throws IOException, BadDiskFileException {
+		NumLogicalSectors = 0;
+		InputStream in = new FileInputStream(filename);
+		try {
+			// Read the ADF Disk info block into a bit of memory
+			// This bit is always 256 bytes long.
+			DiskInfoBlock = in.readNBytes(256);
+			if (DiskInfoBlock.length != 256) {
+				throw new BadDiskFileException("Disk file not big enough");
+			}
+			// Parse the disk information into a structure.
+			ParsedDiskInfo = new DiskInfo(DiskInfoBlock);
+
+			NumCylinders = ParsedDiskInfo.tracks;
+			NumHeads = ParsedDiskInfo.sides;
+			NumSectors = 0;
+			Creator = ParsedDiskInfo.Creator;
+
+			SectorSize = 512;
+
+			int fileptr = 256;
+
+			// Allocate enough space for all the tracks on both sides of the disk.
+			// (+3 disks are usually single sided, but you can do funky things
+			// with 720K disks so lets not assume Single sided)
+			diskTracks = new TrackInfo[NumHeads * NumCylinders];
+			int Tracknum = 0;
+
+			
+			// Track sizes can be variable in the case of extended disks.
+			// eg, in the case of some copy protection methods.
+			// its easier to just load each track into an array.
+			for (int tracknum = 0; tracknum < ParsedDiskInfo.tracks; tracknum++) {
+				// Load the track
+				byte CurrentRawTrack[] = in.readNBytes(ParsedDiskInfo.TrackSizes[tracknum]);
+				if (CurrentRawTrack.length != ParsedDiskInfo.TrackSizes[tracknum]) {
+					throw new BadDiskFileException("Disk file not big enough");
+				}
+				// *********************************************************
+				// get the track header...
+				// *********************************************************
+				TrackInfo CurrentTrack = new TrackInfo();
+				CurrentTrack.TrackStartPtr = fileptr;
+				fileptr = fileptr + CurrentRawTrack.length;
+				// Track-Info
+				for (int i = 0; i < 12; i++) {
+					CurrentTrack.header = CurrentTrack.header + (char) CurrentRawTrack[i];
+				}
+				// track number
+				CurrentTrack.tracknum = (int) CurrentRawTrack[16] & 0xff;
+				// side number
+				CurrentTrack.side = (int) CurrentRawTrack[17] & 0xff;
+				// Data rate (optional)
+				CurrentTrack.datarate = (int) CurrentRawTrack[18] & 0xff;
+				// Recording mode(optional)
+				CurrentTrack.recordingmode = (int) CurrentRawTrack[19] & 0xff;
+				// sector size
+				CurrentTrack.sectorsz = (int) CurrentRawTrack[20] * 256;
+				// Number of sectors
+				CurrentTrack.numsectors = (int) CurrentRawTrack[21] & 0xff;
+				// gap #3 length
+				CurrentTrack.gap3len = (int) CurrentRawTrack[22] & 0xff;
+				// Filler byte
+				CurrentTrack.fillerByte = (int) CurrentRawTrack[23] & 0xff;
+
+				// *********************************************************
+				// Sector information list starts here.
+				// *********************************************************
+				CurrentTrack.Sectors = new Sector[CurrentTrack.numsectors];
+				int sectorbase = 24;
+				int minsector = 255;
+				int maxsector = 0;
+				NumSectors = Math.max(NumSectors, CurrentTrack.numsectors);
+				for (int i = 0; i < CurrentTrack.numsectors; i++) {
+					Sector CurrentSector = new Sector();
+					// track
+					CurrentSector.track = (int) CurrentRawTrack[sectorbase] & 0xff;
+					// side
+					CurrentSector.side = (int) CurrentRawTrack[sectorbase + 1] & 0xff;
+					// sector id
+					CurrentSector.sectorID = (int) CurrentRawTrack[sectorbase + 2] & 0xff;
+					if (CurrentSector.sectorID > maxsector) {
+						maxsector = CurrentSector.sectorID;
+					}
+					if (CurrentSector.sectorID < minsector) {
+						minsector = CurrentSector.sectorID;
+					}
+					// sector sz
+					CurrentSector.Sectorsz = (int) CurrentRawTrack[sectorbase + 3] & 0xff;
+					// fdc status 1
+					CurrentSector.FDCsr1 = (int) CurrentRawTrack[sectorbase + 4] & 0xff;
+					// fdc status 2
+					CurrentSector.FDCsr2 = (int) CurrentRawTrack[sectorbase + 5] & 0xff;
+					// actual data length. Note this is only valid on EXTENDED format disks.
+					// If not the case, the sector size read from the track block.
+					CurrentSector.ActualSize = (int) (CurrentRawTrack[sectorbase + 7] & 0xff) * 256
+							+ (int) (CurrentRawTrack[sectorbase + 6] & 0xff);
+					if (!ParsedDiskInfo.IsExtended) {
+						CurrentSector.ActualSize = CurrentTrack.sectorsz;
+					}
+					// Add sector
+					CurrentTrack.Sectors[i] = CurrentSector;
+					sectorbase = sectorbase + 8;
+					NumLogicalSectors++;
+				}
+				CurrentTrack.minsectorID = minsector;
+				CurrentTrack.maxsectorID = maxsector;
+
+				// The first sector is is after the track information block on the next $100
+				// junction.
+				sectorbase = sectorbase + 0x100;
+				sectorbase = sectorbase - (sectorbase % 0x100);
+
+				// *********************************************************
+				// now the sector data
+				// sectorbase should now point to the start of the first sector.
+				// *********************************************************
+				for (Sector sect : CurrentTrack.Sectors) {
+					sect.SectorStart = sectorbase + CurrentTrack.TrackStartPtr;
+					byte rawdata[] = new byte[sect.ActualSize];
+					for (int i = 0; i < sect.ActualSize; i++) {
+						rawdata[i] = CurrentRawTrack[sectorbase++];
+					}
+					sect.data = rawdata;
+				}
+
+				// Now add the completed track to the track list.
+				System.out.print(".");
+				diskTracks[Tracknum++] = CurrentTrack;
+			}
+			System.out.println(" " + String.valueOf(Tracknum) + " tracks");
+
+		} finally {
+			in.close();
+		}
+		IsValid = true;
+	}
+
+
+	/**
+	 * Can we open this file type....
+	 */
+	@Override
+	public Boolean IsMyFileType(File filename) throws IOException {
+		boolean result = false;
+
+		RandomAccessFile inFile = new RandomAccessFile(filename, "rw");
+		try {
+			byte HeaderData[] = new byte[0x10];
+			inFile.seek(0);
+			inFile.read(HeaderData);
+			String header = new String(HeaderData, StandardCharsets.UTF_8);
+			result = header.startsWith("MV - CPCEMU Disk") || header.startsWith("EXTENDED CPC DSK");
+		} finally {
+			inFile.close();
+		}
+		return (result);
+	}
+
+	/**
+	 * Test harness
+	 * 
+	 * @param args
+	 * @throws BadDiskFileException
+	 */
+	public static void main(String[] args) {
+		AMSDiskFile h;
+		try {
+			// String filename = "/data1/IDEDOS/Workbench2.3_4Gb_8Bits.hdf";
+			String filename = "/home/graham/dev/disks/DSK/Amstrad Compilation Disk Spectrum Plus 3 - Side A.dsk";
+			if (new AMSDiskFile().IsMyFileType(new File(filename))) {
+				h = new AMSDiskFile(filename);
+				System.out.println(h);
+				System.out.println("Track 1:");
+				byte data[] = h.GetBytesStartingFromSector(9, 512);
+				System.out.println(GeneralUtils.HexDump(data, 0, 512));
+				//data[2] = 0x49;
+				h.SetLogicalBlockFromSector(9, data);
+				System.out.println("Track 1:");
+				data = h.GetBytesStartingFromSector(9, 512);
+				System.out.println(GeneralUtils.HexDump(data, 0, 512));
+				h.close();
+			} else {
+				System.out.println(filename + " is Not an AMS disk file");
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (BadDiskFileException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * A bit more complex than the simple Files.
+	 */
+	@Override
+	public byte[] GetBytesStartingFromSector(int SectorNum, int sz) throws IOException {
+		byte result[] = new byte[sz];
+		// Find the track and sector...
+		int TrStart = 0;
+		int TrackNum = 0;
+		TrackInfo Track = null;
+		while (TrStart <= SectorNum) {
+			Track = diskTracks[TrackNum++];
+			TrStart = TrStart + Track.Sectors.length;
+		}
+		// Track is now the start track.
+		TrackNum--;
+		TrStart = TrStart - Track.Sectors.length;
+		int FirstSector = SectorNum - TrStart + Track.minsectorID;
+
+		int ptr = 0;
+		byte sector[] = new byte[1];
+		while ((ptr < sz) && (sector.length > 0)) {
+			sector = Track.GetSectorBySectorID(FirstSector).data;
+			System.arraycopy(sector, 0, result, ptr, Math.min(sector.length, result.length - ptr));
+
+			ptr = ptr + sector.length;
+
+			FirstSector++;
+			if (FirstSector > Track.maxsectorID) {
+				TrackNum++;
+				if (TrackNum < diskTracks.length ) {
+					Track = diskTracks[TrackNum];
+					FirstSector = Track.minsectorID;
+				} else {
+					sector = new byte[0];
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Write block from logical sector.
+	 */
+	@Override
+	public void SetLogicalBlockFromSector(int SectorNum, byte[] result) throws IOException {
+		// Find the track and sector...
+		int TrStart = 0;
+		int TrackNum = 0;
+		TrackInfo Track = null;
+		while (TrStart <= SectorNum) {
+			Track = diskTracks[TrackNum++];
+			TrStart = TrStart + Track.Sectors.length;
+		}
+		// Track is now the start track.
+		TrackNum--;
+		TrStart = TrStart - Track.Sectors.length;
+		int FirstSector = SectorNum - TrStart + Track.minsectorID;
+
+		int ptr = 0;
+		byte sectorData[] = new byte[1];
+		while ((ptr < result.length)) {
+			Sector sect = Track.GetSectorBySectorID(FirstSector);
+			sectorData = sect.data;
+			System.arraycopy(result, ptr, sectorData, 0, Math.min(sectorData.length, result.length - ptr));
+			WriteSector(sect);
+
+			ptr = ptr + sectorData.length;
+
+			FirstSector++;
+			if (FirstSector > Track.maxsectorID) {
+				TrackNum++;
+				Track = diskTracks[TrackNum];
+				FirstSector = Track.minsectorID;
+			}
+		}
+	}
+
+	/**
+	 * Write the given sector back to disk. 
+	 * @param sect
+	 */
+	private void WriteSector(Sector sect) {
+		try {
+			inFile.seek(sect.SectorStart);
+			inFile.write(sect.data);
+		} catch (IOException e) {
+			System.out.println("Failed writing sector...."+e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Add the extra creation user.
+	 */
+	@Override
+	public String toString() {
+		String result = "\n Creator: "+Creator+"\n"+super.toString();
+		return(result);
+	}
+	
+}

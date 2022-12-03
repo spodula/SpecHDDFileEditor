@@ -227,7 +227,7 @@ public class Dirent {
 	 * 	
 	 * @return
 	 */
-	public int GetBytesInLastLogicalBlock() {
+	public int GetBytesInLastDirent() {
 		int rawRecords = (int) (rawdirent[15] & 0xff); 
 		return (rawRecords * 128);
 	}

@@ -308,7 +308,6 @@ public class NewPartitionDialog {
 				// and return;
 				result = true;
 				shell.dispose();
-
 			}
 
 			@Override

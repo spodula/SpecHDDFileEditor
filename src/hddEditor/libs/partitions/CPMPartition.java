@@ -1,4 +1,5 @@
 package hddEditor.libs.partitions;
+
 /**
  * Handler for CPM partitions.
  * Note, this wont work by itself. it needs to have the param data
@@ -8,14 +9,15 @@ package hddEditor.libs.partitions;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import hddEditor.libs.CPM;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.cpm.Dirent;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 
 public class CPMPartition extends IDEDosPartition {
-	// This data needs to be populated by an inherited class. 
-	//It forms the CPM DPB for the disk.  
+	// This data needs to be populated by an inherited class.
+	// It forms the CPM DPB for the disk.
 	public int BlockSize;
 	public int RecordsPerTrack;
 	public int BlockSizeShift;
@@ -47,19 +49,20 @@ public class CPMPartition extends IDEDosPartition {
 	public int usedDirEnts; // Number of entries in the directory map that are used
 	public int diskSize; // Calculated max disk space in Kbytes
 	public int freeSpace; // Calculated free space in Kbytes
+	public boolean IsValid; //
 
 	/**
 	 * Constuctor
 	 * 
 	 * @param tag
-	 * @param ideDosHandler
+	 * @param RawDisk
 	 * @param RawPartition
 	 * @param DirentNum
 	 * @param Initialise
 	 */
-	public CPMPartition(int tag, Disk ideDosHandler, byte[] RawPartition, int DirentNum, boolean Initialise) {
-		super(tag, ideDosHandler, RawPartition, DirentNum, Initialise);
-	} 
+	public CPMPartition(int tag, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise) {
+		super(tag, RawDisk, RawPartition, DirentNum, Initialise);
+	}
 
 	/**
 	 * Get the logical CPM block relative to this partition.
@@ -69,18 +72,20 @@ public class CPMPartition extends IDEDosPartition {
 	 * @throws IOException
 	 */
 	public byte[] GetLogicalBlock(int BlockID) throws IOException {
+
 		int LogicalSectorInPartition = (BlockID * BlockSize) / CurrentDisk.GetSectorSize();
 
-		int LogicalSectorStartOfPartition = GetStartCyl() * CurrentDisk.GetNumHeads() * (CurrentDisk.GetNumSectors());
+		int LogicalSectorStartOfPartition = (GetStartCyl() + ReservedTracks) * CurrentDisk.GetNumHeads()
+				* (CurrentDisk.GetNumSectors());
 		LogicalSectorStartOfPartition = LogicalSectorStartOfPartition + (GetStartHead() * CurrentDisk.GetNumSectors());
 
 		int ActualLogicalSector = LogicalSectorStartOfPartition + LogicalSectorInPartition;
 
-		byte result[] = CurrentDisk.GetBytesStartingFromSector(ActualLogicalSector, BlockSize);
+//		System.out.println("GetLogicalBlock: " + BlockID + " SC:" + GetStartCyl() + " SH:" + GetStartHead()
+//		+ " RealSector:" + ActualLogicalSector + " Log:" + LogicalSectorInPartition + " Startsect:"
+//		+ LogicalSectorStartOfPartition);
 
-		System.out.println("GetLogicalBlock: " + BlockID + " SC:" + GetStartCyl() + " SH:" + GetStartHead()
-				+ " RealSector:" + ActualLogicalSector + " Log:" + LogicalSectorInPartition + " Startsect:"
-				+ LogicalSectorStartOfPartition);
+		byte result[] = CurrentDisk.GetBytesStartingFromSector(ActualLogicalSector, BlockSize);
 
 		return (result);
 	}
@@ -146,6 +151,8 @@ public class CPMPartition extends IDEDosPartition {
 		DirectoryEntry de = GetDirectoryEntry(filename);
 		if (de != null) {
 			de.SetDeleted(true);
+			updateDirentBlocks();
+			System.out.println("AddCPMFile: Deleted old version of " + filename);
 		}
 		try {
 			System.out.println("AddCPMFile: Saving " + filename + " length:" + file.length);
@@ -320,7 +327,8 @@ public class CPMPartition extends IDEDosPartition {
 	public void SetLogicalBlock(int BlockID, byte[] Block) throws IOException {
 		int LogicalSectorInPartition = (BlockID * BlockSize) / CurrentDisk.GetSectorSize();
 
-		int LogicalSectorStartOfPartition = GetStartCyl() * CurrentDisk.GetNumHeads() * (CurrentDisk.GetNumSectors());
+		int LogicalSectorStartOfPartition = (GetStartCyl() + ReservedTracks) * CurrentDisk.GetNumHeads()
+				* (CurrentDisk.GetNumSectors());
 		LogicalSectorStartOfPartition = LogicalSectorStartOfPartition + (GetStartHead() * CurrentDisk.GetNumSectors());
 
 		int ActualLogicalSector = LogicalSectorStartOfPartition + LogicalSectorInPartition;
@@ -341,6 +349,9 @@ public class CPMPartition extends IDEDosPartition {
 	 */
 	public DirectoryEntry GetDirectoryEntry(String filename) {
 		DirectoryEntry result = null;
+		if (filename.endsWith(".")) {
+			filename = filename.substring(0, filename.length() - 1);
+		}
 		for (DirectoryEntry d : DirectoryEntries) {
 			if (d.filename().contentEquals(filename)) {
 				result = d;
@@ -364,7 +375,8 @@ public class CPMPartition extends IDEDosPartition {
 		while (bytesLoaded < bytesRequired) {
 			byte block[] = GetLogicalBlock(blockId);
 			if (block.length > 0) {
-				System.arraycopy(block, 0, rawDirents, bytesLoaded, Math.min(block.length, bytesRequired - bytesLoaded));
+				System.arraycopy(block, 0, rawDirents, bytesLoaded,
+						Math.min(block.length, bytesRequired - bytesLoaded));
 				blockId++;
 				bytesLoaded = bytesLoaded + block.length;
 			} else {
@@ -380,6 +392,29 @@ public class CPMPartition extends IDEDosPartition {
 			Dirents[i] = d;
 		}
 		RecalculateDirectoryListing();
+		int validdirents = 0;
+		int invalidDirents = 0;
+		for (DirectoryEntry d : DirectoryEntries) {
+			boolean valid = !d.IsComplete();
+			if (d.dirents[0].GetUserNumber() > 16 || d.dirents[0].GetUserNumber() != 0xe5) {
+				valid = false;
+			}
+			if (valid) {
+				String s = d.filename();
+				for (int i = 0; i < s.length(); i++) {
+					char c = s.charAt(i);
+					if (!CPM.CharIsCPMValid(c) && (c != ' ') && (c != 0xe5)) {
+						valid = false;
+					}
+				}
+			}
+			if (valid) {
+				validdirents++;
+			} else {
+				invalidDirents++;
+			}
+		}
+		IsValid = ((validdirents > 1) && (invalidDirents < validdirents)) || ((invalidDirents == 0));
 	}
 
 	/**
@@ -387,7 +422,7 @@ public class CPMPartition extends IDEDosPartition {
 	 * DIRENTS. It is used after the disk is loaded or modified.
 	 */
 	public void RecalculateDirectoryListing() {
-
+		IsValid = true;
 		bam = new boolean[MaxBlock];
 		// Convert the DIRENTS into a directory listing.
 		DirectoryEntry direntries[] = new DirectoryEntry[Dirents.length]; // number of directory entries cannot be more
@@ -395,9 +430,8 @@ public class CPMPartition extends IDEDosPartition {
 
 		usedDirEnts = 0;
 		int nextdirentry = 0;
-		for (int i = 0; i < Dirents.length; i++) {
-			Dirent d = Dirents[i];
-			int dType = d.getType();
+		for (Dirent dirent : Dirents) {
+			int dType = dirent.getType();
 			// only care about files
 			if (dType == Dirent.DIRENT_FILE || dType == Dirent.DIRENT_DELETED) {
 				if (dType == Dirent.DIRENT_FILE)
@@ -407,7 +441,7 @@ public class CPMPartition extends IDEDosPartition {
 				int Directorynum = nextdirentry;
 				for (int j = 0; j < nextdirentry; j++) {
 					// if we have found the file, record where it is.
-					if (direntries[j].filename().equals(d.GetFilename())) {
+					if (direntries[j].filename().equals(dirent.GetFilename())) {
 						file = direntries[j];
 						Directorynum = j;
 					}
@@ -417,7 +451,7 @@ public class CPMPartition extends IDEDosPartition {
 					file = new DirectoryEntry(this, (dType == Dirent.DIRENT_DELETED), MaxBlock);
 					Directorynum = nextdirentry++;
 				}
-				file.addDirent(d);
+				file.addDirent(dirent);
 				direntries[Directorynum] = file;
 			}
 		}
@@ -443,8 +477,10 @@ public class CPMPartition extends IDEDosPartition {
 			if (d.getType() == Dirent.DIRENT_FILE) {
 				int blocks[] = d.getBlocks();
 				for (int i : blocks) {
-					bam[i] = true;
-					usedblocks++;
+					if (i < bam.length) {
+						bam[i] = true;
+						usedblocks++;
+					}
 				}
 			}
 		}
@@ -458,9 +494,6 @@ public class CPMPartition extends IDEDosPartition {
 				System.out.println("Filename: '" + d.filename() + "' - " + d.Errors);
 			}
 		}
-		
-		System.out.println("Loaded "+DirectoryEntries.length+" files.");
-
 	}
 
 	/**
@@ -528,7 +561,7 @@ public class CPMPartition extends IDEDosPartition {
 	 * @throws IOException
 	 */
 	public void CreateBlankDirectoryArea() throws IOException {
-		int DirentSize = 16384; //2 blocks
+		int DirentSize = 16384; // 2 blocks
 		// Read the entire DIRENT
 		byte data[] = GetDataInPartition(0, DirentSize);
 		// update the data with this partition
@@ -537,11 +570,13 @@ public class CPMPartition extends IDEDosPartition {
 		}
 		// write it back.
 		SetDataInPartition(0, data);
+		IsValid = true;
 	}
 
 	/**
-	 * Get the array of Address/Notes as used by the search function to identify what a particular address contains
-	 *  
+	 * Get the array of Address/Notes as used by the search function to identify
+	 * what a particular address contains
+	 * 
 	 * @return
 	 */
 	@Override
@@ -567,7 +602,7 @@ public class CPMPartition extends IDEDosPartition {
 		AddressNote result[] = resultlist.toArray(new AddressNote[0]);
 		return (result);
 	}
-	
+
 	/**
 	 * Reload the partition details.
 	 */
@@ -578,12 +613,13 @@ public class CPMPartition extends IDEDosPartition {
 		} catch (IOException E) {
 		}
 	}
-	
+
 	/**
 	 * Load the partition spoecific information
 	 */
 	@Override
 	protected void LoadPartitionSpecificInformation() throws IOException {
+		IsValid = true;
 		super.LoadPartitionSpecificInformation();
 		ExtractDirectoryListing();
 	}

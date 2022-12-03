@@ -1,5 +1,4 @@
 package hddEditor.ui;
-//TODO: Values calculated seems to be wrong for new free space partition (Create new item of 1Gb)
 
 /**
  * Main UI.
@@ -32,19 +31,25 @@ import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.HtmlHelp;
 import hddEditor.libs.PLUSIDEDOS;
-import hddEditor.libs.TestUtils;
+import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.disks.Disk;
-import hddEditor.libs.disks.IDEDosDisk;
-import hddEditor.libs.disks.RS_IDEDosDisk;
+import hddEditor.libs.disks.FDD.AMSDiskFile;
+import hddEditor.libs.disks.FDD.BadDiskFileException;
+import hddEditor.libs.disks.HDD.IDEDosDisk;
+import hddEditor.libs.disks.HDD.RS_IDEDosDisk;
 import hddEditor.libs.handlers.IDEDosHandler;
+import hddEditor.libs.handlers.NonPartitionedDiskHandler;
+import hddEditor.libs.handlers.OSHandler;
 import hddEditor.libs.partitions.IDEDosPartition;
+import hddEditor.ui.partitionPages.FloppyBootTrackPage;
+import hddEditor.ui.partitionPages.FloppyGenericPage;
 import hddEditor.ui.partitionPages.GenericPage;
 import hddEditor.ui.partitionPages.PlusThreePartPage;
 import hddEditor.ui.partitionPages.SystemPartPage;
 
 public class HDDEditor {
 	public Disk CurrentDisk = null;
-	public IDEDosHandler CurrentHandler = null;
+	public OSHandler CurrentHandler = null;
 
 	private static String DefaultDropDownText = "<No Disk loaded>";
 	// SWT display object
@@ -275,7 +280,14 @@ public class HDDEditor {
 			}
 			CurrentDisk = GetCorrectDiskFromFile(selected);
 			if (CurrentDisk != null) {
-				CurrentHandler = new IDEDosHandler(CurrentDisk);
+				if (CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_HDD) {				
+					CurrentHandler = new IDEDosHandler(CurrentDisk);
+				} else if (CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_FDD) {				
+					CurrentHandler = new NonPartitionedDiskHandler(CurrentDisk);
+				} else {
+					System.out.println("Loading failed. - Unable to find OS");
+				}
+					
 				UpdateDropdown();
 				shell.setText(selected);
 			}
@@ -289,6 +301,7 @@ public class HDDEditor {
 	 * 
 	 * @param selected
 	 * @return
+	 * @throws BadDiskFileException 
 	 */
 	private Disk GetCorrectDiskFromFile(String selected) {
 		Disk result = null;
@@ -297,16 +310,19 @@ public class HDDEditor {
 				result = new IDEDosDisk(selected);
 			} else if (new RS_IDEDosDisk().IsMyFileType(new File(selected))) {
 				result = new RS_IDEDosDisk(selected);
+			} else if (new AMSDiskFile().IsMyFileType(new File(selected))) {
+				result = new AMSDiskFile(selected);
 			} else {
 				MessageBox messageBox = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
 				messageBox.setMessage("File " + selected + " is not a Raw HD image or RS HDF drive image.");
 				messageBox.setText("File " + selected + " is not a Raw HD image or RS HDF drive image.");
 				messageBox.open();
 			}
-			System.out.println("Cylinders " + result.GetNumCylinders());
+/*			System.out.println("Cylinders " + result.GetNumCylinders());
 			System.out.println("Heads " + result.GetNumHeads());
-			System.out.println("SPT " + result.GetNumSectors());
-		} catch (IOException e) {
+			System.out.println("SPT " + result.GetNumSectors()); */
+			System.out.println("Using "+result.getClass().getName());
+		} catch (Exception e) {
 			MessageBox messageBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
 			messageBox.setMessage("Error openning file " + selected + " " + e.getMessage());
 			messageBox.setText("Error openning file " + selected + " " + e.getMessage());
@@ -330,7 +346,7 @@ public class HDDEditor {
 			for (IDEDosPartition part : CurrentHandler.SystemPart.partitions) {
 				if (part.GetPartType() != 0) {
 					String s = String.format("%-20s - %-16s %s", part.GetName(), part.GetTypeAsString(),
-							TestUtils.GetSizeAsString(part.GetSizeK() * 1024));
+							GeneralUtils.GetSizeAsString(part.GetSizeK() * 1024));
 					al.add(s);
 				}
 			}
@@ -388,6 +404,12 @@ public class HDDEditor {
 			break;
 		case PLUSIDEDOS.PARTITION_PLUS3DOS:
 			new PlusThreePartPage(this, MainPage, part);
+			break;
+		case PLUSIDEDOS.PARTITION_BOOT:
+			new FloppyBootTrackPage(this, MainPage, part);
+			break;
+		case PLUSIDEDOS.PARTITION_UNKNOWN:
+			new FloppyGenericPage(null, MainPage, part);
 			break;
 		default:
 			new GenericPage(this, MainPage, part);

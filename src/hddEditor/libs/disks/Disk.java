@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.IOException;
 
 public interface Disk {
+	public int GetMediaType();
+	
 	//Disk filename
 	public String GetFilename();
 	public void SetFilename(String filename);

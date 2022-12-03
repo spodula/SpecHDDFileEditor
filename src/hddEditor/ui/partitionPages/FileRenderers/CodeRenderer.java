@@ -6,6 +6,7 @@ package hddEditor.ui.partitionPages.FileRenderers;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -37,7 +38,7 @@ public class CodeRenderer extends FileRenderer {
 	private Text StartAddress = null;
 	private Combo CodeTypeDropDown = null;
 	private Table HexTable = null;
-	private Label ImageLabel = null;
+	private Label[] ImageLabel = null;
 	
 	//Rendering options
 	private String[] CODETYPES = { "Binary", "Screen", "Assembly" };
@@ -247,15 +248,32 @@ public class CodeRenderer extends FileRenderer {
 	 * @param data
 	 */
 	private void AddScreen(byte data[]) {
-		ImageData image = Speccy.GetImageFromFileArray(data, 0x80);
-		Image img = new Image(MainPage.getDisplay(), image);
-		ImageLabel = new Label(MainPage, SWT.NONE);
-		ImageLabel.setImage(img);
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.minimumHeight = 192;
-		gd.minimumWidth = 256;
-		gd.horizontalSpan = 2;
-		ImageLabel.setLayoutData(gd);
+		int base = 0x80;
+		ArrayList<Label> al = new ArrayList<Label>();
+		while (base < data.length) {
+			byte screen[] = new byte[0x1b00];
+			for(int i=0;i<0x1800;i++) {
+				screen[i] = 0;
+			}
+			byte wob = Speccy.ToAttribute(Speccy.COLOUR_BLACK, Speccy.COLOUR_WHITE, false, false);
+			for(int i=0x1800;i<0x1b00;i++) {
+				screen[i] = wob; 
+			}
+			System.arraycopy(data, base, screen, 0, Math.min(0x1b00,data.length - base));
+			
+			ImageData image = Speccy.GetImageFromFileArray(screen, 0);
+			Image img = new Image(MainPage.getDisplay(), image);
+			Label lbl = new Label(MainPage, SWT.NONE);
+			lbl.setImage(img);
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+			gd.minimumHeight = 192;
+			gd.minimumWidth = 256;
+			gd.horizontalSpan = 2;
+			lbl.setLayoutData(gd);
+			al.add(lbl);
+			base = base + 0x1b00;
+		}
+		ImageLabel = al.toArray(new Label[0]);
 		MainPage.pack();
 	}
 
@@ -283,7 +301,9 @@ public class CodeRenderer extends FileRenderer {
 		}
 
 		if (ImageLabel != null) {
-			ImageLabel.dispose();
+			for(Label l:ImageLabel) {
+				l.dispose();
+			}
 			ImageLabel = null;
 		}
 

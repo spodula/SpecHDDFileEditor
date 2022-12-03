@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
-import hddEditor.libs.TestUtils;
+import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.handlers.IDEDosHandler;
 import hddEditor.libs.partitions.FreePartition;
 import hddEditor.libs.partitions.IDEDosPartition;
@@ -40,7 +40,10 @@ import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.NewPartitionDialog;
 
 public class SystemPartPage extends GenericPage {
-	// Sub-forms so we can close them if they are still open when the page changes. 
+	//Flag to block writing to the disk. 
+	private boolean CanEditPartitions = false;
+
+	// Sub-forms so we can close them if they are still open when the page changes.
 	HexEditDialog HxEditDialog = null;
 	NewPartitionDialog NewPartDialog = null;
 
@@ -80,21 +83,22 @@ public class SystemPartPage extends GenericPage {
 	// Partition table
 	Table PartitionTable = null;
 
-	//Colours for the default colour combos.
+	// Colours for the default colour combos.
 	Color colours[] = { new Color(0, 0, 0), new Color(0, 0, 255), new Color(255, 0, 0), new Color(255, 0, 255),
 			new Color(0, 255, 0), new Color(0, 255, 255), new Color(255, 255, 0), new Color(255, 255, 255) };
 
 	/**
-	 * Set the colour for a given colour combo taking into account we actually want to be
-	 * able to read it afterwards. 
+	 * Set the colour for a given colour combo taking into account we actually want
+	 * to be able to read it afterwards.
+	 * 
 	 * @param comp
 	 */
 	public void SetComponentColour(Combo comp) {
 		int index = TextToIndex(comp.getText(), Speccy.SPECTRUM_COLOURS);
 
-		if (index < 4) { //If dark colour, set ink to white
+		if (index < 4) { // If dark colour, set ink to white
 			comp.setForeground(colours[7]);
-		} else { //if light colour set ink to black
+		} else { // if light colour set ink to black
 			comp.setForeground(colours[0]);
 		}
 		comp.setBackground(colours[index]);
@@ -168,143 +172,156 @@ public class SystemPartPage extends GenericPage {
 					DisposeSubDialogs();
 				}
 			});
-			label("", 4);
-			Label l = label("SYSTEM Details.", 1);
-			FontData fontData = l.getFont().getFontData()[0];
-			Font font = new Font(ParentComp.getDisplay(),
-					new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
-			l.setFont(font);
-			label("", 3);
 
-			label("Unallocated space: " + TestUtils.GetSizeAsString(freeSpace), 1);
-			label("Allocated Space: " + TestUtils.GetSizeAsString(usedSpace), 1);
-			label("Free Partitions: " + (sp.GetMaxPartitions() - numUsedPartitions), 1);
-			label("Allocated Partitions: " + numUsedPartitions, 1);
+			if (partition.CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_HDD) {
 
-			label("", 4);
+				label("", 4);
+				Label l = label("SYSTEM Details.", 1);
+				FontData fontData = l.getFont().getFontData()[0];
+				Font font = new Font(ParentComp.getDisplay(),
+						new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
+				l.setFont(font);
+				label("", 3);
 
-			l = label("Default colours:", 1);
-			l.setFont(font);
+				label("Unallocated space: " + GeneralUtils.GetSizeAsString(freeSpace), 1);
+				label("Allocated Space: " + GeneralUtils.GetSizeAsString(usedSpace), 1);
+				label("Free Partitions: " + (sp.GetMaxPartitions() - numUsedPartitions), 1);
+				label("Allocated Partitions: " + numUsedPartitions, 1);
 
-			label("", 1);
-			label("Paper", 1);
-			label("Ink", 1);
+				label("", 4);
 
-			// Colour attribute bits are:
-			// 76543210
-			// FBPPPIII
-			// Where F = flash (ignored), B = bright, PPP = Paper (0-7) and I = ink (0-7)
-			SelectionListener ComboColourChangeListener = new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					Combo comp = (Combo) arg0.getSource();
-					SetComponentColour(comp);
-				}
+				l = label("Default colours:", 1);
+				l.setFont(font);
 
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			};
+				label("", 1);
+				label("Paper", 1);
+				label("Ink", 1);
 
-			int col = sp.GetBasicEditColour();
-			int ink = col & 0x07;
-			int paper = (col & 0x38) / 8;
-			label("Basic editor colour", 1);
-			becBright = checkbox("Bright", (col & 0x40) != 0);
-			becBright.addSelectionListener(SetModifiedSelectionListener);
+				// Colour attribute bits are:
+				// 76543210
+				// FBPPPIII
+				// Where F = flash (ignored), B = bright, PPP = Paper (0-7) and I = ink (0-7)
+				SelectionListener ComboColourChangeListener = new SelectionListener() {
+					@Override
+					public void widgetSelected(SelectionEvent arg0) {
+						Combo comp = (Combo) arg0.getSource();
+						SetComponentColour(comp);
+					}
 
-			becPaper = combo(Speccy.SPECTRUM_COLOURS, Speccy.SPECTRUM_COLOURS[paper]);
-			becPaper.addSelectionListener(SetModifiedSelectionListener);
-			becPaper.addSelectionListener(ComboColourChangeListener);
-			SetComponentColour(becPaper);
+					@Override
+					public void widgetDefaultSelected(SelectionEvent arg0) {
+						widgetSelected(arg0);
+					}
+				};
 
-			becInk = combo(Speccy.SPECTRUM_COLOURS, Speccy.SPECTRUM_COLOURS[ink]);
-			becInk.addSelectionListener(SetModifiedSelectionListener);
-			becInk.addSelectionListener(ComboColourChangeListener);
-			SetComponentColour(becInk);
+				int col = sp.GetBasicEditColour();
+				int ink = col & 0x07;
+				int paper = (col & 0x38) / 8;
+				label("Basic editor colour", 1);
+				becBright = checkbox("Bright", (col & 0x40) != 0);
+				becBright.addSelectionListener(SetModifiedSelectionListener);
 
-			col = sp.GetBasicColour();
-			ink = col & 0x07;
-			paper = (col & 0x38) / 8;
-			label("Default basic colour", 1);
-			dbcBright = checkbox("Bright", (col & 0x40) != 0);
-			dbcBright.addSelectionListener(SetModifiedSelectionListener);
+				becPaper = combo(Speccy.SPECTRUM_COLOURS, Speccy.SPECTRUM_COLOURS[paper]);
+				becPaper.addSelectionListener(SetModifiedSelectionListener);
+				becPaper.addSelectionListener(ComboColourChangeListener);
+				SetComponentColour(becPaper);
 
-			dbcPaper = combo(Speccy.SPECTRUM_COLOURS, Speccy.SPECTRUM_COLOURS[(col & 0x38) / 8]);
-			dbcPaper.addSelectionListener(SetModifiedSelectionListener);
-			dbcPaper.addSelectionListener(ComboColourChangeListener);
-			SetComponentColour(dbcPaper);
+				becInk = combo(Speccy.SPECTRUM_COLOURS, Speccy.SPECTRUM_COLOURS[ink]);
+				becInk.addSelectionListener(SetModifiedSelectionListener);
+				becInk.addSelectionListener(ComboColourChangeListener);
+				SetComponentColour(becInk);
 
-			dbcInk = combo(Speccy.SPECTRUM_COLOURS, Speccy.SPECTRUM_COLOURS[(col & 0x07)]);
-			dbcInk.addSelectionListener(SetModifiedSelectionListener);
-			dbcInk.addSelectionListener(ComboColourChangeListener);
-			SetComponentColour(dbcInk);
+				col = sp.GetBasicColour();
+				ink = col & 0x07;
+				paper = (col & 0x38) / 8;
+				label("Default basic colour", 1);
+				dbcBright = checkbox("Bright", (col & 0x40) != 0);
+				dbcBright.addSelectionListener(SetModifiedSelectionListener);
 
-			label("", 4);
+				dbcPaper = combo(Speccy.SPECTRUM_COLOURS, Speccy.SPECTRUM_COLOURS[(col & 0x38) / 8]);
+				dbcPaper.addSelectionListener(SetModifiedSelectionListener);
+				dbcPaper.addSelectionListener(ComboColourChangeListener);
+				SetComponentColour(dbcPaper);
 
-			unmapA = checkbox("Unmap A:?", sp.GetUnmapA());
-			unmapA.addSelectionListener(SetModifiedSelectionListener);
+				dbcInk = combo(Speccy.SPECTRUM_COLOURS, Speccy.SPECTRUM_COLOURS[(col & 0x07)]);
+				dbcInk.addSelectionListener(SetModifiedSelectionListener);
+				dbcInk.addSelectionListener(ComboColourChangeListener);
+				SetComponentColour(dbcInk);
 
-			Unit0DL = editbox(sp.GetUnit0DriveLetter(), 1);
-			Unit0DL.addModifyListener(SetModifiedTextListener);
-			label("", 1);
-			label("", 1);
+				label("", 4);
 
-			unmapB = checkbox("Unmap B:?", sp.GetUnmapB());
-			unmapB.addSelectionListener(SetModifiedSelectionListener);
-			Unit1DL = editbox(sp.GetUnit1DriveLetter(), 1);
-			Unit1DL.addModifyListener(SetModifiedTextListener);
+				unmapA = checkbox("Unmap A:?", sp.GetUnmapA());
+				unmapA.addSelectionListener(SetModifiedSelectionListener);
 
-			label("Default drive letter:", 1);
-			DefaultDrive = editbox(sp.GetDefaultDrive(), 1);
-			DefaultDrive.addModifyListener(SetModifiedTextListener);
+				Unit0DL = editbox(sp.GetUnit0DriveLetter(), 1);
+				Unit0DL.addModifyListener(SetModifiedTextListener);
+				label("", 1);
+				label("", 1);
 
-			unmapM = checkbox("Unmap M:?", sp.GetUnmapM());
-			unmapM.addSelectionListener(SetModifiedSelectionListener);
-			UnitMDL = editbox(sp.GetRamdiskDriveLetter(), 1);
-			UnitMDL.addModifyListener(SetModifiedTextListener);
+				unmapB = checkbox("Unmap B:?", sp.GetUnmapB());
+				unmapB.addSelectionListener(SetModifiedSelectionListener);
+				Unit1DL = editbox(sp.GetUnit1DriveLetter(), 1);
+				Unit1DL.addModifyListener(SetModifiedTextListener);
 
-			CancelButton = button("Cancel");
-			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-			gd.widthHint = 200;
-			CancelButton.setLayoutData(gd);
-			CancelButton.setEnabled(false);
-			CancelButton.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					DoCancel();
-				}
+				label("Default drive letter:", 1);
+				DefaultDrive = editbox(sp.GetDefaultDrive(), 1);
+				DefaultDrive.addModifyListener(SetModifiedTextListener);
 
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
+				unmapM = checkbox("Unmap M:?", sp.GetUnmapM());
+				unmapM.addSelectionListener(SetModifiedSelectionListener);
+				UnitMDL = editbox(sp.GetRamdiskDriveLetter(), 1);
+				UnitMDL.addModifyListener(SetModifiedTextListener);
 
-			ApplyButton = button("Apply changes");
-			ApplyButton.setLayoutData(gd);
-			ApplyButton.setEnabled(false);
-			ApplyButton.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					DoApply();
-				}
+				CancelButton = button("Cancel");
+				GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+				gd.widthHint = 200;
+				CancelButton.setLayoutData(gd);
+				CancelButton.setEnabled(false);
+				CancelButton.addSelectionListener(new SelectionListener() {
+					@Override
+					public void widgetSelected(SelectionEvent arg0) {
+						DoCancel();
+					}
 
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
+					@Override
+					public void widgetDefaultSelected(SelectionEvent arg0) {
+						widgetSelected(arg0);
+					}
+				});
 
-			l = label("Partitions:", 1);
-			l.setFont(font);
-			label("", 3);
+				ApplyButton = button("Apply changes");
+				ApplyButton.setLayoutData(gd);
+				ApplyButton.setEnabled(false);
+				ApplyButton.addSelectionListener(new SelectionListener() {
+					@Override
+					public void widgetSelected(SelectionEvent arg0) {
+						DoApply();
+					}
 
+					@Override
+					public void widgetDefaultSelected(SelectionEvent arg0) {
+						widgetSelected(arg0);
+					}
+				});
+				l = label("Partitions:", 1);
+				l.setFont(font);
+				label("", 3);
+
+				CanEditPartitions = true;
+			} else {
+				Label l = label("Floppy disk sections:", 1);
+				FontData fontData = l.getFont().getFontData()[0];
+				Font BoldFont = new Font(ParentComp.getDisplay(),
+						new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
+				l.setFont(BoldFont);
+				label("", 3);
+				CanEditPartitions = false;
+			}
+			
 			PartitionTable = new Table(ParentComp, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 			PartitionTable.setLinesVisible(true);
 
-			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.horizontalSpan = 4;
 			gd.heightHint = 240;
 			PartitionTable.setLayoutData(gd);
@@ -314,7 +331,11 @@ public class SystemPartPage extends GenericPage {
 			TableColumn tc3 = new TableColumn(PartitionTable, SWT.LEFT);
 			TableColumn tc4 = new TableColumn(PartitionTable, SWT.LEFT);
 			TableColumn tc5 = new TableColumn(PartitionTable, SWT.LEFT);
-			tc1.setText("Partition name");
+			if (partition.CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_HDD) {
+				tc1.setText("Partition name");
+			} else {
+				tc1.setText("FDD Section:");
+			}
 			tc2.setText("Type");
 			tc3.setText("Start");
 			tc4.setText("End");
@@ -334,7 +355,7 @@ public class SystemPartPage extends GenericPage {
 					content[1] = part.GetTypeAsString();
 					content[2] = "Cyl:" + part.GetStartCyl() + " Head:" + part.GetStartHead();
 					content[3] = "Cyl:" + part.GetEndCyl() + " Head:" + part.GetEndHead();
-					content[4] = TestUtils.GetSizeAsString(part.GetSizeK() * 1024);
+					content[4] = GeneralUtils.GetSizeAsString(part.GetSizeK() * 1024);
 
 					item2.setText(content);
 				}
@@ -413,6 +434,7 @@ public class SystemPartPage extends GenericPage {
 					widgetSelected(arg0);
 				}
 			});
+			NewPartitionButton.setEnabled(CanEditPartitions);
 
 			ParentComp.pack();
 		}
@@ -507,7 +529,7 @@ public class SystemPartPage extends GenericPage {
 		if ((itms != null) && (itms.length > 0)) {
 			String partType = itms[0].getText(1).trim();
 			if (!partType.equals("System") && !partType.equals("Free")) {
-				AllowDelete = true;
+				AllowDelete = CanEditPartitions;
 			}
 			if (!partType.equals("Free")) {
 				AllowGoto = true;
@@ -516,6 +538,7 @@ public class SystemPartPage extends GenericPage {
 			AllowGoto = false;
 			AllowDelete = false;
 		}
+		NewPartitionButton.setEnabled(CanEditPartitions);
 		DeleteButton.setEnabled(AllowDelete);
 		EditPartitionButton.setEnabled(AllowGoto);
 		GotoPartitionButton.setEnabled(AllowGoto);
@@ -529,7 +552,7 @@ public class SystemPartPage extends GenericPage {
 		if ((itms != null) && (itms.length > 0)) {
 			String partName = itms[0].getText(0).trim();
 			boolean DoChange = true;
-			if (ApplyButton.getEnabled()) {
+			if ((ApplyButton!= null) && ApplyButton.getEnabled()) {
 				MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
 				messageBox.setMessage("Do you really want to change partition without saving?");
 				messageBox.setText("Change Partition");
@@ -546,6 +569,9 @@ public class SystemPartPage extends GenericPage {
 	 * Implements the "New Partition" button.
 	 */
 	private void DoNewPartition() {
+		if (!CanEditPartitions) {
+			ErrorBox("Cannot edit partitions on this media type.");
+		} else {
 		SystemPartition SystemPartition = (SystemPartition) RootPage.CurrentHandler
 				.GetPartitionByType(PLUSIDEDOS.PARTITION_SYSTEM);
 		if (SystemPartition == null) {
@@ -632,15 +658,15 @@ public class SystemPartPage extends GenericPage {
 						} else {
 							int PartitonSizeMb = NewPartDialog.SizeMB;
 							int NumSectors = PartitonSizeMb * 1024 * (1024 / partition.CurrentDisk.GetSectorSize());
-							if (partition.CurrentDisk.GetSectorSize() == 512) {
-								// This seems to b0e hard limit, so fiddle it.
-								if (NumSectors > 32768) {
-									NumSectors = 32768;
-								}
 
+							// This seems to be hard limit, so fiddle it.
+							if (partition.CurrentDisk.GetSectorSize() == 512) {
+								if (NumSectors > 32790) {
+									NumSectors = 32790;
+								}
 							} else {
-								if (NumSectors > 65536) {
-									NumSectors = 65536;
+								if (NumSectors > 65580) {
+									NumSectors = 65580;
 								}
 							}
 
@@ -702,13 +728,12 @@ public class SystemPartPage extends GenericPage {
 							FoundPartiton.SetPartType(NewPartDialog.PartType);
 							FoundPartiton.SetEndCyl(Tracks);
 							FoundPartiton.SetEndHead(Heads);
-							
+
 							// Re-create as the proper type
 							FoundPartiton = IDEDosHandler.GetNewPartitionByType(NewPartDialog.PartType,
 									FoundPartiton.DirentLocation, FoundPartiton.CurrentDisk, FoundPartiton.RawPartition,
 									FoundPartiton.DirentNum, true);
 
-							
 							SystemPartition.partitions[FoundPartiton.DirentNum] = FoundPartiton;
 						}
 						RootPage.UpdateDropdown();
@@ -718,12 +743,16 @@ public class SystemPartPage extends GenericPage {
 				NewPartDialog = null;
 			}
 		}
+		}
 	}
 
 	/**
 	 * Implement deletion of selected partition
 	 */
 	protected void DoDeletePartition() {
+		if (!CanEditPartitions) {
+			ErrorBox("Cannot Delete partitions on this media type.");
+		} else {
 		TableItem itms[] = PartitionTable.getSelection();
 		if (itms != null) {
 			SystemPartition SystemPartition = (SystemPartition) RootPage.CurrentHandler
@@ -774,6 +803,7 @@ public class SystemPartPage extends GenericPage {
 				}
 			}
 		}
+		}
 	}
 
 	/**
@@ -805,7 +835,7 @@ public class SystemPartPage extends GenericPage {
 						part.SetDataInPartition(0, HxEditDialog.Data);
 						part.Reload();
 						if (part.GetPartType() == PLUSIDEDOS.PARTITION_SYSTEM) {
-							RootPage.LoadFile(RootPage.CurrentDisk.GetFilename() );
+							RootPage.LoadFile(RootPage.CurrentDisk.GetFilename());
 						}
 					}
 				} catch (IOException e) {

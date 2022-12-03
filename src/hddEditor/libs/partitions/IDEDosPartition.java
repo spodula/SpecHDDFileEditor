@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import hddEditor.libs.PLUSIDEDOS;
-import hddEditor.libs.TestUtils;
+import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.ModifiedEvent;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
@@ -268,11 +268,11 @@ public class IDEDosPartition {
 	/**
 	 * constructor.
 	 * @param tag
-	 * @param ideDosHandler
+	 * @param RawDisk
 	 * @param RawPartition
 	 */
-	public IDEDosPartition(int DirentLocation, Disk ideDosHandler, byte RawPartition[], int DirentNum, boolean Initialise) {
-		CurrentDisk = ideDosHandler;
+	public IDEDosPartition(int DirentLocation, Disk RawDisk, byte RawPartition[], int DirentNum, boolean Initialise) {
+		CurrentDisk = RawDisk;
 		this.DirentLocation = DirentLocation;
 		this.DirentNum = DirentNum;
 		this.RawPartition = RawPartition;
@@ -308,10 +308,10 @@ public class IDEDosPartition {
 	 */
 	@Override
 	public String toString() {
-		String result = TestUtils.PadTo(GetName(), 17);
-		result = result + TestUtils.PadTo(GetTypeAsString(), 7);
+		String result = GeneralUtils.PadTo(GetName(), 17);
+		result = result + GeneralUtils.PadTo(GetTypeAsString(), 7);
 		result = result + String.format("%4d/%2d - %4d/%2d + %5d  ", GetStartCyl(),GetStartHead(),GetEndCyl(),GetEndHead(),GetEndSector());
-		result = result + TestUtils.GetSizeAsString(GetSizeK()*1024);
+		result = result + GeneralUtils.GetSizeAsString(GetSizeK()*1024);
 		
 		return (result);
 	}
@@ -450,7 +450,5 @@ public class IDEDosPartition {
 	protected void LoadPartitionSpecificInformation() throws IOException {
 		
 	}
-	
-
 
 }

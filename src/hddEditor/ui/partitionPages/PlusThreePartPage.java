@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
-import hddEditor.libs.TestUtils;
+import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
@@ -84,15 +84,15 @@ public class PlusThreePartPage extends GenericPage {
 			l.setFont(font);
 			label("", 3);
 
-			label("Partition free space: " + TestUtils.GetSizeAsString(pdp.freeSpace * 1024), 1);
+			label("Partition free space: " + GeneralUtils.GetSizeAsString(pdp.freeSpace * 1024), 1);
 			label("Drive Mapping: " + pdp.DriveLetter, 1);
 			label("Reserved Tracks: " + pdp.ReservedTracks, 1);
-			label("Disk size: " + TestUtils.GetSizeAsString(pdp.diskSize * 1024), 1);
+			label("Disk size: " + GeneralUtils.GetSizeAsString(pdp.diskSize * 1024), 1);
 
 			label("Blocksize: " + pdp.BlockSize, 1);
 			label("Max Block: " + pdp.MaxBlock, 1);
 			label("Used blocks: " + pdp.usedblocks, 1);
-			label("Free space: " + TestUtils.GetSizeAsString(pdp.freeSpace * 1024), 1);
+			label("Free space: " + GeneralUtils.GetSizeAsString(pdp.freeSpace * 1024), 1);
 
 			label("Max dirent: " + pdp.MaxDirent, 1);
 			label("Used dirents: " + pdp.usedDirEnts, 1);

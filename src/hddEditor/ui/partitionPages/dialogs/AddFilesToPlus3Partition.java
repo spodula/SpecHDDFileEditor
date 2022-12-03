@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.dialogs;
+
 /**
  * Add files to the +3DOS partition
  */
@@ -93,13 +94,13 @@ public class AddFilesToPlus3Partition {
 		// If the file is an image file, this contains the original image. Used so the
 		// user can edit it.
 		public BufferedImage OriginalImage = null;
-		//Intensity
+		// Intensity
 		public int Intensity = 0;
-		//BW
-		public boolean IsBlackWhite=false;
+		// BW
+		public boolean IsBlackWhite = false;
 		// Raw file data.
 		public byte[] data = null;
-		
+
 	}
 
 	/**
@@ -829,7 +830,7 @@ public class AddFilesToPlus3Partition {
 					listitem.OriginalImage = RawImage;
 					listitem.Intensity = bwslider;
 					listitem.IsBlackWhite = IsBWCheck.getSelection();
-					
+
 					/*
 					 * Add the row.
 					 */
@@ -1067,8 +1068,9 @@ public class AddFilesToPlus3Partition {
 			}
 		}
 		// make the entire attribute area black on white.
+		byte wob = Speccy.ToAttribute(Speccy.COLOUR_BLACK, Speccy.COLOUR_WHITE, false, false);
 		for (int i = 0x1800; i < 0x1b00; i++) {
-			Screen[i] = 0x38;
+			Screen[i] = wob;
 		}
 
 		return (Screen);
@@ -1457,23 +1459,23 @@ public class AddFilesToPlus3Partition {
 			 */
 			int treatAs = details.FileType;
 			byte data[] = details.data;
-			
+
 			/*
-			 * For files that already have a +3DOS header, Convert them into the
-			 * proper type for rendering. 
+			 * For files that already have a +3DOS header, Convert them into the proper type
+			 * for rendering.
 			 */
 			if (details.FileType == FILETYPE_CPM) {
 				Plus3DosFileHeader pfd = details.fileheader;
 				if (pfd != null) {
-					//Remove the +3DOS for the purposes of rendering the file. 
+					// Remove the +3DOS for the purposes of rendering the file.
 					byte newdata[] = new byte[data.length - 0x80];
 					System.arraycopy(data, 0x80, newdata, 0, newdata.length);
 					data = newdata;
-					
-					//We will treat it as the type of file in the +3DOS header
+
+					// We will treat it as the type of file in the +3DOS header
 					treatAs = pfd.filetype;
-					
-					//If the file is CODE, and length 6912, treat as a screen.
+
+					// If the file is CODE, and length 6912, treat as a screen.
 					if ((pfd.filetype == FILETYPE_CODE) && (pfd.filelength == 6912)) {
 						treatAs = FILETYPE_SCREEN;
 					}
@@ -1497,7 +1499,7 @@ public class AddFilesToPlus3Partition {
 				RenderCode(data);
 				break;
 			case FILETYPE_SCREEN:
-				RenderScreen(data,details);
+				RenderScreen(data, details);
 				break;
 			}
 
@@ -1795,7 +1797,7 @@ public class AddFilesToPlus3Partition {
 				// write it back to the buffer and the listbox.
 				details.data = buffer;
 				details.Intensity = intensitySlider.getSelection();
-				details.IsBlackWhite = IsBWCheck.getSelection(); 
+				details.IsBlackWhite = IsBWCheck.getSelection();
 				SelectedFile.setData(details);
 
 				// Now, re-render to the displayed image
@@ -1810,10 +1812,9 @@ public class AddFilesToPlus3Partition {
 	}
 
 	/**
-	 * Modify the given filename so its unique in the current selection. 
-	 * Note, this has a limitation that it will probably not work properly 
-	 * over >999 files, but that is more than the
-	 * default number of dirents (511), so *should* be ok.
+	 * Modify the given filename so its unique in the current selection. Note, this
+	 * has a limitation that it will probably not work properly over >999 files, but
+	 * that is more than the default number of dirents (511), so *should* be ok.
 	 * 
 	 * @param s
 	 * @return
@@ -1842,11 +1843,11 @@ public class AddFilesToPlus3Partition {
 			String fname = file.getText(1);
 			currentlist.add(fname);
 		}
-		
+
 		/*
 		 * Add in the files on the disk..
 		 */
-		for ( DirectoryEntry d: CurrentPartition.DirectoryEntries) {
+		for (DirectoryEntry d : CurrentPartition.DirectoryEntries) {
 			String fname = d.filename();
 			currentlist.add(fname);
 		}

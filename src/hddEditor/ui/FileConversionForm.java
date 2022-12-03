@@ -1,5 +1,4 @@
 package hddEditor.ui;
-//TODO: HDF files created 8 bit should not be doubled
 /**
  * Convert between file types
  */
@@ -26,8 +25,8 @@ import org.eclipse.swt.widgets.Text;
 import hddEditor.libs.HDFUtils;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.disks.Disk;
-import hddEditor.libs.disks.IDEDosDisk;
-import hddEditor.libs.disks.RS_IDEDosDisk;
+import hddEditor.libs.disks.HDD.IDEDosDisk;
+import hddEditor.libs.disks.HDD.RS_IDEDosDisk;
 import hddEditor.ui.partitionPages.dialogs.ProgesssForm;
 
 public class FileConversionForm {

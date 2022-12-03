@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import hddEditor.libs.TestUtils;
+import hddEditor.libs.GeneralUtils;
 
 public class HexEditDialog {
 	//result to be returned
@@ -497,7 +497,7 @@ public class HexEditDialog {
 	 */
 	public static void main(String[] args) {
 		Display display = new Display();
-		byte data[] = TestUtils.ReadFileIntoArray("/home/graham/2gtest.img");
+		byte data[] = GeneralUtils.ReadFileIntoArray("/home/graham/2gtest.img");
 		HexEditDialog testf = new HexEditDialog(display);
 		System.out.println(testf.Show(data, "CPM BAM", null));
 	}

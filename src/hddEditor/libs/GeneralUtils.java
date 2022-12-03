@@ -10,7 +10,7 @@ import java.io.InputStream;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.SystemPartition;
 
-public class TestUtils {
+public class GeneralUtils {
 	
 	/**
 	 * Get size as either k or m depending on size.
@@ -143,11 +143,11 @@ public class TestUtils {
 	public static void DumpPartitionList(SystemPartition Sysp) {
 		for (IDEDosPartition p : Sysp.partitions) {
 			if (p.GetPartType() > 0) {
-				String result = p.DirentNum + ": " + TestUtils.PadTo(p.GetName(), 17);
-				result = result + TestUtils.PadTo(p.GetTypeAsString(), 8);
+				String result = p.DirentNum + ": " + GeneralUtils.PadTo(p.GetName(), 17);
+				result = result + GeneralUtils.PadTo(p.GetTypeAsString(), 8);
 				result = result + String.format("%4d/%2d - %4d/%2d + %5d  ", p.GetStartCyl(), p.GetStartHead(),
 						p.GetEndCyl(), p.GetEndHead(), p.GetEndSector());
-				result = result + TestUtils.GetSizeAsString(p.GetSizeK() * 1024);
+				result = result + GeneralUtils.GetSizeAsString(p.GetSizeK() * 1024);
 				result = result + " " + p.getClass().getName();
 				System.out.println(result);
 			}
