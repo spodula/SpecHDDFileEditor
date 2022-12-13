@@ -46,7 +46,8 @@ public class IDEDosPartition {
 		if (GetPartType() == PLUSIDEDOS.PARTITION_FREE) {
 			return("<Free space>");
 		} else{
-			String name = new String(RawPartition, StandardCharsets.UTF_8).substring(0, 15);
+			String name = new String(RawPartition, StandardCharsets.UTF_8).substring(0, 15).trim();
+			
 			return(name);
 		}
 	}

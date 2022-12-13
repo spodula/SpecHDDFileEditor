@@ -383,6 +383,8 @@ public class CPMPartition extends IDEDosPartition {
 				bytesLoaded = bytesRequired;
 			}
 		}
+		
+//		System.out.println(GeneralUtils.HexDump(rawDirents, 0, 256));
 
 		Dirents = new Dirent[MaxDirent + 1];
 		for (int i = 0; i <= MaxDirent; i++) {
@@ -395,8 +397,8 @@ public class CPMPartition extends IDEDosPartition {
 		int validdirents = 0;
 		int invalidDirents = 0;
 		for (DirectoryEntry d : DirectoryEntries) {
-			boolean valid = !d.IsComplete();
-			if (d.dirents[0].GetUserNumber() > 16 || d.dirents[0].GetUserNumber() != 0xe5) {
+			boolean valid = d.IsComplete();
+			if (d.dirents[0].GetUserNumber() > 16 && d.dirents[0].GetUserNumber() != 0xe5) {
 				valid = false;
 			}
 			if (valid) {
@@ -489,11 +491,11 @@ public class CPMPartition extends IDEDosPartition {
 		freeSpace = (Freeblocks * BlockSize) / 1024;
 
 		// finally output any errors:
-		for (DirectoryEntry d : DirectoryEntries) {
+/*		for (DirectoryEntry d : DirectoryEntries) {
 			if (!d.Errors.isEmpty()) {
 				System.out.println("Filename: '" + d.filename() + "' - " + d.Errors);
 			}
-		}
+		} */
 	}
 
 	/**

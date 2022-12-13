@@ -129,7 +129,7 @@ public class AMSDiskFile extends FloppyDisk {
 			// Allocate enough space for all the tracks on both sides of the disk.
 			// (+3 disks are usually single sided, but you can do funky things
 			// with 720K disks so lets not assume Single sided)
-			diskTracks = new TrackInfo[NumHeads * NumCylinders];
+			diskTracks = new TrackInfo[GetNumHeads() * GetNumCylinders()];
 			int Tracknum = 0;
 
 			
@@ -205,6 +205,7 @@ public class AMSDiskFile extends FloppyDisk {
 						CurrentSector.ActualSize = CurrentTrack.sectorsz;
 					}
 					// Add sector
+//					System.out.println(i+ ": "+CurrentSector.ActualSize);
 					CurrentTrack.Sectors[i] = CurrentSector;
 					sectorbase = sectorbase + 8;
 					NumLogicalSectors++;

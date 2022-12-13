@@ -375,13 +375,13 @@ public class Speccy {
 	 * @param DisplayValueOnly - Dont display the actual value of any numbers after
 	 *                         the real one.
 	 */
-	public static void DecodeBasicFromLoadedFile(byte file[], StringBuilder sb, Plus3DosFileHeader header,
+	public static void DecodeBasicFromLoadedFile(byte file[], StringBuilder sb, int VariablesOffset,
 			boolean DisplayValueOnly, boolean SkipHeader) {
 		int ptr = 128; // skip the file header
-		int EndOfBasicArea = Math.min(file.length, header.VariablesOffset + 128);
+		int EndOfBasicArea = Math.min(file.length, VariablesOffset + 128);
 		if (!SkipHeader) {
 			ptr = 0;
-			EndOfBasicArea = Math.min(file.length, header.VariablesOffset);
+			EndOfBasicArea = Math.min(file.length, VariablesOffset);
 		}
 		while (ptr < EndOfBasicArea) {
 			int linenum = ((file[ptr++] & 0xff) * 256);
@@ -389,7 +389,7 @@ public class Speccy {
 			int linelen = (int) file[ptr++] & 0xff;
 			linelen = linelen + ((int) (file[ptr++] & 0xff) * 256);
 
-			if (ptr >= header.VariablesOffset + 0x80) {
+			if (ptr >= VariablesOffset + 0x80) {
 				// now into the variables area. Ignoring for the moment.
 				ptr = file.length;
 			} else {

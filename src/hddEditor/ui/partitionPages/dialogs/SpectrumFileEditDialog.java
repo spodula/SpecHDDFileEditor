@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.dialogs;
+
 /**
  * FIle edit dialog for the +3DOS partition page
  */
@@ -24,27 +25,24 @@ import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 
 public class SpectrumFileEditDialog {
-	//Title of the page
+	// Title of the page
 	private String Title = "";
 
-	//Form details
+	// Form details
 	private Shell shell;
 	private Display display;
-	
-	//Composite we are parented to
+
+	// Composite we are parented to
 	private Composite MainPage = null;
 
-	//Result
+	// Result
 	private boolean result = false;
 
-	//Data for the file
+	// Data for the file
 	public byte[] data = new byte[0];
 
-	//Directory entry of the file being displayed
+	// Directory entry of the file being displayed
 	private DirectoryEntry ThisEntry = null;
-
-	//Current renderer being used for this file. 
-	private FileRenderer CurrentRenderer = null;
 
 	// size of the data as as +3 Basic sees it (With +3Header)
 	// This is used to trim off excess records before rendering.
@@ -63,6 +61,7 @@ public class SpectrumFileEditDialog {
 
 	/**
 	 * Constructor
+	 * 
 	 * @param display
 	 */
 	public SpectrumFileEditDialog(Display display) {
@@ -167,31 +166,48 @@ public class SpectrumFileEditDialog {
 	 */
 	private void RenderAppropriatePage() {
 		Plus3DosFileHeader p3d = ThisEntry.GetPlus3DosHeader();
-		if (!p3d.IsPlusThreeDosFile) {
-			CurrentRenderer = new FileRenderer();
-		} else {
-			switch (p3d.filetype) {
-			case Speccy.BASIC_BASIC:
-				CurrentRenderer = new BasicRenderer();
-				break;
-			case Speccy.BASIC_CHRARRAY:
-				CurrentRenderer = new CharArrayRenderer();
-				break;
-			case Speccy.BASIC_NUMARRAY:
-				CurrentRenderer = new NumericArrayRenderer();
-				break;
-			case Speccy.BASIC_CODE:
-				CurrentRenderer = new CodeRenderer();
-				break;
-			}
+
+		byte header[] = null;
+		byte newdata[] = data;
+		if (p3d.IsPlusThreeDosFile) {
+			// Separate the header and the file data.
+			header = new byte[0x80];
+			System.arraycopy(data, 0, header, 0, 0x80);
+			newdata = new byte[data.length - 0x80];
+			System.arraycopy(data, 0x80, newdata, 0, newdata.length);
 		}
 
-		byte TrimmedData[] = this.data;
-		if (Plus3Size < data.length) {
+		/*
+		 * CPM saves file in 128 byte chunks. This trims the data down to the size that
+		 * Speccy basic sees.
+		 */
+		byte TrimmedData[] = newdata;
+		if (Plus3Size < newdata.length) {
 			TrimmedData = new byte[Plus3Size];
-			System.arraycopy(data, 0, TrimmedData, 0, Plus3Size);
+			System.arraycopy(newdata, 0, TrimmedData, 0, Plus3Size);
 		}
-		CurrentRenderer.Render(MainPage, TrimmedData, ThisEntry.filename());
+		newdata = TrimmedData;
+
+		/**
+		 * Render the page.
+		 */
+		if (!p3d.IsPlusThreeDosFile) {
+			FileRenderer FR = new FileRenderer();
+			FR.Render(MainPage, newdata, ThisEntry.filename());
+		} else if (p3d.filetype == Speccy.BASIC_BASIC) {
+			BasicRenderer BR = new BasicRenderer();
+			BR.RenderBasic(MainPage, newdata, header, ThisEntry.filename(), p3d.filelength, p3d.fileSize,
+					p3d.VariablesOffset, p3d.line);
+		} else if (p3d.filetype == Speccy.BASIC_CODE) {
+			CodeRenderer CR = new CodeRenderer();
+			CR.RenderCode(MainPage, newdata, header, ThisEntry.filename(), data.length, p3d.loadAddr);
+		} else if (p3d.filetype == Speccy.BASIC_NUMARRAY) {
+			NumericArrayRenderer NR = new NumericArrayRenderer();
+			NR.RenderNumericArray(MainPage, newdata, header, ThisEntry.filename(), p3d.VarName);
+		} else { // Char array
+			CharArrayRenderer CR = new CharArrayRenderer();
+			CR.RenderCharArray(MainPage, newdata, header, ThisEntry.filename(), p3d.VarName);
+		}
 	}
 
 	/**

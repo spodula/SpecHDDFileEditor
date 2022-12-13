@@ -62,6 +62,7 @@ public class NonCPMDiskImagePartition extends IDEDosPartition {
 	/**
 	 * return details as a string.
 	 */
+	@Override
 	public String toString() {
 		String result = super.toString();
 		result = result + "\n  Sector shift: "+SectorShift;

@@ -35,6 +35,7 @@ import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FDD.AMSDiskFile;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
+import hddEditor.libs.disks.FDD.TrDosDiskFile;
 import hddEditor.libs.disks.HDD.IDEDosDisk;
 import hddEditor.libs.disks.HDD.RS_IDEDosDisk;
 import hddEditor.libs.handlers.IDEDosHandler;
@@ -46,6 +47,7 @@ import hddEditor.ui.partitionPages.FloppyGenericPage;
 import hddEditor.ui.partitionPages.GenericPage;
 import hddEditor.ui.partitionPages.PlusThreePartPage;
 import hddEditor.ui.partitionPages.SystemPartPage;
+import hddEditor.ui.partitionPages.TrDosPartitionPage;
 
 public class HDDEditor {
 	public Disk CurrentDisk = null;
@@ -66,8 +68,8 @@ public class HDDEditor {
 
 	private FileConversionForm fileConvForm = null;
 	private FileNewForm fileNewForm = null;
-	
-	private String helpcontext="Main";
+
+	private String helpcontext = "Main";
 
 	/**
 	 * Make the menus
@@ -162,6 +164,7 @@ public class HDDEditor {
 			public void widgetSelected(SelectionEvent arg0) {
 				HtmlHelp.DoHelp(helpcontext);
 			}
+
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 				widgetSelected(arg0);
@@ -261,7 +264,7 @@ public class HDDEditor {
 	public static void main(String[] args) {
 		HDDEditor hdi = new HDDEditor();
 		hdi.MakeForm();
-		if (args.length>0) {
+		if (args.length > 0) {
 			hdi.LoadFile(args[0]);
 		}
 		hdi.loop();
@@ -280,14 +283,14 @@ public class HDDEditor {
 			}
 			CurrentDisk = GetCorrectDiskFromFile(selected);
 			if (CurrentDisk != null) {
-				if (CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_HDD) {				
+				if (CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_HDD) {
 					CurrentHandler = new IDEDosHandler(CurrentDisk);
-				} else if (CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_FDD) {				
+				} else if (CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_FDD) {
 					CurrentHandler = new NonPartitionedDiskHandler(CurrentDisk);
 				} else {
 					System.out.println("Loading failed. - Unable to find OS");
 				}
-					
+
 				UpdateDropdown();
 				shell.setText(selected);
 			}
@@ -301,7 +304,7 @@ public class HDDEditor {
 	 * 
 	 * @param selected
 	 * @return
-	 * @throws BadDiskFileException 
+	 * @throws BadDiskFileException
 	 */
 	private Disk GetCorrectDiskFromFile(String selected) {
 		Disk result = null;
@@ -312,16 +315,21 @@ public class HDDEditor {
 				result = new RS_IDEDosDisk(selected);
 			} else if (new AMSDiskFile().IsMyFileType(new File(selected))) {
 				result = new AMSDiskFile(selected);
+			} else if (new TrDosDiskFile().IsMyFileType(new File(selected))) {
+				result = new TrDosDiskFile(selected);
 			} else {
 				MessageBox messageBox = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-				messageBox.setMessage("File " + selected + " is not a Raw HD image or RS HDF drive image.");
-				messageBox.setText("File " + selected + " is not a Raw HD image or RS HDF drive image.");
+				messageBox.setMessage("File " + selected + " is not a Raw HD image,a RS HDF drive image, a DSK file or a TR-DOS file.");
+				messageBox.setText("File " + selected + " is not a Raw HD image,a RS HDF drive image, a DSK file or a TR-DOS file.");
 				messageBox.open();
 			}
-/*			System.out.println("Cylinders " + result.GetNumCylinders());
-			System.out.println("Heads " + result.GetNumHeads());
-			System.out.println("SPT " + result.GetNumSectors()); */
-			System.out.println("Using "+result.getClass().getName());
+			/*
+			 * System.out.println("Cylinders " + result.GetNumCylinders());
+			 * System.out.println("Heads " + result.GetNumHeads());
+			 * System.out.println("SPT " + result.GetNumSectors());
+			 */
+			if (result != null)
+				System.out.println("Using " + result.getClass().getName());
 		} catch (Exception e) {
 			MessageBox messageBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
 			messageBox.setMessage("Error openning file " + selected + " " + e.getMessage());
@@ -388,7 +396,7 @@ public class HDDEditor {
 			PartitionDropdown.setText(result);
 		}
 		IDEDosPartition part = CurrentHandler.GetPartitionByName(name);
-		helpcontext = "partition_type_"+String.valueOf( part.GetPartType() );
+		helpcontext = "partition_type_" + String.valueOf(part.GetPartType());
 		PopulatePartitionScreen(part);
 	}
 
@@ -407,6 +415,9 @@ public class HDDEditor {
 			break;
 		case PLUSIDEDOS.PARTITION_BOOT:
 			new FloppyBootTrackPage(this, MainPage, part);
+			break;
+		case PLUSIDEDOS.PARTITION_DISK_TRDOS:
+			new TrDosPartitionPage(this, MainPage, part);
 			break;
 		case PLUSIDEDOS.PARTITION_UNKNOWN:
 			new FloppyGenericPage(null, MainPage, part);

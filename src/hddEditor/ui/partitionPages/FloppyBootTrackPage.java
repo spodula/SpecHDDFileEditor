@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.TableItem;
 import hddEditor.libs.ASMLib;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.ASMLib.DecodedASM;
-import hddEditor.libs.disks.FDD.AMSDiskFile;
+import hddEditor.libs.disks.FDD.FloppyDisk;
 import hddEditor.libs.partitions.FloppyBootTrack;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.ui.HDDEditor;
@@ -65,7 +65,7 @@ public class FloppyBootTrackPage extends GenericPage {
 		if (ParentComp != null) {
 			RemoveComponents();
 			FloppyBootTrack fbc = (FloppyBootTrack) partition;
-			AMSDiskFile Disk = (AMSDiskFile) fbc.CurrentDisk;
+			FloppyDisk Disk = (FloppyDisk) fbc.CurrentDisk;
 			super.AddBasicDetails();
 			label("",4);
 			Label lbl = label("XDPB info:", 4);

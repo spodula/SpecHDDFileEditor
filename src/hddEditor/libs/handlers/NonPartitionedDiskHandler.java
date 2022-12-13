@@ -5,14 +5,15 @@ import java.io.IOException;
 
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.disks.Disk;
-import hddEditor.libs.disks.FDD.AMSDiskFile;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
 import hddEditor.libs.disks.FDD.FloppyDisk;
+import hddEditor.libs.disks.FDD.TrDosDiskFile;
 import hddEditor.libs.partitions.FloppyBootTrack;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.NonCPMDiskImagePartition;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.SystemPartition;
+import hddEditor.libs.partitions.TrDosPartition;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
 
 public class NonPartitionedDiskHandler extends OSHandler {
@@ -131,21 +132,33 @@ public class NonPartitionedDiskHandler extends OSHandler {
 				rawData[0x39] = 0x60; // MFM mode | Skip Deleted address mark.
 			}
 
-			PLUS3DOSPartition p3dp = new PLUS3DOSPartition(1, CurrentDisk, rawData, 1, false);
-			p3dp.SetEndSector((long) ((CurrentDisk.GetNumCylinders() - ActualReservedTracks) * CurrentDisk.GetNumHeads()
-					* CurrentDisk.GetNumSectors()));
-			p3dp.ReservedTracks = 0;
-			SystemPart.partitions = new IDEDosPartition[3];
-			SystemPart.partitions[0] = SystemPart;
-			SystemPart.partitions[1] = BootPart;
-			
-			if (!p3dp.IsValid) {
+			String fn = CurrentDisk.GetFilename().toUpperCase();
+			if (fn.endsWith(".DSK")) {
+				PLUS3DOSPartition p3dp = new PLUS3DOSPartition(1, CurrentDisk, rawData, 1, false);
+				p3dp.SetEndSector((long) ((CurrentDisk.GetNumCylinders() - ActualReservedTracks)
+						* CurrentDisk.GetNumHeads() * CurrentDisk.GetNumSectors()));
+				p3dp.ReservedTracks = 0;
+				SystemPart.partitions = new IDEDosPartition[3];
+				SystemPart.partitions[0] = SystemPart;
+				SystemPart.partitions[1] = BootPart;
+				SystemPart.partitions[2] = p3dp;
+			} else if (fn.endsWith(".TRD")) {
+				TrDosPartition tdp = new TrDosPartition(1, CurrentDisk, rawData, 1, false);
+				tdp.SetPartType(PLUSIDEDOS.PARTITION_DISK_TRDOS);
+				tdp.SetName("TR-DOS disk");
+				tdp.SetStartCyl(0);
+				tdp.SetStartHead(0);
+				SystemPart.partitions = new IDEDosPartition[2];
+				SystemPart.partitions[0] = SystemPart;
+				SystemPart.partitions[1] = tdp;
+
+			} else {
 				NonCPMDiskImagePartition np3dp = new NonCPMDiskImagePartition(1, CurrentDisk, rawData, 1, false);
 				np3dp.SetPartType(PLUSIDEDOS.PARTITION_UNKNOWN);
 				np3dp.SetName("Disk data");
-				SystemPart.partitions[2] = np3dp;
-			} else {
-				SystemPart.partitions[2] = p3dp;
+				SystemPart.partitions = new IDEDosPartition[2];
+				SystemPart.partitions[0] = SystemPart;
+				SystemPart.partitions[1] = np3dp;
 			}
 
 		} catch (Exception E) {
@@ -157,7 +170,7 @@ public class NonPartitionedDiskHandler extends OSHandler {
 			SystemPart.partitions[1] = BootPart;
 			SystemPart.partitions[2] = ncdip;
 		}
-		
+
 	}
 
 	/**
@@ -182,8 +195,7 @@ public class NonPartitionedDiskHandler extends OSHandler {
 	public static void main(String[] args) {
 		NonPartitionedDiskHandler h;
 		try {
-			Disk disk = new AMSDiskFile(
-					"/home/graham/dev/disks/DSK/Amstrad Compilation Disk Spectrum Plus 3 - Side A.dsk");
+			Disk disk = new TrDosDiskFile("/home/graham/tmp/ufo.trd");
 			h = new NonPartitionedDiskHandler(disk);
 			PLUS3DOSPartition p3d = (PLUS3DOSPartition) h.SystemPart.partitions[2];
 			System.out.println("---------------------");

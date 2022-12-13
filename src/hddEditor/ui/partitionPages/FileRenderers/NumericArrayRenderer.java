@@ -32,8 +32,29 @@ public class NumericArrayRenderer extends FileRenderer {
 	 */
 	@Override
 	public void Render(Composite mainPage, byte data[], String Filename) {
-		super.Render(mainPage, data, Filename);
 		Plus3DosFileHeader p3d = new Plus3DosFileHeader(data);
+
+		byte newdata[] = new byte[data.length - 0x80];
+		byte header[] = new byte[0x80];
+		System.arraycopy(data, 0, header, 0, 0x80);
+		System.arraycopy(data, 0x80, newdata, 0, newdata.length);
+
+		RenderNumericArray(mainPage, newdata, header, Filename, p3d.VarName);
+	}
+
+	/**
+	 * Render a numeric array page. 
+	 * 
+	 * @param mainPage - Page to parent to
+	 * @param data - File data
+	 * @param header - Header if appropriate. (If this is null, "Save with header" button will not be shown)
+	 * @param Filename - Filename
+	 * @param varname - Variable name.
+	 */
+	public void RenderNumericArray(Composite mainPage, byte data[], byte header[], String Filename, String varname) {
+		this.filename = Filename;
+		this.MainPage = mainPage;
+		this.data = data;
 
 		Label lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("Numeric array: ");
@@ -50,7 +71,7 @@ public class NumericArrayRenderer extends FileRenderer {
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveArrayAsText(data, mainPage, p3d);
+				DoSaveArrayAsText(data, mainPage, varname);
 			}
 
 			@Override
@@ -65,7 +86,7 @@ public class NumericArrayRenderer extends FileRenderer {
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsBin(data, mainPage, false, p3d);
+				DoSaveFileAsBin(data, mainPage);
 			}
 
 			@Override
@@ -74,20 +95,28 @@ public class NumericArrayRenderer extends FileRenderer {
 			}
 		});
 
-		btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract file as Binary Inc Header");
-		btn.setLayoutData(gd);
-		btn.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsBin(data, mainPage, true, p3d);
-			}
+		if (header != null) {
+			btn = new Button(mainPage, SWT.NONE);
+			btn.setText("Extract file as Binary Inc Header");
+			btn.setLayoutData(gd);
+			btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					byte newdata[] = new byte[data.length + header.length];
+					System.arraycopy(header, 0, newdata, 0, header.length);
+					System.arraycopy(data, 0, newdata, header.length, data.length);
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				widgetSelected(arg0);
-			}
-		});
+					DoSaveFileAsBin(data, mainPage);
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+		} else {
+			new Label(mainPage, SWT.NONE);
+		}
 		new Label(mainPage, SWT.NONE);
 
 		lbl = new Label(mainPage, SWT.NONE);
@@ -98,9 +127,9 @@ public class NumericArrayRenderer extends FileRenderer {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.minimumWidth = 50;
 		VariableEdit.setLayoutData(gd);
-		VariableEdit.setText(p3d.VarName);
+		VariableEdit.setText(varname);
 
-		int location = 0x80; // skip header
+		int location = 0x00;
 
 		// Number of dimensions
 		int numDimensions = data[location++] & 0xff;
@@ -116,7 +145,7 @@ public class NumericArrayRenderer extends FileRenderer {
 		lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("Dimensions: " + numDimensions);
 
-		String s = p3d.VarName + "(";
+		String s = varname + "(";
 		for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
 			if (dimnum > 0)
 				s = s + ",";
@@ -187,11 +216,11 @@ public class NumericArrayRenderer extends FileRenderer {
 	/**
 	 * Save the array to file
 	 * 
-	 * @param data
-	 * @param mainPage
-	 * @param p3d
+	 * @param data - Data to be saved
+	 * @param mainPage - Owning page
+	 * @param varname - Variable name
 	 */
-	protected void DoSaveArrayAsText(byte[] data, Composite mainPage, Plus3DosFileHeader p3d) {
+	protected void DoSaveArrayAsText(byte[] data, Composite mainPage, String varname) {
 		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
 		fd.setText("Save Array as");
 		String[] filterExt = { "*.*" };
@@ -215,7 +244,7 @@ public class NumericArrayRenderer extends FileRenderer {
 						dimsize = dimsize + (data[location++] & 0xff) * 0x100;
 						Dimsizes[dimnum] = dimsize;
 					}
-					String s = "DIM " + p3d.VarName + "(";
+					String s = "DIM " + varname + "(";
 					for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
 						if (dimnum > 0)
 							s = s + ",";

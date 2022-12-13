@@ -1,0 +1,100 @@
+AMS disk file format. 
+https://www.cpcwiki.eu/index.php/Format:DSK_disk_image_file_format
+https://github.com/spodula/SpecPlus3DiskImgManipulator/wiki/DSK-image-format
+
+https://github.com/spodula/SpecPlus3DiskImgManipulator/wiki/3-Disk-format
+
+The AMS disk format is a container format and not directly related to the +3 or CPM.
+
+The disk in documents is an AMS format disk with a CPM v2 (With Amstrad extensions) filesystem on it. 
+
+AMS container:
+--------------
+Non-extended disk. 
+40 tracks
+1 head
+9 sectors per track
+512 bytes per sector
+
+ 00000000  4d 56 20 2d 20 43 50 43  45 4d 55 20 44 69 73 6b  |MV - CPCEMU Disk|
+ 00000010  2d 46 69 6c 65 0d 0a 44  69 73 6b 2d 49 6e 66 6f  |-File..Disk-Info|
+ 00000020  0d 0a 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+ 00000030  28 01 00 13 00 00 00 00  00 00 00 00 00 00 00 00  |(...............|
+ ....
+ 000000F0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+ 
+AMS header: ($00-$FF)
+------------------------
+ 00000000  4d 56 20 2d 20 43 50 43  45 4d 55 20 44 69 73 6b  |MV - CPCEMU Disk|
+ 00000010  2d 46 69 6c 65 0d 0a                              |-File..|
+   00-16: "MV - CPCEMU Disk-File\r\n"
+   
+ 00000017  44  69 73 6b 2d 49 6e 66 6f 0d 0a                 |Disk-Info..|
+   17-21: "Disk-Info\r\n"
+   
+ 00000022  00 00 00 00 00 00 00 00 00 00 00 00 00 00         |................|
+   22-2f: <Name of creator, blank in this case>
+   
+ 00000030  28 01 00 13 
+   30: Number of tracks: $28 = 40 tracks
+   31: Number of sides: $01 = 1 side
+   32-33: Track size in file: $1300 = 4864 = 9 tracks*256 + 256 byte track header
+   
+ 00000034  00 00 00 00 00 00 00 00  00 00 00 00   
+ 00000040  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+ ...
+ 000000F0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+    $34-$ff blank (unused in normal disks)
+ 
+ Track header
+ --------------
+ First track - Track header ($100-$200)
+ 00000100  54 72 61 63 6b 2d 49 6e  66 6f 0d 0a              |Track-Info..|
+   Track: 00-0b: "Track-Info\r\n"
+   
+ 0000010c  00 00 00  
+   Track: 00-0c: unused bytes
+     
+ 00000110  00 00 00 00 02 09 4e e5                           |......N.|
+      track: 10: track number: 0
+      track: 11: side number: 0
+      track: 12-13 unused
+      track: 14: Sector size shift (1=256, 2=512, 3=1024 ect): 02=512
+      track: 15: Number of sectors: 9
+      track: 16: Gap#3length = 4E
+      track: 17: Filler byte E5
+      
+From here on, we have 8 bytes for each sector. There are 9 sectors in this example:
+
+ 00000118  00 00 01 02 00 00 00 00
+   Sector descriptor 1:
+           Sector+00: Track=0
+           Sector+01: Side=0
+           Sector+02: Sector ID=1
+           Sector+03: Sector size shift(1=256, 2=512, 3=1024 ect): 02=512
+           Sector+04: uPD765 status register 1 after reading: 00
+           Sector+05: uPD765 status register 2 after reading: 00
+           Sector+06: Actual data length: LSB - EXTENDED DISKS ONLY, BLANK HERE **
+           Sector+07: Actual data length: MSB - EXTENDED DISKS ONLY, BLANK HERE **
+ 00000120  00 00 02 02 00 00 00 00  T:0 S:0 ID:2 sz:512 sr1:0 sr2:0 unused unused
+ 00000128  00 00 03 02 00 00 00 00  T:0 S:0 ID:3 sz:512 sr1:0 sr2:0 unused unused 
+ 00000130  00 00 04 02 00 00 00 00  T:0 S:0 ID:4 sz:512 sr1:0 sr2:0 unused unused
+ 00000138  00 00 05 02 00 00 00 00  T:0 S:0 ID:5 sz:512 sr1:0 sr2:0 unused unused
+ 00000140  00 00 06 02 00 00 00 00  T:0 S:0 ID:6 sz:512 sr1:0 sr2:0 unused unused
+ 00000148  00 00 07 02 00 00 00 00  T:0 S:0 ID:7 sz:512 sr1:0 sr2:0 unused unused
+ 00000150  00 00 08 02 00 00 00 00  T:0 S:0 ID:8 sz:512 sr1:0 sr2:0 unused unused
+ 00000158  00 00 09 02 00 00 00 00  T:0 S:0 ID:9 sz:512 sr1:0 sr2:0 unused unused
+ After 9 sectors, blank until the next $100 boundary. 
+ 00000160  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+ 00000170  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+ 00000180  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+ 00000190  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+ 000001A0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+ 000001B0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+ 000001C0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+ 000001D0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+ 000001E0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+ 000001F0  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+ 
+ 
+ 

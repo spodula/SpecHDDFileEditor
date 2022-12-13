@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.FileRenderers;
+
 /**
  * Render a CODE file
  */
@@ -31,28 +32,31 @@ import org.eclipse.swt.widgets.Text;
 import hddEditor.libs.ASMLib;
 import hddEditor.libs.ASMLib.DecodedASM;
 import hddEditor.libs.Speccy;
-import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 
 public class CodeRenderer extends FileRenderer {
-	//components
+	// components
 	private Text StartAddress = null;
 	private Combo CodeTypeDropDown = null;
 	private Table HexTable = null;
 	private Label[] ImageLabel = null;
-	
-	//Rendering options
+
+	// Rendering options
 	private String[] CODETYPES = { "Binary", "Screen", "Assembly" };
 
-
 	/**
-	 * Render the page.
+	 * 
+	 * @param mainPage
+	 * @param data
+	 * @param header
+	 * @param Filename
+	 * @param fileSize
+	 * @param loadAddr
 	 */
-	@Override
-	public void Render(Composite mainPage, byte data[], String Filename) {
-		super.Render(mainPage, data, Filename);
-
-		Plus3DosFileHeader p3d = new Plus3DosFileHeader(data);
-
+	public void RenderCode(Composite mainPage, byte data[], byte header[], String Filename, int fileSize,
+			int loadAddr) {
+		this.filename = Filename;
+		this.MainPage = mainPage;
+		this.data = data;
 		Label lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("CODE file: ");
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -62,13 +66,13 @@ public class CodeRenderer extends FileRenderer {
 		lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("+3DOS File length: ");
 		lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText(String.format("%d (%X)", p3d.fileSize, p3d.fileSize));
+		lbl.setText(String.format("%d (%X)", fileSize, fileSize));
 
 		lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("Start Address: ");
 
 		StartAddress = new Text(mainPage, SWT.NONE);
-		StartAddress.setText(String.valueOf(p3d.loadAddr));
+		StartAddress.setText(String.valueOf(loadAddr));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.minimumWidth = 50;
 		StartAddress.setLayoutData(gd);
@@ -81,15 +85,14 @@ public class CodeRenderer extends FileRenderer {
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsHex(data, mainPage, p3d);
+				DoSaveFileAsHex(data, mainPage, 0, data.length);
 			}
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 				widgetSelected(arg0);
 			}
-		}); 
-		
+		});
 
 		btn = new Button(mainPage, SWT.NONE);
 		btn.setText("Extract file as Binary");
@@ -97,7 +100,7 @@ public class CodeRenderer extends FileRenderer {
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsBin(data, mainPage, false, p3d);
+				DoSaveFileAsBin(data, mainPage);
 			}
 
 			@Override
@@ -106,20 +109,28 @@ public class CodeRenderer extends FileRenderer {
 			}
 		});
 
-		btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract file as Binary Inc Header");
-		btn.setLayoutData(gd);
-		btn.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsBin(data, mainPage, true, p3d);
-			}
+		if (header != null) {
+			btn = new Button(mainPage, SWT.NONE);
+			btn.setText("Extract file as Binary Inc Header");
+			btn.setLayoutData(gd);
+			btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					byte newdata[] = new byte[data.length + header.length];
+					System.arraycopy(header, 0, newdata, 0, header.length);
+					System.arraycopy(data, 0, newdata, header.length, data.length);
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				widgetSelected(arg0);
-			}
-		});
+					DoSaveFileAsBin(data, mainPage);
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+		} else {
+			new Label(mainPage, SWT.NONE);
+		}
 
 		btn = new Button(mainPage, SWT.NONE);
 		btn.setText("Extract file as Picture");
@@ -127,7 +138,7 @@ public class CodeRenderer extends FileRenderer {
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsPic(data, mainPage, p3d);
+				DoSaveFileAsPic(data, mainPage);
 			}
 
 			@Override
@@ -142,7 +153,7 @@ public class CodeRenderer extends FileRenderer {
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsAsm(data, mainPage, p3d);
+				DoSaveFileAsAsm(data, mainPage, loadAddr);
 			}
 
 			@Override
@@ -154,31 +165,31 @@ public class CodeRenderer extends FileRenderer {
 		CodeTypeDropDown = new Combo(mainPage, SWT.NONE);
 		CodeTypeDropDown.setItems(CODETYPES);
 		CodeTypeDropDown.setText(CODETYPES[0]);
-		if (p3d.filelength == 6912) {
+		if (data.length == 6912) {
 			CodeTypeDropDown.setText(CODETYPES[1]);
 		}
 		CodeTypeDropDown.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				CodeTypeComboChanged(data, p3d);
+				CodeTypeComboChanged(data, loadAddr);
 			}
 		});
 
 		lbl = new Label(mainPage, SWT.NONE);
 		lbl = new Label(mainPage, SWT.NONE);
 		lbl = new Label(mainPage, SWT.NONE);
-		CodeTypeComboChanged(data, p3d);
+		CodeTypeComboChanged(data, loadAddr);
 
 		mainPage.pack();
 	}
 
-
 	/**
 	 * Add the BIN (hex) option
+	 * 
 	 * @param data
-	 * @param p3d
+	 * @param loadAddr
 	 */
-	private void AddBin(byte data[], Plus3DosFileHeader p3d) {
+	private void AddBin(byte data[], int loadAddr) {
 		int AddressLength = String.format("%X", data.length - 1).length();
 
 		HexTable = new Table(MainPage, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
@@ -203,12 +214,12 @@ public class CodeRenderer extends FileRenderer {
 
 		HexTable.setHeaderVisible(true);
 
-		int ptr = 128;
+		int ptr = 0;
 		int numrows = data.length / 16;
 		if (data.length % 16 != 0) {
 			numrows++;
 		}
-		int Address = p3d.loadAddr;
+		int Address = loadAddr;
 
 		Font mono = new Font(MainPage.getDisplay(), "Monospace", 10, SWT.NONE);
 		for (int rownum = 0; rownum < numrows; rownum++) {
@@ -244,23 +255,23 @@ public class CodeRenderer extends FileRenderer {
 
 	/**
 	 * Render the data as a Screen
-	 *  
+	 * 
 	 * @param data
 	 */
 	private void AddScreen(byte data[]) {
-		int base = 0x80;
+		int base = 0;
 		ArrayList<Label> al = new ArrayList<Label>();
 		while (base < data.length) {
 			byte screen[] = new byte[0x1b00];
-			for(int i=0;i<0x1800;i++) {
+			for (int i = 0; i < 0x1800; i++) {
 				screen[i] = 0;
 			}
 			byte wob = Speccy.ToAttribute(Speccy.COLOUR_BLACK, Speccy.COLOUR_WHITE, false, false);
-			for(int i=0x1800;i<0x1b00;i++) {
-				screen[i] = wob; 
+			for (int i = 0x1800; i < 0x1b00; i++) {
+				screen[i] = wob;
 			}
-			System.arraycopy(data, base, screen, 0, Math.min(0x1b00,data.length - base));
-			
+			System.arraycopy(data, base, screen, 0, Math.min(0x1b00, data.length - base));
+
 			ImageData image = Speccy.GetImageFromFileArray(screen, 0);
 			Image img = new Image(MainPage.getDisplay(), image);
 			Label lbl = new Label(MainPage, SWT.NONE);
@@ -279,29 +290,31 @@ public class CodeRenderer extends FileRenderer {
 
 	/**
 	 * Render the code file as selected in the combo.
+	 * 
 	 * @param data
-	 * @param p3d
+	 * @param loadAddr
 	 */
-	private void CodeTypeComboChanged(byte data[], Plus3DosFileHeader p3d) {
+	private void CodeTypeComboChanged(byte data[], int loadAddr) {
 		String s = CodeTypeDropDown.getText().trim();
-		DoChangeCodeType(s, data, p3d);
+		DoChangeCodeType(s, data, loadAddr);
 	}
 
 	/**
 	 * Actually render
+	 * 
 	 * @param s
 	 * @param data
-	 * @param p3d
+	 * @param loadAddr
 	 */
-	private void DoChangeCodeType(String s, byte data[], Plus3DosFileHeader p3d) {
-		//Dispose of any items that are already on the form
+	private void DoChangeCodeType(String s, byte data[], int loadAddr) {
+		// Dispose of any items that are already on the form
 		if (HexTable != null) {
 			HexTable.dispose();
 			HexTable = null;
 		}
 
 		if (ImageLabel != null) {
-			for(Label l:ImageLabel) {
+			for (Label l : ImageLabel) {
 				l.dispose();
 			}
 			ImageLabel = null;
@@ -311,15 +324,16 @@ public class CodeRenderer extends FileRenderer {
 		if (s.equals(CODETYPES[1])) {
 			AddScreen(data);
 		} else if (s.equals(CODETYPES[2])) {
-			AddAsm(data, p3d.loadAddr);
+			AddAsm(data, loadAddr);
 		} else {
-			AddBin(data, p3d);
+			AddBin(data, loadAddr);
 		}
 		MainPage.pack();
 	}
 
 	/**
 	 * Render the code as ASM.
+	 * 
 	 * @param data
 	 * @param startaddress
 	 */
@@ -348,7 +362,7 @@ public class CodeRenderer extends FileRenderer {
 
 		ASMLib asm = new ASMLib();
 		int loadedaddress = startaddress;
-		int realaddress = 0x0080;
+		int realaddress = 0x0000;
 		int asmData[] = new int[5];
 		try {
 			while (realaddress < data.length) {
@@ -396,14 +410,14 @@ public class CodeRenderer extends FileRenderer {
 
 	}
 
-
 	/**
 	 * Save the file as ASM
+	 * 
 	 * @param data
 	 * @param mainPage2
-	 * @param p3d
+	 * @param loadAddr
 	 */
-	protected void DoSaveFileAsAsm(byte[] data, Composite mainPage2, Plus3DosFileHeader p3d) {
+	protected void DoSaveFileAsAsm(byte[] data, Composite mainPage2, int loadAddr) {
 		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
 		fd.setText("Save Assembly file as");
 		String[] filterExt = { "*.*" };
@@ -414,12 +428,12 @@ public class CodeRenderer extends FileRenderer {
 			try {
 				file = new FileOutputStream(selected);
 				file.write(("File: " + filename + System.lineSeparator()).getBytes());
-				file.write(("Org: " + p3d.loadAddr + System.lineSeparator()).getBytes());
-				file.write(("Length: " + p3d.fileSize + System.lineSeparator() + System.lineSeparator()).getBytes());
+				file.write(("Org: " + loadAddr + System.lineSeparator()).getBytes());
+				file.write(("Length: " + data.length + System.lineSeparator() + System.lineSeparator()).getBytes());
 				try {
 					ASMLib asm = new ASMLib();
-					int loadedaddress = p3d.loadAddr;
-					int realaddress = 0x0080;
+					int loadedaddress = loadAddr;
+					int realaddress = 0x0000;
 					try {
 						int asmData[] = new int[5];
 						while (realaddress < data.length) {
@@ -483,16 +497,16 @@ public class CodeRenderer extends FileRenderer {
 	}
 
 	/**
-	 * Save the file as an image file. (Note, this will be 256x192 of whatever format is selected)
+	 * Save the file as an image file. (Note, this will be 256x192 of whatever
+	 * format is selected)
 	 * 
 	 * @param data
 	 * @param mainPage
-	 * @param p3d
 	 */
-	protected void DoSaveFileAsPic(byte[] data, Composite mainPage, Plus3DosFileHeader p3d) {
+	protected void DoSaveFileAsPic(byte[] data, Composite mainPage) {
 		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
 		fd.setText("Save Assembly file as");
-		String[] filterExt = { "*.jpg","*.gif","*.png","*.bmp","*.svg","*.tiff","*.ico" };
+		String[] filterExt = { "*.jpg", "*.gif", "*.png", "*.bmp", "*.svg", "*.tiff", "*.ico" };
 		fd.setFilterExtensions(filterExt);
 		String selected = fd.open();
 		if (selected != null) {
@@ -502,8 +516,8 @@ public class CodeRenderer extends FileRenderer {
 				try {
 					ImageData image = Speccy.GetImageFromFileArray(data, 0x80);
 					ImageLoader imageLoader = new ImageLoader();
-					imageLoader.data = new ImageData[] {image};
-					int filetyp=SWT.IMAGE_JPEG;
+					imageLoader.data = new ImageData[] { image };
+					int filetyp = SWT.IMAGE_JPEG;
 					if (selected.toLowerCase().endsWith(".gif")) {
 						filetyp = SWT.IMAGE_GIF;
 					} else if (selected.toLowerCase().endsWith(".png")) {
@@ -516,9 +530,9 @@ public class CodeRenderer extends FileRenderer {
 						filetyp = SWT.IMAGE_TIFF;
 					} else if (selected.toLowerCase().endsWith(".ico")) {
 						filetyp = SWT.IMAGE_ICO;
-					}  
-					
-					imageLoader.save(selected,filetyp); 
+					}
+
+					imageLoader.save(selected, filetyp);
 				} finally {
 					file.close();
 				}
@@ -538,6 +552,5 @@ public class CodeRenderer extends FileRenderer {
 			}
 		}
 	}
-	
-	
+
 }

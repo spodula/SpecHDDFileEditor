@@ -1516,7 +1516,7 @@ public class AddFilesToPlus3Partition {
 			pfd.VariablesOffset = data.length;
 		}
 		StringBuilder sb = new StringBuilder();
-		Speccy.DecodeBasicFromLoadedFile(data, sb, pfd, false, false);
+		Speccy.DecodeBasicFromLoadedFile(data, sb, pfd.VariablesOffset, false, false);
 
 		Text t = new Text(MainPage, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
 		GridData gd = new GridData(GridData.FILL_BOTH);

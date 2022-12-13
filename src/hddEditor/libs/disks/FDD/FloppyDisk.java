@@ -20,14 +20,13 @@ public class FloppyDisk implements Disk {
 	public int NumCylinders = 0;
 	public int NumHeads = 0;
 	public int NumSectors = 0;
-	
-	//NUmber of logical sectors
+
+	// NUmber of logical sectors
 	public int NumLogicalSectors;
-	
-	
+
 	// Tracks in the file.
 	public TrackInfo diskTracks[] = null;
-	
+
 	/**
 	 * 
 	 * @param filename
@@ -43,7 +42,7 @@ public class FloppyDisk implements Disk {
 	/**
 	 * 
 	 */
-	public FloppyDisk()  {
+	public FloppyDisk() {
 		inFile = null;
 		this.filename = "";
 		FileSize = 0;
@@ -159,24 +158,22 @@ public class FloppyDisk implements Disk {
 		return PLUSIDEDOS.MEDIATYPE_FDD;
 	}
 
-
 	@Override
 	public void SetLogicalBlockFromSector(int SectorNum, byte[] result) throws IOException {
-		System.out.println("SetLogicalBlockFromSector not implemented for "+getClass().getName());
+		System.out.println("SetLogicalBlockFromSector not implemented for " + getClass().getName());
 	}
 
 	@Override
 	public byte[] GetBytesStartingFromSector(int SectorNum, int sz) throws IOException {
-		System.out.println("GetBytesStartingFromSector not implemented for "+getClass().getName());
+		System.out.println("GetBytesStartingFromSector not implemented for " + getClass().getName());
 		return null;
 	}
 
 	@Override
 	public Boolean IsMyFileType(File filename) throws IOException {
-		System.out.println("IsMyFileType not implemented for "+getClass().getName());
+		System.out.println("IsMyFileType not implemented for " + getClass().getName());
 		return false;
 	}
-	
 
 	/**
 	 * ToString overridden to provide useful debug information
@@ -191,16 +188,20 @@ public class FloppyDisk implements Disk {
 		result = result + "\nSector size: " + SectorSize + " bytes";
 		result = result + "\nFile size: " + FileSize + " bytes";
 		result = result + "\n       Tr/H\n";
-		for (TrackInfo ti : diskTracks) {
-			String trk = Integer.toHexString(ti.tracknum);
-			if (trk.length() == 1) {
-				trk = "0" + trk;
+		if (diskTracks == null) {
+			result = result +" Disk tracks not loaded.";
+		} else {
+			for (TrackInfo ti : diskTracks) {
+				String trk = Integer.toHexString(ti.tracknum);
+				if (trk.length() == 1) {
+					trk = "0" + trk;
+				}
+				result = result + "Track: " + trk + "/" + Integer.toHexString(ti.side) + ": ";
+				for (Sector sect : ti.Sectors) {
+					result = result + Integer.toHexString(sect.sectorID) + "(" + sect.ActualSize + ") ";
+				}
+				result = result + "\n";
 			}
-			result = result + "Track: " + trk + "/" + Integer.toHexString(ti.side) + ": ";
-			for (Sector sect : ti.Sectors) {
-				result = result + Integer.toHexString(sect.sectorID) + "(" + sect.ActualSize + ") ";
-			}
-			result = result + "\n";
 		}
 
 		return (result);
