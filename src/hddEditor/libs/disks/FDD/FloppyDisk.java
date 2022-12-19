@@ -189,7 +189,7 @@ public class FloppyDisk implements Disk {
 		result = result + "\nFile size: " + FileSize + " bytes";
 		result = result + "\n       Tr/H\n";
 		if (diskTracks == null) {
-			result = result +" Disk tracks not loaded.";
+			result = result + " Disk tracks not loaded.";
 		} else {
 			for (TrackInfo ti : diskTracks) {
 				String trk = Integer.toHexString(ti.tracknum);

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
+import hddEditor.libs.disks.FDD.SCLDiskFile;
 import hddEditor.libs.disks.FDD.TrDosDiskFile;
 import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
 
@@ -282,6 +283,12 @@ public class TrDosPartition extends IDEDosPartition {
 		FirstFreeSectorT = NextFreeTrack;
 		FirstFreeSectorS = NextFreeSector;
 		LoadDirectoryEntries();
+		
+		//Hack for SCF disks which need to be physically written after all disk mods are done. 
+		if (CurrentDisk.getClass().getName().equals(SCLDiskFile.class.getName())) {
+			SCLDiskFile scf = (SCLDiskFile) CurrentDisk;
+			scf.OperationCompleted(DirectoryEntries);
+		}
 	}
 
 	/**
@@ -307,6 +314,11 @@ public class TrDosPartition extends IDEDosPartition {
 			System.out.println("File '" + Filename + "' not found.");
 		}
 		CurrentDisk.SetLogicalBlockFromSector(0, dirents);
+		//Hack for SCF disks which need to be physically written after all disk mods are done. 
+		if (CurrentDisk.getClass().getName().equals(SCLDiskFile.class.getName())) {
+			SCLDiskFile scf = (SCLDiskFile) CurrentDisk;
+			scf.OperationCompleted(DirectoryEntries);
+		}
 	}
 
 	/**
@@ -400,7 +412,11 @@ public class TrDosPartition extends IDEDosPartition {
 
 		// re-read the parameter block.
 		PopulateParameters();
-		// Re-load the Dirents.
+		//Hack for SCF disks which need to be physically written after all disk mods are done. 
+		if (CurrentDisk.getClass().getName().equals(SCLDiskFile.class.getName())) {
+			SCLDiskFile scf = (SCLDiskFile) CurrentDisk;
+			scf.OperationCompleted(DirectoryEntries);
+		}
 
 	}
 
@@ -429,6 +445,11 @@ public class TrDosPartition extends IDEDosPartition {
 			System.out.println("File '" + from + "' not found.");
 		}
 		CurrentDisk.SetLogicalBlockFromSector(0, dirents);
+		//Hack for SCF disks which need to be physically written after all disk mods are done. 
+		if (CurrentDisk.getClass().getName().equals(SCLDiskFile.class.getName())) {
+			SCLDiskFile scf = (SCLDiskFile) CurrentDisk;
+			scf.OperationCompleted(DirectoryEntries);
+		}
 	}
 
 	/**

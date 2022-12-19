@@ -61,7 +61,7 @@ public class TrdDirectoryEntry {
 		/**
 		 * For BASIC files, extract the line from the file.
 		 */
-		if (this.GetFileType()=='B') {
+		if ((CurrentDisk!=null) && (this.GetFileType()=='B')) {
 			int startsector = (GetStartTrack() * CurrentDisk.GetNumSectors()) + GetStartSector();
 			//Want the 10 bytes past the EOF
 			int itemlength = GetFileLength()+0x10;
@@ -194,7 +194,7 @@ public class TrdDirectoryEntry {
 	 * 
 	 * @param len
 	 */
-	public void GetVar2(int len) {
+	public void SetVar2(int len) {
 		int lsb = len & 0xff;
 		int msb = len / 0x100;
 		DirEntryDescriptor[0x0B] = (byte) (lsb & 0xff);
@@ -327,7 +327,20 @@ public class TrdDirectoryEntry {
 	public byte[] GetFileData() throws IOException {
 		int startsector = (GetStartTrack() * CurrentDisk.GetNumSectors()) + GetStartSector();
 
-		byte result[] = CurrentDisk.GetBytesStartingFromSector(startsector, GetFileLength());
+		int length = GetFileLength();
+		//check to see if this value is reasonable.
+		int FileSizeSectors = GetFileLengthSectors() * 256;
+		int diff = Math.abs(FileSizeSectors - length);
+		if (diff > 266) { //difference is out of range. (1 sector + 10 BASIC fiddle bytes)
+			//fiddle the file length.
+			length = FileSizeSectors;
+			if (GetFileType()=='B') {
+				length = length - 10;
+			}
+			System.out.println("GetFileData(): File: "+GetFilename()+" bad length. Fiddling.");
+		}
+		
+		byte result[] = CurrentDisk.GetBytesStartingFromSector(startsector, length);
 		return(result);		 
 	}
 
@@ -344,6 +357,7 @@ public class TrdDirectoryEntry {
 		if (GetFileType()=='B') {
 			length = GetVar1();
 		}
+		
 		return length;
 	}
 	

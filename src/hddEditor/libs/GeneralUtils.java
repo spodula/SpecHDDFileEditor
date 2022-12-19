@@ -54,7 +54,7 @@ public class GeneralUtils {
 			return(result);
 		} catch (IOException e) {
 			System.err.println("IO "
-					+ "Error in TestUtils.ReadFileIntoArray: "+e.getMessage());			
+					+ "Error in GeneralUtils.ReadFileIntoArray: "+e.getMessage());			
 			e.printStackTrace();
 		} 
 		return(null);
@@ -79,11 +79,11 @@ public class GeneralUtils {
 				outputStream.close();
 			} 
 		} catch (FileNotFoundException e) {
-			System.err.println("File not found Error in TestUtils.WriteBlockToDisk: "+e.getMessage());
+			System.err.println("File not found Error in GeneralUtils.WriteBlockToDisk: "+e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
 			System.err.println("IO "
-					+ "Error in TestUtils.WriteBlockToDisk: "+e.getMessage());			
+					+ "Error in GeneralUtils.WriteBlockToDisk: "+e.getMessage());			
 			e.printStackTrace();
 		} 
 	}

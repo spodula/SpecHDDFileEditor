@@ -212,7 +212,6 @@ public class TrDosDiskFile extends FloppyDisk {
 			}
 		}
 		return result;
-
 	}
 
 	/**

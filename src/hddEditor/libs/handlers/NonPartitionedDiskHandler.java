@@ -151,7 +151,15 @@ public class NonPartitionedDiskHandler extends OSHandler {
 				SystemPart.partitions = new IDEDosPartition[2];
 				SystemPart.partitions[0] = SystemPart;
 				SystemPart.partitions[1] = tdp;
-
+			} else if (fn.endsWith(".SCL")) {
+				TrDosPartition tdp = new TrDosPartition(1, CurrentDisk, rawData, 1, false);
+				tdp.SetPartType(PLUSIDEDOS.PARTITION_DISK_TRDOS);
+				tdp.SetName("TR-DOS disk");
+				tdp.SetStartCyl(0);
+				tdp.SetStartHead(0);
+				SystemPart.partitions = new IDEDosPartition[2];
+				SystemPart.partitions[0] = SystemPart;
+				SystemPart.partitions[1] = tdp;
 			} else {
 				NonCPMDiskImagePartition np3dp = new NonCPMDiskImagePartition(1, CurrentDisk, rawData, 1, false);
 				np3dp.SetPartType(PLUSIDEDOS.PARTITION_UNKNOWN);

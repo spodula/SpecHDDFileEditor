@@ -35,6 +35,7 @@ import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FDD.AMSDiskFile;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
+import hddEditor.libs.disks.FDD.SCLDiskFile;
 import hddEditor.libs.disks.FDD.TrDosDiskFile;
 import hddEditor.libs.disks.HDD.IDEDosDisk;
 import hddEditor.libs.disks.HDD.RS_IDEDosDisk;
@@ -315,6 +316,8 @@ public class HDDEditor {
 				result = new RS_IDEDosDisk(selected);
 			} else if (new AMSDiskFile().IsMyFileType(new File(selected))) {
 				result = new AMSDiskFile(selected);
+			} else if (new SCLDiskFile().IsMyFileType(new File(selected))) {
+				result = new SCLDiskFile(selected);
 			} else if (new TrDosDiskFile().IsMyFileType(new File(selected))) {
 				result = new TrDosDiskFile(selected);
 			} else {
