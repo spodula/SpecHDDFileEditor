@@ -3,10 +3,12 @@ package hddEditor.ui.partitionPages.FileRenderers;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -18,7 +20,9 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.ASMLib;
 import hddEditor.libs.Speccy;
+import hddEditor.libs.ASMLib.DecodedASM;
 
 public class BasicRenderer extends FileRenderer {
 	// Components
@@ -39,8 +43,7 @@ public class BasicRenderer extends FileRenderer {
 	 * @param VariablesOffset
 	 * @param Startline
 	 */
-	public void RenderBasic(Composite mainPage, byte data[], byte header[], String Filename, int filelength,
-			int fileSize, int VariablesOffset, int Startline) {
+	public void RenderBasic(Composite mainPage, byte data[], byte header[], String Filename, int filelength,int VariablesOffset, int Startline) {
 		this.filename = Filename;
 		this.MainPage = mainPage;
 		this.data = data;
@@ -131,7 +134,7 @@ public class BasicRenderer extends FileRenderer {
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsHex(data, mainpage, 0, fileSize);
+				DoSaveFileAsHex(data, mainpage, 0, filelength);
 			}
 
 			@Override
@@ -156,58 +159,8 @@ public class BasicRenderer extends FileRenderer {
 		tc2.setText("Line");
 		tc2.setWidth(600);
 
-		int ptr = 0;
-		int EndOfBasicArea = Math.min(data.length, VariablesOffset);
-		while (ptr < EndOfBasicArea) {
-			int linenum = -1;
-			int linelen = 0;
-			try {
-				linenum = ((data[ptr++] & 0xff) * 256);
-				linenum = linenum + (data[ptr++] & 0xff);
-				linelen = (int) data[ptr++] & 0xff;
-				linelen = linelen + ((int) (data[ptr++] & 0xff) * 256);
-			} catch (Exception E) {
-				System.out.println("Basic parsing error, bad linenum.");
-				String details[] = new String[2];
-				details[0] = "Invalid";
-				details[1] = "Bad line number encountered.";
-
-				TableItem Row = new TableItem(Listing, SWT.NONE);
-				Row.setText(details);
-			}
-
-			if ((ptr >= VariablesOffset) || (linenum < 0)) {
-				// now into the variables area. Ignoring for the moment.
-				ptr = data.length;
-			} else {
-				String sixdigit = String.valueOf(linenum);
-				while (sixdigit.length() < 6) {
-					sixdigit = sixdigit + " ";
-				}
-				StringBuilder sb = new StringBuilder();
-				try {
-
-					byte line[] = new byte[linelen];
-					for (int i = 0; i < linelen; i++) {
-						line[i] = data[ptr + i];
-					}
-
-					Speccy.DecodeBasicLine(sb, line, 0, linelen, false);
-				} catch (Exception E) {
-					sb.append("Bad line: " + E.getMessage());
-				}
-
-				// point to next line.
-				ptr = ptr + linelen;
-
-				String details[] = new String[2];
-				details[0] = sixdigit;
-				details[1] = sb.toString();
-
-				TableItem Row = new TableItem(Listing, SWT.NONE);
-				Row.setText(details);
-			}
-		}
+		AddBasicFile(filelength, VariablesOffset);
+		
 		StartLineEdit.setText(String.valueOf(Startline));
 		VariableStartEdit.setText(String.valueOf(VariablesOffset));
 
@@ -244,6 +197,186 @@ public class BasicRenderer extends FileRenderer {
 
 		this.MainPage.pack();
 
+	}
+
+	/**
+	 * Add the file as BASIC.
+	 * 
+	 * @param filelength
+	 * @param VariablesOffset
+	 */
+	private void AddBasicFile(int filelength, int VariablesOffset) {
+		class RemDetails {
+			public int locationAddr;
+			public int size;
+			public byte data[];
+			public boolean valid = false;
+			public int line;
+		}
+		
+		Font mono = new Font(MainPage.getDisplay(), "Monospace", 10, SWT.NONE);
+
+		ArrayList<RemDetails> RemLocations = new ArrayList<RemDetails>();
+		
+		int ptr = 0;
+		int EndOfBasicArea = Math.min(filelength, VariablesOffset);
+		while (ptr < EndOfBasicArea) {
+			int linenum = -1;
+			int linelen = 0;
+			int OrigLineLen = 0;
+			try {
+				linenum = ((data[ptr++] & 0xff) * 256);
+				linenum = linenum + (data[ptr++] & 0xff);
+				linelen = (int) data[ptr++] & 0xff;
+				linelen = linelen + ((int) (data[ptr++] & 0xff) * 256);
+				//Record original line length for REM purposes. 
+				OrigLineLen  = linelen;
+				//fiddles bad line lengths
+				linelen = Math.min(filelength-ptr+4, linelen);
+			} catch (Exception E) {
+				System.out.println("Basic parsing error, bad linenum.");
+				String details[] = new String[2];
+				details[0] = "Invalid";
+				details[1] = "Bad line number encountered.";
+
+				TableItem Row = new TableItem(Listing, SWT.NONE);
+				Row.setText(details);				
+			}
+
+			if ((ptr >= VariablesOffset) || (linenum < 0)) {
+				// now into the variables area. Ignoring for the moment.
+				ptr = data.length;
+			} else {
+				String sixdigit = String.valueOf(linenum);
+				while (sixdigit.length() < 6) {
+					sixdigit = sixdigit + " ";
+				}
+				StringBuilder sb = new StringBuilder();
+				try {
+					RemDetails rd = new RemDetails();
+					byte line[] = new byte[linelen];
+					for (int i = 0; i < linelen; i++) {
+						line[i] = data[ptr + i];
+						//get the rem details
+						if ((line[i] & 0xff) == (0xEA & 0xff)) {
+							if ( ((i==0) || (line[i-1] == (byte) ':')) && !rd.valid) {
+								rd.locationAddr = ptr+i+1;
+								int RestOfLine = OrigLineLen - rd.locationAddr;
+								int RestOfData = data.length - rd.locationAddr;
+								RestOfLine = Math.min(RestOfLine, RestOfData);
+								rd.size = RestOfLine;
+								byte remdata[] = new byte[RestOfData];
+								System.arraycopy(data, rd.locationAddr, remdata, 0, rd.size);
+								rd.data = remdata;
+								rd.line = linenum;
+								//Check to see if the REM is actually a REM.
+								boolean FoundInvalidChars=false;
+								for (i=0;i<remdata.length;i++) {
+									if ((remdata[i] < ' ') ||(remdata[i] > 127)) {
+										FoundInvalidChars = true;
+									}
+								}
+								rd.valid = FoundInvalidChars;
+							}
+						}
+					}
+					if (rd.valid) {
+						RemLocations.add(rd);
+					}
+
+					Speccy.DecodeBasicLine(sb, line, 0, linelen, false);
+					
+					
+				} catch (Exception E) {
+					sb.append("Bad line: " + E.getMessage());
+				}
+
+				// point to next line.
+				ptr = ptr + linelen;
+
+				String details[] = new String[2];
+				details[0] = sixdigit;
+				details[1] = sb.toString();	
+
+				TableItem Row = new TableItem(Listing, SWT.NONE);
+				Row.setText(details);
+				Row.setFont(mono);
+			}
+		}
+		if (RemLocations.size() > 0) {
+			String details[] = new String[2];
+			details[0] = "";
+			details[1] = "Code in Rem statements:";
+			TableItem Row = new TableItem(Listing, SWT.NONE);
+			Row.setText(details);
+
+			int baseaddress = 23867;
+			
+			for (RemDetails rd:RemLocations) {
+				details = new String[2];
+				details[0] = "Line: "+String.valueOf(rd.line);
+				details[1] = rd.size+" bytes";
+				Row = new TableItem(Listing, SWT.NONE);
+				Row.setText(details);
+				
+				ASMLib asm = new ASMLib();
+				int loadedaddress = baseaddress + rd.locationAddr;
+				int realaddress = 0x0000;
+				int asmData[] = new int[5];
+				try {
+					while (realaddress < rd.data.length) {
+						String chrdata = "";
+						for (int i = 0; i < 5; i++) {
+							int d = 0;
+							if (realaddress + i < data.length) {
+								d = (int) rd.data[realaddress + i] & 0xff;
+							}
+							asmData[i] = d;
+
+							if ((d > 0x1F) && (d < 0x7f)) {
+								chrdata = chrdata + (char) d;
+							} else {
+								chrdata = chrdata + "?";
+							}
+						}
+						// decode instruction
+						DecodedASM Instruction = asm.decode(asmData, loadedaddress);
+						// output it. - First, assemble a list of hex bytes, but pad out to 12 chars
+						// (4x3)
+						String hex = "";
+						for (int j = 0; j < Instruction.length; j++) {
+							hex = hex + String.format("%02X", asmData[j]) + " ";
+						}
+
+						details = new String[2];
+						while (hex.length() < 10) {
+							hex = hex+" ";
+						}
+						details[0] = String.format("%04X", loadedaddress);
+						String textline = hex+" "+Instruction.instruction;
+						while (textline.length() < 40) {
+							textline = textline+" ";
+						}
+						details[1] =textline+" "+chrdata.substring(0, Instruction.length); 
+						
+						Row = new TableItem(Listing, SWT.NONE);
+						Row.setText(details);
+						Row.setFont(mono);
+
+						realaddress = realaddress + Instruction.length;
+						loadedaddress = loadedaddress + Instruction.length;
+
+					} // while
+				} catch (Exception E) {
+					System.out.println("Error at: " + realaddress + "(" + loadedaddress + ")");
+					System.out.println(E.getMessage());
+					E.printStackTrace();
+				}
+			}
+			
+			
+			
+		}
 	}
 
 	/**

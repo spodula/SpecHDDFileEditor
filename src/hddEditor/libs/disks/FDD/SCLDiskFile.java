@@ -1,5 +1,4 @@
 package hddEditor.libs.disks.FDD;
-//TODO: SCL file only works with a few files. Some of the dirents seem to be silly. 
 
 import java.io.File;
 import java.io.IOException;

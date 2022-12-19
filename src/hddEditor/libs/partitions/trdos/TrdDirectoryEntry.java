@@ -334,9 +334,6 @@ public class TrdDirectoryEntry {
 		if (diff > 266) { //difference is out of range. (1 sector + 10 BASIC fiddle bytes)
 			//fiddle the file length.
 			length = FileSizeSectors;
-			if (GetFileType()=='B') {
-				length = length - 10;
-			}
 			System.out.println("GetFileData(): File: "+GetFilename()+" bad length. Fiddling.");
 		}
 		

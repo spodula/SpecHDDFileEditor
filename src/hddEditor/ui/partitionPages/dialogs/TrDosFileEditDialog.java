@@ -132,7 +132,7 @@ public class TrDosFileEditDialog {
 			char ftype = ThisEntry.GetFileType();
 			if (ftype == 'B') {
 				BasicRenderer CurrentRenderer = new BasicRenderer();
-				CurrentRenderer.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, data.length,
+				CurrentRenderer.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), ThisEntry.GetFileLength(), 
 						ThisEntry.GetVar2(), ThisEntry.startline);
 			} else if (ftype != 'D') {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
