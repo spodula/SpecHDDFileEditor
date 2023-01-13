@@ -1,0 +1,49 @@
+Microdrive MDR format
+Details of the layout can be found in: 
+https://sinclair.wiki.zxnet.co.uk/wiki/ZX_Interface_1
+
+This file encodes a number of sectors in blocks of 543 bytes. (0x21f) Encoding 30 bytes of header, 512 bytes of data and a 1 byte checksum
+
+Each sector is laid out in the file as follows:
+
+byte
++-------+------------------------------------------------------------------------------+
+|000	| Sector flag byte Bit0 = sector header.                                       |
+|001	| Sector number - Sectors count down from 0xFF                                 |
+|002	| Unused                                                                       |
+|003	| Unused                                                                       |
+|004-00D| Cart name. Note this is repeated for each sector. - ASCII padded with spaces |
+|00E	| Sector header checksum                                                       | 
+|00F	| RECFLAG2 - Bit2 = IN USE, Bit1 = Last block in file.                         |
+|010 	| Record segment number.- Sequential integer                                   |
+|011-012| Record length (LSB first)                                                    |
+|013-01C| Filename. ASCII padded with spaces                                           |
+|01D 	| File Header checksum                                                         |
+|01E-21D| 512 bytes sector data                                                        |
+|21E    | file data checksum                                                           |
++-------+------------------------------------------------------------------------------+
+
+Each file consists of one or more sectors. The order is recorded in the segment number 0x10
+
+The first 9 bytes of each file in the first block contains the BASIC file header. The format of this is:
+
++-----+-----------------------------------------------------------------------------------------------+
+|00	  | File Type. 00=Basic Program, 01=Numeric Array, 02=Character Array, 03=CODE.          |
+|01-02|	File Length (0x0200H bytes = 512 Bytes )                                                      |
+|03-04|	Address file was saved from (Used when loading code only, but populated for all file types)   |
+|05-06|	* BASIC: start of variables area in file.                                                     |
+|	  | * Numeric arrays: [5] = 0x80 + (variable name - 'A')                                          |
+|	  | * Char array: [5] = 0xC0 + (variable name - 'A')                                              |
+|	  | * Code: Unused (Should be FFh FFh)                                                            |
+|07-08| For BASIC, Autorun line no (lsb first, 0x00 0x80 = No autorun), $FF for all other file types. |
++-----+-----------------------------------------------------------------------------------------------+
+
+Contents of the file:
+bastest,1 sector BASIC 458 bytes, variables at 298, basic line 1234
+codtest,4 sectors, CODE start=1000 length=2000 
+ctest, 1 sector,  character array, 55 bytes, A$(10,5)
+ntest, 1 sector, Numeric array, 80 bytes, B(5,3)
+
+bastest
+
+
