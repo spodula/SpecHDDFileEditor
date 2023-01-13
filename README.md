@@ -4,6 +4,7 @@ This is a java based editor for either Realsoft HDF files or Raw disk Image file
 Features:
 * Open and create Raw Disk image files OR HDF files in both 8 or 16 bit variants. 
 * Open, read and write DSK and TRD files
+* Open, read and write MDF microdrive files.
 * Convert between Hard disk file types
 * Add and delete partitions for various types on hard drives.
 * Add and remove spectrum +3 files on +3DOS and TR-DOS partitions:
