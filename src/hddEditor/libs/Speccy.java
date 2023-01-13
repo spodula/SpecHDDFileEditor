@@ -36,6 +36,7 @@ public class Speccy {
 
 	public static final String[] filetypeNames = { "Basic", "Numeric array", "Char array", "Code" };
 
+
 	/**
 	 * Testing for the number conversion
 	 * 
@@ -1119,4 +1120,18 @@ public class Speccy {
 		}
 		return ((byte) (result & 0xff));
 	}
+
+	/**
+	 * Get a file type as a string.
+	 * @param filetype
+	 * @return
+	 */
+	public static String FileTypeAsString(int filetype) {
+		String result = "Unknown (#"+filetype+")";
+		if ((filetype>-1) || (filetype < 0x04)) {
+			result = filetypeNames[filetype];
+		}
+		return(result);
+	}
+
 }

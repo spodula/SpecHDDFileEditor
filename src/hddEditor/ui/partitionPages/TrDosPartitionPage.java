@@ -394,7 +394,8 @@ public class TrDosPartitionPage extends GenericPage {
 
 				byte[] data = entry.GetFileData();
 				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
-					entry.SetDeleted(true);
+					//entry.SetDeleted(true);
+					
 					// refresh the screen.
 					AddComponents();
 				}

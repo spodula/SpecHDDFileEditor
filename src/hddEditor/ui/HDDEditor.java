@@ -39,13 +39,16 @@ import hddEditor.libs.disks.FDD.SCLDiskFile;
 import hddEditor.libs.disks.FDD.TrDosDiskFile;
 import hddEditor.libs.disks.HDD.IDEDosDisk;
 import hddEditor.libs.disks.HDD.RS_IDEDosDisk;
+import hddEditor.libs.disks.LINEAR.MDFMicrodriveFile;
 import hddEditor.libs.handlers.IDEDosHandler;
+import hddEditor.libs.handlers.LinearTapeHandler;
 import hddEditor.libs.handlers.NonPartitionedDiskHandler;
 import hddEditor.libs.handlers.OSHandler;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.ui.partitionPages.FloppyBootTrackPage;
 import hddEditor.ui.partitionPages.FloppyGenericPage;
 import hddEditor.ui.partitionPages.GenericPage;
+import hddEditor.ui.partitionPages.MicrodrivePartitionPage;
 import hddEditor.ui.partitionPages.PlusThreePartPage;
 import hddEditor.ui.partitionPages.SystemPartPage;
 import hddEditor.ui.partitionPages.TrDosPartitionPage;
@@ -288,6 +291,8 @@ public class HDDEditor {
 					CurrentHandler = new IDEDosHandler(CurrentDisk);
 				} else if (CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_FDD) {
 					CurrentHandler = new NonPartitionedDiskHandler(CurrentDisk);
+				} else if (CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_LINEAR) {
+					CurrentHandler = new LinearTapeHandler(CurrentDisk);
 				} else {
 					System.out.println("Loading failed. - Unable to find OS");
 				}
@@ -320,6 +325,8 @@ public class HDDEditor {
 				result = new SCLDiskFile(selected);
 			} else if (new TrDosDiskFile().IsMyFileType(new File(selected))) {
 				result = new TrDosDiskFile(selected);
+			} else if (new MDFMicrodriveFile().IsMyFileType(new File(selected))) {
+				result = new MDFMicrodriveFile(selected);
 			} else {
 				MessageBox messageBox = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
 				messageBox.setMessage("File " + selected + " is not a Raw HD image,a RS HDF drive image, a DSK file or a TR-DOS file.");
@@ -356,7 +363,7 @@ public class HDDEditor {
 			ArrayList<String> al = new ArrayList<String>();
 			for (IDEDosPartition part : CurrentHandler.SystemPart.partitions) {
 				if (part.GetPartType() != 0) {
-					String s = String.format("%-20s - %-16s %s", part.GetName(), part.GetTypeAsString(),
+					String s = String.format("%-20s - %-16s %s", part.GetName(), PLUSIDEDOS.GetTypeAsString(part.GetPartType()),
 							GeneralUtils.GetSizeAsString(part.GetSizeK() * 1024));
 					al.add(s);
 				}
@@ -364,7 +371,13 @@ public class HDDEditor {
 			entries = al.toArray(new String[0]);
 		}
 		PartitionDropdown.setItems(entries);
-		PartitionDropdown.setText(entries[0]);
+		
+		//QOL improvement, GDS 11 Jan: if we are NOT dealing with a hard drive, default to probably the only real partition.
+		if (CurrentDisk.GetMediaType() ==  PLUSIDEDOS.MEDIATYPE_HDD) {
+			PartitionDropdown.setText(entries[0]);
+		} else {
+			PartitionDropdown.setText(entries[entries.length-1]);
+		}
 		ComboChanged();
 	}
 
@@ -421,6 +434,9 @@ public class HDDEditor {
 			break;
 		case PLUSIDEDOS.PARTITION_DISK_TRDOS:
 			new TrDosPartitionPage(this, MainPage, part);
+			break;
+		case PLUSIDEDOS.PARTITION_TAPE_SINCLAIRMICRODRIVE:
+			new MicrodrivePartitionPage(null, MainPage, part);
 			break;
 		case PLUSIDEDOS.PARTITION_UNKNOWN:
 			new FloppyGenericPage(null, MainPage, part);

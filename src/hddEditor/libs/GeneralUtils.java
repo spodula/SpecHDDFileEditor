@@ -144,7 +144,7 @@ public class GeneralUtils {
 		for (IDEDosPartition p : Sysp.partitions) {
 			if (p.GetPartType() > 0) {
 				String result = p.DirentNum + ": " + GeneralUtils.PadTo(p.GetName(), 17);
-				result = result + GeneralUtils.PadTo(p.GetTypeAsString(), 8);
+				result = result + GeneralUtils.PadTo(PLUSIDEDOS.GetTypeAsString(p.GetPartType()), 8);
 				result = result + String.format("%4d/%2d - %4d/%2d + %5d  ", p.GetStartCyl(), p.GetStartHead(),
 						p.GetEndCyl(), p.GetEndHead(), p.GetEndSector());
 				result = result + GeneralUtils.GetSizeAsString(p.GetSizeK() * 1024);

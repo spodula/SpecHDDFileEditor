@@ -352,7 +352,7 @@ public class SystemPartPage extends GenericPage {
 					TableItem item2 = new TableItem(PartitionTable, SWT.NONE);
 					String content[] = new String[5];
 					content[0] = part.GetName();
-					content[1] = part.GetTypeAsString();
+					content[1] = PLUSIDEDOS.GetTypeAsString( part.GetPartType());
 					content[2] = "Cyl:" + part.GetStartCyl() + " Head:" + part.GetStartHead();
 					content[3] = "Cyl:" + part.GetEndCyl() + " Head:" + part.GetEndHead();
 					content[4] = GeneralUtils.GetSizeAsString(part.GetSizeK() * 1024);
@@ -823,16 +823,15 @@ public class SystemPartPage extends GenericPage {
 			HxEditDialog = new HexEditDialog(ParentComp.getDisplay());
 
 			if (!ParentComp.isDisposed()) {
-				int PartSize = (int) part.GetEndSector() * part.CurrentDisk.GetSectorSize();
 				boolean WriteBackData = false;
 				byte[] data;
 				try {
-					data = part.GetDataInPartition(0, PartSize);
+					data = part.GetAllDataInPartition();
 					AddressNote an[] = part.GetAddressNotes();
-					WriteBackData = HxEditDialog.Show(data, "Editing " + partName + " (" + part.GetTypeAsString() + ")",
+					WriteBackData = HxEditDialog.Show(data, "Editing " + partName + " (" +PLUSIDEDOS.GetTypeAsString( part.GetPartType()) + ")",
 							an);
 					if (WriteBackData) {
-						part.SetDataInPartition(0, HxEditDialog.Data);
+						part.SetAllDataInPartition(HxEditDialog.Data);
 						part.Reload();
 						if (part.GetPartType() == PLUSIDEDOS.PARTITION_SYSTEM) {
 							RootPage.LoadFile(RootPage.CurrentDisk.GetFilename());

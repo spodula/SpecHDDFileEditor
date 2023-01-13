@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.ui.HDDEditor;
 
@@ -133,7 +134,7 @@ public class GenericPage {
 			//but for the system partition, this cannot be changed. 
 		   RemoveComponents();
 		   label("Name: "+partition.GetName(),1);
-		   label("Type: "+partition.GetTypeAsString(),1);
+		   label("Type: "+PLUSIDEDOS.GetTypeAsString(partition.GetPartType()),1);
 		   label("Size (c/h): "+partition.GetStartCyl()+"/"+partition.GetStartHead()+" - "+partition.GetEndCyl()+"/"+partition.GetEndHead(),1);
 		   label("Last sector: "+partition.GetEndSector(),1);
 		   ParentComp.pack();

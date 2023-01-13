@@ -191,6 +191,7 @@ public class BasicRenderer extends FileRenderer {
 
 		int varlen = filelength - VariablesOffset;
 		byte variables[] = new byte[varlen];
+		
 		System.arraycopy(data, VariablesOffset, variables, 0, varlen);
 
 		DecodeVariables(this.MainPage, variables);

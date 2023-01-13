@@ -168,7 +168,6 @@ public class NonPartitionedDiskHandler extends OSHandler {
 				SystemPart.partitions[0] = SystemPart;
 				SystemPart.partitions[1] = np3dp;
 			}
-
 		} catch (Exception E) {
 			NonCPMDiskImagePartition ncdip = new NonCPMDiskImagePartition(1, CurrentDisk, rawData, 1, false);
 			ncdip.SetPartType(PLUSIDEDOS.PARTITION_UNKNOWN);

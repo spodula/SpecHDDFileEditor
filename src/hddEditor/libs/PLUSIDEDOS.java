@@ -4,8 +4,9 @@ public class PLUSIDEDOS {
 	/*
 	 * Media tyoes
 	 */
-	public static final int MEDIATYPE_HDD = 0x01;
-	public static final int MEDIATYPE_FDD = 0x02;
+	public static final int MEDIATYPE_HDD = 0x01; //hard drives
+	public static final int MEDIATYPE_FDD = 0x02; //Floppy drives
+	public static final int MEDIATYPE_LINEAR = 0x03; //Tapes / Microdrives
 
 	/*
 	 * Partition types.
@@ -30,6 +31,8 @@ public class PLUSIDEDOS {
 	public static final int PARTITION_DISK_AMSTRADPCW = 0x49;
 	public static final int PARTITION_BAD = 0xFE;
 	public static final int PARTITION_FREE = 0xFF;
+	//These are not valid Partition IDs, just used by this program
+	public static final int PARTITION_TAPE_SINCLAIRMICRODRIVE = 0x70;
 
 	/*
 	 * Partition flags
@@ -232,4 +235,73 @@ public class PLUSIDEDOS {
 		}
 		return (result);
 	}
+	
+	/**
+	 * Convert the Partition type into a description.
+	 * 
+	 * @return
+	 */
+	public static String GetTypeAsString(int partType) {
+		String result = "Invalid";
+		switch (partType) {
+		case 0:
+			result = " Unused ";
+			break;
+		case 1:
+			result = " System ";
+			break;
+		case 2:
+			result = " Swap   ";
+			break;
+		case 3:
+			result = " +3DOS  ";
+			break;
+		case 4:
+			result = " CPM    ";
+			break;
+		case 5:
+			result = " Boot   ";
+			break;
+		case 0x10:
+			result = " MS-DOS ";
+			break;
+		case 0x20:
+			result = " UZI(X) ";
+			break;
+		case 0x30:
+			result = " TR-DOS ";
+			break;
+		case 0x31:
+			result = " SAMDOS ";
+			break;
+		case 0x32:
+			result = " MB-02  ";
+			break;
+		case 0x33:
+			result = " TOS A.2";
+			break;
+		case 0x40:
+			result = " +3 Floppy image";
+			break;
+		case 0x41:
+			result = " Elwo 800 Jr Image";
+			break;
+		case 0x48:
+			result = " Amstrad CPC image";
+			break;
+		case 0x49:
+			result = " Amstrad PCW image";
+			break;
+		case 0xfe:
+			result = " BAD    ";
+			break;
+		case 0xff:
+			result = " Free  ";
+			break;
+		case 0x70: 
+			result = " Microdrive cart";
+		}
+		return (result);
+	}
+	
 }

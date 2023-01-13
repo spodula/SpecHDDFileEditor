@@ -1,9 +1,5 @@
 package hddEditor.ui.partitionPages.dialogs;
 
-/**
- * Add files to the +3DOS partition
- */
-
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -12,7 +8,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
@@ -20,8 +15,6 @@ import javax.imageio.ImageIO;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
@@ -47,11 +40,10 @@ import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.CPM;
 import hddEditor.libs.Speccy;
-import hddEditor.libs.partitions.PLUS3DOSPartition;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
-import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
+import hddEditor.libs.partitions.SinclairMicrodrivePartition;
+import hddEditor.libs.partitions.mdf.MicrodriveDirectoryEntry;
 
-public class AddFilesToPlus3Partition {
+public class AddFilesToMDRPartition {
 	private Display display = null;
 	private Shell shell = null;
 
@@ -61,16 +53,16 @@ public class AddFilesToPlus3Partition {
 	private Table DirectoryListing = null;
 	private Slider intensitySlider = null;
 	private Text StartLine = null;
+	private Text LoadAddress = null;
 	private Composite MainPage = null;
 	private Label ImageLabel = null;
 	private Button IsBWCheck = null;
-	private Text StartAddress = null;
 
 	/*
 	 * Current disk.
 	 */
-	private PLUS3DOSPartition CurrentPartition = null;
-
+	private SinclairMicrodrivePartition CurrentPartition = null;
+	
 	/*
 	 * File types. Note, 0-3 correspond to the normal speccy file types, 4 and 5 are
 	 * types used to denote additional processing.
@@ -80,8 +72,7 @@ public class AddFilesToPlus3Partition {
 	private final static int FILETYPE_CHRARRAY = 2;
 	private final static int FILETYPE_CODE = 3;
 	private final static int FILETYPE_SCREEN = 4;
-	private final static int FILETYPE_CPM = 5;
-
+	
 	/*
 	 * This class is used to store the details the files we want to add.
 	 */
@@ -90,46 +81,42 @@ public class AddFilesToPlus3Partition {
 		public File OriginalFilename = null;
 		// Filename as converted to CPM.
 		public String filename = null;
-		// +3DOS file header of the file already has one.
-		public Plus3DosFileHeader fileheader = null;
 		// File type as defined above.
-		public int FileType = FILETYPE_CPM;
+		public int FileType = FILETYPE_BASIC;
 		// If the file is an image file, this contains the original image. Used so the
 		// user can edit it.
 		public BufferedImage OriginalImage = null;
-		//Load address for CODE files
-		public int LoadAddress = 32768;
-		
-		// Intensity
+		// Intensity (SCREEN$)
 		public int Intensity = 0;
-		// BW
+		// BW/colour flag (SCREEN$)
 		public boolean IsBlackWhite = false;
+		//Start line number (BASIC)
+		public int line=0;
+		//Load address (CODE)
+		public int loadaddress = 0;
 		// Raw file data.
 		public byte[] data = null;
-
 	}
-
+	
 	/**
-	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public AddFilesToPlus3Partition(Display display) {
+	public AddFilesToMDRPartition(Display display) {
 		this.display = display;
 	}
-
+	
 	/**
 	 * Show the dialog
 	 * 
 	 * @param title
 	 * @param p3d
 	 */
-	public void Show(String title, PLUS3DOSPartition p3d) {
-		CurrentPartition = p3d;
+	public void Show(String title, SinclairMicrodrivePartition smp) {
+		CurrentPartition = smp;
 		Createform(title);
 		loop();
 	}
-
 	/**
 	 * Create the components on the form.
 	 * 
@@ -155,21 +142,6 @@ public class AddFilesToPlus3Partition {
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
 		Button Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select +3 Files with headers");
-		Btn.setLayoutData(gd);
-		Btn.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				DoAddPlus3Files();
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				widgetSelected(arg0);
-			}
-		});
-
-		Btn = new Button(shell, SWT.PUSH);
 		Btn.setText("Select Text BASIC file");
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
@@ -259,21 +231,6 @@ public class AddFilesToPlus3Partition {
 			}
 		});
 
-		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select CPM file");
-		Btn.setLayoutData(gd);
-		Btn.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				DoAddCPMFiles();
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				widgetSelected(arg0);
-			}
-		});
-
 		DirectoryListing = new Table(shell, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		DirectoryListing.setLinesVisible(true);
 
@@ -288,7 +245,7 @@ public class AddFilesToPlus3Partition {
 		TableColumn tc4 = new TableColumn(DirectoryListing, SWT.LEFT);
 		TableColumn tc5 = new TableColumn(DirectoryListing, SWT.LEFT);
 		tc1.setText("Filename");
-		tc2.setText("+3 Filename");
+		tc2.setText("Microdrive Filename");
 		tc3.setText("Type");
 		tc4.setText("Length");
 		tc5.setText("Flags");
@@ -347,30 +304,16 @@ public class AddFilesToPlus3Partition {
 				widgetSelected(arg0);
 			}
 		});
+		
+		l = new Label(shell, SWT.LEFT);
+		l.setText("CODE load address: ");
 
-		l = new Label(shell, SWT.NONE);
-		l.setText("CODE load address:");
-		StartAddress = new Text(shell, SWT.NONE);
-		StartAddress.setText("32768");
-		StartAddress.addFocusListener(new FocusListener() {
-			@Override
-			public void focusLost(FocusEvent arg0) {
-				TableItem SelectedFiles[] = DirectoryListing.getSelection();
-				if (SelectedFiles!=null && SelectedFiles.length > 0) {
-					NewFileListItem details = (NewFileListItem) SelectedFiles[0].getData();
-					if (details!=null) {
-						details.LoadAddress = Integer.valueOf(StartAddress.getText());
-						System.out.println("Reset load address");
-					}
-				}
-			}
-			
-			@Override
-			public void focusGained(FocusEvent arg0) {
-			}
-		});
-		
-		
+		LoadAddress = new Text(shell, SWT.BORDER);
+		LoadAddress.setText("16384");
+
+
+		new Label(shell, SWT.NONE);
+		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
 
 		Label IntensityLabel = new Label(shell, SWT.LEFT);
@@ -461,92 +404,7 @@ public class AddFilesToPlus3Partition {
 		}
 		shell.dispose();
 	}
-
-	/**
-	 * Select files to be added. The files should have the 128 byte Spectrum +3DOS
-	 * header.
-	 */
-	protected void DoAddPlus3Files() {
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
-		fd.setText("Open");
-		String[] filterExt = { "*" };
-		fd.setFilterExtensions(filterExt);
-		if ((fd.open() != null) && (fd.getFileNames().length > 0)) {
-			/*
-			 * Iterate all files selected...
-			 */
-			for (String filename : fd.getFileNames()) {
-				File FilePath = new File(fd.getFilterPath());
-				byte HeaderBuffer[] = new byte[0x80];
-				byte data[] = null;
-				InputStream is = null;
-				try {
-					/*
-					 * Open the file and load it.
-					 */
-					Plus3DosFileHeader p3d = null;
-					File filedets = new File(FilePath, filename);
-					try {
-						is = new FileInputStream(filedets);
-						int numRead = is.read(HeaderBuffer);
-						if (numRead < HeaderBuffer.length) {
-							byte newbuffer[] = new byte[numRead];
-							System.arraycopy(HeaderBuffer, 0, newbuffer, 0, numRead);
-							HeaderBuffer = newbuffer;
-						}
-						p3d = new Plus3DosFileHeader(HeaderBuffer);
-						data = new byte[p3d.filelength];
-						numRead = is.read(data);
-						if (numRead < data.length) {
-							System.out.println("File terminated before +3DOS header says it should.");
-						}
-					} finally {
-						if (is != null)
-							is.close();
-					}
-					/*
-					 * Try to identify the file type.
-					 */
-					// Check for a +3DOS header
-					if (p3d.IsPlusThreeDosFile) {
-						String DosFileName = UniqueifyName(CPM.FixFullName(filename));
-						String filetypeName = p3d.getTypeDesc() + "(+3Dos Header)";
-
-						TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
-						String values[] = new String[5];
-						values[0] = filedets.getAbsolutePath();
-						values[1] = DosFileName;
-						values[2] = filetypeName;
-						values[3] = String.valueOf(p3d.filelength);
-						values[4] = "";
-
-						byte newdata[] = new byte[data.length + 0x80];
-
-						System.arraycopy(HeaderBuffer, 0, newdata, 0, 0x80);
-						System.arraycopy(data, 0, newdata, 0x80, data.length);
-
-						NewFileListItem listitem = new NewFileListItem();
-						listitem.OriginalFilename = filedets;
-						listitem.filename = DosFileName;
-						listitem.fileheader = p3d;
-						listitem.FileType = FILETYPE_CPM;
-						listitem.LoadAddress = p3d.loadAddr;
-						listitem.data = newdata;
-
-						item2.setText(values);
-						item2.setData(listitem);
-					} else {
-						System.out.println("File " + filename + " does not have a +3DOS header.");
-					}
-				} catch (FileNotFoundException E) {
-					System.out.println("Error reading " + filename + " File not found.");
-				} catch (IOException E) {
-					System.out.println("Error reading " + filename + " " + E.getMessage());
-				}
-			}
-		}
-	}
-
+	
 	/**
 	 * Add a text file as a BASIC file.
 	 */
@@ -607,7 +465,7 @@ public class AddFilesToPlus3Partition {
 				NewFileListItem listitem = new NewFileListItem();
 				listitem.OriginalFilename = filedets;
 				listitem.filename = values[1];
-				listitem.fileheader = null;
+				listitem.line = Integer.parseInt(StartLine.getText());
 				listitem.FileType = FILETYPE_BASIC;
 				listitem.data = data;
 
@@ -668,7 +526,7 @@ public class AddFilesToPlus3Partition {
 				NewFileListItem listitem = new NewFileListItem();
 				listitem.OriginalFilename = filedets;
 				listitem.filename = DosFileName;
-				listitem.fileheader = null;
+				listitem.line = Integer.parseInt(StartLine.getText());
 				listitem.FileType = FILETYPE_BASIC;
 				listitem.data = buffer;
 
@@ -732,9 +590,8 @@ public class AddFilesToPlus3Partition {
 				NewFileListItem listitem = new NewFileListItem();
 				listitem.OriginalFilename = filedets;
 				listitem.filename = DosFileName;
-				listitem.fileheader = null;
+				listitem.loadaddress = Integer.parseInt(LoadAddress.getText());
 				listitem.FileType = FILETYPE_CODE;
-				listitem.LoadAddress =  Integer.valueOf(StartAddress.getText());
 				listitem.data = buffer;
 
 				/*
@@ -746,67 +603,6 @@ public class AddFilesToPlus3Partition {
 		}
 	}
 
-	/**
-	 * Add file(s) as raw CPM files (EG, Headerless).
-	 */
-	protected void DoAddCPMFiles() {
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
-		fd.setText("Open CPM file");
-		String[] filterExt = { "*" };
-		fd.setFilterExtensions(filterExt);
-		if ((fd.open() != null) && (fd.getFileNames().length > 0)) {
-			for (String filename : fd.getFileNames()) {
-				File FilePath = new File(fd.getFilterPath());
-				File filedets = new File(FilePath, filename);
-
-				/*
-				 * Load the file
-				 */
-				byte buffer[] = new byte[(int) filedets.length()];
-				FileInputStream is = null;
-				try {
-					try {
-						is = new FileInputStream(filedets);
-						is.read(buffer);
-					} finally {
-						if (is != null)
-							is.close();
-					}
-				} catch (IOException e) {
-					System.out.println("Error loading file!");
-				}
-
-				/*
-				 * Create the Row texts
-				 */
-				String DosFileName = UniqueifyName(CPM.FixFullName(filename));
-				TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
-				String values[] = new String[5];
-				values[0] = filedets.getAbsolutePath();
-				values[1] = DosFileName;
-				values[2] = "CPM";
-				values[3] = String.valueOf(buffer.length);
-				values[4] = "";
-
-				/*
-				 * Create the data storage object
-				 */
-				NewFileListItem listitem = new NewFileListItem();
-				listitem.OriginalFilename = filedets;
-				listitem.filename = DosFileName;
-				listitem.fileheader = null;
-				listitem.FileType = FILETYPE_CPM;
-				listitem.LoadAddress = Integer.valueOf(StartAddress.getText());
-				listitem.data = buffer;
-
-				/*
-				 * Add the row
-				 */
-				item2.setText(values);
-				item2.setData(listitem);
-			}
-		}
-	}
 
 	/**
 	 * Convert and Add image files as SCREEN$ errors Supports all image types
@@ -838,7 +634,7 @@ public class AddFilesToPlus3Partition {
 					/*
 					 * Create the row texts.
 					 */
-					String DosFileName = UniqueifyName(CPM.FixFullName(filename));
+					String DosFileName = UniqueifyName(filename.substring(0,10).toLowerCase());
 					TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 					String values[] = new String[5];
 					values[0] = filedets.getAbsolutePath();
@@ -854,13 +650,12 @@ public class AddFilesToPlus3Partition {
 					NewFileListItem listitem = new NewFileListItem();
 					listitem.OriginalFilename = filedets;
 					listitem.filename = DosFileName;
-					listitem.fileheader = null;
+					listitem.loadaddress = 0x4000;
 					listitem.FileType = FILETYPE_SCREEN;
 					listitem.data = buffer;
 					listitem.OriginalImage = RawImage;
 					listitem.Intensity = bwslider;
 					listitem.IsBlackWhite = IsBWCheck.getSelection();
-					listitem.LoadAddress = 0x4000;
 
 					/*
 					 * Add the row.
@@ -1099,9 +894,9 @@ public class AddFilesToPlus3Partition {
 			}
 		}
 		// make the entire attribute area black on white.
-		byte wob = Speccy.ToAttribute(Speccy.COLOUR_BLACK, Speccy.COLOUR_WHITE, false, false);
+		byte WhiteOnBlack = Speccy.ToAttribute(Speccy.COLOUR_BLACK, Speccy.COLOUR_WHITE, false, false);
 		for (int i = 0x1800; i < 0x1b00; i++) {
-			Screen[i] = wob;
+			Screen[i] = WhiteOnBlack;
 		}
 
 		return (Screen);
@@ -1215,7 +1010,6 @@ public class AddFilesToPlus3Partition {
 					listitem.OriginalFilename = filedets;
 					listitem.filename = DosFileName;
 					listitem.FileType = FILETYPE_NUMARRAY;
-					listitem.fileheader = null;
 					listitem.data = ArrayAsBytes;
 
 					/*
@@ -1402,7 +1196,6 @@ public class AddFilesToPlus3Partition {
 					NewFileListItem listitem = new NewFileListItem();
 					listitem.OriginalFilename = filedets;
 					listitem.filename = DosFileName;
-					listitem.fileheader = null;
 					listitem.FileType = FILETYPE_CHRARRAY;
 					listitem.data = ArrayAsBytes;
 
@@ -1427,32 +1220,28 @@ public class AddFilesToPlus3Partition {
 		for (TableItem file : files) {
 			NewFileListItem details = (NewFileListItem) file.getData();
 			try {
+				byte data[] = details.data;
+				
 				// Default variable name for arrays
-				char varname = 'A';
 				switch (details.FileType) {
-				case FILETYPE_CPM:
-					CurrentPartition.AddCPMFile(details.filename, details.data);
-					break;
 				case FILETYPE_BASIC:
 					String Startline = StartLine.getText();
 					int line = Integer.valueOf(Startline);
-					CurrentPartition.AddBasicFile(details.filename, details.data, line, details.data.length - 0x80);
+					CurrentPartition.AddBasicFile(details.filename, data, line, data.length - 0x80);
 					break;
 				case FILETYPE_CHRARRAY:
-					CurrentPartition.AddPlusThreeFile(details.filename, details.data, varname * 0x100, 0,
-							Speccy.BASIC_CHRARRAY);
+					CurrentPartition.AddCharArray(details.filename, data, "A");
 					break;
 				case FILETYPE_NUMARRAY:
-					CurrentPartition.AddPlusThreeFile(details.filename, details.data, varname * 0x100, 0,
-							Speccy.BASIC_NUMARRAY);
+					CurrentPartition.AddNumericArray(details.filename, data, "A");
 					break;
 				case FILETYPE_CODE:
 					// for CODE files, put at the top of memory
-					CurrentPartition.AddRawCodeFile(details.filename, details.LoadAddress, details.data);
+					CurrentPartition.AddCodeFile(details.filename, data, details.loadaddress);
 					break;
 				case FILETYPE_SCREEN:
 					// For Screen$ files, these start at 16384 (0x4000)
-					CurrentPartition.AddRawCodeFile(details.filename, 0x4000, details.data);
+					CurrentPartition.AddCodeFile(details.filename, data, 0x4000);
 					break;
 				}
 			} catch (IOException e) {
@@ -1490,31 +1279,7 @@ public class AddFilesToPlus3Partition {
 			int treatAs = details.FileType;
 			byte data[] = details.data;
 
-			/*
-			 * For files that already have a +3DOS header, Convert them into the proper type
-			 * for rendering.
-			 */
-			if (details.FileType == FILETYPE_CPM) {
-				Plus3DosFileHeader pfd = details.fileheader;
-				if (pfd != null) {
-					// Remove the +3DOS for the purposes of rendering the file.
-					byte newdata[] = new byte[data.length - 0x80];
-					System.arraycopy(data, 0x80, newdata, 0, newdata.length);
-					data = newdata;
 
-					// We will treat it as the type of file in the +3DOS header
-					treatAs = pfd.filetype;
-
-					// If the file is CODE, and length 6912, treat as a screen.
-					if ((pfd.filetype == FILETYPE_CODE) && (pfd.filelength == 6912)) {
-						treatAs = FILETYPE_SCREEN;
-					}
-				}
-			}
-			
-			if (treatAs == FILETYPE_CODE || treatAs == FILETYPE_SCREEN)
-				StartAddress.setText(String.valueOf(details.LoadAddress));
-			
 			/*
 			 * Actually render the file
 			 */
@@ -1529,7 +1294,6 @@ public class AddFilesToPlus3Partition {
 				RenderNumArray(data);
 				break;
 			case FILETYPE_CODE:
-			case FILETYPE_CPM:
 				RenderCode(data);
 				break;
 			case FILETYPE_SCREEN:
@@ -1543,14 +1307,8 @@ public class AddFilesToPlus3Partition {
 	}
 
 	private void RenderBasic(byte data[], NewFileListItem details) {
-		Plus3DosFileHeader pfd = details.fileheader;
-		if (pfd == null) {
-			byte tmpbyte[] = new byte[0x80];
-			pfd = new Plus3DosFileHeader(tmpbyte);
-			pfd.VariablesOffset = data.length;
-		}
 		StringBuilder sb = new StringBuilder();
-		Speccy.DecodeBasicFromLoadedFile(data, sb, pfd.VariablesOffset, false, false);
+		Speccy.DecodeBasicFromLoadedFile(data, sb, data.length, false, false);
 
 		Text t = new Text(MainPage, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
 		GridData gd = new GridData(GridData.FILL_BOTH);
@@ -1846,29 +1604,16 @@ public class AddFilesToPlus3Partition {
 	}
 
 	/**
-	 * Modify the given filename so its unique in the current selection. Note, this
-	 * has a limitation that it will probably not work properly over >999 files, but
-	 * that is more than the default number of dirents (511), so *should* be ok.
+	 * Modify the given filename so its unique in the current selection. 
 	 * 
 	 * @param s
 	 * @return
 	 */
 	private String UniqueifyName(String s) {
-		String result = s;
-
+		String result = s.toLowerCase();
 		/*
 		 * Extract the filename and default extension from the file.
 		 */
-		String filename = "";
-		String extension = "";
-		if (result.contains(".")) {
-			int i = result.lastIndexOf(".");
-			extension = result.substring(i + 1);
-			filename = result.substring(0, i);
-		} else {
-			filename = result;
-		}
-
 		/*
 		 * Make a list of the files already added.
 		 */
@@ -1881,8 +1626,8 @@ public class AddFilesToPlus3Partition {
 		/*
 		 * Add in the files on the disk..
 		 */
-		for (DirectoryEntry d : CurrentPartition.DirectoryEntries) {
-			String fname = d.filename();
+		for (MicrodriveDirectoryEntry d : CurrentPartition.Files ) {
+			String fname = d.GetFilename();
 			currentlist.add(fname);
 		}
 
@@ -1891,14 +1636,15 @@ public class AddFilesToPlus3Partition {
 		 */
 		int num = 1;
 		boolean FileFound = true;
+		String origfile = result;
 		while (FileFound) {
 			FileFound = currentlist.indexOf(result) > -1;
 			if (FileFound) {
-				extension = String.valueOf(num++);
-				while (extension.length() < 3) {
-					extension = "0" + extension;
+				String numstr = String.valueOf(num++);
+				if (numstr.length() + origfile.length() > 10) {
+					origfile = origfile.substring(0,10-numstr.length());
 				}
-				result = filename.trim() + "." + extension.trim();
+				result = origfile + numstr;
 			}
 		}
 		/*
@@ -1924,4 +1670,6 @@ public class AddFilesToPlus3Partition {
 
 	}
 
+	
+	
 }
