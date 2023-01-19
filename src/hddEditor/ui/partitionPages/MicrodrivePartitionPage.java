@@ -2,9 +2,7 @@ package hddEditor.ui.partitionPages;
 //TODO: Implement Microdrive defrag.
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -162,7 +160,35 @@ public class MicrodrivePartitionPage extends GenericPage {
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
-					DoExtractAllFiles();
+					DoExtractAllFilesRaw();
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+			Btn = new Button(ParentComp, SWT.PUSH);
+			Btn.setText("Extract all Files (Code=Asm)");
+			Btn.setLayoutData(gd);
+			Btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					DoExtractAllFilesAsm();
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+			Btn = new Button(ParentComp, SWT.PUSH);
+			Btn.setText("Extract all Files (Code=Hex)");
+			Btn.setLayoutData(gd);
+			Btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					DoExtractAllFilesHex();
 				}
 
 				@Override
@@ -348,28 +374,45 @@ public class MicrodrivePartitionPage extends GenericPage {
 	 * Extract all files on this cartridge to a given folder
 	 * 
 	 */
-	protected void DoExtractAllFiles() {
+	protected void DoExtractAllFilesRaw() {
 		DirectoryDialog dialog = new DirectoryDialog(ParentComp.getShell());
 		dialog.setText("Select folder for export to");
 		String result = dialog.open();
 		if (result != null) {
 			File directory = new File(result);
-			for (TableItem t : DirectoryListing.getItems()) {
-				MicrodriveDirectoryEntry entry = (MicrodriveDirectoryEntry) t.getData();
-				try {
-					File TargetFilename = new File(directory, entry.GetFilename().trim());
-					byte file[] = entry.GetFileData();
-					OutputStream outputStream = new FileOutputStream(TargetFilename);
-					try {
-						outputStream.write(file);
-					} finally {
-						outputStream.close();
-					}
-					System.out.println("Written " + entry.GetFilename().trim());
-				} catch (IOException e) {
-					System.out.println("Error extracting " + entry.GetFilename().trim() + ": " + e.getMessage());
-					e.printStackTrace();
-				}
+			try {
+				partition.ExtractPartitiontoFolder(directory, true, false);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+
+	protected void DoExtractAllFilesHex() {
+		DirectoryDialog dialog = new DirectoryDialog(ParentComp.getShell());
+		dialog.setText("Select folder for export to");
+		String result = dialog.open();
+		if (result != null) {
+			File directory = new File(result);
+			try {
+				partition.ExtractPartitiontoFolder(directory, false, true);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	protected void DoExtractAllFilesAsm() {
+		DirectoryDialog dialog = new DirectoryDialog(ParentComp.getShell());
+		dialog.setText("Select folder for export to");
+		String result = dialog.open();
+		if (result != null) {
+			File directory = new File(result);
+			try {
+				partition.ExtractPartitiontoFolder(directory, false, false);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}

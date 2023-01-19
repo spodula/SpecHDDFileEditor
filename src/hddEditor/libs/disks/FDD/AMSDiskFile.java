@@ -1,4 +1,4 @@
-package hddEditor.libs.disks.FDD; 
+package hddEditor.libs.disks.FDD;
 
 /**
 
@@ -70,6 +70,7 @@ package hddEditor.libs.disks.FDD;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -78,16 +79,17 @@ import java.nio.charset.StandardCharsets;
 import hddEditor.libs.GeneralUtils;
 
 public class AMSDiskFile extends FloppyDisk {
+	private static String AMSDISKHEADER_NORMAL = "MV - CPCEMU Disk-File\r\n";
+	private static String AMSDISKHEADER_EXTENDED = "EXTENDED CPC DSK File\r\n";
+	private static String AMSDISKTRACKHEADER = "Track-Info\r\n";
 
 	private String Creator = "";
-
 
 	// Copy of the disk information block at the start of the DSK file
 	private byte DiskInfoBlock[] = new byte[256];
 
 	// Parsed version of above.
 	private DiskInfo ParsedDiskInfo = null;
-
 
 	public boolean IsValid = false;
 
@@ -132,7 +134,6 @@ public class AMSDiskFile extends FloppyDisk {
 			diskTracks = new TrackInfo[GetNumHeads() * GetNumCylinders()];
 			int Tracknum = 0;
 
-			
 			// Track sizes can be variable in the case of extended disks.
 			// eg, in the case of some copy protection methods.
 			// its easier to just load each track into an array.
@@ -205,7 +206,6 @@ public class AMSDiskFile extends FloppyDisk {
 						CurrentSector.ActualSize = CurrentTrack.sectorsz;
 					}
 					// Add sector
-//					System.out.println(i+ ": "+CurrentSector.ActualSize);
 					CurrentTrack.Sectors[i] = CurrentSector;
 					sectorbase = sectorbase + 8;
 					NumLogicalSectors++;
@@ -243,7 +243,6 @@ public class AMSDiskFile extends FloppyDisk {
 		IsValid = true;
 	}
 
-
 	/**
 	 * Can we open this file type....
 	 */
@@ -274,14 +273,15 @@ public class AMSDiskFile extends FloppyDisk {
 		AMSDiskFile h;
 		try {
 			// String filename = "/data1/IDEDOS/Workbench2.3_4Gb_8Bits.hdf";
-			String filename = "/home/graham/dev/disks/DSK/Amstrad Compilation Disk Spectrum Plus 3 - Side A.dsk";
+			String filename = "/home/graham/test-extended.dsk";
 			if (new AMSDiskFile().IsMyFileType(new File(filename))) {
+//				new AMSDiskFile().CreateBlankAMSDisk(filename,true);
 				h = new AMSDiskFile(filename);
 				System.out.println(h);
 				System.out.println("Track 1:");
 				byte data[] = h.GetBytesStartingFromSector(9, 512);
 				System.out.println(GeneralUtils.HexDump(data, 0, 512));
-				//data[2] = 0x49;
+				// data[2] = 0x49;
 				h.SetLogicalBlockFromSector(9, data);
 				System.out.println("Track 1:");
 				data = h.GetBytesStartingFromSector(9, 512);
@@ -329,7 +329,7 @@ public class AMSDiskFile extends FloppyDisk {
 			FirstSector++;
 			if (FirstSector > Track.maxsectorID) {
 				TrackNum++;
-				if (TrackNum < diskTracks.length ) {
+				if (TrackNum < diskTracks.length) {
 					Track = diskTracks[TrackNum];
 					FirstSector = Track.minsectorID;
 				} else {
@@ -378,7 +378,8 @@ public class AMSDiskFile extends FloppyDisk {
 	}
 
 	/**
-	 * Write the given sector back to disk. 
+	 * Write the given sector back to disk.
+	 * 
 	 * @param sect
 	 */
 	private void WriteSector(Sector sect) {
@@ -386,18 +387,138 @@ public class AMSDiskFile extends FloppyDisk {
 			inFile.seek(sect.SectorStart);
 			inFile.write(sect.data);
 		} catch (IOException e) {
-			System.out.println("Failed writing sector...."+e.getMessage());
+			System.out.println("Failed writing sector...." + e.getMessage());
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Add the extra creation user.
 	 */
 	@Override
 	public String toString() {
-		String result = "\n Creator: "+Creator+"\n"+super.toString();
-		return(result);
+		String result = "\n Creator: " + Creator + "\n" + super.toString();
+		return (result);
 	}
-	
+
+	/**
+	 * Create a blank disk, 40 tracks, 1 head, 9 sectors per track, 512 bytes per
+	 * sector.
+	 * 
+	 * 
+	 * @param Filename
+	 * @param VolumeName
+	 * @throws IOException
+	 * @throws BadDiskFileException 
+	 */
+	public void CreateBlankAMSDisk(String Filename, boolean Extended) throws IOException, BadDiskFileException {
+		FileOutputStream NewFile = new FileOutputStream(Filename);
+		try {
+			/*
+			 * Disk information block.....
+			 */
+			DiskInfoBlock = new byte[256];
+			for (int i = 0; i < DiskInfoBlock.length; i++) {
+				DiskInfoBlock[i] = 0;
+			}
+
+			// File header
+			String header = AMSDISKHEADER_NORMAL;
+			if (Extended) {
+				header = AMSDISKHEADER_EXTENDED;
+			}
+			for (int i = 0; i < header.length(); i++) {
+				DiskInfoBlock[i] = (byte) header.charAt(i);
+			}
+
+			// Name of creator
+			String CREATOR = "HDDDiskEditor     ";
+			for (int i = 0; i < 15; i++) {
+				DiskInfoBlock[0x22 + i] = (byte) CREATOR.charAt(i);
+			}
+
+			// tracks and sides.
+			DiskInfoBlock[0x30] = (byte) 40;
+			DiskInfoBlock[0x31] = (byte) 1;
+
+			// Size of track. (Sector size * sector + track info block (256) )
+			int tracksz = (512 * 9) + 0x100;
+			
+			if (!Extended) {
+				// For normal disks, all track sizes are the same.
+				DiskInfoBlock[0x32] = (byte) (tracksz & 0xff);
+				DiskInfoBlock[0x33] = (byte) (tracksz / 256);
+			} else {
+				// extended disks have a track size for each track.
+				// just want the highest byte.
+				for (int i = 0; i < 40 * 1; i++) {
+					DiskInfoBlock[0x34 + i] = (byte) ((tracksz / 0x100) & 0xff);
+				}
+			}			
+
+			// Write the disk header
+			NewFile.write(DiskInfoBlock);
+
+			/*
+			 * Tracks
+			 */
+			for (int TrackNum = 0; TrackNum < 40; TrackNum++) {
+				//Track header
+				byte TrackBlock[] = new byte[tracksz];
+				header = AMSDISKTRACKHEADER;
+				for (int i = 0; i < header.length(); i++) {
+					TrackBlock[i] = (byte) header.charAt(i);
+				}
+				
+				TrackBlock[0x10] = (byte) (TrackNum & 0xff); //tracknum
+				TrackBlock[0x11] = 0x00; //side number
+				TrackBlock[0x14] = 2; //sector size (Fiddled as usual)
+				TrackBlock[0x15] = 9; //Number of sectors
+				TrackBlock[0x16] = 0x4e; //gap3 length
+				TrackBlock[0x17] = (byte) (0xe5 & 0xff); //Filler byte
+				
+				//Sector list - Sectors from 1-9 inclusive
+				int SectorBase = 0x18;
+				for(int SectorNum = 1; SectorNum < 10; SectorNum++) {
+					TrackBlock[SectorBase+0] = (byte) (TrackNum & 0xff); //tracknum
+					TrackBlock[SectorBase+1] = 0x00; //side 
+					TrackBlock[SectorBase+2] = (byte) (SectorNum & 0xff); //Sectornum
+					TrackBlock[SectorBase+3] = 0x02; //Sectorsize
+					TrackBlock[SectorBase+4] = 0x00; //fdc SR0
+					TrackBlock[SectorBase+5] = 0x00; //fdc SR1
+					if (!Extended) {
+						TrackBlock[SectorBase+6] = 0x00; //Not used
+						TrackBlock[SectorBase+7] = 0x00; //Not used
+					} else {
+						TrackBlock[SectorBase+6] = (byte) 0x00; //Sector size (LSB first)
+						TrackBlock[SectorBase+7] = (byte) 0x02; 						
+					}					
+					SectorBase = SectorBase + 0x08;
+				}
+				
+				//Actual sector data
+				for(int ptr=0x100; ptr < TrackBlock.length;ptr++) {
+					TrackBlock[ptr] = (byte) (0xe5 & 0xff);
+				}
+				
+				//Write the track.
+				NewFile.write(TrackBlock);
+			}
+		} finally {
+			// Close, forcing flush
+			NewFile.close();
+			NewFile = null;
+		}
+		
+		/*
+		 *  Load the newly created file.
+		 */
+		this.filename = Filename;
+		inFile = new RandomAccessFile(filename, "rw");
+		FileSize = new File(filename).length();
+		IsValid = false;
+		ParseDisk();
+		
+	}
+
 }

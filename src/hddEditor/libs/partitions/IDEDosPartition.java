@@ -1,5 +1,7 @@
 package hddEditor.libs.partitions;
 
+import java.io.File;
+
 /**
  * Base object for an IDEDOS partition.
  * Basic partition information common to all partition types:
@@ -429,6 +431,15 @@ public class IDEDosPartition {
 	 */
 	protected void LoadPartitionSpecificInformation() throws IOException {
 
+	}
+	
+	/**
+	 * 
+	 * @param folder
+	 * @throws IOException 
+	 */
+	public void ExtractPartitiontoFolder(File folder, boolean Raw, boolean CodeAsHex) throws IOException {
+		
 	}
 
 

@@ -1,5 +1,8 @@
 package hddEditor.libs.partitions;
 
+import java.io.File;
+import java.io.FileWriter;
+
 /**
  * Implementation of the PLUSIDEDOS system partition
  * This partition is unusual as it contains the information for the whole disk as
@@ -31,13 +34,15 @@ package hddEditor.libs.partitions;
 
 import java.io.IOException;
 
+import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.disks.Disk;
 
 public class SystemPartition extends IDEDosPartition {
-	//Flag set by handlers that create this partition as a dummy for the editor. 
-	//This flag will stop the partition trying to update the disk if its modified.
+	// Flag set by handlers that create this partition as a dummy for the editor.
+	// This flag will stop the partition trying to update the disk if its modified.
 	public Boolean DummySystemPartiton = false;
-	
+
 	// Number of Cylinders as described in the XDPB
 	private int GetNumCyls() {
 		int NumCyls = ((RawPartition[0x20 + 1] & 0xff) * 0x100) + (RawPartition[0x20] & 0xff);
@@ -198,7 +203,7 @@ public class SystemPartition extends IDEDosPartition {
 	}
 
 	/**
-	 * ToString overridden to provide System partition specific information 
+	 * ToString overridden to provide System partition specific information
 	 * 
 	 * @return
 	 */
@@ -225,10 +230,10 @@ public class SystemPartition extends IDEDosPartition {
 		return (result);
 	}
 
-	/** 
-	 * Write the system details to the disk.
-	 * Note, this was originally written before the partition objects just directly modified
-	 * the raw dirent. This is probably a bit pointless.
+	/**
+	 * Write the system details to the disk. Note, this was originally written
+	 * before the partition objects just directly modified the raw dirent. This is
+	 * probably a bit pointless.
 	 * 
 	 * @param BasicEdCol
 	 * @param DefaultCol
@@ -255,55 +260,55 @@ public class SystemPartition extends IDEDosPartition {
 
 		UpdateSystemPartitionOnDisk();
 	}
-	
+
 	/**
 	 * Update this Dirent ONLY from the raw data
 	 */
 	public void UpdateSystemPartitionOnDisk() {
 		if (!DummySystemPartiton)
-		try {
-			/*
-			 * Copy the raw dirent over
-			 */
-			// Get the number of sectors in the partition
-			int DirentLength = GetMaxPartitions() * 0x40;
-			// Load the partition
-			byte data[] = GetDataInPartition(0, DirentLength);
-			// update the data with this partition
-			System.arraycopy(RawPartition, 0, data, DirentLocation, 0x40);
-			// write it back.
-			
-			SetDataInPartition(0, data);
-		} catch (IOException e) {
-			System.out.println("Error updating System DIRENT: " + e.getMessage());
-			e.printStackTrace();
-		}
+			try {
+				/*
+				 * Copy the raw dirent over
+				 */
+				// Get the number of sectors in the partition
+				int DirentLength = GetMaxPartitions() * 0x40;
+				// Load the partition
+				byte data[] = GetDataInPartition(0, DirentLength);
+				// update the data with this partition
+				System.arraycopy(RawPartition, 0, data, DirentLocation, 0x40);
+				// write it back.
+
+				SetDataInPartition(0, data);
+			} catch (IOException e) {
+				System.out.println("Error updating System DIRENT: " + e.getMessage());
+				e.printStackTrace();
+			}
 
 	}
-	
+
 	/**
 	 * Update the entire disk partition list.
 	 */
 	public void UpdatePartitionListOnDisk() {
 		if (!DummySystemPartiton)
-		try {
-			/*
-			 * Copy the raw dirent over
-			 */
-			// Get the number of sectors in the partition
-			int DirentSize = GetMaxPartitions() * 0x40;
-			// Load the partition
-			byte data[] = GetDataInPartition(0, DirentSize);
-			// update the data with all the partitions
-			for(IDEDosPartition p:partitions) {
-				System.arraycopy(p.RawPartition, 0, data, p.DirentLocation, 0x40);
+			try {
+				/*
+				 * Copy the raw dirent over
+				 */
+				// Get the number of sectors in the partition
+				int DirentSize = GetMaxPartitions() * 0x40;
+				// Load the partition
+				byte data[] = GetDataInPartition(0, DirentSize);
+				// update the data with all the partitions
+				for (IDEDosPartition p : partitions) {
+					System.arraycopy(p.RawPartition, 0, data, p.DirentLocation, 0x40);
+				}
+				// write it back.
+				SetDataInPartition(0, data);
+			} catch (IOException e) {
+				System.out.println("Error updating System DIRENT: " + e.getMessage());
+				e.printStackTrace();
 			}
-			// write it back.
-			SetDataInPartition(0, data);
-		} catch (IOException e) {
-			System.out.println("Error updating System DIRENT: " + e.getMessage());
-			e.printStackTrace();
-		}
 	}
 
 	/**
@@ -342,9 +347,69 @@ public class SystemPartition extends IDEDosPartition {
 	@Override
 	public void Reload() {
 		/*
-		 * For the SYstem partition, we need to force a disk reload. This is done by the parent. 
+		 * For the SYstem partition, we need to force a disk reload. This is done by the
+		 * parent.
 		 */
 	}
 
-	
+	/**
+	 * @throws IOException
+	 * 
+	 */
+	@Override
+	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex) throws IOException {
+		FileWriter SysConfig = new FileWriter(new File(folder, "system.config"));
+		try {
+			SysConfig.write("<plusidedos>\n".toCharArray());
+			SysConfig.write(("  <name>" + GetName() + "</name>\n").toCharArray());
+			SysConfig.write(("  <dummy>" + DummySystemPartiton + "</dummy>\n").toCharArray());
+			SysConfig.write(("  <disk_geometry>\n").toCharArray());
+			SysConfig.write(("      <cyl>" + GetNumCyls() + "</cyl>\n").toCharArray());
+			SysConfig.write(("      <head>" + GetNumHeads() + "</head>\n").toCharArray());
+			SysConfig.write(("      <sectors>" + GetSectorsPerCyls() + "</sectors>\n").toCharArray());
+			SysConfig.write(("  </disk_geometry>\n").toCharArray());
+			SysConfig.write(("  <basic_colour>" + GetBasicColour() + "</basic_colour>\n").toCharArray());
+			SysConfig.write(("  <editor_colour>" + GetBasicEditColour() + "</editor_colour>\n").toCharArray());
+			SysConfig.write(("  <unmap_a>" + GetUnmapA() + "</unmap_a>\n").toCharArray());
+			SysConfig.write(("  <unmap_b>" + GetUnmapA() + "</unmap_b>\n").toCharArray());
+			SysConfig.write(("  <unmap_m>" + GetUnmapA() + "</unmap_m>\n").toCharArray());
+			SysConfig.write(("  <default_drive>" + GetDefaultDrive() + "</default_drive>\n").toCharArray());
+			SysConfig.write(("  <unit0_drive>" + GetUnit0DriveLetter() + "</unit0_drive>\n").toCharArray());
+			SysConfig.write(("  <unit1_drive>" + GetUnit1DriveLetter() + "</unit1_drive>\n").toCharArray());
+			SysConfig.write(("  <unitm_drive>" + GetRamdiskDriveLetter() + "</unitm_drive>\n").toCharArray());
+			SysConfig.write(("  <maxpart>" + GetMaxPartitions() + "</maxpart>\n").toCharArray());
+			SysConfig.write(("  <partitions>\n").toCharArray());
+
+			for (IDEDosPartition p : partitions) {
+				if (p.GetPartType() != 0) {
+					SysConfig.write(("    <partition>\n").toCharArray());
+					SysConfig.write(("        <partname>" + p.GetName() + "</partname>\n").toCharArray());
+					SysConfig.write(("        <parttype>" + p.GetPartType() + "</parttype>\n").toCharArray());
+					SysConfig.write(("        <parttypename>" + PLUSIDEDOS.GetTypeAsString(p.GetPartType()).trim()
+							+ "</parttypename>\n").toCharArray());
+					SysConfig.write(
+							("        <direntlocation>" + p.DirentLocation + "</direntlocation>\n").toCharArray());
+					SysConfig.write(("        <sizek>" + p.GetSizeK() + "</sizek>\n").toCharArray());
+					SysConfig.write(("        <part_geometry>\n").toCharArray());
+					SysConfig.write(("            <startcyl>" + p.GetStartCyl() + "</startcyl>\n").toCharArray());
+					SysConfig.write(("            <starthead>" + p.GetStartHead() + "</starthead>\n").toCharArray());
+					SysConfig.write(("            <endcyl>" + p.GetEndCyl() + "</endcyl>\n").toCharArray());
+					SysConfig.write(("            <endhead>" + p.GetEndHead() + "</endhead>\n").toCharArray());
+					SysConfig.write(("        </part_geometry>\n").toCharArray());
+					SysConfig.write(("        <RawDirent>\n").toCharArray());
+					String dirent = GeneralUtils.HexDump(p.RawPartition, 0, 0x40).trim();
+					dirent = dirent.replace("\n", "\n            ");
+					SysConfig.write("            " + dirent);
+					SysConfig.write(("\n        </RawDirent>\n").toCharArray());
+					SysConfig.write(("    </partition>\n").toCharArray());
+				}
+			}
+
+			SysConfig.write(("  </partitions>\n").toCharArray());
+			SysConfig.write("</plusidedos>\n".toCharArray());
+		} finally {
+			SysConfig.close();
+		}
+	}
+
 }

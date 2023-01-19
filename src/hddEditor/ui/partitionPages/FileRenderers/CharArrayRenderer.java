@@ -4,7 +4,6 @@ package hddEditor.ui.partitionPages.FileRenderers;
  * Render a character array
  */
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.eclipse.swt.SWT;
@@ -221,83 +220,13 @@ public class CharArrayRenderer extends FileRenderer {
 		fd.setFilterExtensions(filterExt);
 		String selected = fd.open();
 		if (selected != null) {
-			FileOutputStream file;
 			try {
-				file = new FileOutputStream(selected);
-				try {
-					file.write(("File: " + filename + System.lineSeparator()).getBytes());
-					int location = 0x80; // skip header
-
-					// Number of dimensions
-					int numDimensions = data[location++] & 0xff;
-
-					// LOad the dimension sizes into an array
-					int Dimsizes[] = new int[numDimensions];
-					for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
-						int dimsize = data[location++] & 0xff;
-						dimsize = dimsize + (data[location++] & 0xff) * 0x100;
-						Dimsizes[dimnum] = dimsize;
-					}
-					String s = "DIM " + varname + "(";
-					for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
-						if (dimnum > 0)
-							s = s + ",";
-						s = s + String.valueOf(Dimsizes[dimnum]);
-					}
-					s = s + ") = " + System.lineSeparator();
-					file.write(s.getBytes());
-
-					// count of what dimensions have been processed.
-					int DimCounts[] = new int[numDimensions];
-					for (int dimnum = 0; dimnum < numDimensions; dimnum++)
-						DimCounts[dimnum] = 0;
-
-					StringBuffer sb = new StringBuffer();
-					boolean complete = false;
-					while (!complete) {
-						for (int cc = 0; cc < Dimsizes[Dimsizes.length - 1]; cc++) {
-
-							if (cc != 0) {
-								sb.append(",");
-							}
-							String chr = Speccy.tokens[data[location++] & 0xff];
-							chr = chr.replace("&amp;", "&");
-							chr = chr.replace("&gt;", ">");
-							chr = chr.replace("&lt;", "<");
-
-							sb.append(chr);
-						}
-						sb.append(System.lineSeparator());
-						int diminc = Dimsizes.length - 2;
-						boolean doneInc = false;
-						while (!doneInc) {
-							if (diminc == -1) {
-								doneInc = true;
-								complete = true;
-							} else {
-								int x = DimCounts[diminc];
-								x++;
-								if (x == Dimsizes[diminc]) {
-									DimCounts[diminc] = 0;
-									diminc--;
-								} else {
-									DimCounts[diminc] = x;
-									doneInc = true;
-								}
-							}
-						}
-					}
-					file.write(sb.toString().getBytes());
-
-				} finally {
-					file.close();
-				}
+				Speccy.DoSaveCharArrayAsText(data, selected, varname);
 			} catch (FileNotFoundException e) {
 				MessageBox dialog = new MessageBox(MainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
 				dialog.setText("Error saving file");
 				dialog.setMessage("Directory not found!");
 				dialog.open();
-
 				e.printStackTrace();
 			} catch (IOException e) {
 				MessageBox dialog = new MessageBox(MainPage.getShell(), SWT.ICON_ERROR | SWT.OK);

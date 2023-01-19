@@ -1,8 +1,11 @@
 package hddEditor.ui.partitionPages;
+// - Some files seem to be broken..
+
 /**
  * Implementation of the System partition page. 
  */
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -20,6 +23,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
@@ -40,7 +44,7 @@ import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.NewPartitionDialog;
 
 public class SystemPartPage extends GenericPage {
-	//Flag to block writing to the disk. 
+	// Flag to block writing to the disk.
 	private boolean CanEditPartitions = false;
 
 	// Sub-forms so we can close them if they are still open when the page changes.
@@ -79,6 +83,9 @@ public class SystemPartPage extends GenericPage {
 	Button EditPartitionButton = null;
 	Button GotoPartitionButton = null;
 	Button NewPartitionButton = null;
+	Button DoExtractAllPartitionButton = null;
+	Button DoExtractAllPartitionButton2 = null;
+	Button DoExtractAllPartitionButton3 = null;
 
 	// Partition table
 	Table PartitionTable = null;
@@ -317,13 +324,13 @@ public class SystemPartPage extends GenericPage {
 				label("", 3);
 				CanEditPartitions = false;
 			}
-			
+
 			PartitionTable = new Table(ParentComp, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 			PartitionTable.setLinesVisible(true);
 
 			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.horizontalSpan = 4;
-			gd.heightHint = 240;
+			gd.heightHint = 210;
 			PartitionTable.setLayoutData(gd);
 
 			TableColumn tc1 = new TableColumn(PartitionTable, SWT.LEFT);
@@ -352,12 +359,13 @@ public class SystemPartPage extends GenericPage {
 					TableItem item2 = new TableItem(PartitionTable, SWT.NONE);
 					String content[] = new String[5];
 					content[0] = part.GetName();
-					content[1] = PLUSIDEDOS.GetTypeAsString( part.GetPartType());
+					content[1] = PLUSIDEDOS.GetTypeAsString(part.GetPartType());
 					content[2] = "Cyl:" + part.GetStartCyl() + " Head:" + part.GetStartHead();
 					content[3] = "Cyl:" + part.GetEndCyl() + " Head:" + part.GetEndHead();
 					content[4] = GeneralUtils.GetSizeAsString(part.GetSizeK() * 1024);
 
 					item2.setText(content);
+					item2.setData(part);
 				}
 			}
 
@@ -434,12 +442,53 @@ public class SystemPartPage extends GenericPage {
 					widgetSelected(arg0);
 				}
 			});
-			NewPartitionButton.setEnabled(CanEditPartitions);
+			
+			DoExtractAllPartitionButton = button("Dump partitions (RAW)");
+			DoExtractAllPartitionButton.setLayoutData(gd);
+			DoExtractAllPartitionButton.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					DoExtractAllPartitions();
+				}
 
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+			
+			DoExtractAllPartitionButton2 = button("Dump partitions (Code=ASM)");
+			DoExtractAllPartitionButton2.setLayoutData(gd);
+			DoExtractAllPartitionButton2.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					DoExtractAllPartitionsAsm();
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+			DoExtractAllPartitionButton3 = button("Dump partitions (Code=Hex)");
+			DoExtractAllPartitionButton3.setLayoutData(gd);
+			DoExtractAllPartitionButton3.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					DoExtractAllPartitionsHex();
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+			
+			
+			NewPartitionButton.setEnabled(CanEditPartitions);
 			ParentComp.pack();
 		}
 	}
-
 	/**
 	 * Save the top of the form to the partition.
 	 */
@@ -552,7 +601,7 @@ public class SystemPartPage extends GenericPage {
 		if ((itms != null) && (itms.length > 0)) {
 			String partName = itms[0].getText(0).trim();
 			boolean DoChange = true;
-			if ((ApplyButton!= null) && ApplyButton.getEnabled()) {
+			if ((ApplyButton != null) && ApplyButton.getEnabled()) {
 				MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
 				messageBox.setMessage("Do you really want to change partition without saving?");
 				messageBox.setText("Change Partition");
@@ -572,63 +621,105 @@ public class SystemPartPage extends GenericPage {
 		if (!CanEditPartitions) {
 			ErrorBox("Cannot edit partitions on this media type.");
 		} else {
-		SystemPartition SystemPartition = (SystemPartition) RootPage.CurrentHandler
-				.GetPartitionByType(PLUSIDEDOS.PARTITION_SYSTEM);
-		if (SystemPartition == null) {
-			ErrorBox("Error creating partition: System partition not found.");
-		} else {
-			ArrayList<String> ExistingPartitions = new ArrayList<String>();
-			for (IDEDosPartition p : SystemPartition.partitions) {
-				if (p.GetPartType() != 0) {
-					ExistingPartitions.add(p.GetName().trim().toUpperCase());
-				}
-			}
-			String sExistingPartitions[] = ExistingPartitions.toArray(new String[0]);
-
-			IDEDosPartition freespacePartition = RootPage.CurrentHandler.GetPartitionByType(PLUSIDEDOS.PARTITION_FREE);
-			if (freespacePartition == null) {
-				ErrorBox("Error creating partition: Free space partition not found.");
+			SystemPartition SystemPartition = (SystemPartition) RootPage.CurrentHandler
+					.GetPartitionByType(PLUSIDEDOS.PARTITION_SYSTEM);
+			if (SystemPartition == null) {
+				ErrorBox("Error creating partition: System partition not found.");
 			} else {
-				NewPartDialog = new NewPartitionDialog(ParentComp.getDisplay());
-				if (NewPartDialog.Show(sExistingPartitions) && !ParentComp.isDisposed()) {
-					/*
-					 * Find a free partition with enough space. Note, the flags are for how to deal
-					 * with the partition when allocating. If its the last partition, remove the
-					 * Free space partition. Otherwise, if its the last allocated partition, but
-					 * there are still Partents left, Will need to move the Free space partition,
-					 * and setup the new one in the old slot.
-					 */
-					boolean IsLastPartition = false;
-					boolean IsLastFreeSpacePartition = false;
-					IDEDosPartition FoundPartiton = null;
-					for (IDEDosPartition part : SystemPartition.partitions) {
-						if (part.GetPartType() == PLUSIDEDOS.PARTITION_FREE) {
-							int PartitonSizeMb = part.GetSizeK() / 1024;
-							if (PartitonSizeMb >= NewPartDialog.SizeMB) {
-								FoundPartiton = part;
-								if (FoundPartiton.DirentNum == SystemPartition.partitions.length - 1) {
-									IsLastPartition = true;
-								} else {
-									if (SystemPartition.partitions[FoundPartiton.DirentNum + 1]
-											.GetPartType() == PLUSIDEDOS.PARTITION_UNUSED) {
-										IsLastFreeSpacePartition = true;
+				ArrayList<String> ExistingPartitions = new ArrayList<String>();
+				for (IDEDosPartition p : SystemPartition.partitions) {
+					if (p.GetPartType() != 0) {
+						ExistingPartitions.add(p.GetName().trim().toUpperCase());
+					}
+				}
+				String sExistingPartitions[] = ExistingPartitions.toArray(new String[0]);
+
+				IDEDosPartition freespacePartition = RootPage.CurrentHandler
+						.GetPartitionByType(PLUSIDEDOS.PARTITION_FREE);
+				if (freespacePartition == null) {
+					ErrorBox("Error creating partition: Free space partition not found.");
+				} else {
+					NewPartDialog = new NewPartitionDialog(ParentComp.getDisplay());
+					if (NewPartDialog.Show(sExistingPartitions) && !ParentComp.isDisposed()) {
+						/*
+						 * Find a free partition with enough space. Note, the flags are for how to deal
+						 * with the partition when allocating. If its the last partition, remove the
+						 * Free space partition. Otherwise, if its the last allocated partition, but
+						 * there are still Partents left, Will need to move the Free space partition,
+						 * and setup the new one in the old slot.
+						 */
+						boolean IsLastPartition = false;
+						boolean IsLastFreeSpacePartition = false;
+						IDEDosPartition FoundPartiton = null;
+						for (IDEDosPartition part : SystemPartition.partitions) {
+							if (part.GetPartType() == PLUSIDEDOS.PARTITION_FREE) {
+								int PartitonSizeMb = part.GetSizeK() / 1024;
+								if (PartitonSizeMb >= NewPartDialog.SizeMB) {
+									FoundPartiton = part;
+									if (FoundPartiton.DirentNum == SystemPartition.partitions.length - 1) {
+										IsLastPartition = true;
+									} else {
+										if (SystemPartition.partitions[FoundPartiton.DirentNum + 1]
+												.GetPartType() == PLUSIDEDOS.PARTITION_UNUSED) {
+											IsLastFreeSpacePartition = true;
+										}
 									}
+									break;
 								}
-								break;
 							}
 						}
-					}
-					if (FoundPartiton == null) {
-						ErrorBox("Error creating partition: Unable to find an empty partition.");
-					} else {
-						// If the partition isnt the last partition, just use it as is. Dont try to
-						// defrag the disk.
-						if (!IsLastFreeSpacePartition) {
-							FoundPartiton.SetPartType(NewPartDialog.PartType);
-							int PartitonSizeMb = FoundPartiton.GetSizeK() / 1024;
-							if (PartitonSizeMb != NewPartDialog.SizeMB) {
-								PartitonSizeMb = NewPartDialog.SizeMB;
-								int NumSectors = PartitonSizeMb * 1024 * 1024 / partition.CurrentDisk.GetSectorSize();
+						if (FoundPartiton == null) {
+							ErrorBox("Error creating partition: Unable to find an empty partition.");
+						} else {
+							// If the partition isnt the last partition, just use it as is. Dont try to
+							// defrag the disk.
+							if (!IsLastFreeSpacePartition) {
+								FoundPartiton.SetPartType(NewPartDialog.PartType);
+								int PartitonSizeMb = FoundPartiton.GetSizeK() / 1024;
+								if (PartitonSizeMb != NewPartDialog.SizeMB) {
+									PartitonSizeMb = NewPartDialog.SizeMB;
+									int NumSectors = PartitonSizeMb * 1024 * 1024
+											/ partition.CurrentDisk.GetSectorSize();
+
+									int NumCyls = NumSectors / partition.CurrentDisk.GetNumSectors();
+									if (NumSectors % partition.CurrentDisk.GetNumSectors() != 0) {
+										NumCyls++;
+									}
+									int Tracks = NumCyls / partition.CurrentDisk.GetNumHeads();
+									int Heads = NumCyls % partition.CurrentDisk.GetNumHeads();
+
+									Heads = Heads + FoundPartiton.GetStartHead();
+									if (Heads >= partition.CurrentDisk.GetNumHeads()) {
+										Heads = Heads - partition.CurrentDisk.GetNumHeads();
+										Tracks++;
+									}
+									Tracks = Tracks + FoundPartiton.GetStartCyl();
+
+									FoundPartiton.SetEndCyl(Tracks);
+									FoundPartiton.SetEndHead(Heads);
+									FoundPartiton.UpdateEndSector();
+
+								}
+								FoundPartiton = IDEDosHandler.GetNewPartitionByType(NewPartDialog.PartType,
+										FoundPartiton.DirentLocation, FoundPartiton.CurrentDisk,
+										FoundPartiton.RawPartition, FoundPartiton.DirentNum, false);
+								SystemPartition.partitions[FoundPartiton.DirentNum] = FoundPartiton;
+								FoundPartiton.SetName(NewPartDialog.Name);
+
+							} else {
+								int PartitonSizeMb = NewPartDialog.SizeMB;
+								int NumSectors = PartitonSizeMb * 1024 * (1024 / partition.CurrentDisk.GetSectorSize());
+
+								// This seems to be hard limit, so fiddle it.
+								if (partition.CurrentDisk.GetSectorSize() == 512) {
+									if (NumSectors > 32790) {
+										NumSectors = 32790;
+									}
+								} else {
+									if (NumSectors > 65580) {
+										NumSectors = 65580;
+									}
+								}
 
 								int NumCyls = NumSectors / partition.CurrentDisk.GetNumSectors();
 								if (NumSectors % partition.CurrentDisk.GetNumSectors() != 0) {
@@ -637,112 +728,73 @@ public class SystemPartPage extends GenericPage {
 								int Tracks = NumCyls / partition.CurrentDisk.GetNumHeads();
 								int Heads = NumCyls % partition.CurrentDisk.GetNumHeads();
 
-								Heads = Heads + FoundPartiton.GetStartHead();
-								if (Heads >= partition.CurrentDisk.GetNumHeads()) {
-									Heads = Heads - partition.CurrentDisk.GetNumHeads();
-									Tracks++;
-								}
-								Tracks = Tracks + FoundPartiton.GetStartCyl();
+								IDEDosPartition NewFreePartition = null;
 
+								/*
+								 * copy the free space partition. Note, need to duplicate the Raw partition
+								 * data, as its passed by reference.
+								 */
+								if (!IsLastPartition) {
+									byte NewRawPartition[] = new byte[FoundPartiton.RawPartition.length];
+									System.arraycopy(FoundPartiton.RawPartition, 0, NewRawPartition, 0,
+											NewRawPartition.length);
+
+									NewFreePartition = new FreePartition(FoundPartiton.DirentLocation + 0x40,
+											FoundPartiton.CurrentDisk, NewRawPartition, FoundPartiton.DirentNum + 1,
+											false);
+									// Update the cylinder
+									int NewTrack = FoundPartiton.GetStartCyl() + Tracks;
+									int NewHead = FoundPartiton.GetStartHead() + Heads;
+									if (NewHead > FoundPartiton.CurrentDisk.GetNumHeads()) {
+										NewHead = 0;
+										NewTrack++;
+									}
+
+									NewFreePartition.SetStartCyl(NewTrack);
+									NewFreePartition.SetStartHead(NewHead);
+									// Set the new type and add it.
+									NewFreePartition.SetPartType(PLUSIDEDOS.PARTITION_FREE);
+									NewFreePartition.UpdateEndSector();
+									SystemPartition.partitions[NewFreePartition.DirentNum] = NewFreePartition;
+									// extract the track and head information to use as the end of the new
+									// partition.
+									Tracks = NewFreePartition.GetStartCyl();
+									Heads = NewFreePartition.GetStartHead();
+									Heads = Heads - 1;
+									if (Heads < 0) {
+										Heads = FoundPartiton.CurrentDisk.GetNumHeads() - 1;
+										Tracks = Tracks - 1;
+									}
+								} else {
+									// If we havent created a new free space partition, use the old partitions
+									// details.
+									Tracks = FoundPartiton.GetStartCyl() + Tracks;
+									Heads = FoundPartiton.GetStartHead() + Heads;
+									if (Heads > FoundPartiton.CurrentDisk.GetNumHeads()) {
+										Heads = 0;
+										Tracks++;
+									}
+									// Now, modify the old partition
+								}
+								FoundPartiton.SetName(NewPartDialog.Name);
+								FoundPartiton.SetPartType(NewPartDialog.PartType);
 								FoundPartiton.SetEndCyl(Tracks);
 								FoundPartiton.SetEndHead(Heads);
-								FoundPartiton.UpdateEndSector();
 
+								// Re-create as the proper type
+								FoundPartiton = IDEDosHandler.GetNewPartitionByType(NewPartDialog.PartType,
+										FoundPartiton.DirentLocation, FoundPartiton.CurrentDisk,
+										FoundPartiton.RawPartition, FoundPartiton.DirentNum, true);
+
+								SystemPartition.partitions[FoundPartiton.DirentNum] = FoundPartiton;
 							}
-							FoundPartiton = IDEDosHandler.GetNewPartitionByType(NewPartDialog.PartType,
-									FoundPartiton.DirentLocation, FoundPartiton.CurrentDisk, FoundPartiton.RawPartition,
-									FoundPartiton.DirentNum, false);
-							SystemPartition.partitions[FoundPartiton.DirentNum] = FoundPartiton;
-							FoundPartiton.SetName(NewPartDialog.Name);
-
-						} else {
-							int PartitonSizeMb = NewPartDialog.SizeMB;
-							int NumSectors = PartitonSizeMb * 1024 * (1024 / partition.CurrentDisk.GetSectorSize());
-
-							// This seems to be hard limit, so fiddle it.
-							if (partition.CurrentDisk.GetSectorSize() == 512) {
-								if (NumSectors > 32790) {
-									NumSectors = 32790;
-								}
-							} else {
-								if (NumSectors > 65580) {
-									NumSectors = 65580;
-								}
-							}
-
-							int NumCyls = NumSectors / partition.CurrentDisk.GetNumSectors();
-							if (NumSectors % partition.CurrentDisk.GetNumSectors() != 0) {
-								NumCyls++;
-							}
-							int Tracks = NumCyls / partition.CurrentDisk.GetNumHeads();
-							int Heads = NumCyls % partition.CurrentDisk.GetNumHeads();
-
-							IDEDosPartition NewFreePartition = null;
-
-							/*
-							 * copy the free space partition. Note, need to duplicate the Raw partition
-							 * data, as its passed by reference.
-							 */
-							if (!IsLastPartition) {
-								byte NewRawPartition[] = new byte[FoundPartiton.RawPartition.length];
-								System.arraycopy(FoundPartiton.RawPartition, 0, NewRawPartition, 0,
-										NewRawPartition.length);
-
-								NewFreePartition = new FreePartition(FoundPartiton.DirentLocation + 0x40,
-										FoundPartiton.CurrentDisk, NewRawPartition, FoundPartiton.DirentNum + 1, false);
-								// Update the cylinder
-								int NewTrack = FoundPartiton.GetStartCyl() + Tracks;
-								int NewHead = FoundPartiton.GetStartHead() + Heads;
-								if (NewHead > FoundPartiton.CurrentDisk.GetNumHeads()) {
-									NewHead = 0;
-									NewTrack++;
-								}
-
-								NewFreePartition.SetStartCyl(NewTrack);
-								NewFreePartition.SetStartHead(NewHead);
-								// Set the new type and add it.
-								NewFreePartition.SetPartType(PLUSIDEDOS.PARTITION_FREE);
-								NewFreePartition.UpdateEndSector();
-								SystemPartition.partitions[NewFreePartition.DirentNum] = NewFreePartition;
-								// extract the track and head information to use as the end of the new
-								// partition.
-								Tracks = NewFreePartition.GetStartCyl();
-								Heads = NewFreePartition.GetStartHead();
-								Heads = Heads - 1;
-								if (Heads < 0) {
-									Heads = FoundPartiton.CurrentDisk.GetNumHeads() - 1;
-									Tracks = Tracks - 1;
-								}
-							} else {
-								// If we havent created a new free space partition, use the old partitions
-								// details.
-								Tracks = FoundPartiton.GetStartCyl() + Tracks;
-								Heads = FoundPartiton.GetStartHead() + Heads;
-								if (Heads > FoundPartiton.CurrentDisk.GetNumHeads()) {
-									Heads = 0;
-									Tracks++;
-								}
-								// Now, modify the old partition
-							}
-							FoundPartiton.SetName(NewPartDialog.Name);
-							FoundPartiton.SetPartType(NewPartDialog.PartType);
-							FoundPartiton.SetEndCyl(Tracks);
-							FoundPartiton.SetEndHead(Heads);
-
-							// Re-create as the proper type
-							FoundPartiton = IDEDosHandler.GetNewPartitionByType(NewPartDialog.PartType,
-									FoundPartiton.DirentLocation, FoundPartiton.CurrentDisk, FoundPartiton.RawPartition,
-									FoundPartiton.DirentNum, true);
-
-							SystemPartition.partitions[FoundPartiton.DirentNum] = FoundPartiton;
+							RootPage.UpdateDropdown();
 						}
-						RootPage.UpdateDropdown();
+						SystemPartition.UpdatePartitionListOnDisk();
 					}
-					SystemPartition.UpdatePartitionListOnDisk();
+					NewPartDialog = null;
 				}
-				NewPartDialog = null;
 			}
-		}
 		}
 	}
 
@@ -753,56 +805,59 @@ public class SystemPartPage extends GenericPage {
 		if (!CanEditPartitions) {
 			ErrorBox("Cannot Delete partitions on this media type.");
 		} else {
-		TableItem itms[] = PartitionTable.getSelection();
-		if (itms != null) {
-			SystemPartition SystemPartition = (SystemPartition) RootPage.CurrentHandler
-					.GetPartitionByType(PLUSIDEDOS.PARTITION_SYSTEM);
-			if (SystemPartition == null) {
-				ErrorBox("Error Deleting partition: System partition not found. This should not happen");
-			} else {
-				String partName = itms[0].getText(0).trim();
-				IDEDosPartition part = RootPage.CurrentHandler.GetPartitionByName(partName);
-				MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
-				messageBox.setMessage("Are you sure?");
-				messageBox.setText("Are you absolutely sure you want to delete " + partName.trim()
-						+ "?\nThis action is cant be undone!");
-				if (messageBox.open() == SWT.OK) {
-					/*
-					 * Set the partition to FREE, and reallocate it.
-					 */
-					part.SetPartType(PLUSIDEDOS.PARTITION_FREE);
+			TableItem itms[] = PartitionTable.getSelection();
+			if (itms != null) {
+				SystemPartition SystemPartition = (SystemPartition) RootPage.CurrentHandler
+						.GetPartitionByType(PLUSIDEDOS.PARTITION_SYSTEM);
+				if (SystemPartition == null) {
+					ErrorBox("Error Deleting partition: System partition not found. This should not happen");
+				} else {
+					String partName = itms[0].getText(0).trim();
+					IDEDosPartition part = RootPage.CurrentHandler.GetPartitionByName(partName);
+					MessageBox messageBox = new MessageBox(ParentComp.getShell(),
+							SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
+					messageBox.setMessage("Are you sure?");
+					messageBox.setText("Are you absolutely sure you want to delete " + partName.trim()
+							+ "?\nThis action is cant be undone!");
+					if (messageBox.open() == SWT.OK) {
+						/*
+						 * Set the partition to FREE, and reallocate it.
+						 */
+						part.SetPartType(PLUSIDEDOS.PARTITION_FREE);
 
-					IDEDosPartition NewFreePartition = IDEDosHandler.GetNewPartitionByType(PLUSIDEDOS.PARTITION_FREE,
-							part.DirentLocation, part.CurrentDisk, part.RawPartition, part.DirentNum, false);
+						IDEDosPartition NewFreePartition = IDEDosHandler.GetNewPartitionByType(
+								PLUSIDEDOS.PARTITION_FREE, part.DirentLocation, part.CurrentDisk, part.RawPartition,
+								part.DirentNum, false);
 
-					NewFreePartition.SetPartType(PLUSIDEDOS.PARTITION_FREE);
+						NewFreePartition.SetPartType(PLUSIDEDOS.PARTITION_FREE);
 
-					/*
-					 * Try to merge together any free partitions.
-					 */
-					if (NewFreePartition.DirentNum != SystemPartition.partitions.length - 1) {
-						if (SystemPartition.partitions[part.DirentNum + 1].GetPartType() == PLUSIDEDOS.PARTITION_FREE) {
-							// Get the partition
-							IDEDosPartition OldFreePartiton = SystemPartition.partitions[NewFreePartition.DirentNum
-									+ 1];
-							// Merge the partitions
-							NewFreePartition.SetEndCyl(OldFreePartiton.GetEndCyl());
-							NewFreePartition.SetEndHead(OldFreePartiton.GetEndHead());
-							// reset the partition type
-							OldFreePartiton.SetPartType(PLUSIDEDOS.PARTITION_UNUSED);
-							// and set it back.
-							SystemPartition.partitions[OldFreePartiton.DirentNum] = OldFreePartiton;
+						/*
+						 * Try to merge together any free partitions.
+						 */
+						if (NewFreePartition.DirentNum != SystemPartition.partitions.length - 1) {
+							if (SystemPartition.partitions[part.DirentNum + 1]
+									.GetPartType() == PLUSIDEDOS.PARTITION_FREE) {
+								// Get the partition
+								IDEDosPartition OldFreePartiton = SystemPartition.partitions[NewFreePartition.DirentNum
+										+ 1];
+								// Merge the partitions
+								NewFreePartition.SetEndCyl(OldFreePartiton.GetEndCyl());
+								NewFreePartition.SetEndHead(OldFreePartiton.GetEndHead());
+								// reset the partition type
+								OldFreePartiton.SetPartType(PLUSIDEDOS.PARTITION_UNUSED);
+								// and set it back.
+								SystemPartition.partitions[OldFreePartiton.DirentNum] = OldFreePartiton;
+							}
 						}
+						/*
+						 * Update the partition list and on the disk.
+						 */
+						SystemPartition.partitions[NewFreePartition.DirentNum] = NewFreePartition;
+						SystemPartition.UpdatePartitionListOnDisk();
+						RootPage.UpdateDropdown();
 					}
-					/*
-					 * Update the partition list and on the disk.
-					 */
-					SystemPartition.partitions[NewFreePartition.DirentNum] = NewFreePartition;
-					SystemPartition.UpdatePartitionListOnDisk();
-					RootPage.UpdateDropdown();
 				}
 			}
-		}
 		}
 	}
 
@@ -828,8 +883,8 @@ public class SystemPartPage extends GenericPage {
 				try {
 					data = part.GetAllDataInPartition();
 					AddressNote an[] = part.GetAddressNotes();
-					WriteBackData = HxEditDialog.Show(data, "Editing " + partName + " (" +PLUSIDEDOS.GetTypeAsString( part.GetPartType()) + ")",
-							an);
+					WriteBackData = HxEditDialog.Show(data,
+							"Editing " + partName + " (" + PLUSIDEDOS.GetTypeAsString(part.GetPartType()) + ")", an);
 					if (WriteBackData) {
 						part.SetAllDataInPartition(HxEditDialog.Data);
 						part.Reload();
@@ -856,7 +911,54 @@ public class SystemPartPage extends GenericPage {
 		if (NewPartDialog != null) {
 			NewPartDialog.close();
 		}
-
 	}
 
+	/**
+	 * 
+	 */
+	protected void DoExtractAllPartitions() {
+		ExtractAllPartitions(true,false); 
+	}
+
+
+	protected void DoExtractAllPartitionsHex() {
+		ExtractAllPartitions(false,true); 
+	}
+
+	protected void DoExtractAllPartitionsAsm() {
+		ExtractAllPartitions(false,false); 
+	}
+
+	protected void ExtractAllPartitions(boolean AsRaw,boolean CodeAsHex) {
+		DirectoryDialog dialog = new DirectoryDialog(ParentComp.getShell());
+		dialog.setText("Select folder for export to");
+		String result = dialog.open();
+		if (result != null) {
+			File directory = new File(result);
+			for (TableItem t : PartitionTable.getItems()) {
+				IDEDosPartition partition = (IDEDosPartition) t.getData();
+				if (partition.GetPartType() != PLUSIDEDOS.PARTITION_FREE
+						&& partition.GetPartType() != PLUSIDEDOS.PARTITION_UNUSED
+						&& partition.GetPartType() != PLUSIDEDOS.PARTITION_UNKNOWN
+						&& partition.GetPartType() != PLUSIDEDOS.PARTITION_BAD) {
+
+					File BaseFolder = new File(directory, partition.GetName());
+					System.out.print("Extracting partition" + BaseFolder+" - ");
+					if (!BaseFolder.exists()) {
+						BaseFolder.mkdir();
+					}
+					try {
+						long start = System.currentTimeMillis();
+						partition.ExtractPartitiontoFolder(BaseFolder, AsRaw, CodeAsHex);
+						long finish = System.currentTimeMillis();
+						System.out.println(String.valueOf(finish-start)+"ms");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+
+	
 }

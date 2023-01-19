@@ -1,6 +1,7 @@
 package hddEditor.libs.disks.LINEAR;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -362,6 +363,43 @@ public class MDFMicrodriveFile implements Disk {
 		} catch (IOException | BadDiskFileException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Create and load a blank microdrive cart
+	 * 
+	 * @param Filename
+	 * @param title
+	 * @throws IOException
+	 */
+	public void CreateBlankMicrodriveCart(String Filename, String VolumeName) throws IOException {
+		// b5 to 01
+		filename = Filename;
+		//Create a file with lots of blank sectors.
+		FileOutputStream NewFile = new FileOutputStream(Filename);
+		try {
+			for (int SectorNum = 0xb5; SectorNum > 0; SectorNum--) {
+				byte SectorData[] = new byte[0x21f];
+				//Initialise the sector information
+				MicrodriveSector msh = new MicrodriveSector(SectorData, 0);
+				msh.setVolumeName(VolumeName);
+				msh.setSectorFlagByte(0x00);
+				msh.SetSectorNumber(SectorNum);
+				msh.setSegmentNumber(0);
+				msh.CalculateHeaderChecksum();
+				//write our new sector information to disk. 
+				NewFile.write(msh.SectorHeader);
+				NewFile.write(msh.SectorData);
+			}
+		} finally {
+			//Close, forcing flush
+			NewFile.close();
+			NewFile = null;
+		}
+		//Load the newly created file. 
+		inFile = new RandomAccessFile(filename, "rw");
+		FileSize = new File(filename).length();
+		ParseMDFFile();
 	}
 
 }

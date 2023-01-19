@@ -88,6 +88,9 @@ public class MicrodriveSector {
 	public int GetSectorNumber() {
 		return((int) (SectorHeader[1] & 0xff));
 	}
+	public void SetSectorNumber(int newnum) {
+		SectorHeader[1] = (byte) (newnum & 0xff);
+	}
 	
 	/**
 	 * Get the volume name from the header.

@@ -217,7 +217,7 @@ public class BasicRenderer extends FileRenderer {
 		
 		Font mono = new Font(MainPage.getDisplay(), "Monospace", 10, SWT.NONE);
 
-		ArrayList<RemDetails> RemLocations = new ArrayList<RemDetails>();
+		ArrayList<RemDetails> RemLocations = new ArrayList<RemDetails>(); 
 		
 		int ptr = 0;
 		int EndOfBasicArea = Math.min(filelength, VariablesOffset);
@@ -466,7 +466,6 @@ public class BasicRenderer extends FileRenderer {
 				} else {
 					System.out.print("UNKNOWN! $" + Integer.toHexString(var) + " at " + ptr);
 				}
-
 			}
 		}
 

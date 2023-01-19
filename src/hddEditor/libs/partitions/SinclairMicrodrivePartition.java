@@ -1,8 +1,11 @@
 package hddEditor.libs.partitions;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
@@ -45,23 +48,23 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 //			trp.Files[0].RenameMicrodriveFile("Test2", tdf);
 //			trp.Files[0].RenameMicrodriveFile("demo", tdf);
 //			trp.DeleteMicrodriveFile("Demo");
-			
-			//Should require 14 sectors.
+
+			// Should require 14 sectors.
 			byte data[] = new byte[6912];
 			data[0] = 0x00;
 
 			data[1] = 0x00;
 			data[2] = 0x02;
-			
+
 			data[3] = 0x05;
 			data[4] = 0x5d;
 
 			data[5] = 0x00;
 			data[6] = 0x0a;
-			
+
 			data[7] = 0x00;
 			data[8] = 0x00;
-			
+
 //			System.out.println(trp.AddMicrodriveFile("TestMDFFile", data));
 			System.out.println(trp);
 			System.out.println("------------------------------------------------");
@@ -215,7 +218,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	/**
 	 * 
 	 * @param filename
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void DeleteMicrodriveFile(String filename) throws IOException {
 		// find the file in the list
@@ -263,13 +266,13 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	}
 
 	/**
-	 *Add a file to the microdrive, note this does NOT set the basic header
-	 *this has to be done by the calling function.
+	 * Add a file to the microdrive, note this does NOT set the basic header this
+	 * has to be done by the calling function.
 	 * 
 	 * @param filename
 	 * @param data
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private boolean AddMicrodriveFile(String filename, byte data[]) throws IOException {
 		boolean result = false;
@@ -313,7 +316,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		if (FinalStartSector == -1) {
 			System.out.println("Cant find a run of that many sectors.");
 		} else {
-			System.out.println("Found sector run starting at: "+FinalStartSector);
+			System.out.println("Found sector run starting at: " + FinalStartSector);
 			/*
 			 * Write the sectors in turn.
 			 */
@@ -327,7 +330,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		}
 		return (result);
 	}
-	
+
 	/**
 	 * Add a CODE file to the microdrive.
 	 * 
@@ -338,10 +341,10 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 * @throws IOException
 	 */
 	public boolean AddCodeFile(String filename, byte[] CodeFile, int loadAddress) throws IOException {
-		//Create an array with space for the header, and add the file in. 
-		byte data[] = new byte[CodeFile.length+9];
+		// Create an array with space for the header, and add the file in.
+		byte data[] = new byte[CodeFile.length + 9];
 		System.arraycopy(CodeFile, 0, data, 9, CodeFile.length);
-		//Create the header
+		// Create the header
 		data[0] = Speccy.BASIC_CODE;
 		data[1] = (byte) ((CodeFile.length % 0x100) & 0xff);
 		data[2] = (byte) ((CodeFile.length / 0x100) & 0xff);
@@ -352,12 +355,13 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		data[7] = (byte) (0xff & 0xff);
 		data[8] = (byte) (0xff & 0xff);
 
-		//add the file.
-		return(AddMicrodriveFile(filename, data));
+		// add the file.
+		return (AddMicrodriveFile(filename, data));
 	}
-	
+
 	/**
-	 * Add an pre-encoded BASIC file to the microdrive. 
+	 * Add an pre-encoded BASIC file to the microdrive.
+	 * 
 	 * @param filename
 	 * @param EncodedBASICFile
 	 * @param varsStart
@@ -366,27 +370,27 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 * @throws IOException
 	 */
 	public boolean AddBasicFile(String filename, byte[] EncodedBASICFile, int varsStart, int line) throws IOException {
-		//Create an array with space for the header, and add the file in. 
-		byte data[] = new byte[EncodedBASICFile.length+9];
+		// Create an array with space for the header, and add the file in.
+		byte data[] = new byte[EncodedBASICFile.length + 9];
 		System.arraycopy(EncodedBASICFile, 0, data, 9, EncodedBASICFile.length);
-		
-		//Create the header
+
+		// Create the header
 		data[0] = Speccy.BASIC_BASIC;
-		data[1] = (byte) ((EncodedBASICFile.length % 0x100) & 0xff); //File length inc variables
+		data[1] = (byte) ((EncodedBASICFile.length % 0x100) & 0xff); // File length inc variables
 		data[2] = (byte) ((EncodedBASICFile.length / 0x100) & 0xff);
-		data[3] = (byte) ((23813 % 0x100) & 0xff); //Default load address. (Fixed for BASIC)
+		data[3] = (byte) ((23813 % 0x100) & 0xff); // Default load address. (Fixed for BASIC)
 		data[4] = (byte) ((23813 / 0x100) & 0xff);
-		data[5] = (byte) ((varsStart % 0x100) & 0xff);  //Start of the variables area
+		data[5] = (byte) ((varsStart % 0x100) & 0xff); // Start of the variables area
 		data[6] = (byte) ((varsStart / 0x100) & 0xff);
-		data[7] = (byte) ((line % 0x100) & 0xff);  //Start line.
+		data[7] = (byte) ((line % 0x100) & 0xff); // Start line.
 		data[8] = (byte) ((line / 0x100) & 0xff);
-		
-		//add the file.
-		return(AddMicrodriveFile(filename, data));
+
+		// add the file.
+		return (AddMicrodriveFile(filename, data));
 	}
 
 	/**
-	 * Add an pre-encoded character array to the microdrive. 
+	 * Add an pre-encoded character array to the microdrive.
 	 * 
 	 * @param filename
 	 * @param EncodedArray
@@ -395,31 +399,31 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 * @throws IOException
 	 */
 	public boolean AddCharArray(String filename, byte[] EncodedArray, String varname) throws IOException {
-		varname = (varname+"A").toUpperCase();
+		varname = (varname + "A").toUpperCase();
 		byte varenc = (byte) (varname.charAt(0) & 0xff);
 		varenc = (byte) (varenc - 'A');
 		varenc = (byte) ((varenc | 0xC0) & 0xff);
-		
-		//Create an array with space for the header, and add the file in. 
-		byte data[] = new byte[EncodedArray.length+9];
+
+		// Create an array with space for the header, and add the file in.
+		byte data[] = new byte[EncodedArray.length + 9];
 		System.arraycopy(EncodedArray, 0, data, 9, EncodedArray.length);
-		//Create the header
+		// Create the header
 		data[0] = Speccy.BASIC_CHRARRAY;
-		data[1] = (byte) ((EncodedArray.length % 0x100) & 0xff); //File length inc variables
+		data[1] = (byte) ((EncodedArray.length % 0x100) & 0xff); // File length inc variables
 		data[2] = (byte) ((EncodedArray.length / 0x100) & 0xff);
-		data[3] = (byte) ((24114 % 0x100) & 0xff); //Default load address. Ignored, but have to put something there. 
+		data[3] = (byte) ((24114 % 0x100) & 0xff); // Default load address. Ignored, but have to put something there.
 		data[4] = (byte) ((24114 / 0x100) & 0xff);
-		data[5] = (byte) (varenc & 0xff);  //Encoded variable name and variable type.
+		data[5] = (byte) (varenc & 0xff); // Encoded variable name and variable type.
 		data[6] = (byte) (byte) (0xff & 0xff);
 		data[7] = (byte) (byte) (0xff & 0xff);
 		data[8] = (byte) (byte) (0xff & 0xff);
-		
-		//add the file.
-		return(AddMicrodriveFile(filename, data));
+
+		// add the file.
+		return (AddMicrodriveFile(filename, data));
 	}
-	
+
 	/**
-	 * Add an pre-encoded numeric array to the microdrive. 
+	 * Add an pre-encoded numeric array to the microdrive.
 	 * 
 	 * @param filename
 	 * @param EncodedArray
@@ -428,27 +432,27 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 * @throws IOException
 	 */
 	public boolean AddNumericArray(String filename, byte[] EncodedArray, String varname) throws IOException {
-		varname = (varname+"A").toUpperCase();
+		varname = (varname + "A").toUpperCase();
 		byte varenc = (byte) (varname.charAt(0) & 0xff);
 		varenc = (byte) (varenc - 'A');
 		varenc = (byte) ((varenc | 0x80) & 0xff);
-		
-		//Create an array with space for the header, and add the file in. 
-		byte data[] = new byte[EncodedArray.length+9];
+
+		// Create an array with space for the header, and add the file in.
+		byte data[] = new byte[EncodedArray.length + 9];
 		System.arraycopy(EncodedArray, 0, data, 9, EncodedArray.length);
-		//Create the header
+		// Create the header
 		data[0] = Speccy.BASIC_NUMARRAY;
-		data[1] = (byte) ((EncodedArray.length % 0x100) & 0xff); //File length inc variables
+		data[1] = (byte) ((EncodedArray.length % 0x100) & 0xff); // File length inc variables
 		data[2] = (byte) ((EncodedArray.length / 0x100) & 0xff);
-		data[3] = (byte) ((24114 % 0x100) & 0xff); //Default load address. Ignored, but have to put something there. 
+		data[3] = (byte) ((24114 % 0x100) & 0xff); // Default load address. Ignored, but have to put something there.
 		data[4] = (byte) ((24114 / 0x100) & 0xff);
-		data[5] = (byte) (varenc & 0xff);  //Encoded variable name and variable type.
+		data[5] = (byte) (varenc & 0xff); // Encoded variable name and variable type.
 		data[6] = (byte) (byte) (0xff & 0xff);
 		data[7] = (byte) (byte) (0xff & 0xff);
 		data[8] = (byte) (byte) (0xff & 0xff);
-		
-		//add the file.
-		return(AddMicrodriveFile(filename, data));
+
+		// add the file.
+		return (AddMicrodriveFile(filename, data));
 	}
 
 	/**
@@ -456,7 +460,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 * 
 	 * @param filename
 	 * @param newName
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void RenameFile(String filename, String newName) throws IOException {
 		// find the file in the list
@@ -468,31 +472,30 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 			}
 		}
 		if (foundfile == -1) {
-			System.out.println("File "+filename+" not found.");
-			throw new IOException("File "+filename+" not found.");
+			System.out.println("File " + filename + " not found.");
+			throw new IOException("File " + filename + " not found.");
 		} else {
 			Files[foundfile].RenameMicrodriveFile(newName, CurrentDisk);
 		}
 	}
 
-
 	/**
-	 * GetAllDataInPartition overridden as sectors count backwards and are not in order as
-	 * they are for most disks.
+	 * GetAllDataInPartition overridden as sectors count backwards and are not in
+	 * order as they are for most disks.
 	 * 
 	 * @return
 	 * @throws IOException
 	 */
 	@Override
 	public byte[] GetAllDataInPartition() throws IOException {
-		byte allpossdata[] = new byte[255*512];
+		byte allpossdata[] = new byte[255 * 512];
 		MDFMicrodriveFile mdf = (MDFMicrodriveFile) CurrentDisk;
-		int ptr=0;
-		for (int i=0xfe;i>-1;i--) {
+		int ptr = 0;
+		for (int i = 0xfe; i > -1; i--) {
 			MicrodriveSector mds = mdf.GetSectorBySectorNumber(i);
-			if (mds!=null) {
+			if (mds != null) {
 				byte data[] = mds.SectorData;
-				if (data!=null) {
+				if (data != null) {
 					System.arraycopy(data, 0, allpossdata, ptr, data.length);
 					ptr = ptr + data.length;
 				}
@@ -500,10 +503,10 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		}
 		byte result[] = new byte[ptr];
 		System.arraycopy(allpossdata, 0, result, 0, ptr);
-		
+
 		return (result);
 	}
-	
+
 	@Override
 	/**
 	 * 
@@ -512,27 +515,27 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 */
 	public void SetAllDataInPartition(byte[] data) throws IOException {
 		MDFMicrodriveFile mdf = (MDFMicrodriveFile) CurrentDisk;
-		int ptr=0;
+		int ptr = 0;
 		int bytesleft = data.length;
-		for (int i=0xfe;i>-1;i--) {
+		for (int i = 0xfe; i > -1; i--) {
 			MicrodriveSector mds = mdf.GetSectorBySectorNumber(i);
-			if (mds!=null) {
+			if (mds != null) {
 				byte newdata[] = new byte[512];
-				int currentlength = Math.min(bytesleft,512);
-				
-				System.arraycopy(data, ptr, newdata, 0, currentlength );
+				int currentlength = Math.min(bytesleft, 512);
+
+				System.arraycopy(data, ptr, newdata, 0, currentlength);
 				mds.SectorData = newdata;
 				mds.UpdateSectorOnDisk(mdf);
-				
+
 				ptr = ptr + currentlength;
 				bytesleft = bytesleft - currentlength;
 			}
 		}
 	}
-	
+
 	/**
-	 * Get the size in Kbytes of the partition. 
-	 * As usual, this differs for Microdrives. 
+	 * Get the size in Kbytes of the partition. As usual, this differs for
+	 * Microdrives.
 	 * 
 	 * @return
 	 */
@@ -542,6 +545,108 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		int NumSectors = mdf.Sectors.length;
 		return ((int) NumSectors / 2);
 	}
-	
-	
+
+	/**
+	 * 
+	 */
+	@Override
+	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex) {
+		FileWriter SysConfig;
+		try {
+			SysConfig = new FileWriter(new File(folder, "partition.index"));
+			try {
+				SysConfig.write("<speccy>\n".toCharArray());
+
+				for (MicrodriveDirectoryEntry entry : Files) {
+					File TargetFilename = new File(folder, entry.GetFilename().trim());
+					byte file[] = entry.GetFileData();
+					if (raw) {
+						GeneralUtils.WriteBlockToDisk(file, TargetFilename);
+					} else {
+						int filelength = file.length;
+						int SpeccyFileType = entry.GetFiletype();
+						int basicLine = entry.GetLineStart();
+						int basicVarsOffset = entry.GetVarStart();
+						int codeLoadAddress = entry.GetVar2();
+						String arrayVarName = "A";
+						
+						try {
+							Speccy.SaveFileToDisk(TargetFilename, file, filelength, SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName,CodeAsHex);
+						} catch (Exception E) {
+							System.out.println("Error extracting "+TargetFilename+ "For folder: "+folder+" - "+E.getMessage());
+						}
+					}
+					System.out.println("Written " + entry.GetFilename().trim());
+					SysConfig.write(("<file>\n").toCharArray());
+					SysConfig.write(("   <filename>" + entry.GetFilename().trim() + "</filename>\n").toCharArray());
+					SysConfig.write(("   <deleted>false</deleted>\n").toCharArray());
+					SysConfig.write(("   <errors></errors>\n").toCharArray());
+					SysConfig.write(("   <filelength>" + entry.GetFileSize() + "</filelength>\n").toCharArray());
+					SysConfig.write("   <origfiletype>MDF</origfiletype>\n".toCharArray());
+					SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
+					SysConfig.write(("       <filetype>" + entry.GetFiletype() + "</filetype>\n").toCharArray());
+					SysConfig.write(("       <filetypename>" + Speccy.FileTypeAsString(entry.GetFiletype())
+							+ "</filetypename>\n").toCharArray());
+					SysConfig.write(("       <basicsize>" + entry.GetFileSize() + "</basicsize>\n").toCharArray());
+					SysConfig.write(
+							("       <basicstartline>" + entry.GetLineStart() + "</basicstartline>\n").toCharArray());
+					SysConfig.write(("       <codeloadaddr>" + entry.GetVar2() + "</codeloadaddr>\n").toCharArray());
+					SysConfig.write(
+							("       <basicvarsoffset>" + entry.GetVarStart() + "</basicvarsoffset>\n").toCharArray());
+					SysConfig.write(("       <arrayvarname>A</arrayvarname>\n").toCharArray());
+					SysConfig.write(("   </specbasicinfo>\n".toCharArray()));
+					SysConfig.write(("   <microdrivespecific>\n".toCharArray()));
+					SysConfig.write(("       <sectors>\n".toCharArray()));
+					SysConfig.write(("           <sector>\n".toCharArray()));
+					for (MicrodriveSector mds : entry.sectors) {
+						SysConfig.write(
+								("               <location>" + mds.SectorLocation + "</location>\n").toCharArray());
+						SysConfig.write(
+								("               <flagbyte>" + mds.GetFlagByte() + "</flagbyte>\n").toCharArray());
+						SysConfig.write(("               <sectornumber>" + mds.GetSectorNumber() + "</sectornumber>\n")
+								.toCharArray());
+						SysConfig.write(("               <volumename>" + mds.getVolumeName() + "</volumename>\n")
+								.toCharArray());
+						SysConfig.write(
+								("               <headerchecksum>" + mds.getHeaderChecksum() + "</headerchecksum>\n")
+										.toCharArray());
+						SysConfig.write(("               <headerchecksumvalid>" + mds.IsHeaderChecksumValid()
+								+ "</headerchecksumvalid>\n").toCharArray());
+						SysConfig.write(
+								("               <sectorchecksum>" + mds.getSectorChecksum() + "</sectorchecksum>\n")
+										.toCharArray());
+						SysConfig.write(("               <sectorchecksumvalid>" + mds.IsSectorChecksumValid()
+								+ "</sectorchecksumvalid>\n").toCharArray());
+						SysConfig
+								.write(("               <fileflagbyte>" + mds.getSectorFlagByte() + "</fileflagbyte>\n")
+										.toCharArray());
+						SysConfig.write(("               <segmentnumberinfile>" + mds.getSegmentNumber()
+								+ "</segmentnumberinfile>\n").toCharArray());
+						SysConfig.write(("               <recordlength>" + mds.getRecordLength() + "</recordlength>\n")
+								.toCharArray());
+						SysConfig.write(
+								("               <filename>" + mds.getFileName() + "</filename>\n").toCharArray());
+						SysConfig.write(("               <filechecksum>" + mds.getFileChecksum() + "</filechecksum>\n")
+								.toCharArray());
+						SysConfig.write(("               <filechecksumvalid>" + mds.IsFileChecksumValid()
+								+ "</filechecksumvalid>\n").toCharArray());
+						SysConfig.write(
+								("               <sectorflags>" + mds.getSectorFlagsAsString() + "</sectorflags>\n")
+										.toCharArray());
+					}
+					SysConfig.write(("           </sector>\n".toCharArray()));
+					SysConfig.write(("       </sectors>\n".toCharArray()));
+					SysConfig.write(("   </microdrivespecific>\n".toCharArray()));
+					SysConfig.write(("</file>\n").toCharArray());
+
+				}
+				SysConfig.write("</speccy>\n".toCharArray());
+			} finally {
+				SysConfig.close();
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	}
+
 }

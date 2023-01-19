@@ -1,11 +1,17 @@
 package hddEditor.libs.disks.FDD;
 /*
  * TRD disks are just raw floppy disk images with the TR-DOS filesystem on them. 
+ * Disks always have 16 sectors per track of 256 byte sectors, so tracks are always 4096 bytes long
+ * 
+ * Disks can be either be 40 or 80 tracks, with 1 or 2 heads.
+ * 
+ * First track is reserved for directory entries and the disk information block on Sector 9. (always 0x800 in the file)
  * 
  * https://sinclair.wiki.zxnet.co.uk/wiki/TR-DOS_filesystem
  */
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
@@ -300,4 +306,81 @@ public class TrDosDiskFile extends FloppyDisk {
 		return (result);
 	}
 
+	/**
+	 * 
+	 * @param filename
+	 * @param cyls
+	 * @param heads
+	 * @throws IOException
+	 */
+	public void CreateBlankTRDOSDisk(String filename, int cyls, int heads, String DiskLabel) throws IOException {
+		FileOutputStream NewFile = new FileOutputStream(filename);
+		try {
+		    /*
+		     * Create and write the first track (Blank directory entries + disk descriptor
+		     */
+			int DiskType= 0x16;
+			if (heads == 1) 
+				DiskType = DiskType + 2;
+			if (cyls == 40) 
+				DiskType = DiskType + 1;
+			
+			int NumFreeSectors = ((cyls * heads) -1) * 16;
+
+			
+			byte track[] = new byte[256*16];
+			//Blank the track
+			for(int i=0;i<track.length;i++) {
+				track[i] = 0x00;
+			}
+			int DiskInfoLoc = 8 * 256;
+			track[DiskInfoLoc+0] = 0x00; // end of catalog
+			track[DiskInfoLoc+0xe1] = 0x01; //first free sector
+			track[DiskInfoLoc+0xe2] = 0x01; //first free track.
+			track[DiskInfoLoc+0xe3] = (byte) DiskType; //disk type
+			track[DiskInfoLoc+0xe4] = 0x00; //Number of files on disk
+			track[DiskInfoLoc+0xe5] = (byte) ((NumFreeSectors % 0x100) & 0xff);  //Free sectors.
+			track[DiskInfoLoc+0xe6] = (byte) ((NumFreeSectors / 0x100) & 0xff);
+			track[DiskInfoLoc+0xe7] = 0x10; //TR-DOS marker
+			for(int i=0;i<9;i++) {  //blank with spaces. No idea why
+				track[DiskInfoLoc+0xe9+i] = 0x20;
+			}
+			track[DiskInfoLoc+0xf4] = 0x00; //number of deleted files
+			DiskLabel = DiskLabel + "        ";
+			byte DiskLabelBytes[] = DiskLabel.getBytes();
+			for(int i=0;i<8;i++) {
+				track[DiskInfoLoc+0xf5+i] = DiskLabelBytes[i];
+			}
+			//Write the first track
+			NewFile.write(track);
+
+			/*
+			 * Write the rest of the tracks.
+			 */
+			track = new byte[256*16];
+			//Blank the track
+			for(int i=0;i<track.length;i++) {
+				track[i] = 0x00;
+			}
+			//Write all the tracks.
+			int NumDataTracks = ((cyls * heads) -1);
+			for(int tracknum = 0;tracknum < NumDataTracks;tracknum++) {
+				NewFile.write(track);				
+			}
+			
+		} finally {
+			NewFile.close();
+			NewFile = null;
+		}
+		
+		/*
+		 *  Load the newly created file.
+		 */
+		inFile = new RandomAccessFile(filename, "rw");
+		this.filename = filename;
+		FileSize = new File(filename).length();
+		IsValid = false;
+		ParseDisk();
+	}
+	
 }

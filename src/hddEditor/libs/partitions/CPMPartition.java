@@ -1,5 +1,8 @@
 package hddEditor.libs.partitions;
 
+import java.io.File;
+import java.io.FileWriter;
+
 /**
  * Handler for CPM partitions.
  * Note, this wont work by itself. it needs to have the param data
@@ -10,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import hddEditor.libs.CPM;
+import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.cpm.Dirent;
@@ -383,7 +387,7 @@ public class CPMPartition extends IDEDosPartition {
 				bytesLoaded = bytesRequired;
 			}
 		}
-		
+
 //		System.out.println(GeneralUtils.HexDump(rawDirents, 0, 256));
 
 		Dirents = new Dirent[MaxDirent + 1];
@@ -491,11 +495,10 @@ public class CPMPartition extends IDEDosPartition {
 		freeSpace = (Freeblocks * BlockSize) / 1024;
 
 		// finally output any errors:
-/*		for (DirectoryEntry d : DirectoryEntries) {
-			if (!d.Errors.isEmpty()) {
-				System.out.println("Filename: '" + d.filename() + "' - " + d.Errors);
-			}
-		} */
+		/*
+		 * for (DirectoryEntry d : DirectoryEntries) { if (!d.Errors.isEmpty()) {
+		 * System.out.println("Filename: '" + d.filename() + "' - " + d.Errors); } }
+		 */
 	}
 
 	/**
@@ -617,13 +620,55 @@ public class CPMPartition extends IDEDosPartition {
 	}
 
 	/**
-	 * Load the partition spoecific information
+	 * Load the partition specific information
 	 */
 	@Override
 	protected void LoadPartitionSpecificInformation() throws IOException {
 		IsValid = true;
 		super.LoadPartitionSpecificInformation();
 		ExtractDirectoryListing();
+	}
+
+	@Override
+	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex) {
+		try {
+			FileWriter SysConfig = new FileWriter(new File(folder, "partition.index"));
+			try {
+				SysConfig.write("<speccy>\n".toCharArray());
+				for (DirectoryEntry entry : DirectoryEntries) {
+					File TargetFilename = new File(folder, entry.filename().trim());
+					byte file[] = entry.GetFileData();
+					//CPM files are always RAW.
+					GeneralUtils.WriteBlockToDisk(file, TargetFilename);
+					System.out.println("Written " + entry.filename().trim());
+
+					SysConfig.write("<file>\n".toCharArray());
+					SysConfig.write(("  <filename>" + entry.filename() + "</filename>\n").toCharArray());
+					SysConfig.write(("  <deleted>" + entry.IsDeleted + "</deleted>\n").toCharArray());
+					SysConfig.write(("  <errors>" + entry.Errors + "</errors>\n").toCharArray());
+					SysConfig.write(("  <origfiletype>CPM</origfiletype>\n").toCharArray());
+					SysConfig.write("   <cpm:blocks>\n".toCharArray());
+					int blocks[] = entry.getBlocks();
+					for (int i : blocks) {
+						SysConfig.write(("       <blockID>" + i + "</blockID>\n").toCharArray());
+					}
+					SysConfig.write("   </cpm:blocks>\n".toCharArray());
+					SysConfig.write("   <cpm:dirents>\n".toCharArray());
+					for (Dirent d : entry.dirents) {
+						SysConfig.write(("       <dirent>" + d.toString() + "</dirent>\n").toCharArray());
+					}
+					SysConfig.write("   </cpm:dirents>\n".toCharArray());
+					SysConfig.write("</file>\n".toCharArray());
+				}
+
+				SysConfig.write("</speccy>\n".toCharArray());
+			} finally {
+				SysConfig.close();
+			}
+		} catch (IOException e) {
+			System.out.println("Error extracting files: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 
 }

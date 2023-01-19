@@ -410,13 +410,6 @@ public class CodeRenderer extends FileRenderer {
 
 	}
 
-	/**
-	 * Save the file as ASM
-	 * 
-	 * @param data
-	 * @param mainPage2
-	 * @param loadAddr
-	 */
 	protected void DoSaveFileAsAsm(byte[] data, Composite mainPage2, int loadAddr) {
 		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
 		fd.setText("Save Assembly file as");
@@ -424,60 +417,8 @@ public class CodeRenderer extends FileRenderer {
 		fd.setFilterExtensions(filterExt);
 		String selected = fd.open();
 		if (selected != null) {
-			FileOutputStream file;
 			try {
-				file = new FileOutputStream(selected);
-				file.write(("File: " + filename + System.lineSeparator()).getBytes());
-				file.write(("Org: " + loadAddr + System.lineSeparator()).getBytes());
-				file.write(("Length: " + data.length + System.lineSeparator() + System.lineSeparator()).getBytes());
-				try {
-					ASMLib asm = new ASMLib();
-					int loadedaddress = loadAddr;
-					int realaddress = 0x0000;
-					try {
-						int asmData[] = new int[5];
-						while (realaddress < data.length) {
-							String chrdata = "";
-							for (int i = 0; i < 5; i++) {
-								int d = 0;
-								if (realaddress + i < data.length) {
-									d = (int) data[realaddress + i] & 0xff;
-								}
-								asmData[i] = d;
-
-								if ((d > 0x1F) && (d < 0x7f)) {
-									chrdata = chrdata + (char) d;
-								} else {
-									chrdata = chrdata + "?";
-								}
-							}
-							// decode instruction
-							DecodedASM Instruction = asm.decode(asmData, loadedaddress);
-							// output it. - First, assemble a list of hex bytes, but pad out to 12 chars
-							// (4x3)
-							String hex = "";
-							for (int j = 0; j < Instruction.length; j++) {
-								hex = hex + String.format("%02X", asmData[j]) + " ";
-							}
-
-							file.write(String.format("%04X", loadedaddress).getBytes());
-							file.write(("\t" + hex + "\t\t" + Instruction.instruction + "\t\t"
-									+ chrdata.substring(0, Instruction.length)).getBytes());
-							file.write(System.lineSeparator().getBytes());
-
-							realaddress = realaddress + Instruction.length;
-							loadedaddress = loadedaddress + Instruction.length;
-
-						} // while
-					} catch (Exception E) {
-						System.out.println("Error at: " + realaddress + "(" + loadedaddress + ")");
-						System.out.println(E.getMessage());
-						E.printStackTrace();
-					}
-				} finally {
-					file.close();
-				}
-
+				Speccy.DoSaveFileAsAsm(data, selected, loadAddr);
 			} catch (FileNotFoundException e) {
 				MessageBox dialog = new MessageBox(MainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
 				dialog.setText("Error saving file");
@@ -493,8 +434,9 @@ public class CodeRenderer extends FileRenderer {
 
 				e.printStackTrace();
 			}
-		}
+		}		
 	}
+
 
 	/**
 	 * Save the file as an image file. (Note, this will be 256x192 of whatever

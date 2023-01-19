@@ -1,5 +1,4 @@
 package hddEditor.ui;
-
 /**
  * Main UI.
  */
@@ -71,7 +70,8 @@ public class HDDEditor {
 	private Composite MainPage = null;
 
 	private FileConversionForm fileConvForm = null;
-	private FileNewForm fileNewForm = null;
+	private FileNewHDDForm fileNewHDDForm = null;
+	private FileNewFDDForm fileNewFDDForm = null;
 
 	private String helpcontext = "Main";
 
@@ -89,12 +89,26 @@ public class HDDEditor {
 		Menu fileMenu = new Menu(shell, SWT.DROP_DOWN);
 		fileMenuHeader.setMenu(fileMenu);
 
-		MenuItem FileNewItem = new MenuItem(fileMenu, SWT.PUSH);
-		FileNewItem.setText("&New");
-		FileNewItem.addSelectionListener(new SelectionListener() {
+		MenuItem FileNewHDDItem = new MenuItem(fileMenu, SWT.PUSH);
+		FileNewHDDItem.setText("&New Hard disk file");
+		FileNewHDDItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				doNewFile();
+				doNewHDDFile();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				widgetSelected(arg0);
+			}
+		});
+
+		MenuItem FileNewFDDItem = new MenuItem(fileMenu, SWT.PUSH);
+		FileNewFDDItem.setText("&New Floppy/cart file");
+		FileNewFDDItem.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				doNewFDDFile();
 			}
 
 			@Override
@@ -178,6 +192,7 @@ public class HDDEditor {
 		shell.setMenuBar(menuBar);
 	}
 
+
 	/**
 	 * Make and populate the partition dropdown
 	 * 
@@ -210,7 +225,7 @@ public class HDDEditor {
 	public void MakeForm() {
 		display = new Display();
 		shell = new Shell(display);
-		shell.setSize(920, 830);
+		shell.setSize(920, 834);
 		shell.addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent arg0) {
@@ -218,9 +233,13 @@ public class HDDEditor {
 					fileConvForm.close();
 					fileConvForm = null;
 				}
-				if (fileNewForm != null) {
-					fileNewForm.close();
-					fileNewForm = null;
+				if (fileNewHDDForm != null) {
+					fileNewHDDForm.close();
+					fileNewHDDForm = null;
+				}
+				if (fileNewFDDForm != null) {
+					fileNewFDDForm.close();
+					fileNewFDDForm = null;
 				}
 			}
 		});
@@ -456,12 +475,23 @@ public class HDDEditor {
 	}
 
 	/**
-	 * New file form
+	 * New hard disk file form
 	 */
-	protected void doNewFile() {
-		fileNewForm = new FileNewForm(display);
-		String newfile = fileNewForm.Show();
-		fileNewForm = null;
+	protected void doNewHDDFile() {
+		fileNewHDDForm = new FileNewHDDForm(display);
+		String newfile = fileNewHDDForm.Show();
+		fileNewHDDForm = null;
+		if (newfile != null)
+			LoadFile(newfile);
+	}
+	
+	/**
+	 * New floppy disk file
+	 */
+	protected void doNewFDDFile() {
+		fileNewFDDForm = new FileNewFDDForm(display);
+		String newfile = fileNewFDDForm.Show();
+		fileNewFDDForm = null;
 		if (newfile != null)
 			LoadFile(newfile);
 	}

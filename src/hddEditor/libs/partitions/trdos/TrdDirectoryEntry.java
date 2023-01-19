@@ -147,6 +147,7 @@ public class TrdDirectoryEntry {
 		}
 		return (result);
 	}
+	
 
 	/**
 	 * Set the file type

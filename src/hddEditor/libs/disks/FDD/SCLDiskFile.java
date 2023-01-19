@@ -1,6 +1,20 @@
 package hddEditor.libs.disks.FDD;
+/**
+ * SCL file are just compressed TR-DOS files.
+ * 00-07 - "SINCLAIR"  - header
+ * 08 - Number of files in the file
+ * [14 bytes x Number of files]
+ * 		[+00-07] Filename
+ *      [+08] File type
+ *      [+09-0A] variables 1
+ *      [+0B-0C] variables 2
+ *      [+0D] - Number of sectors
+ *      
+ * After this, the sector data, one sector at a time.
+ */     
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -9,6 +23,8 @@ import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
 
 public class SCLDiskFile extends FloppyDisk {
+	public static String Signature="SINCLAIR";
+	
 	private byte[] DiskInfoBlock = null;
 
 	public boolean IsValid = false;
@@ -35,7 +51,7 @@ public class SCLDiskFile extends FloppyDisk {
 		BackupMade = false;
 		ParseDisk();
 	}
-
+	
 	/**
 	 * 
 	 * @throws IOException
@@ -195,7 +211,7 @@ public class SCLDiskFile extends FloppyDisk {
 		DiskInfoBlock[0xe7] = 0x10;
 		DiskInfoBlock[0xe9] = 0x20;
 		// Take the first entry as the disk label.
-		String diskname = "blank";
+		String diskname = "blank     ";
 		if (headers.size() != 0) {
 			diskname = headers.get(0).GetFilename().trim() + "        ";
 		}
@@ -428,5 +444,36 @@ public class SCLDiskFile extends FloppyDisk {
 			e.printStackTrace();
 		}
 
+	}
+	
+	/**
+	 * Create a blank SCL disk. this is possibly the simplest disk creation ever. 
+	 * just a file containing "SINCLAIR[0]"
+	 * 
+	 * @param filename
+	 * @throws IOException 
+	 */
+	public void CreateBlankSCLDisk(String filename) throws IOException {
+		FileOutputStream NewFile = new FileOutputStream(filename);
+		try {
+			NewFile.write(Signature.getBytes());
+			byte numfiles[] = new byte[1];
+			numfiles[0] = 0x00;
+			NewFile.write(numfiles);			
+		} finally {
+			// Close, forcing flush
+			NewFile.close();
+			NewFile = null;
+		}
+		
+		/*
+		 *  Load the newly created file.
+		 */
+		inFile = new RandomAccessFile(filename, "rw");
+		this.filename = filename;
+		FileSize = new File(filename).length();
+		IsValid = false;
+		BackupMade = false;
+		ParseDisk();
 	}
 }

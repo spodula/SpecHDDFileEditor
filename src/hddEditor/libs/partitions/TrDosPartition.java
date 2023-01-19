@@ -1,15 +1,5 @@
 package hddEditor.libs.partitions;
 /**
- *  file format information:
- *  https://formats.kaitai.io/tr_dos_image/#:~:text=TR%2DDOS%20flat%2Dfile%20disk%20image%3A%20format%20specification,of%2016%20256%2Dbyte%20sectors.&text=So%2C%20this%20format%20definition%20is,TR%2DDOS%20filesystem%20than%20for%20.
- *  https://sinclair.wiki.zxnet.co.uk/wiki/TR-DOS_filesystem
- *  
- *  Note, these seem to contradict each other, specifically the use of dirent+0x09
- *  I have been allowed to update sinclair wiki version with my experiments as detailed in the Documents section :)
- *  Also note the test disk included in the Document folder
- */
-
-/**
  * This is the implementation of a TR_DOS partition. Note that this actually duplicates
  * some of the code in the TRD disk handler code, due to the fact it requires the same
  * information.
@@ -17,12 +7,26 @@ package hddEditor.libs.partitions;
  * However its possible that you could get a TR-DOS partition inside an ADF file or
  * some other raw disk format, so will re-fetch the disk info block rather than relying on the 
  * underlying disk. 
+ * 
+ * file format information:
+ * https://formats.kaitai.io/tr_dos_image/#:~:text=TR%2DDOS%20flat%2Dfile%20disk%20image%3A%20format%20specification,of%2016%20256%2Dbyte%20sectors.&text=So%2C%20this%20format%20definition%20is,TR%2DDOS%20filesystem%20than%20for%20.
+ * https://sinclair.wiki.zxnet.co.uk/wiki/TR-DOS_filesystem
+ * 
+ * Note, these seem to contradict each other, specifically the use of dirent+0x09
+ * I have been allowed to update sinclair wiki version with my experiments as detailed in the Documents section :)
+ * Also note the test disk included in the Document folder
  */
+
+import java.io.File;
+import java.io.FileWriter;
+
 
 
 import java.io.IOException;
 import java.util.ArrayList;
 
+import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
 import hddEditor.libs.disks.FDD.SCLDiskFile;
@@ -283,8 +287,9 @@ public class TrDosPartition extends IDEDosPartition {
 		FirstFreeSectorT = NextFreeTrack;
 		FirstFreeSectorS = NextFreeSector;
 		LoadDirectoryEntries();
-		
-		//Hack for SCF disks which need to be physically written after all disk mods are done. 
+
+		// Hack for SCF disks which need to be physically written after all disk mods
+		// are done.
 		if (CurrentDisk.getClass().getName().equals(SCLDiskFile.class.getName())) {
 			SCLDiskFile scf = (SCLDiskFile) CurrentDisk;
 			scf.OperationCompleted(DirectoryEntries);
@@ -302,7 +307,7 @@ public class TrDosPartition extends IDEDosPartition {
 		boolean deleted = false;
 
 		for (TrdDirectoryEntry trd : DirectoryEntries) {
-			if (trd.GetFilename().equals(Filename) && (trd.GetFileType()==type)) {
+			if (trd.GetFilename().equals(Filename) && (trd.GetFileType() == type)) {
 				trd.SetDeleted(true);
 				System.arraycopy(trd.DirEntryDescriptor, 0, dirents, trd.DirentLoc, 0x10);
 				NumDeletedFiles = (dirents[0x8f4] & 0xff) + 1;
@@ -314,7 +319,8 @@ public class TrDosPartition extends IDEDosPartition {
 			System.out.println("File '" + Filename + "' not found.");
 		}
 		CurrentDisk.SetLogicalBlockFromSector(0, dirents);
-		//Hack for SCF disks which need to be physically written after all disk mods are done. 
+		// Hack for SCF disks which need to be physically written after all disk mods
+		// are done.
 		if (CurrentDisk.getClass().getName().equals(SCLDiskFile.class.getName())) {
 			SCLDiskFile scf = (SCLDiskFile) CurrentDisk;
 			scf.OperationCompleted(DirectoryEntries);
@@ -412,7 +418,8 @@ public class TrDosPartition extends IDEDosPartition {
 
 		// re-read the parameter block.
 		PopulateParameters();
-		//Hack for SCF disks which need to be physically written after all disk mods are done. 
+		// Hack for SCF disks which need to be physically written after all disk mods
+		// are done.
 		if (CurrentDisk.getClass().getName().equals(SCLDiskFile.class.getName())) {
 			SCLDiskFile scf = (SCLDiskFile) CurrentDisk;
 			scf.OperationCompleted(DirectoryEntries);
@@ -433,7 +440,7 @@ public class TrDosPartition extends IDEDosPartition {
 
 		for (TrdDirectoryEntry trd : DirectoryEntries) {
 
-			if (trd.GetFilename().equals(from) && (trd.GetFileType()==type)) {
+			if (trd.GetFilename().equals(from) && (trd.GetFileType() == type)) {
 				trd.SetFilename(to);
 				System.arraycopy(trd.DirEntryDescriptor, 0, dirents, trd.DirentLoc, 0x10);
 				NumDeletedFiles = (dirents[0x8f4] & 0xff) + 1;
@@ -445,7 +452,8 @@ public class TrDosPartition extends IDEDosPartition {
 			System.out.println("File '" + from + "' not found.");
 		}
 		CurrentDisk.SetLogicalBlockFromSector(0, dirents);
-		//Hack for SCF disks which need to be physically written after all disk mods are done. 
+		// Hack for SCF disks which need to be physically written after all disk mods
+		// are done.
 		if (CurrentDisk.getClass().getName().equals(SCLDiskFile.class.getName())) {
 			SCLDiskFile scf = (SCLDiskFile) CurrentDisk;
 			scf.OperationCompleted(DirectoryEntries);
@@ -514,6 +522,7 @@ public class TrDosPartition extends IDEDosPartition {
 
 	/**
 	 * Update the given entry with a new file.
+	 * 
 	 * @param entry
 	 * @param data
 	 * @throws IOException
@@ -529,28 +538,28 @@ public class TrDosPartition extends IDEDosPartition {
 		}
 
 		/**
-		 * If the file is the same size, just overwrite the old one. 
+		 * If the file is the same size, just overwrite the old one.
 		 */
 		if (NumSectors == entry.GetFileLengthSectors()) {
 			CurrentDisk.SetLogicalBlockFromSector(0, data);
 			int LogicalSector = (entry.GetStartTrack() * CurrentDisk.GetNumSectors()) + entry.GetStartSector();
 			SetDataInPartition(LogicalSector, data);
 		} else {
-			//If not, copy the old file descriptor information and re-create it. 
+			// If not, copy the old file descriptor information and re-create it.
 			String filename = entry.GetFilename();
 			char filetype = entry.GetFileType();
 			int line = entry.startline;
 			int var1 = entry.GetVar1();
-			
+
 			entry.SetDeleted(true);
-			if (filetype=='B') {
-				AddBasicFile(filename, data, line, line);	
+			if (filetype == 'B') {
+				AddBasicFile(filename, data, line, line);
 			} else {
-				AddFile(filename, 'B', data, var1);			
+				AddFile(filename, 'B', data, var1);
 			}
 		}
 	}
-	
+
 	/**
 	 * Fetch the dirent by name and type
 	 * 
@@ -560,12 +569,126 @@ public class TrDosPartition extends IDEDosPartition {
 	 */
 	public TrdDirectoryEntry GetDirentByName(String name, char type) {
 		TrdDirectoryEntry result = null;
-		for(TrdDirectoryEntry entry:DirectoryEntries) {
-			if (entry.GetFilename().trim().equals(name.trim()) && entry.GetFileType()==type) {
+		for (TrdDirectoryEntry entry : DirectoryEntries) {
+			if (entry.GetFilename().trim().equals(name.trim()) && entry.GetFileType() == type) {
 				result = entry;
 			}
 		}
-		
-		return(result);
+
+		return (result);
 	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex) {
+		FileWriter SysConfig;
+		try {
+			SysConfig = new FileWriter(new File(folder, "partition.index"));
+			try {
+				SysConfig.write("<speccy>\n".toCharArray());
+
+				for (TrdDirectoryEntry entry : DirectoryEntries) {
+					try {
+						File TargetFilename = new File(folder, entry.GetFilename().trim() + "." + entry.GetFileType());
+						byte file[] = entry.GetFileData();
+						if (raw) {
+							GeneralUtils.WriteBlockToDisk(file, TargetFilename);
+						} else {
+							int filelength = entry.GetFileLength();
+							int SpeccyFileType = 0;
+							int basicLine = 0;
+							int basicVarsOffset = entry.GetFileLength();
+							int codeLoadAddress = 0;
+							if ((entry.GetFileType()!='B') && (entry.GetFileType()!='C') && (entry.GetFileType()!='D')){
+								SpeccyFileType  = Speccy.BASIC_CODE;
+								codeLoadAddress = 0x10000 - entry.GetFileLength();							
+							} else {
+								switch (entry.GetFileType()) {
+								case 'B': 
+									SpeccyFileType = Speccy.BASIC_BASIC;
+									break;
+								case 'D': 
+									SpeccyFileType = Speccy.BASIC_NUMARRAY;
+									if (entry.IsCharArray()) {
+										SpeccyFileType = Speccy.BASIC_CHRARRAY;
+									}
+									break;
+								case 'C':
+									SpeccyFileType = Speccy.BASIC_CODE;
+									codeLoadAddress = entry.GetVar1();
+								}
+								basicLine = entry.startline;
+								basicVarsOffset = entry.GetVar2();
+							}
+							try {
+								Speccy.SaveFileToDisk(TargetFilename, entry.GetFileData(), filelength, SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, "A",CodeAsHex);
+							} catch (Exception E) {
+								System.out.println("Error extracting "+TargetFilename+ "For folder: "+folder+" - "+E.getMessage());
+							}
+
+						}
+						System.out.println("Written " + entry.GetFilename().trim());
+					} catch (IOException e) {
+						System.out.println("Error extracting " + entry.GetFilename().trim() + ": " + e.getMessage());
+						e.printStackTrace();
+					}
+					SysConfig.write(("<file>\n").toCharArray());
+					SysConfig.write(
+							("   <filename>" + entry.GetFilename().trim() + "." + entry.GetFileType() + "</filename>\n")
+									.toCharArray());
+					SysConfig.write(("   <deleted>" + entry.GetDeleted() + "</deleted>\n").toCharArray());
+					SysConfig.write(("   <errors></errors>\n").toCharArray());
+					SysConfig.write(("   <filelength>" + entry.GetFileLength() + "</filelength>\n").toCharArray());
+					SysConfig.write("   <origfiletype>TRDOS</origfiletype>\n".toCharArray());
+					SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
+					int filetype = Speccy.BASIC_CODE;
+					switch (entry.GetFileType()) {
+					case 'B':
+						filetype = Speccy.BASIC_BASIC;
+						break;
+					case 'D':
+						filetype = Speccy.BASIC_NUMARRAY;
+						if (entry.IsCharArray()) {
+							filetype = Speccy.BASIC_CHRARRAY;
+						}
+					}
+					SysConfig.write(("       <filetype>" + filetype + "</filetype>\n").toCharArray());
+					SysConfig.write(("       <filetypename>" + Speccy.FileTypeAsString(filetype) + "</filetypename>\n")
+							.toCharArray());
+					SysConfig.write(("       <basicsize>" + entry.GetFileLength() + "</basicsize>\n").toCharArray());
+					SysConfig
+							.write(("       <basicstartline>" + entry.startline + "</basicstartline>\n").toCharArray());
+					SysConfig.write(("       <codeloadaddr>" + entry.GetVar1() + "</codeloadaddr>\n").toCharArray());
+					SysConfig.write(
+							("       <basicvarsoffset>" + entry.GetVar2() + "</basicvarsoffset>\n").toCharArray());
+					SysConfig.write(("       <arrayvarname>A</arrayvarname>\n").toCharArray());
+					SysConfig.write(("   </specbasicinfo>\n".toCharArray()));
+
+					SysConfig.write(("   <trdos>\n".toCharArray()));
+					SysConfig.write(("       <filetype>" + entry.GetFileType() + "</filetype>\n").toCharArray());
+					SysConfig.write(
+							("       <filetypename>" + entry.GetFileTypeName() + "</filetypename>\n").toCharArray());
+					SysConfig.write(("       <direntnum>" + entry.DirentNum + "</direntnum>\n").toCharArray());
+					SysConfig
+							.write(("       <direntlocation>" + entry.DirentLoc + "</direntlocation>\n").toCharArray());
+					SysConfig.write(
+							("       <startsector>" + entry.GetStartSector() + "</startsector>\n").toCharArray());
+					SysConfig.write(("       <starttrack>" + entry.GetStartTrack() + "</starttrack>\n").toCharArray());
+					SysConfig.write(
+							("       <numsectors>" + entry.GetFileLengthSectors() + "</numsectors>\n").toCharArray());
+					SysConfig.write(("   </trdos>\n".toCharArray()));
+					SysConfig.write(("</file>\n").toCharArray());
+				}
+				SysConfig.write("</speccy>\n".toCharArray());
+			} finally {
+				SysConfig.close();
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
+	}
+
 }

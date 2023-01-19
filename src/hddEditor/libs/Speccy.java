@@ -1,11 +1,17 @@
 package hddEditor.libs;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.PaletteData;
 
-import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
+import hddEditor.libs.ASMLib.DecodedASM;
 
 public class Speccy {
 	// Spectrum colours
@@ -35,7 +41,6 @@ public class Speccy {
 	public static final int BASIC_CODE = 0x03;
 
 	public static final String[] filetypeNames = { "Basic", "Numeric array", "Char array", "Code" };
-
 
 	/**
 	 * Testing for the number conversion
@@ -195,6 +200,69 @@ public class Speccy {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Save the file as ASM
+	 * 
+	 * @param data
+	 * @param mainPage2
+	 * @param loadAddr
+	 * @throws IOException
+	 */
+	public static void DoSaveFileAsAsm(byte[] data, String filename, int loadAddr) throws IOException {
+		StringBuilder sb = new StringBuilder();
+		try {
+			String cr = System.lineSeparator();
+			sb.append("File: " + filename + cr);
+			sb.append("Org: " + loadAddr + cr);
+			sb.append("Length: " + data.length + cr+ cr);
+			ASMLib asm = new ASMLib();
+			int loadedaddress = loadAddr;
+			int realaddress = 0x0000;
+			try {
+				int asmData[] = new int[5];
+				while (realaddress < data.length) {
+					char chrdata[] = new char[5]; 
+					for (int i = 0; i < 5; i++) {
+						int d = 0;
+						if (realaddress + i < data.length) {
+							d = (int) data[realaddress + i] & 0xff;
+						}
+						asmData[i] = d;
+
+						if ((d > 0x1F) && (d < 0x7f)) {
+							chrdata[i] = (char) d;
+						} else {
+							chrdata[i] = '?';
+						}
+					}
+					// decode instruction
+					DecodedASM Instruction = asm.decode(asmData, loadedaddress);
+					sb.append(String.format("%04X\t", loadedaddress));
+					// output it. - First, assemble a list of hex bytes, but pad out to 12 chars
+					// (4x3)
+					for (int j = 0; j < Instruction.length; j++) {
+						sb.append(String.format("%02X", asmData[j]) + " ");
+					}
+
+					sb.append("\t\t");
+					sb.append(Instruction.instruction);
+					sb.append("\t\t");
+					sb.append(new String(chrdata).substring(0, Instruction.length));
+					sb.append(cr);
+
+					realaddress = realaddress + Instruction.length;
+					loadedaddress = loadedaddress + Instruction.length;
+				} // while
+			} catch (Exception E) {
+				System.out.println("Error at: " + realaddress + "(" + loadedaddress + ")");
+				System.out.println(E.getMessage());
+				E.printStackTrace();
+			}
+		} finally {
+			GeneralUtils.WriteBlockToDisk(sb.toString().getBytes(), filename);
+		}
 	}
 
 	/**
@@ -434,20 +502,18 @@ public class Speccy {
 	}
 
 	/**
-	 * Decode the variables area of a basic program. Uses the +3 header to determine
-	 * where this starts.
+	 * Decode the variables area of a basic program. 
 	 * 
 	 * @param file
 	 * @param sb
 	 * @param header
 	 */
-	public static void DecodeVariablesFromLoadedFile(byte[] file, StringBuilder sb, Plus3DosFileHeader header) {
-		int ptr = 128; // skip the file header
-		ptr = ptr + header.VariablesOffset;
+	public static void DecodeVariablesFromLoadedFile(byte[] file, StringBuilder sb, int VariablesOffset, int filesize) {
+		int ptr = VariablesOffset; 
 		if (ptr >= file.length) {
 			sb.append("No variables");
 		} else {
-			while (ptr < header.filelength + 0x80) {
+			while (ptr < filesize) {
 				int var = (int) (file[ptr++] & 0xff);
 				int vartype = var / 0x20;
 				if (var == 0x00) {
@@ -666,7 +732,7 @@ public class Speccy {
 	 * @throws Exception
 	 */
 	public static int VariableType6(StringBuilder sb, int Address, int chr, byte[] file) {
-		int varname = (chr & 0x3f);
+		int varname = (chr & 0x1f);
 		varname = varname + 0x40;
 		String txt = "Character array " + String.valueOf((char) varname) + "$(";
 		Address = Address + 2;
@@ -752,25 +818,24 @@ public class Speccy {
 	public static int VariableType7(StringBuilder sb, int Address, int chr, byte[] file) {
 		int varname = (chr & 0x3f);
 		varname = varname + 0x40;
-		String txt = "For/Next " + String.valueOf((char) varname);
+		sb.append("For/Next " + String.valueOf((char) varname));
 
-		txt = txt + " Value=" + String.valueOf(GetNumberAtByte(file, Address));
+		sb.append(" Value=" + String.valueOf(GetNumberAtByte(file, Address)));
 		Address = Address + 5;
-		txt = txt + " Limit=" + String.valueOf(GetNumberAtByte(file, Address));
+		sb.append(" Limit=" + String.valueOf(GetNumberAtByte(file, Address)));
 		Address = Address + 5;
-		txt = txt + " Step=" + String.valueOf(GetNumberAtByte(file, Address));
+		sb.append(" Step=" + String.valueOf(GetNumberAtByte(file, Address)));
 		Address = Address + 5;
 
 		int lsb = (file[Address++] & 0xff);
 		int msb = (file[Address++] & 0xff);
 		int line = (msb * 256) + lsb;
-		txt = txt + " Loop line=" + String.valueOf(line);
+		sb.append(" Loop line=" + String.valueOf(line));
 
 		int statement = (file[Address++] & 0xff);
 
-		txt = txt + " Next Statement in line: " + String.valueOf(statement) + "\r\n";
+		sb.append(" Next Statement in line: " + String.valueOf(statement) + "\r\n");
 
-		sb.append(txt);
 		return (Address);
 	}
 
@@ -1102,6 +1167,173 @@ public class Speccy {
 	}
 
 	/**
+	 * Save the array to file
+	 * 
+	 * @param data     - Data to be saved
+	 * @param mainPage - Owning page
+	 * @param varname  - Variable name
+	 * @throws IOException
+	 */
+	public static void DoSaveNumericArrayAsText(byte[] data, String filename, String varname) throws IOException {
+		FileOutputStream file;
+		file = new FileOutputStream(filename);
+		try {
+			file.write(("File: " + filename + System.lineSeparator()).getBytes());
+			int location = 0x80; // skip header
+
+			// Number of dimensions
+			int numDimensions = data[location++] & 0xff;
+
+			// LOad the dimension sizes into an array
+			int Dimsizes[] = new int[numDimensions];
+			for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
+				int dimsize = data[location++] & 0xff;
+				dimsize = dimsize + (data[location++] & 0xff) * 0x100;
+				Dimsizes[dimnum] = dimsize;
+			}
+			String s = "DIM " + varname + "(";
+			for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
+				if (dimnum > 0)
+					s = s + ",";
+				s = s + String.valueOf(Dimsizes[dimnum]);
+			}
+			s = s + ") = " + System.lineSeparator();
+			file.write(s.getBytes());
+
+			// count of what dimensions have been processed.
+			int DimCounts[] = new int[numDimensions];
+			for (int dimnum = 0; dimnum < numDimensions; dimnum++)
+				DimCounts[dimnum] = 0;
+
+			StringBuffer sb = new StringBuffer();
+			boolean complete = false;
+			while (!complete) {
+				for (int cc = 0; cc < Dimsizes[Dimsizes.length - 1]; cc++) {
+
+					if (cc != 0) {
+						sb.append(",");
+					}
+					double x = Speccy.GetNumberAtByte(data, location);
+					// special case anything thats an exact integer because it makes the arrays look
+					// less messy when displayed.
+					if (x != Math.rint(x)) {
+						sb.append(x);
+						sb.append(",");
+					} else {
+						sb.append((int) x);
+					}
+					location = location + 5;
+				}
+				sb.append(System.lineSeparator());
+				int diminc = Dimsizes.length - 2;
+				boolean doneInc = false;
+				while (!doneInc) {
+					if (diminc == -1) {
+						doneInc = true;
+						complete = true;
+					} else {
+						int x = DimCounts[diminc];
+						x++;
+						if (x == Dimsizes[diminc]) {
+							DimCounts[diminc] = 0;
+							diminc--;
+						} else {
+							DimCounts[diminc] = x;
+							doneInc = true;
+						}
+					}
+				}
+			}
+			file.write(sb.toString().getBytes());
+
+		} finally {
+			file.close();
+		}
+
+	}
+
+	/**
+	 * Save the character array
+	 * 
+	 * @param data
+	 * @param mainPage
+	 * @param p3d
+	 * @throws IOException
+	 */
+	public static void DoSaveCharArrayAsText(byte[] data, String filename, String varname) throws IOException {
+		FileOutputStream file;
+		file = new FileOutputStream(filename);
+		try {
+			file.write(("File: " + filename + System.lineSeparator()).getBytes());
+			int location = 0x80; // skip header
+
+			// Number of dimensions
+			int numDimensions = data[location++] & 0xff;
+
+			// LOad the dimension sizes into an array
+			int Dimsizes[] = new int[numDimensions];
+			for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
+				int dimsize = data[location++] & 0xff;
+				dimsize = dimsize + (data[location++] & 0xff) * 0x100;
+				Dimsizes[dimnum] = dimsize;
+			}
+			String s = "DIM " + varname + "(";
+			for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
+				if (dimnum > 0)
+					s = s + ",";
+				s = s + String.valueOf(Dimsizes[dimnum]);
+			}
+			s = s + ") = " + System.lineSeparator();
+			file.write(s.getBytes());
+
+			// count of what dimensions have been processed.
+			int DimCounts[] = new int[numDimensions];
+			for (int dimnum = 0; dimnum < numDimensions; dimnum++)
+				DimCounts[dimnum] = 0;
+
+			StringBuffer sb = new StringBuffer();
+			boolean complete = false;
+			while (!complete) {
+				for (int cc = 0; cc < Dimsizes[Dimsizes.length - 1]; cc++) {
+
+					if (cc != 0) {
+						sb.append(",");
+					}
+					String chr = Speccy.tokens[data[location++] & 0xff];
+					chr = chr.replace("&amp;", "&");
+					chr = chr.replace("&gt;", ">");
+					chr = chr.replace("&lt;", "<");
+
+					sb.append(chr);
+				}
+				sb.append(System.lineSeparator());
+				int diminc = Dimsizes.length - 2;
+				boolean doneInc = false;
+				while (!doneInc) {
+					if (diminc == -1) {
+						doneInc = true;
+						complete = true;
+					} else {
+						int x = DimCounts[diminc];
+						x++;
+						if (x == Dimsizes[diminc]) {
+							DimCounts[diminc] = 0;
+							diminc--;
+						} else {
+							DimCounts[diminc] = x;
+							doneInc = true;
+						}
+					}
+				}
+			}
+			file.write(sb.toString().getBytes());
+
+		} finally {
+			file.close();
+		}
+	}
+
+	/**
 	 * Get the colour attribute byte
 	 * 
 	 * @param ink
@@ -1123,15 +1355,159 @@ public class Speccy {
 
 	/**
 	 * Get a file type as a string.
+	 * 
 	 * @param filetype
 	 * @return
 	 */
 	public static String FileTypeAsString(int filetype) {
-		String result = "Unknown (#"+filetype+")";
-		if ((filetype>-1) || (filetype < 0x04)) {
+		String result = "Unknown (#" + filetype + ")";
+		if ((filetype > -1) || (filetype < 0x04)) {
 			result = filetypeNames[filetype];
 		}
-		return(result);
+		return (result);
+	}
+
+	/**
+	 * Render a given file type to the given folder.
+	 * 
+	 * @param targetFilename
+	 * @param data
+	 * @param filelength
+	 * @param speccyFileType
+	 * @param basicLine
+	 * @param basicVarsOffset
+	 * @param codeLoadAddress
+	 * @param arrayVarName
+	 * @throws IOException
+	 */
+
+	public static void SaveFileToDisk(File targetFilename, byte[] data, int filelength, int speccyFileType,
+			int basicLine, int basicVarsOffset, int codeLoadAddress, String arrayVarName, boolean codeAsHex)
+			throws IOException {
+		switch (speccyFileType) {
+		case BASIC_BASIC:
+			SaveBasicFile(targetFilename, data, basicLine, basicVarsOffset, filelength);
+			break;
+		case BASIC_NUMARRAY:
+			DoSaveNumericArrayAsText(data, targetFilename.getAbsolutePath(), arrayVarName);
+			break;
+		case BASIC_CHRARRAY:
+			DoSaveCharArrayAsText(data, targetFilename.getAbsolutePath(), arrayVarName);
+			break;
+		case BASIC_CODE:
+			SaveCodeFile(targetFilename, data, codeLoadAddress, filelength, codeAsHex);
+			break;
+		default:
+			SaveCodeFile(targetFilename, data, 0x10000 - filelength, filelength, codeAsHex);
+			break;
+		}
+
+	}
+
+	private static void SaveCodeFile(File targetFilename, byte[] data, int codeLoadAddress, int filelength,
+			boolean OutAshex) throws IOException {
+		if ((filelength == 6912) && (codeLoadAddress == 16384)) {
+			ImageData image = Speccy.GetImageFromFileArray(data, 0);
+			ImageLoader imageLoader = new ImageLoader();
+			imageLoader.data = new ImageData[] { image };
+			int filetyp = SWT.IMAGE_PNG;
+			FileOutputStream file;
+			try {
+				file = new FileOutputStream(targetFilename);
+				imageLoader.save(file, filetyp);
+				file.close();
+			} catch (FileNotFoundException e) {
+				System.out.println("Cannot save " + targetFilename.getAbsolutePath());
+				e.printStackTrace();
+			} catch (IOException e) {
+				System.out.println("Error closing " + targetFilename.getAbsolutePath());
+				e.printStackTrace();
+			}
+
+		} else {
+			if (OutAshex) {
+				String hexdata = GeneralUtils.HexDump(data, 0, data.length);
+				GeneralUtils.WriteBlockToDisk(hexdata.getBytes(), targetFilename);
+			} else {
+				DoSaveFileAsAsm(data, targetFilename.getAbsolutePath(), codeLoadAddress);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param targetFilename
+	 * @param data
+	 * @param basicLine
+	 * @param basicVarsOffset
+	 * @param filelength
+	 * @throws IOException
+	 */
+	private static void SaveBasicFile(File targetFilename, byte[] data, int basicLine, int basicVarsOffset,
+			int filelength) throws IOException {
+		FileOutputStream file;
+		file = new FileOutputStream(targetFilename);
+		try {
+			int ptr = 0;
+			int EndOfBasicArea = Math.min(filelength, basicVarsOffset);
+			while (ptr < EndOfBasicArea) {
+				int linenum = -1;
+				int linelen = 0;
+				try {
+					linenum = ((data[ptr++] & 0xff) * 256);
+					linenum = linenum + (data[ptr++] & 0xff);
+					linelen = (int) data[ptr++] & 0xff;
+					linelen = linelen + ((int) (data[ptr++] & 0xff) * 256);
+					// fiddles bad line lengths
+					linelen = Math.min(filelength - ptr + 4, linelen);
+				} catch (Exception E) {
+					System.out.println("Basic parsing error, bad linenum.");
+					file.write("Bad line number encountered.\n".getBytes());
+				}
+
+				if ((ptr >= basicVarsOffset) || (linenum < 0)) {
+					// now into the variables area. Ignoring for the moment.
+					ptr = data.length;
+				} else {
+					String sixdigit = String.valueOf(linenum);
+					while (sixdigit.length() < 6) {
+						sixdigit = sixdigit + " ";
+					}
+					StringBuilder sb = new StringBuilder();
+					try {
+						byte line[] = new byte[linelen];
+						System.arraycopy(data, ptr, line, 0, linelen);
+						Speccy.DecodeBasicLine(sb, line, 0, linelen, false);
+					} catch (Exception E) {
+						sb.append("Bad line: " + E.getMessage());
+					}
+
+					// point to next line.
+					ptr = ptr + linelen;
+
+					file.write(sixdigit.getBytes());
+					file.write(" ".getBytes());
+					file.write(sb.toString().getBytes());
+					file.write("\n".getBytes());
+				}  
+			}
+		} finally {
+			file.close();
+		}
+
+		//TODO: Rendering of variables for output to file. Doesnt handle bad variables very well. 
+/*		if (basicVarsOffset < filelength ) {
+			byte variables[]=  new byte[filelength-basicVarsOffset];
+			System.arraycopy(data, basicVarsOffset, variables, 0,variables.length);
+			System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx");
+			System.out.println(GeneralUtils.HexDump(variables, 0, variables.length));
+			
+			StringBuilder sb = new StringBuilder();		
+			DecodeVariablesFromLoadedFile(variables,  sb, 0, variables.length);
+			
+			//Now for the variables area.
+			GeneralUtils.WriteBlockToDisk(sb.toString().getBytes(), targetFilename+".variables");
+		} */
 	}
 
 }

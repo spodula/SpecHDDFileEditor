@@ -1,9 +1,7 @@
 package hddEditor.ui.partitionPages;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -162,7 +160,35 @@ public class TrDosPartitionPage extends GenericPage {
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
-					DoExtractAllFiles();
+					DoExtractAllFilesRaw();
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+			Btn = new Button(ParentComp, SWT.PUSH);
+			Btn.setText("Extract all Files (Code=Asm)");
+			Btn.setLayoutData(gd);
+			Btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					DoExtractAllFilesAsm();
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+			Btn = new Button(ParentComp, SWT.PUSH);
+			Btn.setText("Extract all Files (Code=Hex)");
+			Btn.setLayoutData(gd);
+			Btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					DoExtractAllFilesHex();
 				}
 
 				@Override
@@ -244,47 +270,45 @@ public class TrDosPartitionPage extends GenericPage {
 	/**
 	 * 
 	 */
-	protected void DoExtractAllFiles() {
+	protected void DoExtractAllFilesRaw() {
 		DirectoryDialog dialog = new DirectoryDialog(ParentComp.getShell());
 		dialog.setText("Select folder for export to");
 		String result = dialog.open();
 		if (result != null) {
 			File directory = new File(result);
-			for (TableItem t : DirectoryListing.getItems()) {
-				TrdDirectoryEntry entry = (TrdDirectoryEntry) t.getData();
-				String filename = entry.GetFilename().trim();
-				switch (entry.GetFileType()) {
-				case ('B'):
-					filename = filename + ".basic";
-					break;
-				case ('C'):
-					filename = filename + ".code";
-					break;
-				case ('#'):
-					filename = filename + ".stream";
-					break;
-				case ('D'):
-					if (entry.IsCharArray()) {
-						filename = filename + ".cdata";
-					} else {
-						filename = filename + ".ndata";
-					}
-					break;
-				}
-				try {
-					File TargetFilename = new File(directory, filename);
-					byte file[] = entry.GetFileData();
-					OutputStream outputStream = new FileOutputStream(TargetFilename);
-					try {
-						outputStream.write(file);
-					} finally {
-						outputStream.close();
-					}
-					System.out.println("Written " + filename);
-				} catch (IOException e) {
-					System.out.println("Error extracting " + entry.GetFilename() + ": " + e.getMessage());
-					e.printStackTrace();
-				}
+			try {
+				partition.ExtractPartitiontoFolder(directory, true, false);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+
+	protected void DoExtractAllFilesHex() {
+		DirectoryDialog dialog = new DirectoryDialog(ParentComp.getShell());
+		dialog.setText("Select folder for export to");
+		String result = dialog.open();
+		if (result != null) {
+			File directory = new File(result);
+			try {
+				partition.ExtractPartitiontoFolder(directory, false, true);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	protected void DoExtractAllFilesAsm() {
+		DirectoryDialog dialog = new DirectoryDialog(ParentComp.getShell());
+		dialog.setText("Select folder for export to");
+		String result = dialog.open();
+		if (result != null) {
+			File directory = new File(result);
+			try {
+				partition.ExtractPartitiontoFolder(directory, false, false);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}
@@ -394,8 +418,8 @@ public class TrDosPartitionPage extends GenericPage {
 
 				byte[] data = entry.GetFileData();
 				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
-					//entry.SetDeleted(true);
-					
+					// entry.SetDeleted(true);
+
 					// refresh the screen.
 					AddComponents();
 				}

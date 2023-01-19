@@ -11,28 +11,29 @@ import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.SystemPartition;
 
 public class GeneralUtils {
-	
+
 	/**
 	 * Get size as either k or m depending on size.
+	 * 
 	 * @return
 	 */
 	public static String GetSizeAsString(int size) {
 		if (size < 1024) {
-			return(String.format("%3d", size)+"b");
-		} 
+			return (String.format("%3d", size) + "b");
+		}
 		size = size / 1024;
 		if (size < 1024) {
-			return(String.format("%3d", size)+"Kb");
-		} 
+			return (String.format("%3d", size) + "Kb");
+		}
 		size = size / 1024;
 		if (size < 1024) {
-			return(String.format("%3d", size)+"Mb");
-		} 
+			return (String.format("%3d", size) + "Mb");
+		}
 		size = size / 1024;
-		return(String.format("%3d", size)+"Gb");
-		
+		return (String.format("%3d", size) + "Gb");
+
 	}
-	
+
 	/**
 	 * Read a given file to a byte array.
 	 * 
@@ -41,7 +42,7 @@ public class GeneralUtils {
 	 */
 	public static byte[] ReadFileIntoArray(String filename) {
 		long filesize = new File(filename).length();
-		byte result[] = new byte[(int)filesize];
+		byte result[] = new byte[(int) filesize];
 		InputStream inputStream;
 		try {
 			inputStream = new FileInputStream(filename);
@@ -49,22 +50,20 @@ public class GeneralUtils {
 				inputStream.read(result);
 				inputStream.close();
 			} finally {
-				
+
 			}
-			return(result);
+			return (result);
 		} catch (IOException e) {
-			System.err.println("IO "
-					+ "Error in GeneralUtils.ReadFileIntoArray: "+e.getMessage());			
+			System.err.println("IO " + "Error in GeneralUtils.ReadFileIntoArray: " + e.getMessage());
 			e.printStackTrace();
-		} 
-		return(null);
+		}
+		return (null);
 
 	}
-	
 
 	/**
-	 * Write the given byte block to the given filename
-	 * This function reports but otherwise eats any errors.
+	 * Write the given byte block to the given filename This function reports but
+	 * otherwise eats any errors.
 	 * 
 	 * @param data
 	 * @param filename
@@ -77,17 +76,34 @@ public class GeneralUtils {
 				outputStream.write(data);
 			} finally {
 				outputStream.close();
-			} 
+			}
 		} catch (FileNotFoundException e) {
-			System.err.println("File not found Error in GeneralUtils.WriteBlockToDisk: "+e.getMessage());
+			System.err.println("File not found Error in GeneralUtils.WriteBlockToDisk: " + e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
-			System.err.println("IO "
-					+ "Error in GeneralUtils.WriteBlockToDisk: "+e.getMessage());			
+			System.err.println("IO " + "Error in GeneralUtils.WriteBlockToDisk: " + e.getMessage());
 			e.printStackTrace();
-		} 
+		}
 	}
-	
+
+	public static void WriteBlockToDisk(byte[] data, File filename) {
+		FileOutputStream outputStream;
+		try {
+			outputStream = new FileOutputStream(filename);
+			try {
+				outputStream.write(data);
+			} finally {
+				outputStream.close();
+			}
+		} catch (FileNotFoundException e) {
+			System.err.println("File not found Error in GeneralUtils.WriteBlockToDisk: " + e.getMessage());
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.err.println("IO " + "Error in GeneralUtils.WriteBlockToDisk: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
 	/**
 	 * Return a given data block as an ascii hexdump.
 	 * 
@@ -97,33 +113,45 @@ public class GeneralUtils {
 	 * @return
 	 */
 	public static String HexDump(byte[] data, int start, int length) {
-		String result = "";
-		
-		String s="";
-		for(int ptr = 0;ptr < length;ptr++  ) {
-			if ((ptr % 16)==0) {
-				if (!s.isBlank()) {
-					result = result + " "+s+"\n";
-					s = "";
-				} 
-				result = result + String.format("%08X ", start);
+		StringBuilder sb = new StringBuilder();
+		String cr = System.lineSeparator();
+
+		char chars[] = new char[16];
+		for (int s = 0; s < chars.length; s++) {
+			chars[s] = 0x20;
+		}
+		int byteindex = 0;
+		sb.append(String.format("%08X ", start));
+		for (int ptr = 0; ptr < length; ptr++) {
+			if ((byteindex) == 16) {
+				sb.append(" ");
+				sb.append(new String(chars));
+				sb.append(cr);
+				for (int s = 0; s < chars.length; s++) {
+					chars[s] = 0x20;
+				}
+				byteindex = 0;
+				sb.append(String.format("%08X ", start));
 			}
 			byte dd = data[start++];
-			int xi = (int)(dd & 0xff);
-			
-			result = result + String.format("%02X ", xi);
-			if (dd >= 32 && dd<=127) {
-				s = s + (char)dd;
+			int xi = (int) (dd & 0xff);
+
+			sb.append(String.format("%02X ", xi));
+			if (dd >= 32 && dd <= 127) {
+				chars[byteindex++] = (char) dd;
 			} else {
-				s = s + ".";
+				chars[byteindex++] = '.';
 			}
 		}
-		result = result + " "+s+"\n";
-		return(result);		
+		sb.append(" ");
+		sb.append(new String(chars));
+		sb.append(cr);
+
+		return (sb.toString());
 	}
-	
+
 	/**
-	 * Pad a string to a given length  
+	 * Pad a string to a given length
 	 * 
 	 * @param s
 	 * @param i
@@ -133,11 +161,12 @@ public class GeneralUtils {
 		while (s.length() < i) {
 			s = s + " ";
 		}
-		return(s);
+		return (s);
 	}
-	
+
 	/**
 	 * Test function used for dumping partition list given the system partition.
+	 * 
 	 * @param Sysp
 	 */
 	public static void DumpPartitionList(SystemPartition Sysp) {
@@ -154,5 +183,4 @@ public class GeneralUtils {
 		}
 	}
 
-	
 }

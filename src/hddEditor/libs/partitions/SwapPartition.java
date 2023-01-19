@@ -14,6 +14,11 @@ package hddEditor.libs.partitions;
  * MB: Maximum block number (0 to 65535)
  */
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.disks.Disk;
 
 public class SwapPartition extends IDEDosPartition {
@@ -67,5 +72,34 @@ public class SwapPartition extends IDEDosPartition {
 	public void Reload() {
 	}
 
+	
+	/**
+	 * 
+	 */
+	@Override
+	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex) {
+		try {
+			FileWriter SysConfig = new FileWriter(new File(folder, "swap.index"));
+			try {
+				SysConfig.write("<swap>\n".toCharArray());
+				SysConfig.write(("   <blocksizesectors>"+SwapblockSize+"</blocksizesectors>\n").toCharArray());
+				SysConfig.write(("   <currentblock>"+CurrentBlock+"</currentblock>\n").toCharArray());
+				SysConfig.write(("   <maxblock>"+MaxBlock+"</maxblock>\n").toCharArray());
+				SysConfig.write("</swap>\n".toCharArray());
+			} finally {
+				SysConfig.close();
+			}
+			byte data[] = GetAllDataInPartition();
+			if (raw) {
+				GeneralUtils.WriteBlockToDisk(data, new File(folder,"swap.data"));
+			} else {
+				String sdata = GeneralUtils.HexDump(data, 0, data.length);
+				GeneralUtils.WriteBlockToDisk(sdata.getBytes(), new File(folder,"swap.data.txt"));
+			}
+		} catch (IOException e) {
+			System.out.println("Error extracting files: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
 	
 }
