@@ -85,7 +85,7 @@ public class CodeRenderer extends FileRenderer {
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsHex(data, mainPage, 0, data.length);
+				DoSaveFileAsHex(data, mainPage, 0, data.length, filename);
 			}
 
 			@Override
@@ -100,7 +100,7 @@ public class CodeRenderer extends FileRenderer {
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsBin(data, mainPage);
+				DoSaveFileAsBin(data, mainPage,Filename);
 			}
 
 			@Override
@@ -120,7 +120,7 @@ public class CodeRenderer extends FileRenderer {
 					System.arraycopy(header, 0, newdata, 0, header.length);
 					System.arraycopy(data, 0, newdata, header.length, data.length);
 
-					DoSaveFileAsBin(data, mainPage);
+					DoSaveFileAsBin(data, mainPage,Filename);
 				}
 
 				@Override

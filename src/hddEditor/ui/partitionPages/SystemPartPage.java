@@ -37,11 +37,13 @@ import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.handlers.IDEDosHandler;
 import hddEditor.libs.partitions.FreePartition;
 import hddEditor.libs.partitions.IDEDosPartition;
+import hddEditor.libs.partitions.ProgressCallback;
 import hddEditor.libs.partitions.SystemPartition;
 import hddEditor.ui.HDDEditor;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.NewPartitionDialog;
+import hddEditor.ui.partitionPages.dialogs.PartitionExportProgress;
 
 public class SystemPartPage extends GenericPage {
 	// Flag to block writing to the disk.
@@ -442,7 +444,7 @@ public class SystemPartPage extends GenericPage {
 					widgetSelected(arg0);
 				}
 			});
-			
+
 			DoExtractAllPartitionButton = button("Dump partitions (RAW)");
 			DoExtractAllPartitionButton.setLayoutData(gd);
 			DoExtractAllPartitionButton.addSelectionListener(new SelectionListener() {
@@ -456,7 +458,7 @@ public class SystemPartPage extends GenericPage {
 					widgetSelected(arg0);
 				}
 			});
-			
+
 			DoExtractAllPartitionButton2 = button("Dump partitions (Code=ASM)");
 			DoExtractAllPartitionButton2.setLayoutData(gd);
 			DoExtractAllPartitionButton2.addSelectionListener(new SelectionListener() {
@@ -483,12 +485,12 @@ public class SystemPartPage extends GenericPage {
 					widgetSelected(arg0);
 				}
 			});
-			
-			
+
 			NewPartitionButton.setEnabled(CanEditPartitions);
 			ParentComp.pack();
 		}
 	}
+
 	/**
 	 * Save the top of the form to the partition.
 	 */
@@ -917,48 +919,76 @@ public class SystemPartPage extends GenericPage {
 	 * 
 	 */
 	protected void DoExtractAllPartitions() {
-		ExtractAllPartitions(true,false); 
+		ExtractAllPartitions(true, false);
 	}
 
-
 	protected void DoExtractAllPartitionsHex() {
-		ExtractAllPartitions(false,true); 
+		ExtractAllPartitions(false, true);
 	}
 
 	protected void DoExtractAllPartitionsAsm() {
-		ExtractAllPartitions(false,false); 
+		ExtractAllPartitions(false, false);
 	}
 
-	protected void ExtractAllPartitions(boolean AsRaw,boolean CodeAsHex) {
+	protected void ExtractAllPartitions(boolean AsRaw, boolean CodeAsHex) {
 		DirectoryDialog dialog = new DirectoryDialog(ParentComp.getShell());
 		dialog.setText("Select folder for export to");
 		String result = dialog.open();
 		if (result != null) {
-			File directory = new File(result);
-			for (TableItem t : PartitionTable.getItems()) {
-				IDEDosPartition partition = (IDEDosPartition) t.getData();
-				if (partition.GetPartType() != PLUSIDEDOS.PARTITION_FREE
-						&& partition.GetPartType() != PLUSIDEDOS.PARTITION_UNUSED
-						&& partition.GetPartType() != PLUSIDEDOS.PARTITION_UNKNOWN
-						&& partition.GetPartType() != PLUSIDEDOS.PARTITION_BAD) {
+			PartitionExportProgress pep = new PartitionExportProgress(ParentComp.getShell().getDisplay());
+			try {
+				pep.Show("Exporting all partitions", "Partition:", "File:");
+				pep.SetMax1(PartitionTable.getItems().length);
+				pep.SetMax2(1);
+				pep.SetValue1(0);
+				pep.SetValue2(0);
+				int PartNum=0;
+				File directory = new File(result);
+				for (TableItem t : PartitionTable.getItems()) {
+					IDEDosPartition partition = (IDEDosPartition) t.getData();
+					pep.setMessage1("Exporting partition "+partition.GetName()+" ("+PLUSIDEDOS.GetTypeAsString(partition.GetPartType())+")");
+					pep.SetValue1(PartNum++);
+					if (partition.GetPartType() != PLUSIDEDOS.PARTITION_FREE
+							&& partition.GetPartType() != PLUSIDEDOS.PARTITION_UNUSED
+							&& partition.GetPartType() != PLUSIDEDOS.PARTITION_UNKNOWN
+							&& partition.GetPartType() != PLUSIDEDOS.PARTITION_BAD) {
 
-					File BaseFolder = new File(directory, partition.GetName());
-					System.out.print("Extracting partition" + BaseFolder+" - ");
-					if (!BaseFolder.exists()) {
-						BaseFolder.mkdir();
+						File BaseFolder = new File(directory, partition.GetName());
+						System.out.print("Extracting partition" + BaseFolder + " - ");
+						if (!BaseFolder.exists()) {
+							BaseFolder.mkdir();
+						}
+						try {
+							long start = System.currentTimeMillis();
+							partition.ExtractPartitiontoFolder(BaseFolder, AsRaw, CodeAsHex, new ProgressCallback() {
+								int lastmax = 0;
+								@Override
+								public void Callback(int max, int value, String text) {
+									if (max != lastmax) {
+										pep.SetMax2(max);
+										max = lastmax;
+									}
+									pep.SetValue2(value);
+									pep.setMessage2(text);									
+								}
+							});
+							long finish = System.currentTimeMillis();
+							System.out.println(String.valueOf(finish - start) + "ms");
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					}
-					try {
-						long start = System.currentTimeMillis();
-						partition.ExtractPartitiontoFolder(BaseFolder, AsRaw, CodeAsHex);
-						long finish = System.currentTimeMillis();
-						System.out.println(String.valueOf(finish-start)+"ms");
-					} catch (IOException e) {
-						e.printStackTrace();
+					if (pep.IsCancelled()) {
+						System.out.println("Aborted.");
+						break;
 					}
 				}
+			} finally {
+				pep.close();
 			}
+			System.out.println("Export complete.");
+
 		}
 	}
 
-	
 }

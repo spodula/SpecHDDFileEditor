@@ -582,14 +582,17 @@ public class TrDosPartition extends IDEDosPartition {
 	 * 
 	 */
 	@Override
-	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex) {
+	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex, ProgressCallback progress) {
 		FileWriter SysConfig;
 		try {
 			SysConfig = new FileWriter(new File(folder, "partition.index"));
 			try {
 				SysConfig.write("<speccy>\n".toCharArray());
-
+				int entrynum = 0;
 				for (TrdDirectoryEntry entry : DirectoryEntries) {
+					if (progress!= null) {
+						progress.Callback(DirectoryEntries.length, entrynum++, "File: "+entry.GetFilename());
+					}
 					try {
 						File TargetFilename = new File(folder, entry.GetFilename().trim() + "." + entry.GetFileType());
 						byte file[] = entry.GetFileData();
@@ -645,7 +648,7 @@ public class TrDosPartition extends IDEDosPartition {
 					SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
 					int filetype = Speccy.BASIC_CODE;
 					switch (entry.GetFileType()) {
-					case 'B':
+					case 'B': 
 						filetype = Speccy.BASIC_BASIC;
 						break;
 					case 'D':

@@ -285,12 +285,16 @@ public class PLUS3DOSPartition extends CPMPartition {
 	}
 
 	@Override
-	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex) {
+	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex, ProgressCallback progress) {
 		try {
 			FileWriter SysConfig = new FileWriter(new File(folder, "partition.index"));
 			try {
 				SysConfig.write("<speccy>\n".toCharArray());
+				int entrynum=0;
 				for (DirectoryEntry entry : DirectoryEntries) {
+					if (progress!= null) {
+						progress.Callback(DirectoryEntries.length, entrynum++, "File: "+entry.filename());
+					}
 					File TargetFilename = new File(folder, entry.filename().trim());
 					Plus3DosFileHeader p3d = entry.GetPlus3DosHeader();
 					byte entrydata[] = entry.GetFileData();
@@ -303,16 +307,19 @@ public class PLUS3DOSPartition extends CPMPartition {
 					if (raw) {
 						GeneralUtils.WriteBlockToDisk(entrydata, TargetFilename);
 					} else {
-						int filelength = entrydata.length;
 						int SpeccyFileType = 0;
 						int basicLine = 0;
 						int basicVarsOffset = entrydata.length;
 						int codeLoadAddress = 0;
+						int filelength = 0;
 						String arrayVarName = "";
 						if (p3d == null || !p3d.IsPlusThreeDosFile) {
 							SpeccyFileType  = Speccy.BASIC_CODE;
-							codeLoadAddress = 0x10000 - entrydata.length;							
+							codeLoadAddress = 0x10000 - entrydata.length;
+							filelength = entrydata.length;
+
 						} else {
+							filelength = p3d.filelength;
 							SpeccyFileType = p3d.filetype;
 							basicLine = p3d.line;
 							basicVarsOffset = p3d.VariablesOffset;
@@ -322,7 +329,8 @@ public class PLUS3DOSPartition extends CPMPartition {
 						try {
 							Speccy.SaveFileToDisk(TargetFilename, entrydata, filelength, SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName,CodeAsHex);
 						} catch (Exception E) {
-							System.out.println("Error extracting "+TargetFilename+ "For folder: "+folder+" - "+E.getMessage());
+							System.out.println("\nError extracting "+TargetFilename+ "For folder: "+folder+" - "+E.getMessage());
+							E.printStackTrace();
 						}
 					}
 

@@ -438,7 +438,7 @@ public class IDEDosPartition {
 	 * @param folder
 	 * @throws IOException 
 	 */
-	public void ExtractPartitiontoFolder(File folder, boolean Raw, boolean CodeAsHex) throws IOException {
+	public void ExtractPartitiontoFolder(File folder, boolean Raw, boolean CodeAsHex, ProgressCallback progress) throws IOException {
 		
 	}
 

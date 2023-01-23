@@ -357,7 +357,7 @@ public class SystemPartition extends IDEDosPartition {
 	 * 
 	 */
 	@Override
-	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex) throws IOException {
+	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex, ProgressCallback progress) throws IOException {
 		FileWriter SysConfig = new FileWriter(new File(folder, "system.config"));
 		try {
 			SysConfig.write("<plusidedos>\n".toCharArray());
@@ -380,7 +380,11 @@ public class SystemPartition extends IDEDosPartition {
 			SysConfig.write(("  <maxpart>" + GetMaxPartitions() + "</maxpart>\n").toCharArray());
 			SysConfig.write(("  <partitions>\n").toCharArray());
 
+			int entrynum=0;
 			for (IDEDosPartition p : partitions) {
+				if (progress!= null) {
+					progress.Callback(partitions.length, entrynum++, "Partition: "+p.GetName());
+				}
 				if (p.GetPartType() != 0) {
 					SysConfig.write(("    <partition>\n").toCharArray());
 					SysConfig.write(("        <partname>" + p.GetName() + "</partname>\n").toCharArray());

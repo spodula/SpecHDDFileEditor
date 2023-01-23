@@ -32,7 +32,7 @@ public class MDFMicrodriveFile implements Disk {
 		FileSize = 0;
 	}
 
-	private void ParseMDFFile() throws IOException {
+	public void ParseMDFFile() throws IOException {
 		byte FileData[] = new byte[(int) FileSize];
 		inFile.seek(0);
 		inFile.read(FileData);

@@ -630,12 +630,16 @@ public class CPMPartition extends IDEDosPartition {
 	}
 
 	@Override
-	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex) {
+	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex, ProgressCallback progress) {
 		try {
 			FileWriter SysConfig = new FileWriter(new File(folder, "partition.index"));
 			try {
 				SysConfig.write("<speccy>\n".toCharArray());
+				int entrynum=0;
 				for (DirectoryEntry entry : DirectoryEntries) {
+					if (progress!= null) {
+						progress.Callback(DirectoryEntries.length, entrynum++, "File: "+entry.filename());
+					}
 					File TargetFilename = new File(folder, entry.filename().trim());
 					byte file[] = entry.GetFileData();
 					//CPM files are always RAW.

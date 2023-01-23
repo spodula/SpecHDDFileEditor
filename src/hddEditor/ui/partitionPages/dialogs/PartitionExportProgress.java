@@ -14,12 +14,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 
-public class ProgesssForm {
+public class PartitionExportProgress {
 	//Form details
 	private Display display = null;
 	private Shell shell = null;
-	private ProgressBar progress = null;
-	private Label MessageLabel = null;
+	private ProgressBar progress1 = null;
+	private ProgressBar progress2 = null;
+	private Label MessageLabel1 = null;
+	private Label MessageLabel2 = null;
 
 	//result
 	private boolean cancelled = true;
@@ -37,7 +39,7 @@ public class ProgesssForm {
 	 * 
 	 * @param display
 	 */
-	public ProgesssForm(Display display) {
+	public PartitionExportProgress(Display display) {
 		this.display = display;
 	}
 
@@ -45,9 +47,9 @@ public class ProgesssForm {
 	 * Show the form and reset the cancelled flag
 	 * 
 	 */
-	public void Show(String title, String message) {
+	public void Show(String title, String message1, String message2) {
 		cancelled = false;
-		Createform(title, message);
+		Createform(title, message1, message2);
 		shell.open();
 	}
 
@@ -56,8 +58,12 @@ public class ProgesssForm {
 	 * 
 	 * @param max
 	 */
-	public void SetMax(int max) {
-		progress.setMaximum(max);
+	public void SetMax1(int max) {
+		progress1.setMaximum(max);
+		display.readAndDispatch();
+	}
+	public void SetMax2(int max) {
+		progress2.setMaximum(max);
 		display.readAndDispatch();
 	}
 
@@ -66,8 +72,12 @@ public class ProgesssForm {
 	 * 
 	 * @param value
 	 */
-	public void SetValue(int value) {
-		progress.setSelection(value);
+	public void SetValue1(int value) {
+		progress1.setSelection(value);
+		display.readAndDispatch();
+	}
+	public void SetValue2(int value) {
+		progress2.setSelection(value);
 		display.readAndDispatch();
 	}
 
@@ -76,9 +86,8 @@ public class ProgesssForm {
 	 * 
 	 * @param title
 	 */
-	private void Createform(String title, String message) {
+	private void Createform(String title, String message1, String message2) {
 		cancelled = false;
-
 		shell = new Shell(display);
 		shell.setSize(900, 810);
 
@@ -92,20 +101,35 @@ public class ProgesssForm {
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 600;
 		gd.horizontalSpan = 3;
+		MessageLabel1 = new Label(shell, SWT.NONE);
+		MessageLabel1.setText(message1);
+		MessageLabel1.setLayoutData(gd);
 
-		MessageLabel = new Label(shell, SWT.NONE);
-		MessageLabel.setText(message);
-		MessageLabel.setLayoutData(gd);
-
-		progress = new ProgressBar(shell, SWT.BORDER);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 3;
 		gd.widthHint = 600;
-		progress.setLayoutData(gd);
-		progress.setMinimum(0);
-		progress.setMaximum(100);
-		progress.setSelection(0);
+		progress1 = new ProgressBar(shell, SWT.BORDER);
+		progress1.setLayoutData(gd);
+		progress1.setMinimum(0);
+		progress1.setMaximum(100);
+		progress1.setSelection(0);
 
+		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.widthHint = 600;
+		gd.horizontalSpan = 3;
+		MessageLabel2 = new Label(shell, SWT.NONE);
+		MessageLabel2.setText(message1);
+		MessageLabel2.setLayoutData(gd);
+
+		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.horizontalSpan = 3;
+		gd.widthHint = 600;
+		progress2 = new ProgressBar(shell, SWT.BORDER);
+		progress2.setLayoutData(gd);
+		progress2.setMinimum(0);
+		progress2.setMaximum(100);
+		progress2.setSelection(0);
+		
 		new Label(shell, SWT.NONE);
 
 		Button CancelBtn = new Button(shell, SWT.BORDER);
@@ -142,8 +166,13 @@ public class ProgesssForm {
 	 * 
 	 * @param string
 	 */
-	public void setMessage(String string) {
-		MessageLabel.setText(string);
+	public void setMessage1(String string) {
+		MessageLabel1.setText(string);
+		shell.pack();
+		display.readAndDispatch();
+	}
+	public void setMessage2(String string) {
+		MessageLabel2.setText(string);
 		shell.pack();
 		display.readAndDispatch();
 	}

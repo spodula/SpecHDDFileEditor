@@ -1,4 +1,7 @@
 package hddEditor.ui.partitionPages.FileRenderers;
+//BUGFIX: GDS 22/01/2023 - Fixed error deciding when REM statements need to be disassembled. Was calculating with wrong values.
+//BUGFIX: GDS 23/01/2023 - Now handles bad basic files a bit better when the +3Size> CPMsize 
+//QOLFIX: GDS 22/01/2023 - DoSaveFileAsText: Now defaults to the current filename and puts in title bar.
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -32,7 +35,7 @@ public class BasicRenderer extends FileRenderer {
 	private Table Variables = null;
 
 	/**
-	 * Version of Render that doesnt rely on the +3DOS header
+	 * Version of Render that doesn't rely on the +3DOS header
 	 * 
 	 * @param mainPage
 	 * @param data
@@ -43,7 +46,8 @@ public class BasicRenderer extends FileRenderer {
 	 * @param VariablesOffset
 	 * @param Startline
 	 */
-	public void RenderBasic(Composite mainPage, byte data[], byte header[], String Filename, int filelength,int VariablesOffset, int Startline) {
+	public void RenderBasic(Composite mainPage, byte data[], byte header[], String Filename, int filelength,
+			int VariablesOffset, int Startline) {
 		this.filename = Filename;
 		this.MainPage = mainPage;
 		this.data = data;
@@ -97,7 +101,7 @@ public class BasicRenderer extends FileRenderer {
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsBin(data, mainpage);
+				DoSaveFileAsBin(data, mainpage, Filename);
 			}
 
 			@Override
@@ -114,11 +118,10 @@ public class BasicRenderer extends FileRenderer {
 			btn.addSelectionListener(new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
-					byte newdata[] = new byte[data.length+header.length];
+					byte newdata[] = new byte[data.length + header.length];
 					System.arraycopy(header, 0, newdata, 0, header.length);
 					System.arraycopy(data, 0, newdata, header.length, data.length);
-					
-					DoSaveFileAsBin(newdata, mainpage);
+					DoSaveFileAsBin(newdata, mainpage, Filename);
 				}
 
 				@Override
@@ -134,7 +137,7 @@ public class BasicRenderer extends FileRenderer {
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsHex(data, mainpage, 0, filelength);
+				DoSaveFileAsHex(data, mainpage, 0, filelength, Filename);
 			}
 
 			@Override
@@ -160,7 +163,7 @@ public class BasicRenderer extends FileRenderer {
 		tc2.setWidth(600);
 
 		AddBasicFile(filelength, VariablesOffset);
-		
+
 		StartLineEdit.setText(String.valueOf(Startline));
 		VariableStartEdit.setText(String.valueOf(VariablesOffset));
 
@@ -184,18 +187,17 @@ public class BasicRenderer extends FileRenderer {
 		vc1.setWidth(80);
 		TableColumn vc2 = new TableColumn(Variables, SWT.FILL);
 		vc2.setText("Type");
-		vc2.setWidth(80);
+		vc2.setWidth(100);
 		TableColumn vc3 = new TableColumn(Variables, SWT.FILL);
 		vc3.setText("Content");
-		vc3.setWidth(600);
+		vc3.setWidth(580);
 
-		int varlen = filelength - VariablesOffset;
-		byte variables[] = new byte[varlen];
-		
-		System.arraycopy(data, VariablesOffset, variables, 0, varlen);
-
-		DecodeVariables(this.MainPage, variables);
-
+		int varlen = Math.min(filelength,data.length) - VariablesOffset;
+		if (varlen > 0) {
+			byte variables[] = new byte[varlen];
+			System.arraycopy(data, VariablesOffset, variables, 0, varlen);
+			DecodeVariables(this.MainPage, variables);
+		}
 		this.MainPage.pack();
 
 	}
@@ -214,11 +216,11 @@ public class BasicRenderer extends FileRenderer {
 			public boolean valid = false;
 			public int line;
 		}
-		
+
 		Font mono = new Font(MainPage.getDisplay(), "Monospace", 10, SWT.NONE);
 
-		ArrayList<RemDetails> RemLocations = new ArrayList<RemDetails>(); 
-		
+		ArrayList<RemDetails> RemLocations = new ArrayList<RemDetails>();
+
 		int ptr = 0;
 		int EndOfBasicArea = Math.min(filelength, VariablesOffset);
 		while (ptr < EndOfBasicArea) {
@@ -230,23 +232,24 @@ public class BasicRenderer extends FileRenderer {
 				linenum = linenum + (data[ptr++] & 0xff);
 				linelen = (int) data[ptr++] & 0xff;
 				linelen = linelen + ((int) (data[ptr++] & 0xff) * 256);
-				//Record original line length for REM purposes. 
-				OrigLineLen  = linelen;
-				//fiddles bad line lengths
-				linelen = Math.min(filelength-ptr+4, linelen);
+				// Record original line length for REM purposes.
+				OrigLineLen = linelen;
+				// fiddles bad line lengths
+				linelen = Math.min(filelength - ptr + 4, linelen);
 			} catch (Exception E) {
 				System.out.println("Basic parsing error, bad linenum.");
 				String details[] = new String[2];
 				details[0] = "Invalid";
 				details[1] = "Bad line number encountered.";
+				ptr = 99999999;
 
 				TableItem Row = new TableItem(Listing, SWT.NONE);
-				Row.setText(details);				
+				Row.setText(details);
 			}
 
 			if ((ptr >= VariablesOffset) || (linenum < 0)) {
 				// now into the variables area. Ignoring for the moment.
-				ptr = data.length;
+				ptr = 99999999;
 			} else {
 				String sixdigit = String.valueOf(linenum);
 				while (sixdigit.length() < 6) {
@@ -258,46 +261,43 @@ public class BasicRenderer extends FileRenderer {
 					byte line[] = new byte[linelen];
 					for (int i = 0; i < linelen; i++) {
 						line[i] = data[ptr + i];
-						//get the rem details
+						// get the rem details
 						if ((line[i] & 0xff) == (0xEA & 0xff)) {
-							if ( ((i==0) || (line[i-1] == (byte) ':')) && !rd.valid) {
-								rd.locationAddr = ptr+i+1;
-								int RestOfLine = OrigLineLen - rd.locationAddr;
+							if (((i == 0) || (line[i - 1] == (byte) ':')) && !rd.valid) {
+								rd.locationAddr = ptr + i + 1;
+								int RestOfLine = OrigLineLen - i - 2; // Length = rest of line - terminating CR and the
+																		// original REM statement
 								int RestOfData = data.length - rd.locationAddr;
 								RestOfLine = Math.min(RestOfLine, RestOfData);
 								rd.size = RestOfLine;
-								byte remdata[] = new byte[RestOfData];
+								byte remdata[] = new byte[RestOfLine];
 								System.arraycopy(data, rd.locationAddr, remdata, 0, rd.size);
 								rd.data = remdata;
 								rd.line = linenum;
-								//Check to see if the REM is actually a REM.
-								boolean FoundInvalidChars=false;
-								for (i=0;i<remdata.length;i++) {
-									if ((remdata[i] < ' ') ||(remdata[i] > 127)) {
-										FoundInvalidChars = true;
+								// Check to see if the REM is actually a REM.
+								rd.valid = false;
+								for (int RData = 0; RData < remdata.length; RData++) {
+									if ((remdata[RData] < ' ') || ((remdata[RData] & 0xff) > 127)) {
+										rd.valid = true;
 									}
 								}
-								rd.valid = FoundInvalidChars;
 							}
 						}
 					}
 					if (rd.valid) {
 						RemLocations.add(rd);
 					}
-
 					Speccy.DecodeBasicLine(sb, line, 0, linelen, false);
-					
-					
 				} catch (Exception E) {
 					sb.append("Bad line: " + E.getMessage());
+					ptr = 99999999;
 				}
-
 				// point to next line.
 				ptr = ptr + linelen;
 
 				String details[] = new String[2];
 				details[0] = sixdigit;
-				details[1] = sb.toString();	
+				details[1] = sb.toString();
 
 				TableItem Row = new TableItem(Listing, SWT.NONE);
 				Row.setText(details);
@@ -312,14 +312,14 @@ public class BasicRenderer extends FileRenderer {
 			Row.setText(details);
 
 			int baseaddress = 23867;
-			
-			for (RemDetails rd:RemLocations) {
+
+			for (RemDetails rd : RemLocations) {
 				details = new String[2];
-				details[0] = "Line: "+String.valueOf(rd.line);
-				details[1] = rd.size+" bytes";
+				details[0] = "Line: " + String.valueOf(rd.line);
+				details[1] = rd.size + " bytes";
 				Row = new TableItem(Listing, SWT.NONE);
 				Row.setText(details);
-				
+
 				ASMLib asm = new ASMLib();
 				int loadedaddress = baseaddress + rd.locationAddr;
 				int realaddress = 0x0000;
@@ -329,7 +329,7 @@ public class BasicRenderer extends FileRenderer {
 						String chrdata = "";
 						for (int i = 0; i < 5; i++) {
 							int d = 0;
-							if (realaddress + i < data.length) {
+							if ((realaddress + i) < rd.data.length) {
 								d = (int) rd.data[realaddress + i] & 0xff;
 							}
 							asmData[i] = d;
@@ -351,15 +351,15 @@ public class BasicRenderer extends FileRenderer {
 
 						details = new String[2];
 						while (hex.length() < 10) {
-							hex = hex+" ";
+							hex = hex + " ";
 						}
 						details[0] = String.format("%04X", loadedaddress);
-						String textline = hex+" "+Instruction.instruction;
+						String textline = hex + " " + Instruction.instruction;
 						while (textline.length() < 40) {
-							textline = textline+" ";
+							textline = textline + " ";
 						}
-						details[1] =textline+" "+chrdata.substring(0, Instruction.length); 
-						
+						details[1] = textline + " " + chrdata.substring(0, Instruction.length);
+
 						Row = new TableItem(Listing, SWT.NONE);
 						Row.setText(details);
 						Row.setFont(mono);
@@ -374,9 +374,7 @@ public class BasicRenderer extends FileRenderer {
 					E.printStackTrace();
 				}
 			}
-			
-			
-			
+
 		}
 	}
 
@@ -387,9 +385,10 @@ public class BasicRenderer extends FileRenderer {
 	 */
 	protected void DoSaveFileAsText(Composite mainPage) {
 		FileDialog fd = new FileDialog(mainPage.getShell(), SWT.SAVE);
-		fd.setText("Save file as");
+		fd.setText("Save " + filename + " as text file");
 		String[] filterExt = { "*.*" };
 		fd.setFilterExtensions(filterExt);
+		fd.setFileName(filename);
 		String selected = fd.open();
 		if (selected != null) {
 			PrintWriter file;
@@ -418,7 +417,6 @@ public class BasicRenderer extends FileRenderer {
 				dialog.setText("Error saving file");
 				dialog.setMessage("Internal error, cannot write UTF-8?");
 				dialog.open();
-
 				e.printStackTrace();
 			}
 

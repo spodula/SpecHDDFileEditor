@@ -277,7 +277,7 @@ public class TrDosPartitionPage extends GenericPage {
 		if (result != null) {
 			File directory = new File(result);
 			try {
-				partition.ExtractPartitiontoFolder(directory, true, false);
+				partition.ExtractPartitiontoFolder(directory, true, false, null);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -292,7 +292,7 @@ public class TrDosPartitionPage extends GenericPage {
 		if (result != null) {
 			File directory = new File(result);
 			try {
-				partition.ExtractPartitiontoFolder(directory, false, true);
+				partition.ExtractPartitiontoFolder(directory, false, true, null);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -306,7 +306,7 @@ public class TrDosPartitionPage extends GenericPage {
 		if (result != null) {
 			File directory = new File(result);
 			try {
-				partition.ExtractPartitiontoFolder(directory, false, false);
+				partition.ExtractPartitiontoFolder(directory, false, false, null);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

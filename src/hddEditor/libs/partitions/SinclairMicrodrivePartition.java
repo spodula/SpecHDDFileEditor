@@ -42,7 +42,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		try {
 //			tdf = new MDFMicrodriveFile("/home/graham/rothi.mdr");
 //			tdf = new MDFMicrodriveFile("/home/graham/DEMO.MDR");
-			tdf = new MDFMicrodriveFile("/home/graham/test.mdr");
+			tdf = new MDFMicrodriveFile("/home/graham/demo.mdr");
 			SinclairMicrodrivePartition trp = new SinclairMicrodrivePartition(0, tdf, new byte[64], 1, false);
 			System.out.println(tdf);
 //			trp.Files[0].RenameMicrodriveFile("Test2", tdf);
@@ -550,14 +550,17 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 * 
 	 */
 	@Override
-	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex) {
+	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex, ProgressCallback progress) {
 		FileWriter SysConfig;
 		try {
 			SysConfig = new FileWriter(new File(folder, "partition.index"));
 			try {
 				SysConfig.write("<speccy>\n".toCharArray());
-
+				int entrynum = 0;
 				for (MicrodriveDirectoryEntry entry : Files) {
+					if (progress!= null) {
+						progress.Callback(Files.length, entrynum++, "File: "+entry.GetFilename());
+					}
 					File TargetFilename = new File(folder, entry.GetFilename().trim());
 					byte file[] = entry.GetFileData();
 					if (raw) {
@@ -569,11 +572,13 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 						int basicVarsOffset = entry.GetVarStart();
 						int codeLoadAddress = entry.GetVar2();
 						String arrayVarName = "A";
-						
+
 						try {
-							Speccy.SaveFileToDisk(TargetFilename, file, filelength, SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName,CodeAsHex);
+							Speccy.SaveFileToDisk(TargetFilename, file, filelength, SpeccyFileType, basicLine,
+									basicVarsOffset, codeLoadAddress, arrayVarName, CodeAsHex);
 						} catch (Exception E) {
-							System.out.println("Error extracting "+TargetFilename+ "For folder: "+folder+" - "+E.getMessage());
+							System.out.println("Error extracting " + TargetFilename + "For folder: " + folder + " - "
+									+ E.getMessage());
 						}
 					}
 					System.out.println("Written " + entry.GetFilename().trim());
@@ -646,6 +651,56 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
+		}
+	}
+
+	/**
+	 * Pack the current microdrive cart.
+	 * 
+	 * @throws IOException 
+	 */
+	public void Pack() throws IOException {
+		MDFMicrodriveFile mdf = (MDFMicrodriveFile) CurrentDisk;
+
+		// Create a new array of sectors
+		MicrodriveSector NewSectors[] = new MicrodriveSector[mdf.Sectors.length+1];
+
+		int CurrentSectorNumber = mdf.Sectors.length;
+		// Iterate through each file
+		for (MicrodriveDirectoryEntry File : Files) {
+			// Copy sector to latest location
+			for (int sNum = 0; sNum < File.sectors.length; sNum++) {
+				NewSectors[CurrentSectorNumber--] = File.GetSectorByFilePartNumber(sNum);
+			}
+		}
+		// Pack the rest with blank sectors..
+		for (MicrodriveSector Sector : mdf.Sectors) {
+			if (!Sector.IsInUse()) {
+				NewSectors[CurrentSectorNumber--] = Sector;
+			}
+		}
+		if (CurrentSectorNumber != 0) { 
+			System.out.println("Error packing Cartridge, not enough sectors! (missing: " + CurrentSectorNumber + ")");
+		} else {
+			// For each sector
+			int fileptr = 0;
+			for (int SNum = mdf.Sectors.length;SNum>0;SNum--) {
+				MicrodriveSector Sector = NewSectors[SNum];
+				if (Sector != null) {
+					// Set the new sector number
+					Sector.SetSectorNumber(SNum);
+					// Set the sector location
+					Sector.SectorLocation = fileptr;
+					fileptr = fileptr + 0x21f;
+					// recalculate the sector checksum
+					Sector.UpdateSectorChecksum();
+					// save to disk
+					Sector.UpdateSectorOnDisk(mdf);
+				}
+			}
+			// Reload all the data
+			mdf.ParseMDFFile();
+			LoadPartitionSpecificInformation();
 		}
 	}
 

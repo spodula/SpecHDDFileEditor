@@ -1,5 +1,4 @@
 package hddEditor.ui.partitionPages;
-//TODO: Implement Microdrive defrag.
 
 import java.io.File;
 import java.io.IOException;
@@ -211,6 +210,20 @@ public class MicrodrivePartitionPage extends GenericPage {
 					widgetSelected(arg0);
 				}
 			});
+			Btn = new Button(ParentComp, SWT.PUSH);
+			Btn.setText("Pack Cartridge");
+			Btn.setLayoutData(gd);
+			Btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					DoPackCart();
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
 			ParentComp.pack();
 		}
 	}
@@ -229,23 +242,29 @@ public class MicrodrivePartitionPage extends GenericPage {
 				content[1] = entry.GetFiletype() + " (" + entry.GetFileTypeName() + ")";
 				content[2] = String.valueOf(entry.GetFileSize());
 				content[3] = String.valueOf(entry.sectors.length);
-				
-				int FileHBad=0;
+
+				int FileHBad = 0;
 				int SectorHBad = 0;
-				int DataBad=0;
-				
-				for(MicrodriveSector Sector: entry.sectors) {
-					if (!Sector.IsFileChecksumValid()) DataBad++;
-					if (!Sector.IsSectorChecksumValid()) SectorHBad++;
-					if (!Sector.IsHeaderChecksumValid()) FileHBad++;
+				int DataBad = 0;
+
+				for (MicrodriveSector Sector : entry.sectors) {
+					if (!Sector.IsFileChecksumValid())
+						DataBad++;
+					if (!Sector.IsSectorChecksumValid())
+						SectorHBad++;
+					if (!Sector.IsHeaderChecksumValid())
+						FileHBad++;
 				}
-				
+
 				String notes = "";
-				
-				if (FileHBad>0) notes = notes + " bad file headers: "+FileHBad; 
-				if (SectorHBad > 0) notes = notes + " bad sector headers: "+SectorHBad;
-				if (DataBad > 0) notes = notes + " bad DataBad headers: "+DataBad;
-				
+
+				if (FileHBad > 0)
+					notes = notes + " bad file headers: " + FileHBad;
+				if (SectorHBad > 0)
+					notes = notes + " bad sector headers: " + SectorHBad;
+				if (DataBad > 0)
+					notes = notes + " bad DataBad headers: " + DataBad;
+
 				content[4] = notes.trim();
 				item2.setText(content);
 				item2.setData(entry);
@@ -259,17 +278,17 @@ public class MicrodrivePartitionPage extends GenericPage {
 	protected void DoEditFile() {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
-			
+
 			MicrodriveDirectoryEntry entry = (MicrodriveDirectoryEntry) itms[0].getData();
 			SpecFileEditDialog = new MicrodriveFileEditDialog(ParentComp.getDisplay());
 
 			byte data[] = entry.GetFileRawData();
-			byte newdata[] = new byte[data.length-0x09];
+			byte newdata[] = new byte[data.length - 0x09];
 			System.arraycopy(data, 0x09, newdata, 0, newdata.length);
-			
+
 			if (SpecFileEditDialog.Show(newdata, "Editing " + entry.GetFilename(), entry)) {
 				byte NewRawData[] = new byte[newdata.length + 0x09];
-				System.arraycopy(data,0,NewRawData,0,0x09);
+				System.arraycopy(data, 0, NewRawData, 0, 0x09);
 				System.arraycopy(newdata, 0, NewRawData, 0x09, newdata.length);
 				NewRawData[1] = (byte) ((newdata.length % 0x100) & 0xff);
 				NewRawData[2] = (byte) ((newdata.length / 0x100) & 0xff);
@@ -320,7 +339,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 			HxEditDialog = null;
 		}
 	}
-	
+
 	/**
 	 * Force any dialogs that are still open to close. This avoids exceptions on
 	 * exit.
@@ -329,7 +348,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 		if (SpecFileEditDialog != null) {
 			SpecFileEditDialog.close();
 		}
-		
+
 		if (HxEditDialog != null) {
 			HxEditDialog.close();
 		}
@@ -337,7 +356,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 			RenFileDialog.close();
 		}
 
-		if (AddFilesDialog != null) { 
+		if (AddFilesDialog != null) {
 			AddFilesDialog.close();
 		}
 	}
@@ -371,6 +390,24 @@ public class MicrodrivePartitionPage extends GenericPage {
 	}
 
 	/**
+	 * Pack the current microdrive cart.
+	 * 
+	 */
+	protected void DoPackCart() {
+		SinclairMicrodrivePartition smp = (SinclairMicrodrivePartition) partition;
+		try {
+			smp.Pack();
+		} catch (IOException e) {
+			MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
+			messageBox.setMessage("Error packing microdrive: " + e.getMessage());
+			messageBox.setText("Error packing microdrive: " + e.getMessage());
+			messageBox.open();
+			e.printStackTrace();
+		}
+		UpdateDirectoryEntryList();
+	}
+
+	/**
 	 * Extract all files on this cartridge to a given folder
 	 * 
 	 */
@@ -381,13 +418,12 @@ public class MicrodrivePartitionPage extends GenericPage {
 		if (result != null) {
 			File directory = new File(result);
 			try {
-				partition.ExtractPartitiontoFolder(directory, true, false);
+				partition.ExtractPartitiontoFolder(directory, true, false, null);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
 
 	protected void DoExtractAllFilesHex() {
 		DirectoryDialog dialog = new DirectoryDialog(ParentComp.getShell());
@@ -396,7 +432,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 		if (result != null) {
 			File directory = new File(result);
 			try {
-				partition.ExtractPartitiontoFolder(directory, false, true);
+				partition.ExtractPartitiontoFolder(directory, false, true, null);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -410,13 +446,13 @@ public class MicrodrivePartitionPage extends GenericPage {
 		if (result != null) {
 			File directory = new File(result);
 			try {
-				partition.ExtractPartitiontoFolder(directory, false, false);
+				partition.ExtractPartitiontoFolder(directory, false, false, null);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
+
 	/**
 	 * Delete the selected file.
 	 * 
@@ -452,5 +488,5 @@ public class MicrodrivePartitionPage extends GenericPage {
 			AddComponents();
 		}
 	}
-	
+
 }

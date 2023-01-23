@@ -77,9 +77,12 @@ public class SwapPartition extends IDEDosPartition {
 	 * 
 	 */
 	@Override
-	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex) {
+	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex, ProgressCallback progress) {
 		try {
 			FileWriter SysConfig = new FileWriter(new File(folder, "swap.index"));
+			if (progress!= null) {
+				progress.Callback(1, 0, "Swap data...");
+			}
 			try {
 				SysConfig.write("<swap>\n".toCharArray());
 				SysConfig.write(("   <blocksizesectors>"+SwapblockSize+"</blocksizesectors>\n").toCharArray());
