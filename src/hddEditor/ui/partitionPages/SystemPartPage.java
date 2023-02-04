@@ -5,7 +5,6 @@ package hddEditor.ui.partitionPages;
  * Implementation of the System partition page. 
  */
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -23,7 +22,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
@@ -37,13 +35,12 @@ import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.handlers.IDEDosHandler;
 import hddEditor.libs.partitions.FreePartition;
 import hddEditor.libs.partitions.IDEDosPartition;
-import hddEditor.libs.partitions.ProgressCallback;
 import hddEditor.libs.partitions.SystemPartition;
+import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.NewPartitionDialog;
-import hddEditor.ui.partitionPages.dialogs.PartitionExportProgress;
 
 public class SystemPartPage extends GenericPage {
 	// Flag to block writing to the disk.
@@ -52,6 +49,7 @@ public class SystemPartPage extends GenericPage {
 	// Sub-forms so we can close them if they are still open when the page changes.
 	HexEditDialog HxEditDialog = null;
 	NewPartitionDialog NewPartDialog = null;
+	FileExportAllPartitionsForm ExportAllPartsForm = null;
 
 	// Basic editor colour components.
 	Button becBright = null;
@@ -88,6 +86,7 @@ public class SystemPartPage extends GenericPage {
 	Button DoExtractAllPartitionButton = null;
 	Button DoExtractAllPartitionButton2 = null;
 	Button DoExtractAllPartitionButton3 = null;
+	Button DoExtractAllPartitionButton4 = null;
 
 	// Partition table
 	Table PartitionTable = null;
@@ -444,10 +443,9 @@ public class SystemPartPage extends GenericPage {
 					widgetSelected(arg0);
 				}
 			});
-
-			DoExtractAllPartitionButton = button("Dump partitions (RAW)");
-			DoExtractAllPartitionButton.setLayoutData(gd);
-			DoExtractAllPartitionButton.addSelectionListener(new SelectionListener() {
+			DoExtractAllPartitionButton4 = button("Dump partitions");
+			DoExtractAllPartitionButton4.setLayoutData(gd);
+			DoExtractAllPartitionButton4.addSelectionListener(new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
 					DoExtractAllPartitions();
@@ -459,35 +457,17 @@ public class SystemPartPage extends GenericPage {
 				}
 			});
 
-			DoExtractAllPartitionButton2 = button("Dump partitions (Code=ASM)");
-			DoExtractAllPartitionButton2.setLayoutData(gd);
-			DoExtractAllPartitionButton2.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					DoExtractAllPartitionsAsm();
-				}
-
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
-			DoExtractAllPartitionButton3 = button("Dump partitions (Code=Hex)");
-			DoExtractAllPartitionButton3.setLayoutData(gd);
-			DoExtractAllPartitionButton3.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					DoExtractAllPartitionsHex();
-				}
-
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
-
 			NewPartitionButton.setEnabled(CanEditPartitions);
 			ParentComp.pack();
+		}
+	}
+
+	protected void DoExtractAllPartitions() {
+		ExportAllPartsForm = new FileExportAllPartitionsForm (ParentComp.getDisplay()); 
+		try {
+			ExportAllPartsForm.Show(partition);
+		} finally {
+			ExportAllPartsForm = null;
 		}
 	}
 
@@ -913,82 +893,8 @@ public class SystemPartPage extends GenericPage {
 		if (NewPartDialog != null) {
 			NewPartDialog.close();
 		}
-	}
-
-	/**
-	 * 
-	 */
-	protected void DoExtractAllPartitions() {
-		ExtractAllPartitions(true, false);
-	}
-
-	protected void DoExtractAllPartitionsHex() {
-		ExtractAllPartitions(false, true);
-	}
-
-	protected void DoExtractAllPartitionsAsm() {
-		ExtractAllPartitions(false, false);
-	}
-
-	protected void ExtractAllPartitions(boolean AsRaw, boolean CodeAsHex) {
-		DirectoryDialog dialog = new DirectoryDialog(ParentComp.getShell());
-		dialog.setText("Select folder for export to");
-		String result = dialog.open();
-		if (result != null) {
-			PartitionExportProgress pep = new PartitionExportProgress(ParentComp.getShell().getDisplay());
-			try {
-				pep.Show("Exporting all partitions", "Partition:", "File:");
-				pep.SetMax1(PartitionTable.getItems().length);
-				pep.SetMax2(1);
-				pep.SetValue1(0);
-				pep.SetValue2(0);
-				int PartNum=0;
-				File directory = new File(result);
-				for (TableItem t : PartitionTable.getItems()) {
-					IDEDosPartition partition = (IDEDosPartition) t.getData();
-					pep.setMessage1("Exporting partition "+partition.GetName()+" ("+PLUSIDEDOS.GetTypeAsString(partition.GetPartType())+")");
-					pep.SetValue1(PartNum++);
-					if (partition.GetPartType() != PLUSIDEDOS.PARTITION_FREE
-							&& partition.GetPartType() != PLUSIDEDOS.PARTITION_UNUSED
-							&& partition.GetPartType() != PLUSIDEDOS.PARTITION_UNKNOWN
-							&& partition.GetPartType() != PLUSIDEDOS.PARTITION_BAD) {
-
-						File BaseFolder = new File(directory, partition.GetName());
-						System.out.print("Extracting partition" + BaseFolder + " - ");
-						if (!BaseFolder.exists()) {
-							BaseFolder.mkdir();
-						}
-						try {
-							long start = System.currentTimeMillis();
-							partition.ExtractPartitiontoFolder(BaseFolder, AsRaw, CodeAsHex, new ProgressCallback() {
-								int lastmax = 0;
-								@Override
-								public void Callback(int max, int value, String text) {
-									if (max != lastmax) {
-										pep.SetMax2(max);
-										max = lastmax;
-									}
-									pep.SetValue2(value);
-									pep.setMessage2(text);									
-								}
-							});
-							long finish = System.currentTimeMillis();
-							System.out.println(String.valueOf(finish - start) + "ms");
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-					if (pep.IsCancelled()) {
-						System.out.println("Aborted.");
-						break;
-					}
-				}
-			} finally {
-				pep.close();
-			}
-			System.out.println("Export complete.");
-
+		if (ExportAllPartsForm != null) {
+			ExportAllPartsForm.close();
 		}
 	}
-
 }

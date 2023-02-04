@@ -559,7 +559,9 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 				int entrynum = 0;
 				for (MicrodriveDirectoryEntry entry : Files) {
 					if (progress!= null) {
-						progress.Callback(Files.length, entrynum++, "File: "+entry.GetFilename());
+						if (progress.Callback(Files.length, entrynum++, "File: "+entry.GetFilename())) {
+							break;
+						}
 					}
 					File TargetFilename = new File(folder, entry.GetFilename().trim());
 					byte file[] = entry.GetFileData();
@@ -703,5 +705,146 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 			LoadPartitionSpecificInformation();
 		}
 	}
+	
+	/**
+	 * Extract partition with flags showing what to do with each file type. 
+	 * 
+	 * @param folder
+	 * @param BasicAction
+	 * @param CodeAction
+	 * @param ArrayAction
+	 * @param ScreenAction
+	 * @param MiscAction
+	 * @param progress
+	 * @throws IOException
+	 */
+
+	@Override
+	public void ExtractPartitiontoFolderAdvanced(File folder,int BasicAction, int CodeAction, int ArrayAction, int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress) throws IOException {
+		FileWriter SysConfig;
+		try {
+			SysConfig = new FileWriter(new File(folder, "partition.index"));
+			try {
+				SysConfig.write("<speccy>\n".toCharArray());
+				int entrynum = 0;
+				for (MicrodriveDirectoryEntry entry : Files) {
+					if (progress!= null) {
+						if (progress.Callback(Files.length, entrynum++, "File: "+entry.GetFilename())) {
+							break;
+						}
+					}
+					File TargetFilename = new File(folder, entry.GetFilename().trim());
+					byte entrydata[] = entry.GetFileData();
+					byte Rawentrydata[] = entry.GetFileRawData();
+					
+					int filelength = entrydata.length;
+					int SpeccyFileType = entry.GetFiletype();
+					boolean isUnknown = (SpeccyFileType> 3);
+					int basicLine = entry.GetLineStart();
+					int basicVarsOffset = entry.GetVarStart();
+					int codeLoadAddress = entry.GetVar2();
+					String arrayVarName = "A";
+
+					try {
+						int actiontype = GeneralUtils.EXPORT_TYPE_RAW;
+						if (isUnknown) { // Options are: "Raw", "Hex", "Assembly"
+							actiontype = MiscAction;
+						} else {
+							// Identifed BASIC File type
+							if (SpeccyFileType == Speccy.BASIC_BASIC) { // Options are: "Text", "Raw", "Raw+Header", "Hex"
+								actiontype = BasicAction;
+							} else if ((SpeccyFileType == Speccy.BASIC_NUMARRAY) && (SpeccyFileType == Speccy.BASIC_CHRARRAY)) {
+								actiontype = ArrayAction;
+							} else if ((filelength == 6912) && (codeLoadAddress == 16384)) { // { "PNG", "GIF", "JPEG", "Raw",
+																								// "Raw+Header", "Hex", "Assembly" };
+								actiontype = ScreenAction;
+							} else { // CODE Options: { "Raw", "Raw+Header", "Assembly", "Hex" };
+								actiontype = CodeAction;
+							}
+						}
+						
+						Speccy.SaveFileToDiskAdvanced(TargetFilename, entrydata, Rawentrydata, filelength, SpeccyFileType, basicLine,
+								basicVarsOffset, codeLoadAddress, arrayVarName, actiontype);
+					} catch (Exception E) {
+						System.out.println("\nError extracting " + TargetFilename + "For folder: " + folder + " - "
+								+ E.getMessage());
+						E.printStackTrace();
+					}
+
+					
+					
+					System.out.println("Written " + entry.GetFilename().trim());
+					SysConfig.write(("<file>\n").toCharArray());
+					SysConfig.write(("   <filename>" + entry.GetFilename().trim() + "</filename>\n").toCharArray());
+					SysConfig.write(("   <deleted>false</deleted>\n").toCharArray());
+					SysConfig.write(("   <errors></errors>\n").toCharArray());
+					SysConfig.write(("   <filelength>" + entry.GetFileSize() + "</filelength>\n").toCharArray());
+					SysConfig.write("   <origfiletype>MDF</origfiletype>\n".toCharArray());
+					SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
+					SysConfig.write(("       <filetype>" + entry.GetFiletype() + "</filetype>\n").toCharArray());
+					SysConfig.write(("       <filetypename>" + Speccy.FileTypeAsString(entry.GetFiletype())
+							+ "</filetypename>\n").toCharArray());
+					SysConfig.write(("       <basicsize>" + entry.GetFileSize() + "</basicsize>\n").toCharArray());
+					SysConfig.write(
+							("       <basicstartline>" + entry.GetLineStart() + "</basicstartline>\n").toCharArray());
+					SysConfig.write(("       <codeloadaddr>" + entry.GetVar2() + "</codeloadaddr>\n").toCharArray());
+					SysConfig.write(
+							("       <basicvarsoffset>" + entry.GetVarStart() + "</basicvarsoffset>\n").toCharArray());
+					SysConfig.write(("       <arrayvarname>A</arrayvarname>\n").toCharArray());
+					SysConfig.write(("   </specbasicinfo>\n".toCharArray()));
+					SysConfig.write(("   <microdrivespecific>\n".toCharArray()));
+					SysConfig.write(("       <sectors>\n".toCharArray()));
+					SysConfig.write(("           <sector>\n".toCharArray()));
+					for (MicrodriveSector mds : entry.sectors) {
+						SysConfig.write(
+								("               <location>" + mds.SectorLocation + "</location>\n").toCharArray());
+						SysConfig.write(
+								("               <flagbyte>" + mds.GetFlagByte() + "</flagbyte>\n").toCharArray());
+						SysConfig.write(("               <sectornumber>" + mds.GetSectorNumber() + "</sectornumber>\n")
+								.toCharArray());
+						SysConfig.write(("               <volumename>" + mds.getVolumeName() + "</volumename>\n")
+								.toCharArray());
+						SysConfig.write(
+								("               <headerchecksum>" + mds.getHeaderChecksum() + "</headerchecksum>\n")
+										.toCharArray());
+						SysConfig.write(("               <headerchecksumvalid>" + mds.IsHeaderChecksumValid()
+								+ "</headerchecksumvalid>\n").toCharArray());
+						SysConfig.write(
+								("               <sectorchecksum>" + mds.getSectorChecksum() + "</sectorchecksum>\n")
+										.toCharArray());
+						SysConfig.write(("               <sectorchecksumvalid>" + mds.IsSectorChecksumValid()
+								+ "</sectorchecksumvalid>\n").toCharArray());
+						SysConfig
+								.write(("               <fileflagbyte>" + mds.getSectorFlagByte() + "</fileflagbyte>\n")
+										.toCharArray());
+						SysConfig.write(("               <segmentnumberinfile>" + mds.getSegmentNumber()
+								+ "</segmentnumberinfile>\n").toCharArray());
+						SysConfig.write(("               <recordlength>" + mds.getRecordLength() + "</recordlength>\n")
+								.toCharArray());
+						SysConfig.write(
+								("               <filename>" + mds.getFileName() + "</filename>\n").toCharArray());
+						SysConfig.write(("               <filechecksum>" + mds.getFileChecksum() + "</filechecksum>\n")
+								.toCharArray());
+						SysConfig.write(("               <filechecksumvalid>" + mds.IsFileChecksumValid()
+								+ "</filechecksumvalid>\n").toCharArray());
+						SysConfig.write(
+								("               <sectorflags>" + mds.getSectorFlagsAsString() + "</sectorflags>\n")
+										.toCharArray());
+					}
+					SysConfig.write(("           </sector>\n".toCharArray()));
+					SysConfig.write(("       </sectors>\n".toCharArray()));
+					SysConfig.write(("   </microdrivespecific>\n".toCharArray()));
+					SysConfig.write(("</file>\n").toCharArray());
+
+				}
+				SysConfig.write("</speccy>\n".toCharArray());
+			} finally {
+				SysConfig.close();
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	}
+
 
 }

@@ -100,7 +100,7 @@ public class CodeRenderer extends FileRenderer {
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsBin(data, mainPage,Filename);
+				DoSaveFileAsBin(data, mainPage, Filename);
 			}
 
 			@Override
@@ -120,7 +120,7 @@ public class CodeRenderer extends FileRenderer {
 					System.arraycopy(header, 0, newdata, 0, header.length);
 					System.arraycopy(data, 0, newdata, header.length, data.length);
 
-					DoSaveFileAsBin(data, mainPage,Filename);
+					DoSaveFileAsBin(data, mainPage, Filename);
 				}
 
 				@Override
@@ -417,26 +417,9 @@ public class CodeRenderer extends FileRenderer {
 		fd.setFilterExtensions(filterExt);
 		String selected = fd.open();
 		if (selected != null) {
-			try {
-				Speccy.DoSaveFileAsAsm(data, selected, loadAddr);
-			} catch (FileNotFoundException e) {
-				MessageBox dialog = new MessageBox(MainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("Directory not found!");
-				dialog.open();
-
-				e.printStackTrace();
-			} catch (IOException e) {
-				MessageBox dialog = new MessageBox(MainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("IO error: " + e.getMessage());
-				dialog.open();
-
-				e.printStackTrace();
-			}
-		}		
+			Speccy.DoSaveFileAsAsm(data, selected, loadAddr);
+		}
 	}
-
 
 	/**
 	 * Save the file as an image file. (Note, this will be 256x192 of whatever

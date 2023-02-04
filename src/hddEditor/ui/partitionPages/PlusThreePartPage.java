@@ -4,7 +4,6 @@ package hddEditor.ui.partitionPages;
  */
 
 
-import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.swt.SWT;
@@ -17,7 +16,6 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
@@ -29,6 +27,7 @@ import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
+import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;
 import hddEditor.ui.partitionPages.dialogs.AddFilesToPlus3Partition;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
@@ -216,40 +215,12 @@ public class PlusThreePartPage extends GenericPage {
 				}
 			});
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Extract all Files (raw)");
+			Btn.setText("Extract all Files");
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
-					DoExtractAllFilesRaw();
-				}
-
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
-			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Extract all Files (Code=asm)");
-			Btn.setLayoutData(gd);
-			Btn.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					DoExtractAllFilesAsm();
-				}
-
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
-			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Extract all Files (code=hex)");
-			Btn.setLayoutData(gd);
-			Btn.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					DoExtractAllFilesHex();
+					DoExtractAllFiles();
 				}
 
 				@Override
@@ -369,52 +340,14 @@ public class PlusThreePartPage extends GenericPage {
 		}
 	}
 
-	/**
-	 * Extract all files in the current partition.
-	 */
-	protected void DoExtractAllFilesRaw() {
-		DirectoryDialog dialog = new DirectoryDialog(ParentComp.getShell());
-		dialog.setText("Select folder for export to");
-		String result = dialog.open();
-		if (result != null) {
-			File directory = new File(result);
-			try {
-				partition.ExtractPartitiontoFolder(directory, true, false, null);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+	protected void DoExtractAllFiles() {
+		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm (ParentComp.getDisplay()); 
+		try {
+			ExportAllPartsForm.ShowSinglePartition(partition);
+		} finally {
+			ExportAllPartsForm = null;
 		}
 	}
-	
-
-	protected void DoExtractAllFilesHex() {
-		DirectoryDialog dialog = new DirectoryDialog(ParentComp.getShell());
-		dialog.setText("Select folder for export to");
-		String result = dialog.open();
-		if (result != null) {
-			File directory = new File(result);
-			try {
-				partition.ExtractPartitiontoFolder(directory, false, true, null);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	protected void DoExtractAllFilesAsm() {
-		DirectoryDialog dialog = new DirectoryDialog(ParentComp.getShell());
-		dialog.setText("Select folder for export to");
-		String result = dialog.open();
-		if (result != null) {
-			File directory = new File(result);
-			try {
-				partition.ExtractPartitiontoFolder(directory, false, false, null);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
 	/**
 	 * Rename the current file.
 	 */

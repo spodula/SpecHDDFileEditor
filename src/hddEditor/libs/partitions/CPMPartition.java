@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import hddEditor.libs.CPM;
-import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.cpm.Dirent;
@@ -630,7 +630,7 @@ public class CPMPartition extends IDEDosPartition {
 	}
 
 	@Override
-	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex, ProgressCallback progress) {
+	public void ExtractPartitiontoFolderAdvanced(File folder,int BasicAction, int CodeAction, int ArrayAction, int ScreenAction, int MiscAction, int SwapAction,  ProgressCallback progress) throws IOException {
 		try {
 			FileWriter SysConfig = new FileWriter(new File(folder, "partition.index"));
 			try {
@@ -638,13 +638,14 @@ public class CPMPartition extends IDEDosPartition {
 				int entrynum=0;
 				for (DirectoryEntry entry : DirectoryEntries) {
 					if (progress!= null) {
-						progress.Callback(DirectoryEntries.length, entrynum++, "File: "+entry.filename());
+						if (progress.Callback(DirectoryEntries.length, entrynum++, "File: "+entry.filename())) {
+							break;
+						}
 					}
 					File TargetFilename = new File(folder, entry.filename().trim());
 					byte file[] = entry.GetFileData();
-					//CPM files are always RAW.
-					GeneralUtils.WriteBlockToDisk(file, TargetFilename);
-					System.out.println("Written " + entry.filename().trim());
+					Speccy.SaveFileToDiskAdvanced(TargetFilename, file, file, file.length, 3, 0,
+							0, 0, "A", MiscAction);	
 
 					SysConfig.write("<file>\n".toCharArray());
 					SysConfig.write(("  <filename>" + entry.filename() + "</filename>\n").toCharArray());
@@ -675,4 +676,6 @@ public class CPMPartition extends IDEDosPartition {
 		}
 	}
 
+	
+	
 }

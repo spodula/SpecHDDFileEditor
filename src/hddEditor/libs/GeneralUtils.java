@@ -1,9 +1,9 @@
 package hddEditor.libs;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -11,6 +11,17 @@ import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.SystemPartition;
 
 public class GeneralUtils {
+	public static final int EXPORT_TYPE_RAW = 0;
+	public static final int EXPORT_TYPE_TXT = 1;
+	public static final int EXPORT_TYPE_HEX = 2;
+	public static final int EXPORT_TYPE_ASM = 3;
+	public static final int EXPORT_TYPE_CSV = 4;
+	public static final int EXPORT_TYPE_PNG = 5;
+	public static final int EXPORT_TYPE_GIF = 6;
+	public static final int EXPORT_TYPE_JPG = 7;
+	public static final int EXPORT_TYPE_RAWANDHEADER = 8;
+
+	public static String MasterList[] = { "Raw", "Text", "Hex", "Assembly", "CSV", "PNG", "GIF", "JPEG" ,"Raw+Header"};
 
 	/**
 	 * Get size as either k or m depending on size.
@@ -181,6 +192,21 @@ public class GeneralUtils {
 				System.out.println(result);
 			}
 		}
+	}
+	
+	/*
+	 * Read the first <numbytes> from the given file.
+	 */
+	public static byte[] ReadNBytes(File filename, int numbytes) throws IOException {
+		int length = Math.min(numbytes, (int) filename.length());
+		byte result[] = new byte[length];
+		FileInputStream fis = new FileInputStream(filename);
+		try {
+			fis.read(result);
+		} finally {
+			fis.close();
+		}
+		return(result);
 	}
 
 }

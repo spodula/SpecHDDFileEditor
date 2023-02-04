@@ -3,9 +3,6 @@ package hddEditor.ui.partitionPages.FileRenderers;
 /**
  * Render a character array
  */
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -15,7 +12,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.Speccy;
@@ -43,10 +39,11 @@ public class CharArrayRenderer extends FileRenderer {
 	 * Render a character array to the given page
 	 * 
 	 * @param mainPage - Page to parent to.
-	 * @param data - data to be rendered
-	 * @param header - file header if appropriate (If null, "Save with header" button not shown)
+	 * @param data     - data to be rendered
+	 * @param header   - file header if appropriate (If null, "Save with header"
+	 *                 button not shown)
 	 * @param Filename - filename
-	 * @param varname - variable name
+	 * @param varname  - variable name
 	 */
 	public void RenderCharArray(Composite mainPage, byte data[], byte header[], String Filename, String varname) {
 		this.filename = Filename;
@@ -82,7 +79,7 @@ public class CharArrayRenderer extends FileRenderer {
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsBin(data, mainPage,Filename);
+				DoSaveFileAsBin(data, mainPage, Filename);
 			}
 
 			@Override
@@ -102,7 +99,7 @@ public class CharArrayRenderer extends FileRenderer {
 					System.arraycopy(header, 0, newdata, 0, header.length);
 					System.arraycopy(data, 0, newdata, header.length, data.length);
 
-					DoSaveFileAsBin(newdata, mainPage,Filename);
+					DoSaveFileAsBin(newdata, mainPage, Filename);
 				}
 
 				@Override
@@ -220,21 +217,7 @@ public class CharArrayRenderer extends FileRenderer {
 		fd.setFilterExtensions(filterExt);
 		String selected = fd.open();
 		if (selected != null) {
-			try {
-				Speccy.DoSaveCharArrayAsText(data, selected, varname);
-			} catch (FileNotFoundException e) {
-				MessageBox dialog = new MessageBox(MainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("Directory not found!");
-				dialog.open();
-				e.printStackTrace();
-			} catch (IOException e) {
-				MessageBox dialog = new MessageBox(MainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("IO error: " + e.getMessage());
-				dialog.open();
-				e.printStackTrace();
-			}
+			Speccy.DoSaveCharArrayAsText(data, selected, varname);
 		}
 	}
 }

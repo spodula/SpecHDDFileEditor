@@ -1,4 +1,5 @@
 package hddEditor.libs.partitions;
+
 /**
  * This is the implementation of a TR_DOS partition. Note that this actually duplicates
  * some of the code in the TRD disk handler code, due to the fact it requires the same
@@ -19,8 +20,6 @@ package hddEditor.libs.partitions;
 
 import java.io.File;
 import java.io.FileWriter;
-
-
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -579,10 +578,20 @@ public class TrDosPartition extends IDEDosPartition {
 	}
 
 	/**
+	 * Extract partition with flags showing what to do with each file type. 
 	 * 
+	 * @param folder
+	 * @param BasicAction
+	 * @param CodeAction
+	 * @param ArrayAction
+	 * @param ScreenAction
+	 * @param MiscAction
+	 * @param progress
+	 * @throws IOException
 	 */
 	@Override
-	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex, ProgressCallback progress) {
+	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress) throws IOException {
 		FileWriter SysConfig;
 		try {
 			SysConfig = new FileWriter(new File(folder, "partition.index"));
@@ -590,48 +599,49 @@ public class TrDosPartition extends IDEDosPartition {
 				SysConfig.write("<speccy>\n".toCharArray());
 				int entrynum = 0;
 				for (TrdDirectoryEntry entry : DirectoryEntries) {
-					if (progress!= null) {
-						progress.Callback(DirectoryEntries.length, entrynum++, "File: "+entry.GetFilename());
+					if (progress != null) {
+						if (progress.Callback(DirectoryEntries.length, entrynum++, "File: " + entry.GetFilename()))
+							break;
 					}
 					try {
 						File TargetFilename = new File(folder, entry.GetFilename().trim() + "." + entry.GetFileType());
-						byte file[] = entry.GetFileData();
-						if (raw) {
-							GeneralUtils.WriteBlockToDisk(file, TargetFilename);
+						int filelength = entry.GetFileLength();
+						int SpeccyFileType = 0;
+						int basicLine = 0;
+						int basicVarsOffset = entry.GetFileLength();
+						int codeLoadAddress = 0;
+						String arrayVarName="A";
+						int actiontype = GeneralUtils.EXPORT_TYPE_RAW;
+						if ((entry.GetFileType() != 'B') && (entry.GetFileType() != 'C')
+								&& (entry.GetFileType() != 'D')) {
+							SpeccyFileType = Speccy.BASIC_CODE;
+							codeLoadAddress = 0x10000 - entry.GetFileLength();
+							actiontype = MiscAction;
 						} else {
-							int filelength = entry.GetFileLength();
-							int SpeccyFileType = 0;
-							int basicLine = 0;
-							int basicVarsOffset = entry.GetFileLength();
-							int codeLoadAddress = 0;
-							if ((entry.GetFileType()!='B') && (entry.GetFileType()!='C') && (entry.GetFileType()!='D')){
-								SpeccyFileType  = Speccy.BASIC_CODE;
-								codeLoadAddress = 0x10000 - entry.GetFileLength();							
-							} else {
-								switch (entry.GetFileType()) {
-								case 'B': 
-									SpeccyFileType = Speccy.BASIC_BASIC;
-									break;
-								case 'D': 
-									SpeccyFileType = Speccy.BASIC_NUMARRAY;
-									if (entry.IsCharArray()) {
-										SpeccyFileType = Speccy.BASIC_CHRARRAY;
-									}
-									break;
-								case 'C':
-									SpeccyFileType = Speccy.BASIC_CODE;
-									codeLoadAddress = entry.GetVar1();
+							switch (entry.GetFileType()) {
+							case 'B':
+								SpeccyFileType = Speccy.BASIC_BASIC;
+								actiontype = BasicAction;
+								break;
+							case 'D':
+								SpeccyFileType = Speccy.BASIC_NUMARRAY;
+								if (entry.IsCharArray()) {
+									SpeccyFileType = Speccy.BASIC_CHRARRAY;
 								}
-								basicLine = entry.startline;
-								basicVarsOffset = entry.GetVar2();
+								actiontype = ArrayAction;
+								break;
+							case 'C':
+								SpeccyFileType = Speccy.BASIC_CODE;
+								codeLoadAddress = entry.GetVar1();
+								actiontype = CodeAction;
 							}
-							try {
-								Speccy.SaveFileToDisk(TargetFilename, entry.GetFileData(), filelength, SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, "A",CodeAsHex);
-							} catch (Exception E) {
-								System.out.println("Error extracting "+TargetFilename+ "For folder: "+folder+" - "+E.getMessage());
-							}
+							basicLine = entry.startline;
+							basicVarsOffset = entry.GetVar2();
 
 						}
+
+						Speccy.SaveFileToDiskAdvanced(TargetFilename, entry.GetFileData(), entry.GetFileData(), filelength,
+								SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName, actiontype);
 						System.out.println("Written " + entry.GetFilename().trim());
 					} catch (IOException e) {
 						System.out.println("Error extracting " + entry.GetFilename().trim() + ": " + e.getMessage());
@@ -648,7 +658,7 @@ public class TrDosPartition extends IDEDosPartition {
 					SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
 					int filetype = Speccy.BASIC_CODE;
 					switch (entry.GetFileType()) {
-					case 'B': 
+					case 'B':
 						filetype = Speccy.BASIC_BASIC;
 						break;
 					case 'D':
@@ -688,10 +698,11 @@ public class TrDosPartition extends IDEDosPartition {
 			} finally {
 				SysConfig.close();
 			}
-		} catch (IOException e1) {
+		} catch (
+
+		IOException e1) {
 			e1.printStackTrace();
 		}
-
 	}
 
 }

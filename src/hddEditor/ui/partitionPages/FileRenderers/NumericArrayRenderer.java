@@ -4,9 +4,6 @@ package hddEditor.ui.partitionPages.FileRenderers;
  * Render a numeric array
  */
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -16,7 +13,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.Speccy;
@@ -226,21 +222,7 @@ public class NumericArrayRenderer extends FileRenderer {
 		fd.setFilterExtensions(filterExt);
 		String selected = fd.open();
 		if (selected != null) {
-			try {
-				Speccy.DoSaveNumericArrayAsText(data, selected, varname);
-			} catch (FileNotFoundException e) {
-				MessageBox dialog = new MessageBox(MainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("Directory not found!");
-				dialog.open();
-				e.printStackTrace();
-			} catch (IOException e) {
-				MessageBox dialog = new MessageBox(MainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("IO error: " + e.getMessage());
-				dialog.open();
-				e.printStackTrace();
-			}
+			Speccy.DoSaveNumericArrayAsText(data, selected, varname);
 		}
 	}
 

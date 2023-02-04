@@ -230,7 +230,7 @@ public class Speccy {
 			data[loc++] = value.charAt(ptr++);
 		}
 	}
-	
+
 	/**
 	 * Save the file as ASM
 	 * 
@@ -239,7 +239,7 @@ public class Speccy {
 	 * @param loadAddr
 	 * @throws IOException
 	 */
-	public static void DoSaveFileAsAsm(byte[] data, String filename, int loadAddr) throws IOException {
+	public static void DoSaveFileAsAsm(byte[] data, String filename, int loadAddr) {
 		StringBuilder sb = new StringBuilder();
 		try {
 			String cr = System.lineSeparator();
@@ -268,19 +268,18 @@ public class Speccy {
 					}
 					// decode instruction
 					DecodedASM Instruction = asm.decode(asmData, loadedaddress);
-					
-					char Line[] = new char[80]; 
-					for(int i=0;i<Line.length;i++) {
+
+					char Line[] = new char[80];
+					for (int i = 0; i < Line.length; i++) {
 						Line[i] = ' ';
 					}
 					SetCharArray(Line, 0, String.format("%04X\t", loadedaddress));
-										
-					
+
 					// output it. - First, assemble a list of hex bytes, but pad out to 12 chars
 					// (4x3)
-					int loc=6;
+					int loc = 6;
 					for (int j = 0; j < Instruction.length; j++) {
-						SetCharArray(Line, loc,String.format("%02X", asmData[j]));
+						SetCharArray(Line, loc, String.format("%02X", asmData[j]));
 						loc = loc + 3;
 					}
 
@@ -539,6 +538,15 @@ public class Speccy {
 		}
 	}
 
+	public static boolean isHex(String str) {
+		try {
+			Integer.parseInt(str, 16);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
 	/**
 	 * Decode the variables area of a basic program.
 	 * 
@@ -550,21 +558,22 @@ public class Speccy {
 			int filesize) {
 		int ptr = VariablesOffset;
 		int varsize = filesize - VariablesOffset;
-		
+
 		sb.append("<variables>" + System.lineSeparator());
 		sb.append("<varsize>" + varsize + "</varsize>" + System.lineSeparator());
 		sb.append("<offset>" + VariablesOffset + "</offset>" + System.lineSeparator());
 		if (file.length < filesize) {
-			sb.append("<err>The file is smaller than reported by the basic header. Variables will be incorrect. Reported size: "+filesize+" Actual size: "+file.length+"</err>" + System.lineSeparator());
+			sb.append(
+					"<err>The file is smaller than reported by the basic header. Variables will be incorrect. Reported size: "
+							+ filesize + " Actual size: " + file.length + "</err>" + System.lineSeparator());
 		}
-		int ActualVarSize = Math.min(file.length,filesize) - VariablesOffset;
+		int ActualVarSize = Math.min(file.length, filesize) - VariablesOffset;
 		sb.append("<rawdata>" + System.lineSeparator());
 		if (ActualVarSize > 0) {
 			sb.append(GeneralUtils.HexDump(file, VariablesOffset, ActualVarSize));
 		}
 		sb.append("</rawdata>" + System.lineSeparator());
-		
-		
+
 		ptr = VariablesOffset;
 		if (ptr >= file.length) {
 			sb.append("No variables");
@@ -773,7 +782,7 @@ public class Speccy {
 					}
 					TempSB.append(")=");
 					TempSB.append(String.valueOf(val));
-					
+
 					boolean decdone = false;
 					int dimid = dimensions - 1;
 					while (!decdone) {
@@ -1371,82 +1380,86 @@ public class Speccy {
 	 * @param varname  - Variable name
 	 * @throws IOException
 	 */
-	public static void DoSaveNumericArrayAsText(byte[] data, String filename, String varname) throws IOException {
-		FileOutputStream file;
-		file = new FileOutputStream(filename);
+	public static void DoSaveNumericArrayAsText(byte[] data, String filename, String varname) {
 		try {
-			file.write(("File: " + filename + System.lineSeparator()).getBytes());
-			int location = 0x80; // skip header
+			FileOutputStream file;
+			file = new FileOutputStream(filename);
+			try {
+				file.write(("File: " + filename + System.lineSeparator()).getBytes());
+				int location = 0x80; // skip header
 
-			// Number of dimensions
-			int numDimensions = data[location++] & 0xff;
+				// Number of dimensions
+				int numDimensions = data[location++] & 0xff;
 
-			// LOad the dimension sizes into an array
-			int Dimsizes[] = new int[numDimensions];
-			for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
-				int dimsize = data[location++] & 0xff;
-				dimsize = dimsize + (data[location++] & 0xff) * 0x100;
-				Dimsizes[dimnum] = dimsize;
-			}
-			String s = "DIM " + varname + "(";
-			for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
-				if (dimnum > 0)
-					s = s + ",";
-				s = s + String.valueOf(Dimsizes[dimnum]);
-			}
-			s = s + ") = " + System.lineSeparator();
-			file.write(s.getBytes());
-
-			// count of what dimensions have been processed.
-			int DimCounts[] = new int[numDimensions];
-			for (int dimnum = 0; dimnum < numDimensions; dimnum++)
-				DimCounts[dimnum] = 0;
-
-			StringBuffer sb = new StringBuffer();
-			boolean complete = false;
-			while (!complete) {
-				for (int cc = 0; cc < Dimsizes[Dimsizes.length - 1]; cc++) {
-
-					if (cc != 0) {
-						sb.append(",");
-					}
-					double x = Speccy.GetNumberAtByte(data, location);
-					// special case anything thats an exact integer because it makes the arrays look
-					// less messy when displayed.
-					if (x != Math.rint(x)) {
-						sb.append(x);
-						sb.append(",");
-					} else {
-						sb.append((int) x);
-					}
-					location = location + 5;
+				// LOad the dimension sizes into an array
+				int Dimsizes[] = new int[numDimensions];
+				for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
+					int dimsize = data[location++] & 0xff;
+					dimsize = dimsize + (data[location++] & 0xff) * 0x100;
+					Dimsizes[dimnum] = dimsize;
 				}
-				sb.append(System.lineSeparator());
-				int diminc = Dimsizes.length - 2;
-				boolean doneInc = false;
-				while (!doneInc) {
-					if (diminc == -1) {
-						doneInc = true;
-						complete = true;
-					} else {
-						int x = DimCounts[diminc];
-						x++;
-						if (x == Dimsizes[diminc]) {
-							DimCounts[diminc] = 0;
-							diminc--;
+				String s = "DIM " + varname + "(";
+				for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
+					if (dimnum > 0)
+						s = s + ",";
+					s = s + String.valueOf(Dimsizes[dimnum]);
+				}
+				s = s + ") = " + System.lineSeparator();
+				file.write(s.getBytes());
+
+				// count of what dimensions have been processed.
+				int DimCounts[] = new int[numDimensions];
+				for (int dimnum = 0; dimnum < numDimensions; dimnum++)
+					DimCounts[dimnum] = 0;
+
+				StringBuffer sb = new StringBuffer();
+				boolean complete = false;
+				while (!complete) {
+					for (int cc = 0; cc < Dimsizes[Dimsizes.length - 1]; cc++) {
+
+						if (cc != 0) {
+							sb.append(",");
+						}
+						double x = Speccy.GetNumberAtByte(data, location);
+						// special case anything thats an exact integer because it makes the arrays look
+						// less messy when displayed.
+						if (x != Math.rint(x)) {
+							sb.append(x);
+							sb.append(",");
 						} else {
-							DimCounts[diminc] = x;
+							sb.append((int) x);
+						}
+						location = location + 5;
+					}
+					sb.append(System.lineSeparator());
+					int diminc = Dimsizes.length - 2;
+					boolean doneInc = false;
+					while (!doneInc) {
+						if (diminc == -1) {
 							doneInc = true;
+							complete = true;
+						} else {
+							int x = DimCounts[diminc];
+							x++;
+							if (x == Dimsizes[diminc]) {
+								DimCounts[diminc] = 0;
+								diminc--;
+							} else {
+								DimCounts[diminc] = x;
+								doneInc = true;
+							}
 						}
 					}
 				}
+				file.write(sb.toString().getBytes());
+
+			} finally {
+				file.close();
 			}
-			file.write(sb.toString().getBytes());
-
-		} finally {
-			file.close();
+		} catch (Exception e) {
+			System.out.println("Error exporting: " + filename + " " + e.getMessage());
+			e.printStackTrace();
 		}
-
 	}
 
 	/**
@@ -1457,72 +1470,77 @@ public class Speccy {
 	 * @param p3d
 	 * @throws IOException
 	 */
-	public static void DoSaveCharArrayAsText(byte[] data, String filename, String varname) throws IOException {
+	public static void DoSaveCharArrayAsText(byte[] data, String filename, String varname) {
 		FileOutputStream file;
-		file = new FileOutputStream(filename);
 		try {
-			file.write(("File: " + filename + System.lineSeparator()).getBytes());
-			int location = 0x80; // skip header
+			file = new FileOutputStream(filename);
+			try {
+				file.write(("File: " + filename + System.lineSeparator()).getBytes());
+				int location = 0x80; // skip header
 
-			// Number of dimensions
-			int numDimensions = data[location++] & 0xff;
+				// Number of dimensions
+				int numDimensions = data[location++] & 0xff;
 
-			// LOad the dimension sizes into an array
-			int Dimsizes[] = new int[numDimensions];
-			for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
-				int dimsize = data[location++] & 0xff;
-				dimsize = dimsize + (data[location++] & 0xff) * 0x100;
-				Dimsizes[dimnum] = dimsize;
-			}
-			String s = "DIM " + varname + "(";
-			for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
-				if (dimnum > 0)
-					s = s + ",";
-				s = s + String.valueOf(Dimsizes[dimnum]);
-			}
-			s = s + ") = " + System.lineSeparator();
-			file.write(s.getBytes());
-
-			// count of what dimensions have been processed.
-			int DimCounts[] = new int[numDimensions];
-			for (int dimnum = 0; dimnum < numDimensions; dimnum++)
-				DimCounts[dimnum] = 0;
-
-			StringBuffer sb = new StringBuffer();
-			boolean complete = false;
-			while (!complete) {
-				for (int cc = 0; cc < Dimsizes[Dimsizes.length - 1]; cc++) {
-
-					if (cc != 0) {
-						sb.append(",");
-					}
-					String chr = Speccy.tokens[data[location++] & 0xff];
-					sb.append(chr);
+				// LOad the dimension sizes into an array
+				int Dimsizes[] = new int[numDimensions];
+				for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
+					int dimsize = data[location++] & 0xff;
+					dimsize = dimsize + (data[location++] & 0xff) * 0x100;
+					Dimsizes[dimnum] = dimsize;
 				}
-				sb.append(System.lineSeparator());
-				int diminc = Dimsizes.length - 2;
-				boolean doneInc = false;
-				while (!doneInc) {
-					if (diminc == -1) {
-						doneInc = true;
-						complete = true;
-					} else {
-						int x = DimCounts[diminc];
-						x++;
-						if (x == Dimsizes[diminc]) {
-							DimCounts[diminc] = 0;
-							diminc--;
-						} else {
-							DimCounts[diminc] = x;
+				String s = "DIM " + varname + "(";
+				for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
+					if (dimnum > 0)
+						s = s + ",";
+					s = s + String.valueOf(Dimsizes[dimnum]);
+				}
+				s = s + ") = " + System.lineSeparator();
+				file.write(s.getBytes());
+
+				// count of what dimensions have been processed.
+				int DimCounts[] = new int[numDimensions];
+				for (int dimnum = 0; dimnum < numDimensions; dimnum++)
+					DimCounts[dimnum] = 0;
+
+				StringBuffer sb = new StringBuffer();
+				boolean complete = false;
+				while (!complete) {
+					for (int cc = 0; cc < Dimsizes[Dimsizes.length - 1]; cc++) {
+
+						if (cc != 0) {
+							sb.append(",");
+						}
+						String chr = Speccy.tokens[data[location++] & 0xff];
+						sb.append(chr);
+					}
+					sb.append(System.lineSeparator());
+					int diminc = Dimsizes.length - 2;
+					boolean doneInc = false;
+					while (!doneInc) {
+						if (diminc == -1) {
 							doneInc = true;
+							complete = true;
+						} else {
+							int x = DimCounts[diminc];
+							x++;
+							if (x == Dimsizes[diminc]) {
+								DimCounts[diminc] = 0;
+								diminc--;
+							} else {
+								DimCounts[diminc] = x;
+								doneInc = true;
+							}
 						}
 					}
 				}
-			}
-			file.write(sb.toString().getBytes());
+				file.write(sb.toString().getBytes());
 
-		} finally {
-			file.close();
+			} finally {
+				file.close();
+			}
+		} catch (Exception e) {
+			System.out.println("Error exporting: " + filename + " " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
@@ -1637,7 +1655,7 @@ public class Speccy {
 	 * @throws IOException
 	 */
 	private static void SaveBasicFile(File targetFilename, byte[] data, int basicLine, int basicVarsOffset,
-			int filelength) throws IOException {
+			int filelength) {
 		FileOutputStream file;
 		try {
 			file = new FileOutputStream(targetFilename);
@@ -1719,6 +1737,80 @@ public class Speccy {
 				E.printStackTrace();
 				System.out.println("data being parsed:");
 				System.out.println(GeneralUtils.HexDump(variables, 0, variables.length));
+			}
+		}
+	}
+
+	/**
+	 * Save file using the given types. 
+	 *
+	 * 
+	 * @param targetFilename
+	 * @param entrydata
+	 * @param rawdata
+	 * @param filelength
+	 * @param speccyFileType
+	 * @param basicLine
+	 * @param basicVarsOffset
+	 * @param codeLoadAddress
+	 * @param arrayVarName
+	 * @param ActionType
+	 */
+	public static void SaveFileToDiskAdvanced(File targetFilename, byte[] entrydata, byte[] rawdata, int filelength,
+			int speccyFileType, int basicLine, int basicVarsOffset, int codeLoadAddress, String arrayVarName,
+			int ActionType) {
+
+		int ImageFileTyp = -1;
+		switch (ActionType) {
+		case GeneralUtils.EXPORT_TYPE_RAW:
+			GeneralUtils.WriteBlockToDisk(entrydata, targetFilename);
+			break;
+		case GeneralUtils.EXPORT_TYPE_HEX:
+			String hexdata = GeneralUtils.HexDump(entrydata, 0, entrydata.length);
+			GeneralUtils.WriteBlockToDisk(hexdata.getBytes(), targetFilename);
+			break;
+		case GeneralUtils.EXPORT_TYPE_ASM:
+			DoSaveFileAsAsm(entrydata, targetFilename.getAbsolutePath(), 0);
+			break;
+		case GeneralUtils.EXPORT_TYPE_TXT:
+			SaveBasicFile(targetFilename, entrydata, basicLine, basicVarsOffset, filelength);
+			break;
+		case GeneralUtils.EXPORT_TYPE_RAWANDHEADER:
+			GeneralUtils.WriteBlockToDisk(rawdata, targetFilename);
+			break;
+		case GeneralUtils.EXPORT_TYPE_CSV:
+			if (speccyFileType == BASIC_NUMARRAY) {
+				DoSaveNumericArrayAsText(entrydata, targetFilename.getAbsolutePath(), arrayVarName);
+			} else {
+				DoSaveCharArrayAsText(entrydata, targetFilename.getAbsolutePath(), arrayVarName);
+			}
+			break;
+		case GeneralUtils.EXPORT_TYPE_PNG:
+			ImageFileTyp = SWT.IMAGE_PNG;
+			break;
+		case GeneralUtils.EXPORT_TYPE_GIF:
+			ImageFileTyp = SWT.IMAGE_GIF;
+			break;
+		case GeneralUtils.EXPORT_TYPE_JPG:
+			ImageFileTyp = SWT.IMAGE_JPEG;
+			break;
+		}
+
+		if (ImageFileTyp > -1) {
+			ImageData image = Speccy.GetImageFromFileArray(entrydata, 0);
+			ImageLoader imageLoader = new ImageLoader();
+			imageLoader.data = new ImageData[] { image };
+			FileOutputStream file;
+			try {
+				file = new FileOutputStream(targetFilename);
+				imageLoader.save(file, ImageFileTyp);
+				file.close();
+			} catch (FileNotFoundException e) {
+				System.out.println("Cannot save " + targetFilename.getAbsolutePath());
+				e.printStackTrace();
+			} catch (IOException e) {
+				System.out.println("Error closing " + targetFilename.getAbsolutePath());
+				e.printStackTrace();
 			}
 		}
 	}

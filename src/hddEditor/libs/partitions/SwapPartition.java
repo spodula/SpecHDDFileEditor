@@ -18,7 +18,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
 
 public class SwapPartition extends IDEDosPartition {
@@ -72,12 +72,10 @@ public class SwapPartition extends IDEDosPartition {
 	public void Reload() {
 	}
 
-	
-	/**
-	 * 
-	 */
+
 	@Override
-	public void ExtractPartitiontoFolder(File folder, boolean raw, boolean CodeAsHex, ProgressCallback progress) {
+	public void ExtractPartitiontoFolderAdvanced(File folder,int BasicAction, int CodeAction, int ArrayAction, int ScreenAction, int MiscAction, int SwapAction,  ProgressCallback progress) throws IOException {
+		//ExtractPartitiontoFolder(folder, SwapAction==GeneralUtils.EXPORT_TYPE_RAW, false, progress); 
 		try {
 			FileWriter SysConfig = new FileWriter(new File(folder, "swap.index"));
 			if (progress!= null) {
@@ -93,16 +91,12 @@ public class SwapPartition extends IDEDosPartition {
 				SysConfig.close();
 			}
 			byte data[] = GetAllDataInPartition();
-			if (raw) {
-				GeneralUtils.WriteBlockToDisk(data, new File(folder,"swap.data"));
-			} else {
-				String sdata = GeneralUtils.HexDump(data, 0, data.length);
-				GeneralUtils.WriteBlockToDisk(sdata.getBytes(), new File(folder,"swap.data.txt"));
-			}
+			Speccy.SaveFileToDiskAdvanced(folder, data, data, BasicAction, CodeAction, ArrayAction, ScreenAction, MiscAction, null, SwapAction);
 		} catch (IOException e) {
 			System.out.println("Error extracting files: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
+
 	
 }

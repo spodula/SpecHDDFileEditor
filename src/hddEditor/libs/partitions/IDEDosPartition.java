@@ -433,12 +433,33 @@ public class IDEDosPartition {
 
 	}
 	
+	
 	/**
+	 * Export the current partition to a given folder
 	 * 
 	 * @param folder
-	 * @throws IOException 
+	 * @param Raw
+	 * @param CodeAsHex
+	 * @param progress
+	 * @throws IOException
 	 */
 	public void ExtractPartitiontoFolder(File folder, boolean Raw, boolean CodeAsHex, ProgressCallback progress) throws IOException {
+		
+	}
+	
+	/**
+	 * Extract partition with flags showing what to do with each file type. 
+	 * 
+	 * @param folder
+	 * @param BasicAction
+	 * @param CodeAction
+	 * @param ArrayAction
+	 * @param ScreenAction
+	 * @param MiscAction
+	 * @param progress
+	 * @throws IOException
+	 */
+	public void ExtractPartitiontoFolderAdvanced(File folder,int BasicAction, int CodeAction, int ArrayAction, int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress) throws IOException {
 		
 	}
 

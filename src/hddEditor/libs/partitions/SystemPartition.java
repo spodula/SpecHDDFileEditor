@@ -383,7 +383,9 @@ public class SystemPartition extends IDEDosPartition {
 			int entrynum=0;
 			for (IDEDosPartition p : partitions) {
 				if (progress!= null) {
-					progress.Callback(partitions.length, entrynum++, "Partition: "+p.GetName());
+					if (progress.Callback(partitions.length, entrynum++, "Partition: "+p.GetName())) {
+						break;
+					}
 				}
 				if (p.GetPartType() != 0) {
 					SysConfig.write(("    <partition>\n").toCharArray());
@@ -415,5 +417,68 @@ public class SystemPartition extends IDEDosPartition {
 			SysConfig.close();
 		}
 	}
+	
+	@Override
+	public void ExtractPartitiontoFolderAdvanced(File folder,int BasicAction, int CodeAction, int ArrayAction, int ScreenAction, int MiscAction, int SwapAction,  ProgressCallback progress) throws IOException {
+		FileWriter SysConfig = new FileWriter(new File(folder, "system.config"));
+		try {
+			SysConfig.write("<plusidedos>\n".toCharArray());
+			SysConfig.write(("  <name>" + GetName() + "</name>\n").toCharArray());
+			SysConfig.write(("  <dummy>" + DummySystemPartiton + "</dummy>\n").toCharArray());
+			SysConfig.write(("  <disk_geometry>\n").toCharArray());
+			SysConfig.write(("      <cyl>" + GetNumCyls() + "</cyl>\n").toCharArray());
+			SysConfig.write(("      <head>" + GetNumHeads() + "</head>\n").toCharArray());
+			SysConfig.write(("      <sectors>" + GetSectorsPerCyls() + "</sectors>\n").toCharArray());
+			SysConfig.write(("  </disk_geometry>\n").toCharArray());
+			SysConfig.write(("  <basic_colour>" + GetBasicColour() + "</basic_colour>\n").toCharArray());
+			SysConfig.write(("  <editor_colour>" + GetBasicEditColour() + "</editor_colour>\n").toCharArray());
+			SysConfig.write(("  <unmap_a>" + GetUnmapA() + "</unmap_a>\n").toCharArray());
+			SysConfig.write(("  <unmap_b>" + GetUnmapA() + "</unmap_b>\n").toCharArray());
+			SysConfig.write(("  <unmap_m>" + GetUnmapA() + "</unmap_m>\n").toCharArray());
+			SysConfig.write(("  <default_drive>" + GetDefaultDrive() + "</default_drive>\n").toCharArray());
+			SysConfig.write(("  <unit0_drive>" + GetUnit0DriveLetter() + "</unit0_drive>\n").toCharArray());
+			SysConfig.write(("  <unit1_drive>" + GetUnit1DriveLetter() + "</unit1_drive>\n").toCharArray());
+			SysConfig.write(("  <unitm_drive>" + GetRamdiskDriveLetter() + "</unitm_drive>\n").toCharArray());
+			SysConfig.write(("  <maxpart>" + GetMaxPartitions() + "</maxpart>\n").toCharArray());
+			SysConfig.write(("  <partitions>\n").toCharArray());
+
+			int entrynum=0;
+			for (IDEDosPartition p : partitions) {
+				if (progress!= null) {
+					if (progress.Callback(partitions.length, entrynum++, "Partition: "+p.GetName())) {
+						break;
+					}
+				}
+				if (p.GetPartType() != 0) {
+					SysConfig.write(("    <partition>\n").toCharArray());
+					SysConfig.write(("        <partname>" + p.GetName() + "</partname>\n").toCharArray());
+					SysConfig.write(("        <parttype>" + p.GetPartType() + "</parttype>\n").toCharArray());
+					SysConfig.write(("        <parttypename>" + PLUSIDEDOS.GetTypeAsString(p.GetPartType()).trim()
+							+ "</parttypename>\n").toCharArray());
+					SysConfig.write(
+							("        <direntlocation>" + p.DirentLocation + "</direntlocation>\n").toCharArray());
+					SysConfig.write(("        <sizek>" + p.GetSizeK() + "</sizek>\n").toCharArray());
+					SysConfig.write(("        <part_geometry>\n").toCharArray());
+					SysConfig.write(("            <startcyl>" + p.GetStartCyl() + "</startcyl>\n").toCharArray());
+					SysConfig.write(("            <starthead>" + p.GetStartHead() + "</starthead>\n").toCharArray());
+					SysConfig.write(("            <endcyl>" + p.GetEndCyl() + "</endcyl>\n").toCharArray());
+					SysConfig.write(("            <endhead>" + p.GetEndHead() + "</endhead>\n").toCharArray());
+					SysConfig.write(("        </part_geometry>\n").toCharArray());
+					SysConfig.write(("        <RawDirent>\n").toCharArray());
+					String dirent = GeneralUtils.HexDump(p.RawPartition, 0, 0x40).trim();
+					dirent = dirent.replace("\n", "\n            ");
+					SysConfig.write("            " + dirent);
+					SysConfig.write(("\n        </RawDirent>\n").toCharArray());
+					SysConfig.write(("    </partition>\n").toCharArray());
+				}
+			}
+
+			SysConfig.write(("  </partitions>\n").toCharArray());
+			SysConfig.write("</plusidedos>\n".toCharArray());
+		} finally {
+			SysConfig.close();
+		}
+	}
+
 
 }
