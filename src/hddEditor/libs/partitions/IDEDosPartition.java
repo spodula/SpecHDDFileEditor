@@ -432,21 +432,6 @@ public class IDEDosPartition {
 	protected void LoadPartitionSpecificInformation() throws IOException {
 
 	}
-	
-	
-	/**
-	 * Export the current partition to a given folder
-	 * 
-	 * @param folder
-	 * @param Raw
-	 * @param CodeAsHex
-	 * @param progress
-	 * @throws IOException
-	 */
-	public void ExtractPartitiontoFolder(File folder, boolean Raw, boolean CodeAsHex, ProgressCallback progress) throws IOException {
-		
-	}
-	
 	/**
 	 * Extract partition with flags showing what to do with each file type. 
 	 * 
