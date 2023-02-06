@@ -570,7 +570,7 @@ public class Speccy {
 		int ActualVarSize = Math.min(file.length, filesize) - VariablesOffset;
 		sb.append("<rawdata>" + System.lineSeparator());
 		if (ActualVarSize > 0) {
-			sb.append(GeneralUtils.HexDump(file, VariablesOffset, ActualVarSize));
+			sb.append(GeneralUtils.HexDump(file, VariablesOffset, ActualVarSize,0));
 		}
 		sb.append("</rawdata>" + System.lineSeparator());
 
@@ -1637,7 +1637,7 @@ public class Speccy {
 
 		} else {
 			if (OutAsHex) {
-				String hexdata = GeneralUtils.HexDump(data, 0, data.length);
+				String hexdata = GeneralUtils.HexDump(data, 0, data.length,0);
 				GeneralUtils.WriteBlockToDisk(hexdata.getBytes(), targetFilename);
 			} else {
 				DoSaveFileAsAsm(data, targetFilename.getAbsolutePath(), codeLoadAddress);
@@ -1736,7 +1736,7 @@ public class Speccy {
 				System.out.println("Error: " + E.getMessage());
 				E.printStackTrace();
 				System.out.println("data being parsed:");
-				System.out.println(GeneralUtils.HexDump(variables, 0, variables.length));
+				System.out.println(GeneralUtils.HexDump(variables, 0, variables.length,0));
 			}
 		}
 	}
@@ -1766,7 +1766,7 @@ public class Speccy {
 			GeneralUtils.WriteBlockToDisk(entrydata, targetFilename);
 			break;
 		case GeneralUtils.EXPORT_TYPE_HEX:
-			String hexdata = GeneralUtils.HexDump(entrydata, 0, entrydata.length);
+			String hexdata = GeneralUtils.HexDump(entrydata, 0, entrydata.length, codeLoadAddress);
 			GeneralUtils.WriteBlockToDisk(hexdata.getBytes(), targetFilename);
 			break;
 		case GeneralUtils.EXPORT_TYPE_ASM:

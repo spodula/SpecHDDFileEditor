@@ -130,7 +130,7 @@ public class FloppyGenericPage extends GenericPage {
 		    	s = s + "  Actual size: "+sect.ActualSize;
 		    	s = s + "  FDC size: "+sect.Sectorsz+"\n";
 		    	s = s + "Data:\n";
-		    	s = s + GeneralUtils.HexDump(sect.data,0, sect.data.length );
+		    	s = s + GeneralUtils.HexDump(sect.data,0, sect.data.length,0 );
 		    	s = s + "\n\n";
 		    }
 		    

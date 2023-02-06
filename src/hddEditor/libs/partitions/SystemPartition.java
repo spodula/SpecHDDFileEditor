@@ -399,7 +399,7 @@ public class SystemPartition extends IDEDosPartition {
 					SysConfig.write(("            <endhead>" + p.GetEndHead() + "</endhead>\n").toCharArray());
 					SysConfig.write(("        </part_geometry>\n").toCharArray());
 					SysConfig.write(("        <RawDirent>\n").toCharArray());
-					String dirent = GeneralUtils.HexDump(p.RawPartition, 0, 0x40).trim();
+					String dirent = GeneralUtils.HexDump(p.RawPartition, 0, 0x40,0).trim();
 					dirent = dirent.replace("\n", "\n            ");
 					SysConfig.write("            " + dirent);
 					SysConfig.write(("\n        </RawDirent>\n").toCharArray());

@@ -87,7 +87,7 @@ public class SCLDiskFile extends FloppyDisk {
 		for (int i = 0; i < numfiles; i++) {
 			byte header[] = new byte[14];
 			inFile.read(header);
-			System.out.println(GeneralUtils.HexDump(header, 0, 14));
+//			System.out.println(GeneralUtils.HexDump(header, 0, 14,0));
 
 			byte targetHeader[] = new byte[16];
 			System.arraycopy(header, 0, targetHeader, 0, header.length);

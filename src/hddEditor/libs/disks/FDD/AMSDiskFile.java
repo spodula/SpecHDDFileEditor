@@ -280,12 +280,12 @@ public class AMSDiskFile extends FloppyDisk {
 				System.out.println(h);
 				System.out.println("Track 1:");
 				byte data[] = h.GetBytesStartingFromSector(9, 512);
-				System.out.println(GeneralUtils.HexDump(data, 0, 512));
+				System.out.println(GeneralUtils.HexDump(data, 0, 512,0));
 				// data[2] = 0x49;
 				h.SetLogicalBlockFromSector(9, data);
 				System.out.println("Track 1:");
 				data = h.GetBytesStartingFromSector(9, 512);
-				System.out.println(GeneralUtils.HexDump(data, 0, 512));
+				System.out.println(GeneralUtils.HexDump(data, 0, 512,0));
 				h.close();
 			} else {
 				System.out.println(filename + " is Not an AMS disk file");

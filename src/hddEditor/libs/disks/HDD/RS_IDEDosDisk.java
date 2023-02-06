@@ -107,7 +107,7 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 			System.out.println(h);
 			//First sector:
 			byte data[] = h.GetBytesStartingFromSector(0,512);
-			System.out.println(GeneralUtils.HexDump(data, 0, 512));
+			System.out.println(GeneralUtils.HexDump(data, 0, 512,0));
 			h.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

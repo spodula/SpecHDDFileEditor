@@ -110,7 +110,7 @@ public class GeneralUtils {
 	 * @param length
 	 * @return
 	 */
-	public static String HexDump(byte[] data, int start, int length) {
+	public static String HexDump(byte[] data, int start, int length, int Displacement) {
 		StringBuilder sb = new StringBuilder();
 		String cr = System.lineSeparator();
 
@@ -119,7 +119,7 @@ public class GeneralUtils {
 			chars[s] = 0x20;
 		}
 		int byteindex = 0;
-		sb.append(String.format("%08X ", start));
+		sb.append(String.format("%08X ", start+Displacement));
 		for (int ptr = 0; ptr < length; ptr++) {
 			if ((byteindex) == 16) {
 				sb.append(" ");
@@ -129,7 +129,7 @@ public class GeneralUtils {
 					chars[s] = 0x20;
 				}
 				byteindex = 0;
-				sb.append(String.format("%08X ", start));
+				sb.append(String.format("%08X ", start+Displacement));
 			}
 			byte dd = data[start++];
 			int xi = (int) (dd & 0xff);
