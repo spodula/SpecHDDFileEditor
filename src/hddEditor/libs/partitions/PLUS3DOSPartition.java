@@ -351,7 +351,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 								actiontype = BasicAction;
 							} else if ((SpeccyFileType == Speccy.BASIC_NUMARRAY) && (SpeccyFileType == Speccy.BASIC_CHRARRAY)) {
 								actiontype = ArrayAction;
-							} else if ((filelength == 6912) && (codeLoadAddress == 16384)) { // { "PNG", "GIF", "JPEG", "Raw",
+							} else if ((filelength == 6912)) { // { "PNG", "GIF", "JPEG", "Raw",
 																								// "Raw+Header", "Hex", "Assembly" };
 								actiontype = ScreenAction;
 							} else { // CODE Options: { "Raw", "Raw+Header", "Assembly", "Hex" };
