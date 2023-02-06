@@ -192,13 +192,9 @@ public class DirectoryEntry {
 		if (lastdirent == null) {
 			System.out.println("Cant get last dirent for " + filename());
 		} else {
-			//int almostallBlocks = (lastdirent.getBlocks().length-1) * ThisPartition.BlockSize;
-			
-			bytesinlld = lastdirent.GetBytesInLastDirent();// + almostallBlocks;
+			bytesinlld = lastdirent.GetBytesInLastDirent();
 		}
-		
-		System.out.println(filename() +  ": Bytes in LD: "+bytesinlld+" Bytes in rest of dirents:"+BytesInRestOfDirents+ " Total: "+(bytesinlld + BytesInRestOfDirents));
-		
+	
 		return (bytesinlld + BytesInRestOfDirents);
 	}
 	
