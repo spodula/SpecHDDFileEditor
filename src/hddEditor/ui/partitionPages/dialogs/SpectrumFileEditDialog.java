@@ -192,8 +192,10 @@ public class SpectrumFileEditDialog {
 		 * Render the page.
 		 */
 		if (!p3d.IsPlusThreeDosFile) {
-			FileRenderer FR = new FileRenderer();
-			FR.Render(MainPage, newdata, ThisEntry.filename());
+//			FileRenderer FR = new FileRenderer();
+//			FR.Render(MainPage, newdata, ThisEntry.filename());
+			CodeRenderer CR = new CodeRenderer();
+			CR.RenderCode(MainPage, newdata, null, ThisEntry.filename(), data.length, 0x0000);
 		} else if (p3d.filetype == Speccy.BASIC_BASIC) {
 			BasicRenderer BR = new BasicRenderer();
 			BR.RenderBasic(MainPage, newdata, header, ThisEntry.filename(), p3d.filelength, 
