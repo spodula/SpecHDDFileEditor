@@ -1,4 +1,7 @@
 package hddEditor.libs;
+//TODO: Non +3DOS files cant be edited.
+//TODO: Drag and drop files into partitions
+
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -69,7 +72,6 @@ public class GeneralUtils {
 			e.printStackTrace();
 		}
 		return (null);
-
 	}
 
 	/**
