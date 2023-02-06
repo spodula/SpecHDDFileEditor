@@ -259,7 +259,7 @@ public class CPMPartition extends IDEDosPartition {
 				}
 
 				// extent lower 4 bits
-				d.rawdirent[0x0c] = (byte) (direntNum % 0x0f);
+//				d.rawdirent[0x0c] = (byte) (direntNum % 0x0f);
 
 				// number of bytes used in the last dirent with 0=128
 				d.rawdirent[0x0d] = (byte) (file.length & 0x7f);
@@ -275,7 +275,10 @@ public class CPMPartition extends IDEDosPartition {
 				if (file.length % bytesPerDirent != 0) {
 					recordsInLastDirent++;
 				}
-				d.rawdirent[0x0f] = (byte) recordsInLastDirent;
+				//Updated Dirent for larger files. 
+				int cdata = (recordsInLastDirent / 128) & ExtentMask;  
+				d.rawdirent[0x0c] = (byte) (cdata | (direntNum % 0x0f));
+				d.rawdirent[0x0f] = (byte) (recordsInLastDirent % 128);
 
 				// copy block numbers to the DIRENTS
 				for (int j = 0; j < blocksPerDirent; j++) {
