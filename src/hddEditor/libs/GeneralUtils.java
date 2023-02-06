@@ -81,21 +81,7 @@ public class GeneralUtils {
 	 * @param filename
 	 */
 	public static void WriteBlockToDisk(byte[] data, String filename) {
-		FileOutputStream outputStream;
-		try {
-			outputStream = new FileOutputStream(filename);
-			try {
-				outputStream.write(data);
-			} finally {
-				outputStream.close();
-			}
-		} catch (FileNotFoundException e) {
-			System.err.println("File not found Error in GeneralUtils.WriteBlockToDisk: " + e.getMessage());
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.err.println("IO " + "Error in GeneralUtils.WriteBlockToDisk: " + e.getMessage());
-			e.printStackTrace();
-		}
+		WriteBlockToDisk(data, new File(filename));
 	}
 
 	public static void WriteBlockToDisk(byte[] data, File filename) {
