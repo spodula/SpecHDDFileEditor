@@ -374,7 +374,7 @@ public class FileExportAllPartitionsForm {
 
 		PartitionExportProgress pep = new PartitionExportProgress(shell.getDisplay());
 		try {
-			pep.Show("Exporting a;; partitions", "Partition:", "File:");
+			pep.Show("Exporting all partitions", "Partition:", "File:");
 			pep.SetMax1(sp.partitions.length);
 			pep.SetMax2(1);
 			pep.SetValue1(0);
