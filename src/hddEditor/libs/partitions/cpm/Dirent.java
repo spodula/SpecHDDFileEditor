@@ -33,9 +33,12 @@ public class Dirent {
 
 	// Determines if block IDs are treated as 8 bit or 16 bit values.
 	public boolean Is16BitBlockID = false;
+	
+	public int ExtentMask = 0;
 
-	public Dirent(int number) {
+	public Dirent(int number, int ExtentMask) {
 		entrynum = number;
+		this.ExtentMask = ExtentMask;
 	}
 
 	public void setType(int typ) {
@@ -228,8 +231,10 @@ public class Dirent {
 	 * @return
 	 */
 	public int GetBytesInLastDirent() {
-		int rawRecords = (int) (rawdirent[15] & 0xff); 
-		return (rawRecords * 128);
+		int usedRecords = (int) ((rawdirent[12] & ExtentMask) & 0xff);
+		usedRecords = usedRecords * 128;
+		usedRecords = usedRecords + (int) (rawdirent[15] & 0xff);
+		return (usedRecords * 128);
 	}
 	
 	/**

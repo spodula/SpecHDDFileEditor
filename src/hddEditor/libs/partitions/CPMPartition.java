@@ -392,7 +392,7 @@ public class CPMPartition extends IDEDosPartition {
 
 		Dirents = new Dirent[MaxDirent + 1];
 		for (int i = 0; i <= MaxDirent; i++) {
-			Dirent d = new Dirent(i);
+			Dirent d = new Dirent(i, ExtentMask);
 			d.Is16BitBlockID = (MaxBlock > 254);
 			d.LoadDirentFromArray(rawDirents, i * 32);
 			Dirents[i] = d;

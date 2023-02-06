@@ -178,6 +178,7 @@ public class DirectoryEntry {
 		//use that.
 		//GDS 25/12/2022 - The bytes in the last logical Dirent are the bytes for the last DIRENT not Block. 
 		//                  So ignore the last Dirent in file size calculations.
+		//GDS 06/02/2023 - This doesnt seem right...
 		int BytesInRestOfDirents = 0; 
 		Dirent lastdirent = GetLastDirent();
 		for(Dirent d:dirents) {
@@ -191,10 +192,14 @@ public class DirectoryEntry {
 		if (lastdirent == null) {
 			System.out.println("Cant get last dirent for " + filename());
 		} else {
-			bytesinlld = lastdirent.GetBytesInLastDirent();
+			//int almostallBlocks = (lastdirent.getBlocks().length-1) * ThisPartition.BlockSize;
+			
+			bytesinlld = lastdirent.GetBytesInLastDirent();// + almostallBlocks;
 		}
+		
+		System.out.println(filename() +  ": Bytes in LD: "+bytesinlld+" Bytes in rest of dirents:"+BytesInRestOfDirents+ " Total: "+(bytesinlld + BytesInRestOfDirents));
+		
 		return (bytesinlld + BytesInRestOfDirents);
-
 	}
 	
 	/**
