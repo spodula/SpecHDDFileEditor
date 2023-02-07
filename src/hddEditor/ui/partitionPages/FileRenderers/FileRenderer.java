@@ -17,8 +17,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.MessageBox;
 
-import hddEditor.libs.GeneralUtils;
-
 public class FileRenderer {
 	//Storage for the file details
 	protected String filename="";

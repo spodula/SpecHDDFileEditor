@@ -19,7 +19,6 @@ import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.cpm.Dirent;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
-import hddEditor.ui.partitionPages.FileRenderers.FileRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
