@@ -32,8 +32,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import hddEditor.libs.disks.Disk;
+import hddEditor.libs.disks.FileEntry;
 
-public class TrdDirectoryEntry {
+public class TrdDirectoryEntry implements FileEntry {
 	public byte DirEntryDescriptor[] = null;
 	public int DirentNum = 0;
 	public int DirentLoc = 0;
@@ -373,6 +374,91 @@ public class TrdDirectoryEntry {
 		}
 		return(result);
 	}
+	
+	/**
+	 * There can only be one .X
+	 */
+	@Override
+	/**
+	 * This performs a CPM-style file match
+	 */
+	public boolean DoesMatch(String wildcard) {		
+		// convert the wildcard into a search array:
+		// Split into filename and extension. pad out with spaces.
+		String fname = wildcard.trim().toUpperCase();
+		String StringToMatch = GetFilename().toUpperCase();
+		String filename = "";
+		String extension = "";
+		if (fname.contains(".")) {
+			int i = fname.lastIndexOf(".");
+			extension = fname.substring(i + 1);
+			filename = fname.substring(0, i);
+		} else {
+			filename = fname;
+		}
+		filename = filename + "            ";
+		extension = extension + "  ";
+
+		// create search array.
+		byte comp[] = new byte[12];
+
+		// populate with filename
+		boolean foundstar = false;
+		for (int i = 0; i < 10; i++) {
+			if (foundstar) {
+				comp[i] = '?';
+			} else {
+				char c = filename.charAt(i);
+				if (c == '*') {
+					foundstar = true;
+					comp[i] = '?';
+				} else {
+					comp[i] = (byte) ((int) c & 0xff);
+				}
+			}
+		}
+
+		// populate with extension
+		for (int i = 0; i < 1; i++) {
+			if (foundstar) {
+				comp[i + 10] = '?';
+			} else {
+				char c = extension.charAt(i);
+				if (c == '*') {
+					foundstar = true;
+					comp[i + 10] = '?';
+				} else {
+					comp[i + 10] = (byte) ((int) c & 0xff);
+				}
+			}
+		}
+
+		
+		int HasDot = StringToMatch.indexOf('.');
+		String preDot = StringToMatch;
+		String PostDot = "";
+		if (HasDot>-1) {
+			preDot = StringToMatch.substring(0,HasDot);
+			PostDot = StringToMatch.substring(HasDot+1);
+		}
+		preDot = (preDot+"            ").substring(0,10);
+		PostDot = (PostDot+" ").substring(0,1);
+		
+		StringToMatch = preDot+PostDot;
+		// now search.
+		// check the filename
+		boolean match = true;
+		for (int i = 0; i < 11; i++) {
+			byte chr = (byte) StringToMatch.charAt(i);
+			byte cchr = comp[i];
+			if ((chr != cchr) && (cchr != '?')) {
+				match = false;
+			}
+		}
+//		System.out.println("Match: "+wildcard+" to "+StringToMatch+" "+match+" "+new String(comp));
+		return(match);
+	}
+
 
 	
 }

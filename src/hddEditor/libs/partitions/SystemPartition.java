@@ -37,8 +37,12 @@ import java.io.IOException;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.disks.Disk;
+import hddEditor.libs.handlers.IDEDosHandler;
 
 public class SystemPartition extends IDEDosPartition {
+	// Storage for the partitions
+	public IDEDosPartition partitions[] = null;
+
 	// Flag set by handlers that create this partition as a dummy for the editor.
 	// This flag will stop the partition trying to update the disk if its modified.
 	public Boolean DummySystemPartiton = false;
@@ -188,9 +192,6 @@ public class SystemPartition extends IDEDosPartition {
 	public void SetDefaultDrive(String DriverLetter) {
 		RawPartition[0x30] = StringOrBlankToByte(DriverLetter);
 	}
-
-	// Storage for the partitions
-	public IDEDosPartition partitions[] = null;
 
 	/**
 	 * 
@@ -351,9 +352,10 @@ public class SystemPartition extends IDEDosPartition {
 		 * parent.
 		 */
 	}
-	
+
 	@Override
-	public void ExtractPartitiontoFolderAdvanced(File folder,int BasicAction, int CodeAction, int ArrayAction, int ScreenAction, int MiscAction, int SwapAction,  ProgressCallback progress) throws IOException {
+	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress) throws IOException {
 		FileWriter SysConfig = new FileWriter(new File(folder, "system.config"));
 		try {
 			SysConfig.write("<plusidedos>\n".toCharArray());
@@ -376,10 +378,10 @@ public class SystemPartition extends IDEDosPartition {
 			SysConfig.write(("  <maxpart>" + GetMaxPartitions() + "</maxpart>\n").toCharArray());
 			SysConfig.write(("  <partitions>\n").toCharArray());
 
-			int entrynum=0;
+			int entrynum = 0;
 			for (IDEDosPartition p : partitions) {
-				if (progress!= null) {
-					if (progress.Callback(partitions.length, entrynum++, "Partition: "+p.GetName())) {
+				if (progress != null) {
+					if (progress.Callback(partitions.length, entrynum++, "Partition: " + p.GetName())) {
 						break;
 					}
 				}
@@ -399,7 +401,7 @@ public class SystemPartition extends IDEDosPartition {
 					SysConfig.write(("            <endhead>" + p.GetEndHead() + "</endhead>\n").toCharArray());
 					SysConfig.write(("        </part_geometry>\n").toCharArray());
 					SysConfig.write(("        <RawDirent>\n").toCharArray());
-					String dirent = GeneralUtils.HexDump(p.RawPartition, 0, 0x40,0).trim();
+					String dirent = GeneralUtils.HexDump(p.RawPartition, 0, 0x40, 0).trim();
 					dirent = dirent.replace("\n", "\n            ");
 					SysConfig.write("            " + dirent);
 					SysConfig.write(("\n        </RawDirent>\n").toCharArray());
@@ -414,5 +416,234 @@ public class SystemPartition extends IDEDosPartition {
 		}
 	}
 
+	/**
+	 * Create a named partition on the current disk
+	 * 
+	 * @param partname
+	 * @param Partsize
+	 * @param PartType
+	 * @param IsScript
+	 * @throws PlusIDEDosException
+	 */
+	public void CreatePartition(String partname, int Partsize, int PartType) throws PlusIDEDosException {
+		if (DummySystemPartiton) {
+			throw new PlusIDEDosException(partname, "Cannot edit partitions on this media type.");
+		} else {
+			// check for duplicate name
+			boolean IsExisting = false;
+			for (IDEDosPartition p : partitions) {
+				if (p.GetPartType() != 0) {
+					if (p.GetName().equals(partname)) {
+						IsExisting = true;
+					}
+				}
+			}
+			if (IsExisting) {
+				throw new PlusIDEDosException(partname,
+						"Error creating partition: Partition " + partname + " already exists.");
+			} else {
+				/*
+				 * Find a free partition with enough space. Note, the flags are for how to deal
+				 * with the partition when allocating. If its the last partition, remove the
+				 * Free space partition. Otherwise, if its the last allocated partition, but
+				 * there are still entries left, Will need to move the Free space partition, and
+				 * setup the new one in the old slot.
+				 */
+				boolean IsLastPartition = false;
+				boolean IsLastFreeSpacePartition = false;
+				IDEDosPartition FoundPartiton = null;
+				for (IDEDosPartition part : partitions) {
+					if (part.GetPartType() == PLUSIDEDOS.PARTITION_FREE) {
+						int PartitonSizeMb = part.GetSizeK() / 1024;
+						if (PartitonSizeMb >= Partsize) {
+							FoundPartiton = part;
+							if (FoundPartiton.DirentNum == partitions.length - 1) {
+								IsLastPartition = true;
+							} else {
+								if (partitions[FoundPartiton.DirentNum + 1]
+										.GetPartType() == PLUSIDEDOS.PARTITION_UNUSED) {
+									IsLastFreeSpacePartition = true;
+								}
+							}
+							break;
+						}
+					}
+				}
+				if (FoundPartiton == null) {
+					throw new PlusIDEDosException(partname,
+							"Error creating partition: Unable to find an empty partition.");
+				} else {
+					// If the partition isnt the last partition, just use it as is. Dont try to
+					// defrag the disk.
+					if (!IsLastFreeSpacePartition) {
+						FoundPartiton.SetPartType(PartType);
+						int PartitonSizeMb = FoundPartiton.GetSizeK() / 1024;
+						if (PartitonSizeMb != Partsize) {
+							PartitonSizeMb = Partsize;
+							int NumSectors = PartitonSizeMb * 1024 * 1024 / CurrentDisk.GetSectorSize();
 
+							int NumCyls = NumSectors / CurrentDisk.GetNumSectors();
+							if (NumSectors % CurrentDisk.GetNumSectors() != 0) {
+								NumCyls++;
+							}
+							int Tracks = NumCyls / CurrentDisk.GetNumHeads();
+							int Heads = NumCyls % CurrentDisk.GetNumHeads();
+
+							Heads = Heads + FoundPartiton.GetStartHead();
+							if (Heads >= CurrentDisk.GetNumHeads()) {
+								Heads = Heads - CurrentDisk.GetNumHeads();
+								Tracks++;
+							}
+							Tracks = Tracks + FoundPartiton.GetStartCyl();
+
+							FoundPartiton.SetEndCyl(Tracks);
+							FoundPartiton.SetEndHead(Heads);
+							FoundPartiton.UpdateEndSector();
+
+						}
+						FoundPartiton = IDEDosHandler.GetNewPartitionByType(PartType, FoundPartiton.DirentLocation,
+								FoundPartiton.CurrentDisk, FoundPartiton.RawPartition, FoundPartiton.DirentNum, false);
+						partitions[FoundPartiton.DirentNum] = FoundPartiton;
+						FoundPartiton.SetName(partname);
+
+					} else {
+						int PartitonSizeMb = Partsize;
+						int NumSectors = PartitonSizeMb * 1024 * (1024 / CurrentDisk.GetSectorSize());
+
+						// This seems to be hard limit, so fiddle it.
+						if (CurrentDisk.GetSectorSize() == 512) {
+							if (NumSectors > 32790) {
+								NumSectors = 32790;
+							}
+						} else {
+							if (NumSectors > 65580) {
+								NumSectors = 65580;
+							}
+						}
+
+						int NumCyls = NumSectors / CurrentDisk.GetNumSectors();
+						if (NumSectors % CurrentDisk.GetNumSectors() != 0) {
+							NumCyls++;
+						}
+						int Tracks = NumCyls / CurrentDisk.GetNumHeads();
+						int Heads = NumCyls % CurrentDisk.GetNumHeads();
+
+						IDEDosPartition NewFreePartition = null;
+
+						/*
+						 * copy the free space partition. Note, need to duplicate the Raw partition
+						 * data, as its passed by reference.
+						 */
+						if (!IsLastPartition) {
+							byte NewRawPartition[] = new byte[FoundPartiton.RawPartition.length];
+							System.arraycopy(FoundPartiton.RawPartition, 0, NewRawPartition, 0, NewRawPartition.length);
+
+							NewFreePartition = new FreePartition(FoundPartiton.DirentLocation + 0x40,
+									FoundPartiton.CurrentDisk, NewRawPartition, FoundPartiton.DirentNum + 1, false);
+							// Update the cylinder
+							int NewTrack = FoundPartiton.GetStartCyl() + Tracks;
+							int NewHead = FoundPartiton.GetStartHead() + Heads;
+							if (NewHead > FoundPartiton.CurrentDisk.GetNumHeads()) {
+								NewHead = 0;
+								NewTrack++;
+							}
+
+							NewFreePartition.SetStartCyl(NewTrack);
+							NewFreePartition.SetStartHead(NewHead);
+							// Set the new type and add it.
+							NewFreePartition.SetPartType(PLUSIDEDOS.PARTITION_FREE);
+							NewFreePartition.UpdateEndSector();
+							partitions[NewFreePartition.DirentNum] = NewFreePartition;
+							// extract the track and head information to use as the end of the new
+							// partition.
+							Tracks = NewFreePartition.GetStartCyl();
+							Heads = NewFreePartition.GetStartHead();
+							Heads = Heads - 1;
+							if (Heads < 0) {
+								Heads = FoundPartiton.CurrentDisk.GetNumHeads() - 1;
+								Tracks = Tracks - 1;
+							}
+						} else {
+							// If we havent created a new free space partition, use the old partitions
+							// details.
+							Tracks = FoundPartiton.GetStartCyl() + Tracks;
+							Heads = FoundPartiton.GetStartHead() + Heads;
+							if (Heads > FoundPartiton.CurrentDisk.GetNumHeads()) {
+								Heads = 0;
+								Tracks++;
+							}
+							// Now, modify the old partition
+						}
+						FoundPartiton.SetName(partname);
+						FoundPartiton.SetPartType(PartType);
+						FoundPartiton.SetEndCyl(Tracks);
+						FoundPartiton.SetEndHead(Heads);
+
+						// Re-create as the proper type
+						FoundPartiton = IDEDosHandler.GetNewPartitionByType(PartType, FoundPartiton.DirentLocation,
+								FoundPartiton.CurrentDisk, FoundPartiton.RawPartition, FoundPartiton.DirentNum, true);
+
+						partitions[FoundPartiton.DirentNum] = FoundPartiton;
+					}
+				}
+				UpdatePartitionListOnDisk();
+			}
+		}
+	}
+
+	/**
+	 * Implement deletion of selected partition
+	 * 
+	 * @throws PlusIDEDosException 
+	 */
+	public void DeletePartition(String partname) throws PlusIDEDosException {
+		partname = partname.toUpperCase();
+		if (DummySystemPartiton) {
+			throw new PlusIDEDosException(partname, "Cannot Delete partitions on this media type.");
+		} else {
+			// Find the partition to delete
+			IDEDosPartition part = null;
+			for (IDEDosPartition p : partitions) {
+				if (p.GetPartType() != 0) {
+					if (p.GetName().toUpperCase().equals(partname.toUpperCase())) {
+						part = p;
+					}
+				}
+			}
+			if (part == null) {
+				throw new PlusIDEDosException(partname, "Cannot find the partition '" + partname + "' to delete");
+			} else {
+				/*
+				 * Set the partition to FREE, and reallocate it.
+				 */
+				part.SetPartType(PLUSIDEDOS.PARTITION_FREE);
+
+				IDEDosPartition NewFreePartition = IDEDosHandler.GetNewPartitionByType(PLUSIDEDOS.PARTITION_FREE,
+						part.DirentLocation, part.CurrentDisk, part.RawPartition, part.DirentNum, false);
+
+				NewFreePartition.SetPartType(PLUSIDEDOS.PARTITION_FREE);
+
+				/*
+				 * Try to merge together any free partitions.
+				 */
+				if (NewFreePartition.DirentNum != partitions.length - 1) {
+					if (partitions[part.DirentNum + 1].GetPartType() == PLUSIDEDOS.PARTITION_FREE) {
+						// Get the partition
+						IDEDosPartition OldFreePartiton = partitions[NewFreePartition.DirentNum + 1];
+						// Merge the partitions
+						NewFreePartition.SetEndCyl(OldFreePartiton.GetEndCyl());
+						NewFreePartition.SetEndHead(OldFreePartiton.GetEndHead());
+						// reset the partition type
+						OldFreePartiton.SetPartType(PLUSIDEDOS.PARTITION_UNUSED);
+						// and set it back.
+						partitions[OldFreePartiton.DirentNum] = OldFreePartiton;
+					}
+				}
+				/*
+				 * Update the partition list and on the disk.
+				 */
+				partitions[NewFreePartition.DirentNum] = NewFreePartition;
+			}
+		}
+	}
 }

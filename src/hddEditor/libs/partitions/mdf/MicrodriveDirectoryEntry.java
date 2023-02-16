@@ -4,10 +4,11 @@ import java.io.IOException;
 
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
+import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.LINEAR.MDFMicrodriveFile;
 import hddEditor.libs.disks.LINEAR.MicrodriveSector;
 
-public class MicrodriveDirectoryEntry {
+public class MicrodriveDirectoryEntry implements FileEntry {
 	// Filename
 	private String filename;
 	// List of sectors.
@@ -130,13 +131,12 @@ public class MicrodriveDirectoryEntry {
 		MicrodriveSector s0 = GetSectorByFilePartNumber(0);
 		return ((int) (s0.SectorData[1] & 0xff) + ((s0.SectorData[2] & 0xff) * 0x100));
 	}
-	
+
 	public void SetFileSize(int size) {
 		MicrodriveSector s0 = GetSectorByFilePartNumber(0);
 		s0.SectorData[1] = (byte) ((size % 0x100) & 0xff);
 		s0.SectorData[2] = (byte) ((size / 0x100) & 0xff);
 	}
-
 
 	/**
 	 * Get the variable from the basic header.
@@ -185,32 +185,18 @@ public class MicrodriveDirectoryEntry {
 	/**
 	 * Get a textual representation of the file type
 	 * 
+	 * 
 	 * @return
 	 */
 	public String GetFileTypeName() {
-		String result = "Unknown";
-		switch (GetFiletype()) {
-		case Speccy.BASIC_BASIC:
-			result = "Basic";
-			break;
-		case Speccy.BASIC_CHRARRAY:
-			result = "Character array";
-			break;
-		case Speccy.BASIC_NUMARRAY:
-			result = "Numeric array";
-			break;
-		case Speccy.BASIC_CODE:
-			result = "Code";
-			break;
-		}
-		return (result);
+		return (Speccy.SpecFileTypeToString(GetFiletype()));
 	}
-	
+
 	/**
 	 * This will get the entire microdrive file including the 9 byte header.
 	 * 
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void SetFileRawData(byte dat[], MDFMicrodriveFile mdf) throws IOException {
 		int CurrentSectors = sectors.length;
@@ -218,59 +204,59 @@ public class MicrodriveDirectoryEntry {
 		if ((dat.length % 512) != 0) {
 			newsectors++;
 		}
-		
-		//Add extra sectors if needed
-		
+
+		// Add extra sectors if needed
+
 		if (newsectors > CurrentSectors) {
-			MicrodriveSector LastSector = GetSectorByFilePartNumber(sectors.length-1); 
+			MicrodriveSector LastSector = GetSectorByFilePartNumber(sectors.length - 1);
 			int lastsectorid = LastSector.GetSectorNumber();
-			for(int i=lastsectorid-1; (i>0) && (newsectors != CurrentSectors);i--) {
+			for (int i = lastsectorid - 1; (i > 0) && (newsectors != CurrentSectors); i--) {
 				MicrodriveSector mds = mdf.GetSectorBySectorNumber(i);
 				if (!mds.IsInUse()) {
-					//claim the sector.
+					// claim the sector.
 					mds.setFilename(this.GetFilename());
 					mds.setSectorFlagByte(0x06);
-					mds.setSegmentNumber(LastSector.getSegmentNumber()+1);
+					mds.setSegmentNumber(LastSector.getSegmentNumber() + 1);
 					mds.UpdateSectorChecksum();
 					mds.UpdateHeaderChecksum();
 					AddSector(mds);
-					
-					//last sector is no longer the final sector.
+
+					// last sector is no longer the final sector.
 					LastSector.setSectorFlagByte(0x04);
 					LastSector.UpdateSectorChecksum();
 					LastSector.UpdateHeaderChecksum();
-					
+
 					LastSector = mds;
 					CurrentSectors++;
-					
+
 				}
 			}
 		}
-		//subtract sectors if needed
+		// subtract sectors if needed
 		while (newsectors < CurrentSectors) {
-			MicrodriveSector LastSector = GetSectorByFilePartNumber(sectors.length-1); 
+			MicrodriveSector LastSector = GetSectorByFilePartNumber(sectors.length - 1);
 			LastSector.setSectorFlagByte(0x00);
 			LastSector.setFilename("");
 			LastSector.UpdateSectorChecksum();
 			LastSector.UpdateHeaderChecksum();
-			
-			MicrodriveSector NewSectorList[] = new MicrodriveSector[sectors.length-1];
-			for(int i=0;i<NewSectorList.length;i++) {
+
+			MicrodriveSector NewSectorList[] = new MicrodriveSector[sectors.length - 1];
+			for (int i = 0; i < NewSectorList.length; i++) {
 				NewSectorList[i] = sectors[i];
 			}
 			sectors = NewSectorList;
 		}
-		
-		//mark the new last sector.
-		MicrodriveSector LastSector = GetSectorByFilePartNumber(sectors.length-1); 
+
+		// mark the new last sector.
+		MicrodriveSector LastSector = GetSectorByFilePartNumber(sectors.length - 1);
 		LastSector.setSectorFlagByte(0x06);
 		LastSector.UpdateSectorChecksum();
 		LastSector.UpdateHeaderChecksum();
-		
-		//Copy data to sectors.
+
+		// Copy data to sectors.
 		int bytesleft = dat.length;
 		int ptr = 0;
-		for(int i=0;i<sectors.length;i++) {
+		for (int i = 0; i < sectors.length; i++) {
 			MicrodriveSector Sector = GetSectorByFilePartNumber(i);
 			byte newdata[] = new byte[513]; // 512 bytes + checksum
 
@@ -301,13 +287,54 @@ public class MicrodriveDirectoryEntry {
 			ptr = ptr + numbytes;
 			bytesleft = bytesleft - numbytes;
 		}
-		//Update the file size.
-		int NewFileSize = dat.length-9;
+		// Update the file size.
+		int NewFileSize = dat.length - 9;
 		SetFileSize(NewFileSize);
 		MicrodriveSector Sector = GetSectorByFilePartNumber(0);
 		Sector.UpdateFileChecksum();
 		Sector.UpdateSectorOnDisk(mdf);
 
+	}
+
+	@Override
+	public boolean DoesMatch(String wildcard) {
+		String StringToMatch = GetFilename().toUpperCase();
+		// convert the wildcard into a search array:
+		// Split into filename and extension. pad out with spaces.
+		wildcard = wildcard.trim().toUpperCase();
+		wildcard = wildcard + "            ";
+
+		// create search array.
+		byte comp[] = new byte[10];
+
+		// populate with filename
+		boolean foundstar = false;
+		for (int i = 0; i < 10; i++) {
+			if (foundstar) {
+				comp[i] = '?';
+			} else {
+				char c = wildcard.charAt(i);
+				if (c == '*') {
+					foundstar = true;
+					comp[i] = '?';
+				} else {
+					comp[i] = (byte) ((int) c & 0xff);
+				}
+			}
+		}
+
+		StringToMatch = (StringToMatch + "          ").substring(0, 10);
+		// now search.
+		// check the filename
+		boolean match = true;
+		for (int i = 0; i < 10; i++) {
+			byte chr = (byte) StringToMatch.charAt(i);
+			byte cchr = comp[i];
+			if ((chr != cchr) && (cchr != '?')) {
+				match = false;
+			}
+		}
+		return (match);
 	}
 
 }

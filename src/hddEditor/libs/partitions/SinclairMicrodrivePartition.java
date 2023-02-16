@@ -9,6 +9,7 @@ import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
+import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
 import hddEditor.libs.disks.LINEAR.MDFMicrodriveFile;
 import hddEditor.libs.disks.LINEAR.MicrodriveSector;
@@ -736,5 +737,18 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		}
 	}
 
+	/**
+	 * 
+	 */
+	@Override
+	public FileEntry[] GetFileList(String wildcard) {
+		ArrayList<FileEntry> results = new ArrayList<FileEntry>();
+		for (FileEntry de : Files) {
+			if (de.DoesMatch(wildcard)) {
+				results.add(de);
+			}
+		}
+		return(results.toArray(new FileEntry[0]));
+	}
 
 }

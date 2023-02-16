@@ -51,7 +51,15 @@ public class Speccy {
 	public static final int BASIC_CHRARRAY = 0x02;
 	public static final int BASIC_CODE = 0x03;
 
-	public static final String[] filetypeNames = { "Basic", "Numeric array", "Char array", "Code" };
+	public static final String[] filetypeNames = { "Basic", "Numeric array", "Character array", "Code" };
+
+	public static String SpecFileTypeToString(int filetype) {
+		String result = "Unknown";
+		if (filetype > -1 && filetype < filetypeNames.length) {
+			result = filetypeNames[filetype];
+		}
+		return(result);
+	}
 
 	/**
 	 * Testing for the number conversion
@@ -570,7 +578,7 @@ public class Speccy {
 		int ActualVarSize = Math.min(file.length, filesize) - VariablesOffset;
 		sb.append("<rawdata>" + System.lineSeparator());
 		if (ActualVarSize > 0) {
-			sb.append(GeneralUtils.HexDump(file, VariablesOffset, ActualVarSize,0));
+			sb.append(GeneralUtils.HexDump(file, VariablesOffset, ActualVarSize, 0));
 		}
 		sb.append("</rawdata>" + System.lineSeparator());
 
@@ -1637,7 +1645,7 @@ public class Speccy {
 
 		} else {
 			if (OutAsHex) {
-				String hexdata = GeneralUtils.HexDump(data, 0, data.length,0);
+				String hexdata = GeneralUtils.HexDump(data, 0, data.length, 0);
 				GeneralUtils.WriteBlockToDisk(hexdata.getBytes(), targetFilename);
 			} else {
 				DoSaveFileAsAsm(data, targetFilename.getAbsolutePath(), codeLoadAddress);
@@ -1736,13 +1744,13 @@ public class Speccy {
 				System.out.println("Error: " + E.getMessage());
 				E.printStackTrace();
 				System.out.println("data being parsed:");
-				System.out.println(GeneralUtils.HexDump(variables, 0, variables.length,0));
+				System.out.println(GeneralUtils.HexDump(variables, 0, variables.length, 0));
 			}
 		}
 	}
 
 	/**
-	 * Save file using the given types. 
+	 * Save file using the given types.
 	 *
 	 * 
 	 * @param targetFilename

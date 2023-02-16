@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
+import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
 import hddEditor.libs.disks.FDD.SCLDiskFile;
 import hddEditor.libs.disks.FDD.TrDosDiskFile;
@@ -306,7 +307,7 @@ public class TrDosPartition extends IDEDosPartition {
 		boolean deleted = false;
 
 		for (TrdDirectoryEntry trd : DirectoryEntries) {
-			if (trd.GetFilename().equals(Filename) && (trd.GetFileType() == type)) {
+			if (trd.GetFilename().equals(Filename) && ((trd.GetFileType() == type) || (type==' '))) {
 				trd.SetDeleted(true);
 				System.arraycopy(trd.DirEntryDescriptor, 0, dirents, trd.DirentLoc, 0x10);
 				NumDeletedFiles = (dirents[0x8f4] & 0xff) + 1;
@@ -439,7 +440,7 @@ public class TrDosPartition extends IDEDosPartition {
 
 		for (TrdDirectoryEntry trd : DirectoryEntries) {
 
-			if (trd.GetFilename().equals(from) && (trd.GetFileType() == type)) {
+			if (trd.GetFilename().equals(from) && ((trd.GetFileType() == type) || (type==' '))) {
 				trd.SetFilename(to);
 				System.arraycopy(trd.DirEntryDescriptor, 0, dirents, trd.DirentLoc, 0x10);
 				NumDeletedFiles = (dirents[0x8f4] & 0xff) + 1;
@@ -704,5 +705,20 @@ public class TrDosPartition extends IDEDosPartition {
 			e1.printStackTrace();
 		}
 	}
+	
+	/**
+	 * 
+	 */
+	@Override
+	public FileEntry[] GetFileList(String wildcard) {
+		ArrayList<FileEntry> results = new ArrayList<FileEntry>();
+		for (FileEntry de : DirectoryEntries) {
+			if (de.DoesMatch(wildcard)) {
+				results.add(de);
+			}
+		}
+		return(results.toArray(new FileEntry[0]));
+	}
+
 
 }

@@ -24,10 +24,11 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 
+import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.partitions.CPMPartition;
 
 
-public class DirectoryEntry {
+public class DirectoryEntry implements FileEntry {
 	// the raw dirents associated with this entry
 	public Dirent[] dirents = null;
 
@@ -52,7 +53,8 @@ public class DirectoryEntry {
 	 * 
 	 * @return
 	 */
-	public String filename() {
+	@Override
+	public String GetFilename() {
 		if (dirents != null) {
 			return (dirents[0].GetFilename());
 		} else {
@@ -190,7 +192,7 @@ public class DirectoryEntry {
 		// Get the number of records used in the last dirent.
 		int bytesinlld = 0;
 		if (lastdirent == null) {
-			System.out.println("Cant get last dirent for " + filename());
+			System.out.println("Cant get last dirent for " + GetFilename());
 		} else {
 			bytesinlld = lastdirent.GetBytesInLastDirent();
 		}
@@ -271,7 +273,7 @@ public class DirectoryEntry {
 					//added for Double Dragon which has a directory entry 
 					//with bad Block numbers, this prevents most of the files
 					//appearing in the directory listing. 
-					System.out.println("Block "+blocks[0]+" does not exist for entry: '"+filename()+"'");
+					System.out.println("Block "+blocks[0]+" does not exist for entry: '"+GetFilename()+"'");
 					pdh = new Plus3DosFileHeader(new byte[256]);
 				} else {
 					try {
@@ -383,7 +385,8 @@ public class DirectoryEntry {
 	 * @param newFilename
 	 * @throws IOException 
 	 */
-	public void RenameTo(String newFilename) throws IOException {
+	@Override
+	public void SetFilename(String newFilename) throws IOException {
 		// first, set all the dirents.
 		for (Dirent d : dirents) {
 			d.SetFilename(newFilename);
@@ -409,8 +412,89 @@ public class DirectoryEntry {
 			}
 			result = result + "\n";
 		}
-		
 		return(result);
 	}
 	
+	/**
+	 * This performs a CPM-style file match
+	 */
+	@Override
+	public boolean DoesMatch(String wildcard) {		
+		// convert the wildcard into a search array:
+		// Split into filename and extension. pad out with spaces.
+		wildcard = wildcard.trim().toUpperCase();
+		if (wildcard.endsWith("*") && !wildcard.contains(".")) {
+			wildcard = wildcard+".*";
+		}
+		String filename = "";
+		String extension = "";
+		if (wildcard.contains(".")) {
+			int i = wildcard.lastIndexOf(".");
+			extension = wildcard.substring(i + 1);
+			filename = wildcard.substring(0, i);
+		} else {
+			filename = wildcard;
+		}
+		filename = filename + "        ";
+		extension = extension + "   ";
+
+		// create search array.
+		byte comp[] = new byte[11];
+
+		// populate with filename
+		boolean foundstar = false;
+		for (int i = 0; i < 8; i++) {
+			if (foundstar) {
+				comp[i] = '?';
+			} else {
+				char c = filename.charAt(i);
+				if (c == '*') {
+					foundstar = true;
+					comp[i] = '?';
+				} else {
+					comp[i] = (byte) ((int) c & 0xff);
+				}
+			}
+		}
+
+		// populate with extension
+		foundstar = false;
+		for (int i = 0; i < 3; i++) {
+			if (foundstar) {
+				comp[i + 8] = '?';
+			} else {
+				char c = extension.charAt(i);
+				if (c == '*') {
+					foundstar = true;
+					comp[i + 8] = '?';
+				} else {
+					comp[i + 8] = (byte) ((int) c & 0xff);
+				}
+			}
+		}
+
+		String StringToMatch = GetFilename();
+		int HasDot = StringToMatch.indexOf('.');
+		String preDot = StringToMatch;
+		String PostDot = "";
+		if (HasDot>-1) {
+			preDot = StringToMatch.substring(0,HasDot);
+			PostDot = StringToMatch.substring(HasDot+1);
+		}
+		preDot = (preDot+"             ").substring(0,8);
+		PostDot = (PostDot+"   ").substring(0,3);
+		
+		StringToMatch = preDot+PostDot;
+		// now search.
+		// check the filename
+		boolean match = true;
+		for (int i = 0; i < 11; i++) {
+			byte chr = (byte) StringToMatch.charAt(i);
+			byte cchr = comp[i];
+			if ((chr != cchr) && (cchr != '?')) {
+				match = false;
+			}
+		}
+		return(match);
+	}
 }

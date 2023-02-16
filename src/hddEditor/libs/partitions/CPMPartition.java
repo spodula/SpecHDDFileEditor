@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import hddEditor.libs.CPM;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
+import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.cpm.Dirent;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
@@ -360,7 +361,7 @@ public class CPMPartition extends IDEDosPartition {
 			filename = filename.substring(0, filename.length() - 1);
 		}
 		for (DirectoryEntry d : DirectoryEntries) {
-			if (d.filename().contentEquals(filename)) {
+			if (d.GetFilename().contentEquals(filename)) {
 				result = d;
 			}
 		}
@@ -409,7 +410,7 @@ public class CPMPartition extends IDEDosPartition {
 				valid = false;
 			}
 			if (valid) {
-				String s = d.filename();
+				String s = d.GetFilename();
 				for (int i = 0; i < s.length(); i++) {
 					char c = s.charAt(i);
 					if (!CPM.CharIsCPMValid(c) && (c != ' ') && (c != 0xe5)) {
@@ -450,7 +451,7 @@ public class CPMPartition extends IDEDosPartition {
 				int Directorynum = nextdirentry;
 				for (int j = 0; j < nextdirentry; j++) {
 					// if we have found the file, record where it is.
-					if (direntries[j].filename().equals(dirent.GetFilename())) {
+					if (direntries[j].GetFilename().equals(dirent.GetFilename())) {
 						file = direntries[j];
 						Directorynum = j;
 					}
@@ -551,7 +552,7 @@ public class CPMPartition extends IDEDosPartition {
 		result = result + "\nDirectory entries:\n";
 		for (DirectoryEntry de : DirectoryEntries) {
 			if (!de.IsDeleted) {
-				String fn = de.filename();
+				String fn = de.GetFilename();
 				while (fn.length() < 15) {
 					fn = fn + " ";
 				}
@@ -602,7 +603,7 @@ public class CPMPartition extends IDEDosPartition {
 			int[] blocks = di.getBlocks();
 			for (int i = 0; i < blocks.length; i++) {
 				an = new AddressNote(blocks[i] * BlockSize, ((blocks[i] + 1) * BlockSize) - 1, i * BlockSize,
-						"File: " + di.filename());
+						"File: " + di.GetFilename());
 				resultlist.add(an);
 			}
 		}
@@ -641,17 +642,17 @@ public class CPMPartition extends IDEDosPartition {
 				int entrynum=0;
 				for (DirectoryEntry entry : DirectoryEntries) {
 					if (progress!= null) {
-						if (progress.Callback(DirectoryEntries.length, entrynum++, "File: "+entry.filename())) {
+						if (progress.Callback(DirectoryEntries.length, entrynum++, "File: "+entry.GetFilename())) {
 							break;
 						}
 					}
-					File TargetFilename = new File(folder, entry.filename().trim());
+					File TargetFilename = new File(folder, entry.GetFilename().trim());
 					byte file[] = entry.GetFileData();
 					Speccy.SaveFileToDiskAdvanced(TargetFilename, file, file, file.length, 3, 0,
 							0, 0, "A", MiscAction);	
 
 					SysConfig.write("<file>\n".toCharArray());
-					SysConfig.write(("  <filename>" + entry.filename() + "</filename>\n").toCharArray());
+					SysConfig.write(("  <filename>" + entry.GetFilename()+ "</filename>\n").toCharArray());
 					SysConfig.write(("  <deleted>" + entry.IsDeleted + "</deleted>\n").toCharArray());
 					SysConfig.write(("  <errors>" + entry.Errors + "</errors>\n").toCharArray());
 					SysConfig.write(("  <origfiletype>CPM</origfiletype>\n").toCharArray());
@@ -677,6 +678,20 @@ public class CPMPartition extends IDEDosPartition {
 			System.out.println("Error extracting files: " + e.getMessage());
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public FileEntry[] GetFileList(String wildcard) {
+		ArrayList<FileEntry> results = new ArrayList<FileEntry>();
+		for (FileEntry de : DirectoryEntries) {
+			if (de.DoesMatch(wildcard)) {
+				results.add(de);
+			}
+		}
+		return(results.toArray(new FileEntry[0]));
 	}
 
 	

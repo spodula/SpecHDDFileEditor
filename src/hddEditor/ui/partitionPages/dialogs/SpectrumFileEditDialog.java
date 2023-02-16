@@ -194,20 +194,20 @@ public class SpectrumFileEditDialog {
 //			FileRenderer FR = new FileRenderer();
 //			FR.Render(MainPage, newdata, ThisEntry.filename());
 			CodeRenderer CR = new CodeRenderer();
-			CR.RenderCode(MainPage, newdata, null, ThisEntry.filename(), data.length, 0x0000);
+			CR.RenderCode(MainPage, newdata, null, ThisEntry.GetFilename(), data.length, 0x0000);
 		} else if (p3d.filetype == Speccy.BASIC_BASIC) {
 			BasicRenderer BR = new BasicRenderer();
-			BR.RenderBasic(MainPage, newdata, header, ThisEntry.filename(), p3d.filelength, 
+			BR.RenderBasic(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.filelength, 
 					p3d.VariablesOffset, p3d.line);
 		} else if (p3d.filetype == Speccy.BASIC_CODE) {
 			CodeRenderer CR = new CodeRenderer();
-			CR.RenderCode(MainPage, newdata, header, ThisEntry.filename(), data.length, p3d.loadAddr);
+			CR.RenderCode(MainPage, newdata, header, ThisEntry.GetFilename(), data.length, p3d.loadAddr);
 		} else if (p3d.filetype == Speccy.BASIC_NUMARRAY) {
 			NumericArrayRenderer NR = new NumericArrayRenderer();
-			NR.RenderNumericArray(MainPage, newdata, header, ThisEntry.filename(), p3d.VarName);
+			NR.RenderNumericArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.VarName);
 		} else { // Char array
 			CharArrayRenderer CR = new CharArrayRenderer();
-			CR.RenderCharArray(MainPage, newdata, header, ThisEntry.filename(), p3d.VarName);
+			CR.RenderCharArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.VarName);
 		}
 	}
 

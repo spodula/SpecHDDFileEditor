@@ -307,10 +307,10 @@ public class PLUS3DOSPartition extends CPMPartition {
 				int entrynum = 0;
 				for (DirectoryEntry entry : DirectoryEntries) {
 					if (progress != null) {
-						if (progress.Callback(DirectoryEntries.length, entrynum++, "File: " + entry.filename())) 
+						if (progress.Callback(DirectoryEntries.length, entrynum++, "File: " + entry.GetFilename())) 
 							break;
 					}
-					File TargetFilename = new File(folder, entry.filename().trim());
+					File TargetFilename = new File(folder, entry.GetFilename().trim());
 					Plus3DosFileHeader p3d = entry.GetPlus3DosHeader();
 					byte entrydata[] = entry.GetFileData();
 					byte Rawentrydata[] = entry.GetFileData();
@@ -368,7 +368,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 					}
 
 					SysConfig.write("<file>\n".toCharArray());
-					SysConfig.write(("   <filename>" + entry.filename().trim() + "</filename>\n").toCharArray());
+					SysConfig.write(("   <filename>" + entry.GetFilename().trim() + "</filename>\n").toCharArray());
 					SysConfig.write(("   <deleted>" + entry.IsDeleted + "</deleted>\n").toCharArray());
 					SysConfig.write(("   <errors>" + entry.Errors + "</errors>\n").toCharArray());
 					SysConfig.write(("   <filelength>" + entry.GetFileSize() + "</filelength>\n").toCharArray());

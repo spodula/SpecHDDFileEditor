@@ -191,7 +191,12 @@ public class FileNewHDDForm {
 		CreateBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				if (DoCreateFile()) {
+				String s = TargetFileType.getText();
+				int cyl = Integer.parseInt(Cyls.getText());
+				int head = Integer.parseInt(Heads.getText());
+				int spt = Integer.parseInt(Spt.getText());
+
+				if (DoCreateFile(s.contains("HDF"),s.contains("8 bit"),Targetfile.getText(), cyl, head, spt)) {
 					shell.close();
 				}
 			}
@@ -285,17 +290,16 @@ public class FileNewHDDForm {
 	/**
 	 * Actually create the file.
 	 * 
+	 * @param IsTargetHDF   - TRUE = HDF, FALSE = Raw IMG
+	 * @param IsTarget8Bit  - TRUE = 8 bit, FALSE = 16 bit 
+	 * @param targFile
 	 * @return TRUE if file successfully created.
 	 */
-	protected boolean DoCreateFile() {
+	public boolean DoCreateFile(boolean IsTargetHDF , boolean IsTarget8Bit, String targFile, int cyl, int head, int spt) {
 		result = null;
 		boolean SuccessfullyCreated = false;
 		ProgesssForm pf = new ProgesssForm(display);
 		try {
-			String targFile = Targetfile.getText();
-			boolean IsTarget8Bit = TargetFileType.getText().contains("8 bit");
-			boolean IsTargetHDF = TargetFileType.getText().contains("HDF");
-
 			System.out.println("Openning " + targFile + " for writing...");
 			String s = "8-bit";
 			if (!IsTarget8Bit) {
@@ -308,10 +312,6 @@ public class FileNewHDDForm {
 			}
 			pf.Show("Creating file...", "Creating "+s+" \""+new File(targFile).getName()+"\"");
 			try {
-				int cyl = Integer.parseInt(Cyls.getText());
-				int head = Integer.parseInt(Heads.getText());
-				int spt = Integer.parseInt(Spt.getText());
-
 				int sectorSz = 512;
 				if (IsTarget8Bit) {
 					sectorSz = 256;
@@ -365,7 +365,7 @@ public class FileNewHDDForm {
 				} finally {
 					TargetFile.close();
 				}
-				System.out.println("Conversion finished.");
+				System.out.println("Creation finished.");
 			} catch (FileNotFoundException e) {
 				System.out.println("Cannot open file " + targFile + " for writing.");
 				System.out.println(e.getMessage());

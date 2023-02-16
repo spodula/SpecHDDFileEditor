@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages;
+
 /**
  * Generic partition page. 
  * 
@@ -24,12 +25,12 @@ public class GenericPage {
 	Composite ParentComp = null;
 	IDEDosPartition partition = null;
 	HDDEditor RootPage = null;
-	
+
 	/**
 	 * Generic constructor.
 	 * 
-	 * @param root - Editor page
-	 * @param parent - Parent component to put stuff on.
+	 * @param root      - Editor page
+	 * @param parent    - Parent component to put stuff on.
 	 * @param partition - Partition.
 	 */
 	public GenericPage(HDDEditor root, Composite parent, IDEDosPartition partition) {
@@ -40,18 +41,18 @@ public class GenericPage {
 	}
 
 	/**
-	 * Remove all components parented on the composite. 
+	 * Remove all components parented on the composite.
 	 */
 	public void RemoveComponents() {
 		if ((ParentComp != null) && !ParentComp.isDisposed()) {
-			for(Control child:ParentComp.getChildren()) {
+			for (Control child : ParentComp.getChildren()) {
 				if (!child.isDisposed())
 					child.dispose();
 			}
 			ParentComp.pack();
 		}
 	}
-	
+
 	/**
 	 * Create a generic label with the given text and span.
 	 * 
@@ -62,14 +63,14 @@ public class GenericPage {
 	public Label label(String text, int span) {
 		Label label = new Label(ParentComp, SWT.SHADOW_NONE);
 		label.setText(text);
-		if (span>1) {
+		if (span > 1) {
 			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.horizontalSpan = 4;
 			label.setLayoutData(gd);
 		}
-		return(label);
+		return (label);
 	}
-	
+
 	/**
 	 * Create a generic Combo with the given text and content.
 	 * 
@@ -81,9 +82,9 @@ public class GenericPage {
 		Combo c = new Combo(ParentComp, SWT.DROP_DOWN);
 		c.setItems(content);
 		c.setText(def);
-		return(c);
+		return (c);
 	}
-	
+
 	/**
 	 * Create a generic checkbox with the given text and check status.
 	 * 
@@ -95,9 +96,9 @@ public class GenericPage {
 		Button b = new Button(ParentComp, SWT.CHECK);
 		b.setText(title);
 		b.setSelection(IsChecked);
-		return(b);
+		return (b);
 	}
-	
+
 	/**
 	 * Create a generic button with the given text.
 	 * 
@@ -107,9 +108,9 @@ public class GenericPage {
 	public Button button(String title) {
 		Button b = new Button(ParentComp, SWT.PUSH);
 		b.setText(title);
-		return(b);	
+		return (b);
 	}
-	
+
 	/**
 	 * Create a generic editbox with the given limit.
 	 * 
@@ -118,39 +119,43 @@ public class GenericPage {
 	 * @return
 	 */
 	public Text editbox(String value, int limit) {
-		Text t = new Text(ParentComp,SWT.BORDER);
+		Text t = new Text(ParentComp, SWT.BORDER);
 		t.setTextLimit(limit);
 		t.setText(value);
-		return(t);
+		return (t);
 	}
-	
 
 	/**
 	 * Add the generic details common to all IDEPLUSDOS partition types.
 	 */
 	public void AddBasicDetails() {
 		if ((ParentComp != null) && !ParentComp.isDisposed()) {
-			//Note, for most partition types, this would be editable. 
-			//but for the system partition, this cannot be changed. 
-		   RemoveComponents();
-		   label("Name: "+partition.GetName(),1);
-		   label("Type: "+PLUSIDEDOS.GetTypeAsString(partition.GetPartType()),1);
-		   label("Size (c/h): "+partition.GetStartCyl()+"/"+partition.GetStartHead()+" - "+partition.GetEndCyl()+"/"+partition.GetEndHead(),1);
-		   label("Last sector: "+partition.GetEndSector(),1);
-		   ParentComp.pack();
-		}		
+			// Note, for most partition types, this would be editable.
+			// but for the system partition, this cannot be changed.
+			RemoveComponents();
+			label("Name: " + partition.GetName(), 1);
+			label("Type: " + PLUSIDEDOS.GetTypeAsString(partition.GetPartType()), 1);
+			label("Size (c/h): " + partition.GetStartCyl() + "/" + partition.GetStartHead() + " - "
+					+ partition.GetEndCyl() + "/" + partition.GetEndHead(), 1);
+			label("Last sector: " + partition.GetEndSector(), 1);
+			ParentComp.pack();
+		}
 	}
-	
+
 	/**
 	 * Quick handler for error messages.
+	 * 
 	 * @param msg
 	 */
 	protected void ErrorBox(String msg) {
-		MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
-		messageBox.setMessage(msg);
-		messageBox.setText(msg);
-		messageBox.open();
+		if (ParentComp != null) {
+			MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
+			messageBox.setMessage(msg);
+			messageBox.setText(msg);
+			messageBox.open();
+		} else {
+			System.out.println(msg);
+		}
 	}
-	
 
 }

@@ -19,7 +19,7 @@ import hddEditor.libs.disks.FDD.TrDosDiskFile;
 import hddEditor.libs.disks.LINEAR.MDFMicrodriveFile;
 
 public class FileNewFDDForm {
-	//Form components
+	// Form components
 	private Display display = null;
 	private Shell shell = null;
 
@@ -32,12 +32,12 @@ public class FileNewFDDForm {
 	private Button trdCompressed = null;
 	private Combo TrDosDiskFormat = null;
 	private Text DiskLabel = null;
-	
-	//Result to return. 
+
+	// Result to return.
 	private String result = null;
 
-	//Flag to prevent an endless loop when the boxes are being edited. 
-	//private boolean ModInProgress = false;
+	// Flag to prevent an endless loop when the boxes are being edited.
+	// private boolean ModInProgress = false;
 
 	/**
 	 * Constructor
@@ -47,7 +47,7 @@ public class FileNewFDDForm {
 	public FileNewFDDForm(Display display) {
 		this.display = display;
 	}
-	
+
 	/**
 	 * Show the dialog
 	 * 
@@ -123,35 +123,35 @@ public class FileNewFDDForm {
 			public void widgetSelected(SelectionEvent arg0) {
 				SetButtonsEnabled();
 			}
+
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
-				widgetSelected(arg0);		
+				widgetSelected(arg0);
 			}
 		});
-		
+
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
 
 		lbl = new Label(shell, SWT.NONE);
 		lbl.setText("TR-DOS disk size (TRD):");
 		TrDosDiskFormat = new Combo(shell, SWT.CHECK);
-		String trdEntries[] = { "40 Tracks, 1 head (160K)", "40 Tracks, 2 heads (320k)", "80 Tracks, 1 head (316k)", "80 Tracks, 2 heads (632k )" };
+		String trdEntries[] = { "40 Tracks, 1 head (160K)", "40 Tracks, 2 heads (320k)", "80 Tracks, 1 head (316k)",
+				"80 Tracks, 2 heads (632k )" };
 		TrDosDiskFormat.setItems(trdEntries);
 		TrDosDiskFormat.setText(trdEntries[0]);
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
-		
+
 		lbl = new Label(shell, SWT.NONE);
 		lbl.setText("Disk/Cart label:");
-		DiskLabel= new Text(shell, SWT.BORDER);
+		DiskLabel = new Text(shell, SWT.BORDER);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		DiskLabel.setLayoutData(gd);
 		DiskLabel.setText("XXXXXXXXXXXXXXXXXXXX");
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
 
-		
-		
 		new Label(shell, SWT.NONE);
 		AmstradExtendedCB = new Button(shell, SWT.CHECK);
 		AmstradExtendedCB.setText("Amstrad file: Extended");
@@ -175,7 +175,8 @@ public class FileNewFDDForm {
 		CreateBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				if (DoCreateFile()) {
+				if (DoCreateFile(Targetfile.getText(), TargetFileType.getText(), DiskLabel.getText(),
+						AmstradExtendedCB.getSelection(), TrDosDiskFormat.getText(),trdCompressed.getSelection())) {
 					shell.close();
 				}
 			}
@@ -209,7 +210,7 @@ public class FileNewFDDForm {
 		DiskLabel.setText("Untitled");
 		SetButtonsEnabled();
 	}
-	
+
 	/**
 	 * Enable or disable the appropriate buttons.
 	 * 
@@ -225,7 +226,7 @@ public class FileNewFDDForm {
 		TrDosDiskFormat.setEnabled(IsTRDOSDisk);
 		DiskLabel.setEnabled(IsTRDOSDisk || IsMicrodriveCart);
 	}
-	
+
 	/**
 	 * Dialog loop, open and wait until closed.
 	 */
@@ -254,44 +255,41 @@ public class FileNewFDDForm {
 	 * 
 	 * @return TRUE if file successfully created.
 	 */
-	protected boolean DoCreateFile() {
-		String Filename = Targetfile.getText(); 
-		String tftString = TargetFileType.getText().toUpperCase();
-		String Label = DiskLabel.getText();
-		
-		boolean IsAmstradDisk = tftString.contains("AMSTRAD");
-		boolean IsTRDOSDisk = tftString.contains("TR-DOS");
-		boolean IsMicrodriveCart = tftString.contains("MICRODRIVE");
-		
+	protected boolean DoCreateFile(String Filename, String Filetype, String Label, boolean AmstradExtended, String TRDosFormat, boolean IsSCLFile) {
+		Filetype = Filetype.toUpperCase();
+		boolean IsAmstradDisk = Filetype.contains("AMSTRAD");
+		boolean IsTRDOSDisk = Filetype.contains("TR-DOS");
+		boolean IsMicrodriveCart = Filetype.contains("MICRODRIVE");
+
 		boolean createResult = false;
 		if (IsAmstradDisk) {
-			createResult = CreateAmstradDisk(Filename, AmstradExtendedCB.getSelection());
+			createResult = CreateAmstradDisk(Filename, AmstradExtended);
 		} else if (IsTRDOSDisk) {
-			if (trdCompressed.getSelection()) {
-				createResult = CreateSCLDisk(Filename,Label);
+			if (IsSCLFile) {
+				createResult = CreateSCLDisk(Filename, Label);
 			} else {
-				String TrDosDiskFormatText = TrDosDiskFormat.getText().toUpperCase();
-				int tracks=40;
-				int heads=1;
-				
+				String TrDosDiskFormatText = TRDosFormat.toUpperCase();
+				int tracks = 40;
+				int heads = 1;
+
 				if (TrDosDiskFormatText.contains("80 TRACKS")) {
 					tracks = 80;
 				}
-				
+
 				if (TrDosDiskFormatText.contains("2 HEADS")) {
 					heads = 2;
 				}
-				
-				createResult = CreateTRDDisk(Filename, tracks, heads,Label );
+
+				createResult = CreateTRDDisk(Filename, tracks, heads, Label);
 			}
 		} else if (IsMicrodriveCart) {
-			createResult = CreateMDFFile(Filename,Label);
+			createResult = CreateMDFFile(Filename, Label);
 		}
-		
+
 		if (createResult) {
 			this.result = Filename;
 		}
-		return(createResult);
+		return (createResult);
 	}
 
 	/**
@@ -300,17 +298,17 @@ public class FileNewFDDForm {
 	 * @param filename
 	 * @return
 	 */
-	private boolean CreateMDFFile(String filename,String Label) {
+	private boolean CreateMDFFile(String filename, String Label) {
 		boolean result = false;
 		try {
 			MDFMicrodriveFile mdf = new MDFMicrodriveFile();
 			mdf.CreateBlankMicrodriveCart(filename, Label);
 			result = true;
 		} catch (Exception E) {
-			System.out.println("Error creating cart:"+E.getMessage());
+			System.out.println("Error creating cart:" + E.getMessage());
 			E.printStackTrace();
 		}
-		
+
 		return (result);
 	}
 
@@ -322,19 +320,19 @@ public class FileNewFDDForm {
 	 * @param heads
 	 * @return
 	 */
-	private boolean CreateTRDDisk(String filename, int tracks, int heads,String Label) {
+	private boolean CreateTRDDisk(String filename, int tracks, int heads, String Label) {
 		boolean result = false;
 		try {
 			TrDosDiskFile trd = new TrDosDiskFile();
-			trd.CreateBlankTRDOSDisk(filename, tracks, heads,Label);
+			trd.CreateBlankTRDOSDisk(filename, tracks, heads, Label);
 			result = true;
 		} catch (Exception E) {
-			System.out.println("Error creating Compressed TR-DOS disk:"+E.getMessage());
+			System.out.println("Error creating Compressed TR-DOS disk:" + E.getMessage());
 			E.printStackTrace();
 		}
-		
+
 		return (result);
-		
+
 	}
 
 	/**
@@ -343,17 +341,17 @@ public class FileNewFDDForm {
 	 * @param filename
 	 * @return
 	 */
-	private boolean CreateSCLDisk(String filename,String Label) {
+	private boolean CreateSCLDisk(String filename, String Label) {
 		boolean result = false;
 		try {
 			SCLDiskFile scl = new SCLDiskFile();
 			scl.CreateBlankSCLDisk(filename);
 			result = true;
 		} catch (Exception E) {
-			System.out.println("Error creating Compressed TR-DOS disk:"+E.getMessage());
+			System.out.println("Error creating Compressed TR-DOS disk:" + E.getMessage());
 			E.printStackTrace();
 		}
-		
+
 		return (result);
 	}
 
@@ -372,12 +370,11 @@ public class FileNewFDDForm {
 			System.out.println(ams);
 			result = true;
 		} catch (Exception E) {
-			System.out.println("Error creating Amstrad disk:"+E.getMessage());
+			System.out.println("Error creating Amstrad disk:" + E.getMessage());
 			E.printStackTrace();
 		}
-		
+
 		return (result);
 	}
-
 
 }

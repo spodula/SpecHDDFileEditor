@@ -46,8 +46,6 @@ public class FileRenderer {
 	 * @param Origfilename
 	 */
 	public void DoSaveFileAsHex(byte[] data, Composite mainPage, int loadaddr, int filesize, String Origfilename) {
-//		System.out.println(GeneralUtils.HexDump(data, 0, data.length,));
-		
 		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
 		fd.setText("Save "+Origfilename+" as Hex..");
 		fd.setFileName(Origfilename);

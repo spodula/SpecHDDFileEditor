@@ -55,10 +55,11 @@ import hddEditor.ui.partitionPages.TrDosPartitionPage;
 public class HDDEditor {
 	public Disk CurrentDisk = null;
 	public OSHandler CurrentHandler = null;
+	public IDEDosPartition CurrentSelectedPartition = null;
 
 	private static String DefaultDropDownText = "<No Disk loaded>";
 	// SWT display object
-	private Display display = null;
+	public Display display = null;
 
 	// SWT shell object
 	private Shell shell = null;
@@ -360,10 +361,14 @@ public class HDDEditor {
 			if (result != null)
 				System.out.println("Using " + result.getClass().getName());
 		} catch (Exception e) {
+			if (shell!=null) {
 			MessageBox messageBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
 			messageBox.setMessage("Error openning file " + selected + " " + e.getMessage());
 			messageBox.setText("Error openning file " + selected + " " + e.getMessage());
 			messageBox.open();
+			} else {
+				System.out.println("Error openning file " + selected + " " + e.getMessage());
+			}
 			e.printStackTrace();
 		}
 
@@ -441,6 +446,7 @@ public class HDDEditor {
 	 * @param part
 	 */
 	private void PopulatePartitionScreen(IDEDosPartition part) {
+		CurrentSelectedPartition = part;
 		switch (part.GetPartType()) {
 		case PLUSIDEDOS.PARTITION_SYSTEM:
 			new SystemPartPage(this, MainPage, part);

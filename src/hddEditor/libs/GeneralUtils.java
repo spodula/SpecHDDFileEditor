@@ -1,13 +1,13 @@
 package hddEditor.libs;
 //TODO: Drag and drop files into partitions
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.SystemPartition;
@@ -23,7 +23,7 @@ public class GeneralUtils {
 	public static final int EXPORT_TYPE_JPG = 7;
 	public static final int EXPORT_TYPE_RAWANDHEADER = 8;
 
-	public static String MasterList[] = { "Raw", "Text", "Hex", "Assembly", "CSV", "PNG", "GIF", "JPEG" ,"Raw+Header"};
+	public static String MasterList[] = { "Raw", "Text", "Hex", "Assembly", "CSV", "PNG", "GIF", "JPEG", "Raw+Header" };
 
 	/**
 	 * Get size as either k or m depending on size.
@@ -119,7 +119,7 @@ public class GeneralUtils {
 			chars[s] = 0x20;
 		}
 		int byteindex = 0;
-		sb.append(String.format("%08X ", start+Displacement));
+		sb.append(String.format("%08X ", start + Displacement));
 		for (int ptr = 0; ptr < length; ptr++) {
 			if ((byteindex) == 16) {
 				sb.append(" ");
@@ -129,7 +129,7 @@ public class GeneralUtils {
 					chars[s] = 0x20;
 				}
 				byteindex = 0;
-				sb.append(String.format("%08X ", start+Displacement));
+				sb.append(String.format("%08X ", start + Displacement));
 			}
 			byte dd = data[start++];
 			int xi = (int) (dd & 0xff);
@@ -180,7 +180,7 @@ public class GeneralUtils {
 			}
 		}
 	}
-	
+
 	/*
 	 * Read the first <numbytes> from the given file.
 	 */
@@ -193,7 +193,53 @@ public class GeneralUtils {
 		} finally {
 			fis.close();
 		}
-		return(result);
+		return (result);
 	}
 
+	/**
+	 * Split a string handling quotes. from:
+	 * http://www.java2s.com/example/java-utility-method/string-split-by-quote/splithandlequotes-string-s-1ca04.html
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static String[] splitHandleQuotes(String s) {
+		ArrayList<String> results = new ArrayList<String>();
+		char quoteChar = '"';
+		char escapeChar = '\\';
+
+		StringBuffer current = new StringBuffer("");
+		boolean inQuotation = false;
+		boolean escaping = false;
+
+		for (int i = 0; i < s.length(); ++i) {
+			char c = s.charAt(i);
+			if (escaping) {
+				if (c == quoteChar)
+					current.append(quoteChar);
+				else {
+					current.append(escapeChar);
+					current.append(quoteChar);
+				}
+				escaping = false;
+			} else {
+				if (c == quoteChar) {
+					inQuotation = !inQuotation;
+				} else if (c == escapeChar) {
+					escaping = true;
+				} else if (!inQuotation)
+					if (c == ' ' || c == '\t') {
+						results.add(new String(current));
+						current = new StringBuffer("");
+					} else
+						current.append(s.charAt(i));
+				else
+					current.append(s.charAt(i));
+			}
+		}
+
+		results.add(new String(current));
+
+		return (results.toArray(new String[0]));
+	}
 }

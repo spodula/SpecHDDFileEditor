@@ -211,7 +211,7 @@ public class NonPartitionedDiskHandler extends OSHandler {
 			String result = "";
 			for (DirectoryEntry de : p3d.DirectoryEntries) {
 				if (!de.IsDeleted) {
-					String fn = de.filename();
+					String fn = de.GetFilename();
 					while (fn.length() < 15) {
 						fn = fn + " ";
 					}

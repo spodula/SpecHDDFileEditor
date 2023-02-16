@@ -141,12 +141,14 @@ public class Plus3DosFileHeader {
 	
 	}
 	
+	/**
+	 * Get a textual representation of the file type
+	 * 
+	 * 
+	 * @return
+	 */
 	public String getTypeDesc() {
-		String result = "Invalid";
-		if (filetype> -1 && filetype < 4) {
-			result = Speccy.filetypeNames[filetype];
-		}
-		return(result);
+		return (Speccy.SpecFileTypeToString(filetype));
 	}
-
+	
 }

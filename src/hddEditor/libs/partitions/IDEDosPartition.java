@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.disks.Disk;
+import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.ModifiedEvent;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 
@@ -448,5 +449,13 @@ public class IDEDosPartition {
 		
 	}
 
+	/**
+	 * 
+	 * @param wildcard
+	 * @return
+	 */
+	public FileEntry[] GetFileList(String wildcard) {
+		return(null);
+	}
 
 }

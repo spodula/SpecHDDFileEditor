@@ -127,7 +127,7 @@ public class PlusThreePartPage extends GenericPage {
 				TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 				item2.setData(entry);
 				String content[] = new String[5];
-				content[0] = entry.filename();
+				content[0] = entry.GetFilename();
 				Plus3DosFileHeader pfdh = entry.GetPlus3DosHeader();
 				if (pfdh.IsPlusThreeDosFile) {
 					content[1] = pfdh.getTypeDesc();
@@ -261,9 +261,9 @@ public class PlusThreePartPage extends GenericPage {
 				SpecFileEditDialog = new SpectrumFileEditDialog(ParentComp.getDisplay());
 
 				byte[] data = entry.GetFileData();
-				if (SpecFileEditDialog.Show(data, "Editing " + entry.filename(), entry)) {
+				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
 					entry.SetDeleted(true);
-					((PLUS3DOSPartition) partition).AddCPMFile(entry.filename(), SpecFileEditDialog.data);
+					((PLUS3DOSPartition) partition).AddCPMFile(entry.GetFilename(), SpecFileEditDialog.data);
 					// refresh the screen.
 					AddComponents();
 				}
@@ -300,13 +300,13 @@ public class PlusThreePartPage extends GenericPage {
 
 				byte data[] = entry.GetFileData();
 
-				AddressNote NewAddressNote = new AddressNote(0, data.length, 0, "File: " + entry.filename());
+				AddressNote NewAddressNote = new AddressNote(0, data.length, 0, "File: " + entry.GetFilename());
 				AddressNote ANArray[] = { NewAddressNote };
 
-				boolean WriteBackData = HxEditDialog.Show(data, "Editing " + entry.filename(), ANArray);
+				boolean WriteBackData = HxEditDialog.Show(data, "Editing " + entry.GetFilename(), ANArray);
 				if (WriteBackData) {
 					entry.SetDeleted(true);
-					((PLUS3DOSPartition) partition).AddCPMFile(entry.filename(), HxEditDialog.Data);
+					((PLUS3DOSPartition) partition).AddCPMFile(entry.GetFilename(), HxEditDialog.Data);
 					// refresh the screen.
 					AddComponents();
 				}
@@ -327,8 +327,8 @@ public class PlusThreePartPage extends GenericPage {
 			DirectoryEntry entry = (DirectoryEntry) itms[0].getData();
 			try {
 				MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
-				messageBox.setMessage("Are you sure you want to delete " + entry.filename() + " ?");
-				messageBox.setText("Are you sure you want to delete " + entry.filename() + " ?");
+				messageBox.setMessage("Are you sure you want to delete " + entry.GetFilename() + " ?");
+				messageBox.setText("Are you sure you want to delete " + entry.GetFilename() + " ?");
 				if (messageBox.open() == SWT.OK) {
 					entry.SetDeleted(true);
 					AddComponents();
@@ -356,15 +356,15 @@ public class PlusThreePartPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 			DirectoryEntry entry = (DirectoryEntry) itms[0].getData();
 			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay());
-			if (RenFileDialog.Show(entry.filename())) {
+			if (RenFileDialog.Show(entry.GetFilename())) {
 				try {
-					entry.RenameTo(RenFileDialog.NewName);
+					entry.SetFilename(RenFileDialog.NewName);
 					// refresh the screen.
 					AddComponents();					
 				} catch (IOException e) {
 					MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
-					messageBox.setMessage("Error Renaming " + entry.filename() + ": "+e.getMessage());
-					messageBox.setText("Error Renaming " + entry.filename() + ": "+e.getMessage());
+					messageBox.setMessage("Error Renaming " + entry.GetFilename() + ": "+e.getMessage());
+					messageBox.setText("Error Renaming " + entry.GetFilename() + ": "+e.getMessage());
 					messageBox.open();
 					e.printStackTrace();
 				}

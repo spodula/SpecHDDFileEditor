@@ -55,23 +55,7 @@ public class OSHandler {
 			e.printStackTrace();
 		}
 	}
-	
-	/**
-	 * Get a partition given the name or NULL Case insensitive.
-	 * 
-	 * @param PartName
-	 * @return
-	 */
-	public IDEDosPartition GetPartitionByName(String PartName) {
-		IDEDosPartition result = null;
-		String searchstring = PartName.trim().toUpperCase();
-		for (IDEDosPartition part : SystemPart.partitions) {
-			if (part.GetName().toUpperCase().trim().equals(searchstring)) {
-				result = part;
-			}
-		}
-		return result;
-	}
+
 
 	/**
 	 * Get the last partition with the given Partition type
@@ -88,5 +72,21 @@ public class OSHandler {
 		}
 		return result;
 	}
-	
+
+	/**
+	 * Get a partition given the name or NULL Case insensitive.
+	 * 
+	 * @param PartName
+	 * @return
+	 */
+	public IDEDosPartition GetPartitionByName(String PartName) {
+		IDEDosPartition result = null;
+		String searchstring = PartName.trim().toUpperCase();
+		for (IDEDosPartition part : SystemPart.partitions) {
+			if (part.GetName().toUpperCase().trim().equals(searchstring)) {
+				result = part;
+			}
+		}
+		return result;
+	}	
 }
