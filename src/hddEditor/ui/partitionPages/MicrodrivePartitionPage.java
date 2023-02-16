@@ -405,7 +405,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 				messageBox.setText("Are you sure you want to delete " + entry.GetFilename() + " ?");
 				if (messageBox.open() == SWT.OK) {
 					SinclairMicrodrivePartition smp = (SinclairMicrodrivePartition) partition;
-					smp.DeleteMicrodriveFile(entry.GetFilename());
+					smp.DeleteFile(entry.GetFilename());
 					AddComponents();
 				}
 			} catch (IOException e) {

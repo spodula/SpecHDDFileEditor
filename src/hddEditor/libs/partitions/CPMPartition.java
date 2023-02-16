@@ -276,8 +276,8 @@ public class CPMPartition extends IDEDosPartition {
 				if (file.length % bytesPerDirent != 0) {
 					recordsInLastDirent++;
 				}
-				//Updated Dirent for larger files. 
-				int cdata = (recordsInLastDirent / 128) & ExtentMask;  
+				// Updated Dirent for larger files.
+				int cdata = (recordsInLastDirent / 128) & ExtentMask;
 				d.rawdirent[0x0c] = (byte) (cdata | (direntNum % 0x0f));
 				d.rawdirent[0x0f] = (byte) (recordsInLastDirent % 128);
 
@@ -634,25 +634,25 @@ public class CPMPartition extends IDEDosPartition {
 	}
 
 	@Override
-	public void ExtractPartitiontoFolderAdvanced(File folder,int BasicAction, int CodeAction, int ArrayAction, int ScreenAction, int MiscAction, int SwapAction,  ProgressCallback progress) throws IOException {
+	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress) throws IOException {
 		try {
 			FileWriter SysConfig = new FileWriter(new File(folder, "partition.index"));
 			try {
 				SysConfig.write("<speccy>\n".toCharArray());
-				int entrynum=0;
+				int entrynum = 0;
 				for (DirectoryEntry entry : DirectoryEntries) {
-					if (progress!= null) {
-						if (progress.Callback(DirectoryEntries.length, entrynum++, "File: "+entry.GetFilename())) {
+					if (progress != null) {
+						if (progress.Callback(DirectoryEntries.length, entrynum++, "File: " + entry.GetFilename())) {
 							break;
 						}
 					}
 					File TargetFilename = new File(folder, entry.GetFilename().trim());
 					byte file[] = entry.GetFileData();
-					Speccy.SaveFileToDiskAdvanced(TargetFilename, file, file, file.length, 3, 0,
-							0, 0, "A", MiscAction);	
+					Speccy.SaveFileToDiskAdvanced(TargetFilename, file, file, file.length, 3, 0, 0, 0, "A", MiscAction);
 
 					SysConfig.write("<file>\n".toCharArray());
-					SysConfig.write(("  <filename>" + entry.GetFilename()+ "</filename>\n").toCharArray());
+					SysConfig.write(("  <filename>" + entry.GetFilename() + "</filename>\n").toCharArray());
 					SysConfig.write(("  <deleted>" + entry.IsDeleted + "</deleted>\n").toCharArray());
 					SysConfig.write(("  <errors>" + entry.Errors + "</errors>\n").toCharArray());
 					SysConfig.write(("  <origfiletype>CPM</origfiletype>\n").toCharArray());
@@ -691,9 +691,20 @@ public class CPMPartition extends IDEDosPartition {
 				results.add(de);
 			}
 		}
-		return(results.toArray(new FileEntry[0]));
+		return (results.toArray(new FileEntry[0]));
 	}
 
-	
-	
+	@Override
+	public void DeleteFile(String wildcard) throws IOException {
+		int numdeleted = 0;
+		for (DirectoryEntry de : DirectoryEntries) {
+			if (de.DoesMatch(wildcard)) {
+				de.SetDeleted(true);
+				numdeleted++;
+
+			}
+		}
+		System.out.println("Deleted " + numdeleted + " files.");
+	}
+
 }

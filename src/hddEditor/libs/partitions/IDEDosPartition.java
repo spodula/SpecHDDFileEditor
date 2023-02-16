@@ -446,7 +446,7 @@ public class IDEDosPartition {
 	 * @throws IOException
 	 */
 	public void ExtractPartitiontoFolderAdvanced(File folder,int BasicAction, int CodeAction, int ArrayAction, int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress) throws IOException {
-		
+		System.out.println("Class "+this.getClass().getName()+" does not support ExtractPartitiontoFolderAdvanced.");		
 	}
 
 	/**
@@ -455,7 +455,18 @@ public class IDEDosPartition {
 	 * @return
 	 */
 	public FileEntry[] GetFileList(String wildcard) {
+		System.out.println("Class "+this.getClass().getName()+" does not support GetFileList.");
 		return(null);
 	}
+	
+	/**
+	 * 
+	 * @param wildcard
+	 * @throws IOException 
+	 */
+	public void DeleteFile(String wildcard) throws IOException {
+		System.out.println("Class "+this.getClass().getName()+" does not support Deletefile.");
+	}
+	
 
 }

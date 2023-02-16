@@ -217,56 +217,6 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	}
 
 	/**
-	 * 
-	 * @param filename
-	 * @throws IOException
-	 */
-	public void DeleteMicrodriveFile(String filename) throws IOException {
-		// find the file in the list
-		int foundfile = -1;
-		filename = filename.trim().toUpperCase();
-		for (int i = 0; i < Files.length; i++) {
-			if (Files[i].GetFilename().trim().toUpperCase().equals(filename)) {
-				foundfile = i;
-			}
-		}
-		if (foundfile == -1) {
-			System.out.println("File not found.");
-		} else {
-			// Blank the sectors
-			MicrodriveDirectoryEntry mde = Files[foundfile];
-			for (MicrodriveSector Sector : mde.sectors) {
-				Sector.setSectorFlagByte(0x00);
-				Sector.CalculateHeaderChecksum();
-				// blank file information.
-				for (int i = 19; i < Sector.SectorHeader.length; i++) {
-					Sector.SectorHeader[i] = 0x00;
-				}
-				// blank file.
-				for (int i = 0; i < Sector.SectorData.length; i++) {
-					Sector.SectorData[i] = 0x00;
-				}
-				// update sector.
-				try {
-					Sector.UpdateSectorOnDisk((MDFMicrodriveFile) CurrentDisk);
-				} catch (IOException e) {
-					System.out.println("Cannot Set file on cartridge. Is it read-only?");
-					throw new IOException("Cannot Set file on cartridge. Is it read-only?");
-				}
-			}
-			// remove the filename from the list.
-			MicrodriveDirectoryEntry newfiles[] = new MicrodriveDirectoryEntry[Files.length - 1];
-			int entryNum = 0;
-			for (int i = 0; i < Files.length; i++) {
-				if (i != foundfile) {
-					newfiles[entryNum++] = Files[i];
-				}
-			}
-			Files = newfiles;
-		}
-	}
-
-	/**
 	 * Add a file to the microdrive, note this does NOT set the basic header this
 	 * has to be done by the calling function.
 	 * 
@@ -550,13 +500,13 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	/**
 	 * Pack the current microdrive cart.
 	 * 
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void Pack() throws IOException {
 		MDFMicrodriveFile mdf = (MDFMicrodriveFile) CurrentDisk;
 
 		// Create a new array of sectors
-		MicrodriveSector NewSectors[] = new MicrodriveSector[mdf.Sectors.length+1];
+		MicrodriveSector NewSectors[] = new MicrodriveSector[mdf.Sectors.length + 1];
 
 		int CurrentSectorNumber = mdf.Sectors.length;
 		// Iterate through each file
@@ -572,12 +522,12 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 				NewSectors[CurrentSectorNumber--] = Sector;
 			}
 		}
-		if (CurrentSectorNumber != 0) { 
+		if (CurrentSectorNumber != 0) {
 			System.out.println("Error packing Cartridge, not enough sectors! (missing: " + CurrentSectorNumber + ")");
 		} else {
 			// For each sector
 			int fileptr = 0;
-			for (int SNum = mdf.Sectors.length;SNum>0;SNum--) {
+			for (int SNum = mdf.Sectors.length; SNum > 0; SNum--) {
 				MicrodriveSector Sector = NewSectors[SNum];
 				if (Sector != null) {
 					// Set the new sector number
@@ -596,9 +546,9 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 			LoadPartitionSpecificInformation();
 		}
 	}
-	
+
 	/**
-	 * Extract partition with flags showing what to do with each file type. 
+	 * Extract partition with flags showing what to do with each file type.
 	 * 
 	 * @param folder
 	 * @param BasicAction
@@ -611,7 +561,8 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 */
 
 	@Override
-	public void ExtractPartitiontoFolderAdvanced(File folder,int BasicAction, int CodeAction, int ArrayAction, int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress) throws IOException {
+	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress) throws IOException {
 		FileWriter SysConfig;
 		try {
 			SysConfig = new FileWriter(new File(folder, "partition.index"));
@@ -619,18 +570,18 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 				SysConfig.write("<speccy>\n".toCharArray());
 				int entrynum = 0;
 				for (MicrodriveDirectoryEntry entry : Files) {
-					if (progress!= null) {
-						if (progress.Callback(Files.length, entrynum++, "File: "+entry.GetFilename())) {
+					if (progress != null) {
+						if (progress.Callback(Files.length, entrynum++, "File: " + entry.GetFilename())) {
 							break;
 						}
 					}
 					File TargetFilename = new File(folder, entry.GetFilename().trim());
 					byte entrydata[] = entry.GetFileData();
 					byte Rawentrydata[] = entry.GetFileRawData();
-					
+
 					int filelength = entrydata.length;
 					int SpeccyFileType = entry.GetFiletype();
-					boolean isUnknown = (SpeccyFileType> 3);
+					boolean isUnknown = (SpeccyFileType > 3);
 					int basicLine = entry.GetLineStart();
 					int basicVarsOffset = entry.GetVarStart();
 					int codeLoadAddress = entry.GetVar2();
@@ -642,28 +593,30 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 							actiontype = MiscAction;
 						} else {
 							// Identifed BASIC File type
-							if (SpeccyFileType == Speccy.BASIC_BASIC) { // Options are: "Text", "Raw", "Raw+Header", "Hex"
+							if (SpeccyFileType == Speccy.BASIC_BASIC) { // Options are: "Text", "Raw", "Raw+Header",
+																		// "Hex"
 								actiontype = BasicAction;
-							} else if ((SpeccyFileType == Speccy.BASIC_NUMARRAY) && (SpeccyFileType == Speccy.BASIC_CHRARRAY)) {
+							} else if ((SpeccyFileType == Speccy.BASIC_NUMARRAY)
+									&& (SpeccyFileType == Speccy.BASIC_CHRARRAY)) {
 								actiontype = ArrayAction;
-							} else if ((filelength == 6912) && (codeLoadAddress == 16384)) { // { "PNG", "GIF", "JPEG", "Raw",
-																								// "Raw+Header", "Hex", "Assembly" };
+							} else if ((filelength == 6912) && (codeLoadAddress == 16384)) { // { "PNG", "GIF", "JPEG",
+																								// "Raw",
+																								// "Raw+Header", "Hex",
+																								// "Assembly" };
 								actiontype = ScreenAction;
 							} else { // CODE Options: { "Raw", "Raw+Header", "Assembly", "Hex" };
 								actiontype = CodeAction;
 							}
 						}
-						
-						Speccy.SaveFileToDiskAdvanced(TargetFilename, entrydata, Rawentrydata, filelength, SpeccyFileType, basicLine,
-								basicVarsOffset, codeLoadAddress, arrayVarName, actiontype);
+
+						Speccy.SaveFileToDiskAdvanced(TargetFilename, entrydata, Rawentrydata, filelength,
+								SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName, actiontype);
 					} catch (Exception E) {
 						System.out.println("\nError extracting " + TargetFilename + "For folder: " + folder + " - "
 								+ E.getMessage());
 						E.printStackTrace();
 					}
 
-					
-					
 					System.out.println("Written " + entry.GetFilename().trim());
 					SysConfig.write(("<file>\n").toCharArray());
 					SysConfig.write(("   <filename>" + entry.GetFilename().trim() + "</filename>\n").toCharArray());
@@ -748,7 +701,51 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 				results.add(de);
 			}
 		}
-		return(results.toArray(new FileEntry[0]));
+		return (results.toArray(new FileEntry[0]));
 	}
 
+	/**
+	 * 
+	 * @param filename
+	 * @throws IOException
+	 */
+	@Override
+	public void DeleteFile(String wildcard) throws IOException {
+		// find the file in the list
+		wildcard = wildcard.trim();
+		for (MicrodriveDirectoryEntry mde : Files) {
+			if (mde.DoesMatch(wildcard)) {
+
+				// Blank the sectors
+				for (MicrodriveSector Sector : mde.sectors) {
+					Sector.setSectorFlagByte(0x00);
+					Sector.CalculateHeaderChecksum();
+					// blank file information.
+					for (int i = 19; i < Sector.SectorHeader.length; i++) {
+						Sector.SectorHeader[i] = 0x00;
+					}
+					// blank file.
+					for (int i = 0; i < Sector.SectorData.length; i++) {
+						Sector.SectorData[i] = 0x00;
+					}
+					// update sector.
+					try {
+						Sector.UpdateSectorOnDisk((MDFMicrodriveFile) CurrentDisk);
+					} catch (IOException e) {
+						System.out.println("Cannot Set file on cartridge. Is it read-only?");
+						throw new IOException("Cannot Set file on cartridge. Is it read-only?");
+					}
+				}
+				// remove the filename from the list.
+				MicrodriveDirectoryEntry newfiles[] = new MicrodriveDirectoryEntry[Files.length - 1];
+				int entryNum = 0;
+				for (int i = 0; i < Files.length; i++) {
+					if (mde != Files[i]) {
+						newfiles[entryNum++] = Files[i];
+					}
+				}
+				Files = newfiles;
+			}
+		}
+	}
 }

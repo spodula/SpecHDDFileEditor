@@ -285,7 +285,7 @@ public class TrDosPartitionPage extends GenericPage {
 	/**
 	 * @throws IOException
 	 * 
-	 */
+	 */ 
 	protected void DoDeleteFile() {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
@@ -297,7 +297,11 @@ public class TrDosPartitionPage extends GenericPage {
 			if (response == SWT.YES) {
 				TrDosPartition fbc = (TrDosPartition) partition;
 				try {
-					fbc.DeleteFile(entry.GetFilename(), entry.GetFileType());
+					String filename = entry.GetFilename();
+					if (entry.GetFileType()!=' ') {
+						filename = filename+"."+entry.GetFileType();
+					}
+					fbc.DeleteFile(filename);
 					UpdateDirectoryEntryList();
 				} catch (IOException e) {
 					ErrorBox("IO Error deleting file." + e.getMessage());

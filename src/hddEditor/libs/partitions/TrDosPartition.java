@@ -297,37 +297,6 @@ public class TrDosPartition extends IDEDosPartition {
 	}
 
 	/**
-	 * Delete the given file.
-	 * 
-	 * @param getFilename
-	 * @throws IOException
-	 */
-	public void DeleteFile(String Filename, char type) throws IOException {
-		byte dirents[] = CurrentDisk.GetBytesStartingFromSector(0, CurrentDisk.GetSectorSize() * 9);
-		boolean deleted = false;
-
-		for (TrdDirectoryEntry trd : DirectoryEntries) {
-			if (trd.GetFilename().equals(Filename) && ((trd.GetFileType() == type) || (type==' '))) {
-				trd.SetDeleted(true);
-				System.arraycopy(trd.DirEntryDescriptor, 0, dirents, trd.DirentLoc, 0x10);
-				NumDeletedFiles = (dirents[0x8f4] & 0xff) + 1;
-				dirents[0x8f4] = (byte) (NumDeletedFiles & 0xff);
-				deleted = true;
-			}
-		}
-		if (!deleted) {
-			System.out.println("File '" + Filename + "' not found.");
-		}
-		CurrentDisk.SetLogicalBlockFromSector(0, dirents);
-		// Hack for SCF disks which need to be physically written after all disk mods
-		// are done.
-		if (CurrentDisk.getClass().getName().equals(SCLDiskFile.class.getName())) {
-			SCLDiskFile scf = (SCLDiskFile) CurrentDisk;
-			scf.OperationCompleted(DirectoryEntries);
-		}
-	}
-
-	/**
 	 * Pack the disk. This is essential on a disk that has a
 	 */
 	public void Pack() throws IOException {
@@ -440,7 +409,7 @@ public class TrDosPartition extends IDEDosPartition {
 
 		for (TrdDirectoryEntry trd : DirectoryEntries) {
 
-			if (trd.GetFilename().equals(from) && ((trd.GetFileType() == type) || (type==' '))) {
+			if (trd.GetFilename().equals(from) && ((trd.GetFileType() == type) || (type == ' '))) {
 				trd.SetFilename(to);
 				System.arraycopy(trd.DirEntryDescriptor, 0, dirents, trd.DirentLoc, 0x10);
 				NumDeletedFiles = (dirents[0x8f4] & 0xff) + 1;
@@ -579,7 +548,7 @@ public class TrDosPartition extends IDEDosPartition {
 	}
 
 	/**
-	 * Extract partition with flags showing what to do with each file type. 
+	 * Extract partition with flags showing what to do with each file type.
 	 * 
 	 * @param folder
 	 * @param BasicAction
@@ -611,7 +580,7 @@ public class TrDosPartition extends IDEDosPartition {
 						int basicLine = 0;
 						int basicVarsOffset = entry.GetFileLength();
 						int codeLoadAddress = 0;
-						String arrayVarName="A";
+						String arrayVarName = "A";
 						int actiontype = GeneralUtils.EXPORT_TYPE_RAW;
 						if ((entry.GetFileType() != 'B') && (entry.GetFileType() != 'C')
 								&& (entry.GetFileType() != 'D')) {
@@ -641,8 +610,9 @@ public class TrDosPartition extends IDEDosPartition {
 
 						}
 
-						Speccy.SaveFileToDiskAdvanced(TargetFilename, entry.GetFileData(), entry.GetFileData(), filelength,
-								SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName, actiontype);
+						Speccy.SaveFileToDiskAdvanced(TargetFilename, entry.GetFileData(), entry.GetFileData(),
+								filelength, SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName,
+								actiontype);
 						System.out.println("Written " + entry.GetFilename().trim());
 					} catch (IOException e) {
 						System.out.println("Error extracting " + entry.GetFilename().trim() + ": " + e.getMessage());
@@ -705,7 +675,7 @@ public class TrDosPartition extends IDEDosPartition {
 			e1.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -717,8 +687,33 @@ public class TrDosPartition extends IDEDosPartition {
 				results.add(de);
 			}
 		}
-		return(results.toArray(new FileEntry[0]));
+		return (results.toArray(new FileEntry[0]));
 	}
 
+	@Override
+	public void DeleteFile(String wildcard) throws IOException {
+		byte dirents[] = CurrentDisk.GetBytesStartingFromSector(0, CurrentDisk.GetSectorSize() * 9);
+		boolean deleted = false;
+
+		for (TrdDirectoryEntry trd : DirectoryEntries) {
+			if (trd.DoesMatch(wildcard)) {
+				trd.SetDeleted(true);
+				System.arraycopy(trd.DirEntryDescriptor, 0, dirents, trd.DirentLoc, 0x10);
+				NumDeletedFiles = (dirents[0x8f4] & 0xff) + 1;
+				dirents[0x8f4] = (byte) (NumDeletedFiles & 0xff);
+				deleted = true;
+			}
+		}
+		if (!deleted) {
+			System.out.println("File '" + wildcard + "' not found.");
+		}
+		CurrentDisk.SetLogicalBlockFromSector(0, dirents);
+		// Hack for SCF disks which need to be physically written after all disk mods
+		// are done. 
+		if (CurrentDisk.getClass().getName().equals(SCLDiskFile.class.getName())) {
+			SCLDiskFile scf = (SCLDiskFile) CurrentDisk;
+			scf.OperationCompleted(DirectoryEntries);
+		}
+	}
 
 }

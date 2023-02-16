@@ -1,5 +1,6 @@
 package hddEditor.ui;
 //TODO: For scripting, proper error handling
+
 //TODO: Make Add /basic/code/numarray/chrarray/raw a generic method of the partition
 
 //TODO: For scripting, proper param checking.
@@ -421,7 +422,6 @@ public class ScriptRunner {
 	 * @param restOfCommand
 	 * @throws PlusIDEDosException
 	 */
-	// TODO: Need a common way of deleting files over all partitions.
 	private void DoDelete(String restOfCommand) {
 		boolean ShowOptions = false;
 		String params[] = GeneralUtils.splitHandleQuotes(restOfCommand.trim());
@@ -446,51 +446,11 @@ public class ScriptRunner {
 				if (hdi.CurrentSelectedPartition == null) {
 					System.out.println("delete: Select a partition first");
 				} else {
-					// TODO: make delete a generic property of the handler
 					IDEDosPartition part = hdi.CurrentSelectedPartition;
-					if ((part.GetPartType() == PLUSIDEDOS.PARTITION_PLUS3DOS)
-							|| (part.GetPartType() == PLUSIDEDOS.PARTITION_CPM)) {
-						CPMPartition cpp = (CPMPartition) part;
-						int numdeleted = 0;
-						for (DirectoryEntry de : cpp.DirectoryEntries) {
-							if (de.DoesMatch(delName)) {
-								try {
-									de.SetDeleted(true);
-									numdeleted++;
-								} catch (IOException e) {
-									System.out.println("Error deleting file '" + delName + "'. " + e.getMessage());
-								}
-							}
-						}
-						System.out.println("Deleted " + numdeleted + " files.");
-					} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_SYSTEM) {
-						System.out.println("System partition selected. Use 'delete partition' to remove partitions.");
-					} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_TAPE_SINCLAIRMICRODRIVE) {
-						SinclairMicrodrivePartition mdp = (SinclairMicrodrivePartition) part;
-						try {
-							for (MicrodriveDirectoryEntry mde : mdp.Files) {
-								if (mde.DoesMatch(delName)) {
-									mdp.DeleteMicrodriveFile(mde.GetFilename());
-								}
-							}
-						} catch (IOException e) {
-							System.out.println("Error deleting file '" + delName + "'. " + e.getMessage());
-						}
-					} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_DISK_TRDOS) {
-						TrDosPartition trd = (TrDosPartition) part;
-						for (TrdDirectoryEntry tre : trd.DirectoryEntries) {
-							if (tre.DoesMatch(delName)) {
-								try {
-									trd.DeleteFile(delName, ' ');
-								} catch (IOException e) {
-									System.out.println("Error deleting file '" + delName + "'. " + e.getMessage());
-								}
-							}
-						}
-
-					} else {
-						System.out.println("delete: Currently selected partition ("
-								+ hdi.CurrentSelectedPartition.GetName() + ") does not have file support");
+					try {
+						part.DeleteFile(delName);
+					} catch (IOException e) {
+						System.out.println("Error deleting file '" + delName + "'. " + e.getMessage());
 					}
 				}
 			} else {
@@ -731,7 +691,7 @@ public class ScriptRunner {
 				int intensity = 50;
 				boolean isbw = false;
 				int csvLineLimit = 2000;
-				
+
 				for (int i = 2; i < params.length; i++) {
 					String param = params[i];
 					int x = param.indexOf('=');
@@ -806,8 +766,8 @@ public class ScriptRunner {
 								IDEDosPartition part = hdi.CurrentSelectedPartition;
 								if (part.GetPartType() == PLUSIDEDOS.PARTITION_PLUS3DOS) {
 									PLUS3DOSPartition p3d = (PLUS3DOSPartition) part;
-									int v1=0;
-									int v2=0;
+									int v1 = 0;
+									int v2 = 0;
 									switch (BasicFileType) {
 									case Speccy.BASIC_BASIC:
 										v1 = BasicStartLine;
@@ -823,7 +783,7 @@ public class ScriptRunner {
 										v1 = ((byte) varname.charAt(0)) * 0x100;
 										break;
 									}
-									p3d.AddPlusThreeFile(filename, rawdata, v1, v2, BasicFileType );
+									p3d.AddPlusThreeFile(filename, rawdata, v1, v2, BasicFileType);
 								} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_CPM) {
 									CPMPartition cpp = (CPMPartition) part;
 									cpp.AddCPMFile(file.getAbsolutePath(), rawdata);
@@ -861,9 +821,9 @@ public class ScriptRunner {
 									case Speccy.BASIC_NUMARRAY:
 										trd.AddNumericArray(filename, rawdata);
 										break;
-									}	
+									}
 								}
-								System.out.println("Added "+file.getName());
+								System.out.println("Added " + file.getName());
 							}
 						} catch (IOException E) {
 							System.out.println("Error processing file: " + file.getName() + " " + E.getMessage());
