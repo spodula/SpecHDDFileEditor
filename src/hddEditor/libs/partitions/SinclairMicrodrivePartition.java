@@ -413,6 +413,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 * @param newName
 	 * @throws IOException
 	 */
+	@Override
 	public void RenameFile(String filename, String newName) throws IOException {
 		// find the file in the list
 		int foundfile = -1;

@@ -467,6 +467,17 @@ public class IDEDosPartition {
 	public void DeleteFile(String wildcard) throws IOException {
 		System.out.println("Class "+this.getClass().getName()+" does not support Deletefile.");
 	}
-	
+
+	/**
+	 * Rename a named file.
+	 * 
+	 * @param filename
+	 * @param newName
+	 * @throws IOException
+	 */
+	public void RenameFile(String filename, String newName) throws IOException {
+		System.out.println("Class "+this.getClass().getName()+" does not support RenameFile.");
+	}
+
 
 }

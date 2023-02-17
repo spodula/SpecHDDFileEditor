@@ -715,5 +715,22 @@ public class TrDosPartition extends IDEDosPartition {
 			scf.OperationCompleted(DirectoryEntries);
 		}
 	}
+	
+	/**
+	 * Rename a named file. This is the generic version that doesn't include the type separately.
+	 * 
+	 * @param filename
+	 * @param newName
+	 * @throws IOException
+	 */
+	@Override
+	public void RenameFile(String filename, String newName) throws IOException {
+		char filetype = ' ';
+		if ((filename.length() > 2) && (filename.charAt(filename.length() - 2) == '.')) {
+			filetype = filename.charAt(filename.length() - 1);
+			filename = filename.substring(0,filename.length()-2);
+		}
+		RenameFile(filename, filetype, newName);	
+	}
 
 }

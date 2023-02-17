@@ -470,7 +470,6 @@ public class ScriptRunner {
 	 * 
 	 * @param restOfCommand
 	 */
-	// TODO: Rename: Common partition function needed
 	private void DoRename(String restOfCommand) {
 		boolean ShowOptions = false;
 		String params[] = GeneralUtils.splitHandleQuotes(restOfCommand.trim());
@@ -484,41 +483,18 @@ public class ScriptRunner {
 			if (hdi.CurrentSelectedPartition == null) {
 				System.out.println("delete: Select a partition first");
 			} else {
-				// TODO: make delete a generic property of the handler
 				IDEDosPartition part = hdi.CurrentSelectedPartition;
 				if ((part.GetPartType() == PLUSIDEDOS.PARTITION_PLUS3DOS)
+						|| (part.GetPartType() == PLUSIDEDOS.PARTITION_TAPE_SINCLAIRMICRODRIVE)
+						|| (part.GetPartType() == PLUSIDEDOS.PARTITION_DISK_TRDOS)
 						|| (part.GetPartType() == PLUSIDEDOS.PARTITION_CPM)) {
-					CPMPartition cpp = (CPMPartition) part;
-					DirectoryEntry de = cpp.GetDirectoryEntry(srcFile);
-					if (de != null) {
 						try {
-							de.SetFilename(destFile);
+							part.RenameFile(srcFile, destFile);
 						} catch (IOException e) {
 							System.out.println("Error Renaming file '" + srcFile + "'. " + e.getMessage());
 						}
-					} else {
-						System.out.println("Rename: File '" + srcFile + "' not found.");
-					}
 				} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_SYSTEM) {
 					System.out.println("System partition selected. Use 'delete partition' to remove partitions.");
-				} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_TAPE_SINCLAIRMICRODRIVE) {
-					SinclairMicrodrivePartition mdp = (SinclairMicrodrivePartition) part;
-					try {
-						mdp.RenameFile(srcFile, destFile);
-					} catch (IOException e) {
-						System.out.println("Error renaming file '" + srcFile + "'. " + e.getMessage());
-					}
-				} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_DISK_TRDOS) {
-					TrDosPartition trd = (TrDosPartition) part;
-					try {
-						char filetype = ' ';
-						if ((srcFile.length() > 2) && (srcFile.charAt(srcFile.length() - 2) == '.')) {
-							filetype = srcFile.charAt(srcFile.length() - 1);
-						}
-						trd.RenameFile(srcFile, filetype, destFile);
-					} catch (IOException e) {
-						System.out.println("Error deleting file '" + srcFile + "'. " + e.getMessage());
-					}
 				} else {
 					System.out.println("delete: Currently selected partition (" + hdi.CurrentSelectedPartition.GetName()
 							+ ") does not have file support");

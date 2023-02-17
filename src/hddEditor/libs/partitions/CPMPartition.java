@@ -707,4 +707,25 @@ public class CPMPartition extends IDEDosPartition {
 		System.out.println("Deleted " + numdeleted + " files.");
 	}
 
+	/**
+	 * Rename a named file.
+	 * 
+	 * @param filename
+	 * @param newName
+	 * @throws IOException
+	 */
+	@Override
+	public void RenameFile(String filename, String newName) throws IOException {
+		DirectoryEntry de = GetDirectoryEntry(filename);
+		if (de != null) {
+			try {
+				de.SetFilename(newName);
+			} catch (IOException e) {
+				System.out.println("Error Renaming file '" + filename + "'. " + e.getMessage());
+			}
+		} else {
+			System.out.println("Rename: File '" + filename + "' not found.");
+		}
+	}
+
 }
