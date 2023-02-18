@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import hddEditor.libs.disks.FileEntry;
+import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.CPMPartition;
 
 
@@ -174,7 +175,8 @@ public class DirectoryEntry implements FileEntry {
 	 * 
 	 * @return
 	 */
-	public int GetFileSize() {
+	@Override
+	public int GetRawFileSize() {
 		//On a normal +3 disk, all dirents except the last one will be full.
 		//This doesn't seem to be the case for PLUSIDEPOS, so just get the number of blocks, and
 		//use that.
@@ -198,6 +200,20 @@ public class DirectoryEntry implements FileEntry {
 		}
 	
 		return (bytesinlld + BytesInRestOfDirents);
+	}
+	
+	/**
+	 * Get the size of a file as seen by BASIC.
+	 * For +3DOS files, basiclly, if it has a valid header, subtract this. Otherwise
+	 * just return the file size. 
+	 */
+	@Override
+	public int GetFileSize() {
+		if (GetPlus3DosHeader().IsPlusThreeDosFile) {
+			return(GetRawFileSize()-0x80);
+		} else {
+			return(GetRawFileSize());
+		}
 	}
 	
 	/**
@@ -227,13 +243,13 @@ public class DirectoryEntry implements FileEntry {
 	 * @throws BadDiskFileException
 	 */
 	public byte[] GetFileData() throws IOException {
-		byte result[] = new byte[GetFileSize()];
+		byte result[] = new byte[GetRawFileSize()];
 
 		// get all the blocks
 		int[] blocks = getBlocks();
 
 		// find the last valid byte
-		int eob = GetFileSize();
+		int eob = GetRawFileSize();
 
 		// iterate each block
 		int resultptr = 0;
@@ -497,4 +513,34 @@ public class DirectoryEntry implements FileEntry {
 		}
 		return(match);
 	}
+	
+	/**
+	 * 
+	 */
+	@Override
+	public String GetFileTypeString() {
+		Plus3DosFileHeader p3d = GetPlus3DosHeader();
+		if (p3d.IsPlusThreeDosFile) {
+			return(p3d.getTypeDesc());
+		} else {
+			return("Raw CPM");
+		}
+	}
+	
+	@Override
+	public SpeccyBasicDetails GetSpeccyBasicDetails() {
+		Plus3DosFileHeader p3d = GetPlus3DosHeader();
+		int FileType = p3d.filetype;
+		if (!p3d.IsPlusThreeDosFile) {
+			FileType = -1;
+		}
+		int VarStart = p3d.VariablesOffset;
+		int LineStart = p3d.line;
+		int LoadAddress = p3d.loadAddr;
+		char ArrayVar = (p3d.VarName+"A").charAt(0);
+		
+		SpeccyBasicDetails result = new SpeccyBasicDetails(FileType, VarStart, LineStart, LoadAddress, ArrayVar );
+		return (result);
+	}
+
 }

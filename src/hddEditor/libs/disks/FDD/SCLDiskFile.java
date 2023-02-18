@@ -234,7 +234,7 @@ public class SCLDiskFile extends FloppyDisk {
 			byte file[] = FileData.get(i);
 			System.out.println("--------------------------------------");
 			System.out.println("File: " + entry.GetFilename() + " sectors: " + entry.GetFileLengthSectors() + " len:"
-					+ entry.GetFileLength());
+					+ entry.GetFileSize());
 			System.out.println("bin: " + file.length);
 			System.out.println("--------------------------------------");
 			int fileptr = 0;

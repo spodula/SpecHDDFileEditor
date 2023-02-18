@@ -33,11 +33,14 @@ import java.io.FileWriter;
  */
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.disks.Disk;
+import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.handlers.IDEDosHandler;
+import hddEditor.libs.partitions.system.DummyFileEntry;
 
 public class SystemPartition extends IDEDosPartition {
 	// Storage for the partitions
@@ -646,4 +649,23 @@ public class SystemPartition extends IDEDosPartition {
 			}
 		}
 	}
+	
+	/**
+	 * 
+	 */
+	@Override
+	public FileEntry[] GetFileList(String wildcard) {
+		ArrayList<FileEntry> results = new ArrayList<FileEntry>();
+		for (IDEDosPartition idep : partitions) {
+			if (idep.GetPartType() != PLUSIDEDOS.PARTITION_UNUSED) {
+				FileEntry fe = new DummyFileEntry(idep.GetName(), idep.GetSizeK()*1024, PLUSIDEDOS.GetTypeAsString(idep.GetPartType()));
+				if (fe.DoesMatch(wildcard)) {
+					results.add(fe);
+				}
+			}
+		}
+		return (results.toArray(new FileEntry[0]));
+	}
+
+	
 }

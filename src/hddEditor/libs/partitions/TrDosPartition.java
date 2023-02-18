@@ -575,17 +575,17 @@ public class TrDosPartition extends IDEDosPartition {
 					}
 					try {
 						File TargetFilename = new File(folder, entry.GetFilename().trim() + "." + entry.GetFileType());
-						int filelength = entry.GetFileLength();
+						int filelength = entry.GetFileSize();
 						int SpeccyFileType = 0;
 						int basicLine = 0;
-						int basicVarsOffset = entry.GetFileLength();
+						int basicVarsOffset = entry.GetFileSize();
 						int codeLoadAddress = 0;
 						String arrayVarName = "A";
 						int actiontype = GeneralUtils.EXPORT_TYPE_RAW;
 						if ((entry.GetFileType() != 'B') && (entry.GetFileType() != 'C')
 								&& (entry.GetFileType() != 'D')) {
 							SpeccyFileType = Speccy.BASIC_CODE;
-							codeLoadAddress = 0x10000 - entry.GetFileLength();
+							codeLoadAddress = 0x10000 - entry.GetFileSize();
 							actiontype = MiscAction;
 						} else {
 							switch (entry.GetFileType()) {
@@ -624,7 +624,7 @@ public class TrDosPartition extends IDEDosPartition {
 									.toCharArray());
 					SysConfig.write(("   <deleted>" + entry.GetDeleted() + "</deleted>\n").toCharArray());
 					SysConfig.write(("   <errors></errors>\n").toCharArray());
-					SysConfig.write(("   <filelength>" + entry.GetFileLength() + "</filelength>\n").toCharArray());
+					SysConfig.write(("   <filelength>" + entry.GetFileSize() + "</filelength>\n").toCharArray());
 					SysConfig.write("   <origfiletype>TRDOS</origfiletype>\n".toCharArray());
 					SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
 					int filetype = Speccy.BASIC_CODE;
@@ -641,7 +641,7 @@ public class TrDosPartition extends IDEDosPartition {
 					SysConfig.write(("       <filetype>" + filetype + "</filetype>\n").toCharArray());
 					SysConfig.write(("       <filetypename>" + Speccy.FileTypeAsString(filetype) + "</filetypename>\n")
 							.toCharArray());
-					SysConfig.write(("       <basicsize>" + entry.GetFileLength() + "</basicsize>\n").toCharArray());
+					SysConfig.write(("       <basicsize>" + entry.GetFileSize() + "</basicsize>\n").toCharArray());
 					SysConfig
 							.write(("       <basicstartline>" + entry.startline + "</basicstartline>\n").toCharArray());
 					SysConfig.write(("       <codeloadaddr>" + entry.GetVar1() + "</codeloadaddr>\n").toCharArray());
@@ -653,7 +653,7 @@ public class TrDosPartition extends IDEDosPartition {
 					SysConfig.write(("   <trdos>\n".toCharArray()));
 					SysConfig.write(("       <filetype>" + entry.GetFileType() + "</filetype>\n").toCharArray());
 					SysConfig.write(
-							("       <filetypename>" + entry.GetFileTypeName() + "</filetypename>\n").toCharArray());
+							("       <filetypename>" + entry.GetFileTypeString() + "</filetypename>\n").toCharArray());
 					SysConfig.write(("       <direntnum>" + entry.DirentNum + "</direntnum>\n").toCharArray());
 					SysConfig
 							.write(("       <direntlocation>" + entry.DirentLoc + "</direntlocation>\n").toCharArray());

@@ -18,6 +18,7 @@ import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.SpeccyFileEncoders;
 import hddEditor.libs.disks.FileEntry;
+import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.CPMPartition;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
@@ -242,8 +243,9 @@ public class ScriptRunner {
 		}
 	}
 
+	
 	/**
-	 * display a catalog
+	 * Display a catalog
 	 * 
 	 * @param restOfCommand
 	 */
@@ -253,169 +255,36 @@ public class ScriptRunner {
 		} else {
 			IDEDosPartition part = hdi.CurrentSelectedPartition;
 			int numfiles = 0;
-			// TODO: Need to generify file directory format.
 			System.out.println("Catalog of " + part.GetName());
-			if (part.GetPartType() == PLUSIDEDOS.PARTITION_PLUS3DOS) {
-				PLUS3DOSPartition p3d = (PLUS3DOSPartition) part;
-				if (restOfCommand.isEmpty()) {
-					restOfCommand = "*.*";
+			FileEntry entries[] = part.GetFileList(restOfCommand);
+			for (FileEntry fe : entries) {
+				String line = fe.GetFilename();
+				while (line.length() < 14)
+					line = line + " ";
+				line = line + fe.GetFileTypeString();
+				while (line.length() < 26)
+					line = line + " ";
+				line = line + fe.GetFileSize();
+				while (line.length() < 33)
+					line = line + " ";
+				SpeccyBasicDetails sbd = fe.GetSpeccyBasicDetails();
+				switch (sbd.BasicType) {
+				case Speccy.BASIC_BASIC:
+					line = line + "Line: " + sbd.LineStart  + " Vars: " + sbd.VarStart;
+					break;
+				case Speccy.BASIC_CODE:
+					line = line + "Load address: " + sbd.LoadAddress;
+					break;
+				default:
+					break;
 				}
-				FileEntry entries[] = p3d.GetFileList(restOfCommand);
-				for (FileEntry fe : entries) {
-					DirectoryEntry de = (DirectoryEntry) fe;
-					String line = de.GetFilename();
-					while (line.length() < 14)
-						line = line + " ";
-					Plus3DosFileHeader p3dh = de.GetPlus3DosHeader();
-					if (p3dh.IsPlusThreeDosFile) {
-						line = line + p3dh.getTypeDesc();
-					} else {
-						line = line + "Raw CPM";
-					}
-					while (line.length() < 26)
-						line = line + " ";
-					if (p3dh.IsPlusThreeDosFile) {
-						line = line + p3dh.filelength;
-					} else {
-						line = line + de.GetFileSize();
-					}
-					while (line.length() < 33)
-						line = line + " ";
-					if (p3dh.IsPlusThreeDosFile) {
-						switch (p3dh.filetype) {
-						case Speccy.BASIC_BASIC:
-							line = line + "Line: " + p3dh.line + " Vars: " + p3dh.VariablesOffset;
-							break;
-						case Speccy.BASIC_CODE:
-							line = line + "Load address: " + p3dh.loadAddr;
-							break;
-						default:
-							line = line + "Var: " + p3dh.VarName;
-						}
-					}
 
-					numfiles++;
-					System.out.println(line);
-				}
-				System.out.println("\n  " + numfiles + " files found.");
-
-			} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_TAPE_SINCLAIRMICRODRIVE) {
-				SinclairMicrodrivePartition smp = (SinclairMicrodrivePartition) part;
-				if (restOfCommand.isEmpty()) {
-					restOfCommand = "*";
-				}
-				for (MicrodriveDirectoryEntry mde : smp.Files) {
-					if (mde.DoesMatch(restOfCommand)) {
-						String line = mde.GetFilename();
-						while (line.length() < 14)
-							line = line + " ";
-
-						line = line + mde.GetFileTypeName();
-
-						while (line.length() < 26)
-							line = line + " ";
-
-						line = line + mde.GetFileSize();
-
-						while (line.length() < 33)
-							line = line + " ";
-
-						switch (mde.GetFiletype()) {
-						case Speccy.BASIC_BASIC:
-							line = line + "Line: " + mde.GetLineStart() + " Vars: " + mde.GetVarStart();
-							break;
-						case Speccy.BASIC_CODE:
-							line = line + "Load address: " + mde.GetVar2();
-							break;
-						default:
-							break;
-						}
-						numfiles++;
-						System.out.println(line);
-					}
-				}
-			} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_CPM) {
-				if (restOfCommand.isEmpty()) {
-					restOfCommand = "*";
-				}
-				CPMPartition Cpmp = (CPMPartition) part;
-				for (DirectoryEntry de : Cpmp.DirectoryEntries) {
-					if (de.DoesMatch(restOfCommand)) {
-						String line = de.GetFilename();
-						while (line.length() < 14)
-							line = line + " ";
-						line = line + "Raw CPM";
-						while (line.length() < 26)
-							line = line + " ";
-						line = line + de.GetFileSize();
-						while (line.length() < 33)
-							line = line + " ";
-
-						numfiles++;
-						System.out.println(line);
-					}
-				}
-				System.out.println("\n  " + numfiles + " files found.");
-			} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_SYSTEM) {
-
-				for (IDEDosPartition idep : hdi.CurrentHandler.SystemPart.partitions) {
-					if (idep.GetPartType() != PLUSIDEDOS.PARTITION_UNUSED) {
-						String line = idep.GetName();
-						while (line.length() < 14)
-							line = line + " ";
-
-						line = line + PLUSIDEDOS.GetTypeAsString(idep.GetPartType());
-
-						while (line.length() < 26)
-							line = line + " ";
-
-						line = line + (idep.GetSizeK() * 1024);
-						numfiles++;
-						System.out.println(line);
-					}
-				}
-				System.out.println("\n  " + numfiles + " files found.");
-
-			} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_DISK_TRDOS) {
-				TrDosPartition trdp = (TrDosPartition) part;
-				if (restOfCommand.isEmpty()) {
-					restOfCommand = "*.*";
-				}
-				for (TrdDirectoryEntry trde : trdp.DirectoryEntries) {
-					if (trde.DoesMatch(restOfCommand)) {
-						String line = trde.GetFilename();
-						while (line.length() < 14)
-							line = line + " ";
-
-						line = line + trde.GetFileTypeName();
-
-						while (line.length() < 26)
-							line = line + " ";
-
-						line = line + trde.GetFileLength();
-
-						while (line.length() < 33)
-							line = line + " ";
-
-						switch (trde.GetFileType()) {
-						case 'B':
-							line = line + "Line: " + trde.startline + " Vars: " + trde.GetVar1();
-							break;
-						case 'C':
-							line = line + "Load address: " + trde.GetVar2();
-							break;
-						default:
-							break;
-						}
-						numfiles++;
-						System.out.println(line);
-					}
-				}
-				System.out.println("\n  " + numfiles + " files found.");
+				numfiles++;
+				System.out.println(line);
 			}
-		}
+			System.out.println("\n  " + numfiles + " files found.");
+		}		
 	}
-
 	/**
 	 * 
 	 * 
@@ -563,12 +432,13 @@ public class ScriptRunner {
 							break;
 						case PLUSIDEDOS.PARTITION_TAPE_SINCLAIRMICRODRIVE:
 							MicrodriveDirectoryEntry mde = (MicrodriveDirectoryEntry) entry;
+							SpeccyBasicDetails sbd = entry.GetSpeccyBasicDetails();
 							filedata = mde.GetFileData();
 							rawdata = mde.GetFileRawData();
 							filelength = mde.GetFileSize();
-							SpeccyFileType = mde.GetFiletype();
-							basicline = mde.GetLineStart();
-							basicVarsOffset = mde.GetVarStart();
+							SpeccyFileType = sbd.BasicType;
+							basicline = sbd.LineStart;
+							basicVarsOffset = sbd.VarStart;
 							codeLoadAddress = mde.GetVar2();
 							arrayVarName = "A";
 							break;
@@ -576,7 +446,7 @@ public class ScriptRunner {
 							TrdDirectoryEntry trd = (TrdDirectoryEntry) entry;
 							filedata = trd.GetFileData();
 							rawdata = filedata;
-							filelength = trd.GetFileLength();
+							filelength = trd.GetFileSize();
 							basicline = trd.startline;
 							basicVarsOffset = trd.GetVar2();
 							codeLoadAddress = trd.GetVar1();

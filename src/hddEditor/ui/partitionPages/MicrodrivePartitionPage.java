@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
+import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.LINEAR.MDFMicrodriveFile;
 import hddEditor.libs.disks.LINEAR.MicrodriveSector;
 import hddEditor.libs.partitions.IDEDosPartition;
@@ -208,8 +209,9 @@ public class MicrodrivePartitionPage extends GenericPage {
 			for (MicrodriveDirectoryEntry entry : smp.Files) {
 				TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 				String content[] = new String[5];
+				SpeccyBasicDetails spd = entry.GetSpeccyBasicDetails();
 				content[0] = entry.GetFilename();
-				content[1] = entry.GetFiletype() + " (" + entry.GetFileTypeName() + ")";
+				content[1] = spd.BasicType + " (" + spd.BasicTypeString() + ")";
 				content[2] = String.valueOf(entry.GetFileSize());
 				content[3] = String.valueOf(entry.sectors.length);
 

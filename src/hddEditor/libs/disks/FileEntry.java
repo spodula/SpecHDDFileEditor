@@ -12,4 +12,16 @@ public interface FileEntry {
 	//Does this File entry match the given wildcard?
 	public boolean DoesMatch(String wildcard); 
 
+	//File size
+	public int GetRawFileSize();
+	
+	//File size of the file as seen by BASIC.
+	public int GetFileSize();
+	
+	//Get File type
+	public String GetFileTypeString();
+
+	//Get Speccy Basic details
+	public SpeccyBasicDetails GetSpeccyBasicDetails();
+	
 }

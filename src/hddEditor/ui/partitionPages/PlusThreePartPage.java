@@ -135,7 +135,7 @@ public class PlusThreePartPage extends GenericPage {
 				} else {
 					content[1] = "CPM/Invalid +3 Header";
 				}
-				content[2] = String.valueOf(entry.GetFileSize());
+				content[2] = String.valueOf(entry.GetRawFileSize());
 				String s = "";
 				if (entry.IsDeleted) {
 					s = s + ",Deleted";

@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.Speccy;
+import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.LINEAR.MicrodriveSector;
 import hddEditor.libs.partitions.mdf.MicrodriveDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
@@ -90,7 +91,7 @@ public class MicrodriveFileEditDialog {
 		gridLayout.marginRight = 20;
 		shell.setLayout(gridLayout);
 
-		Label lbl = label(ThisEntry.GetFileTypeName()+" file",4);
+		Label lbl = label(ThisEntry.GetSpeccyBasicDetails().BasicTypeString()+" file",4);
 		FontData fontData = lbl.getFont().getFontData()[0];
 		Font boldFont = new Font(display, new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 		lbl.setFont(boldFont);
@@ -126,11 +127,12 @@ public class MicrodriveFileEditDialog {
 		/**
 		 * Render the page.
 		 */
-		switch (ThisEntry.GetFiletype()) {
+		switch (ThisEntry.GetSpeccyBasicDetails().BasicType) {
 		case Speccy.BASIC_BASIC: 
 			BasicRenderer BR = new BasicRenderer();
+			SpeccyBasicDetails sbd = ThisEntry.GetSpeccyBasicDetails();
 			BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, 
-					ThisEntry.GetVarStart(), ThisEntry.GetLineStart());
+					sbd.VarStart, sbd.LineStart);
 			break;
 		case Speccy.BASIC_CODE:
 				CodeRenderer CR = new CodeRenderer();

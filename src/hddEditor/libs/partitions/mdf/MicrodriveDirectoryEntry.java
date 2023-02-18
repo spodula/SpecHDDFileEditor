@@ -2,9 +2,9 @@ package hddEditor.libs.partitions.mdf;
 
 import java.io.IOException;
 
-import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
+import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.LINEAR.MDFMicrodriveFile;
 import hddEditor.libs.disks.LINEAR.MicrodriveSector;
 
@@ -104,20 +104,11 @@ public class MicrodriveDirectoryEntry implements FileEntry {
 	}
 
 	/**
-	 * Extract the file type from the basic header
-	 * 
-	 * @return
-	 */
-	public int GetFiletype() {
-		MicrodriveSector s0 = GetSectorByFilePartNumber(0);
-		return ((int) (s0.SectorData[0] & 0xff));
-	}
-
-	/**
 	 * Extract file file length from the basic header including the basic header
 	 * 
 	 * @return
 	 */
+	@Override
 	public int GetRawFileSize() {
 		MicrodriveSector s0 = GetSectorByFilePartNumber(0);
 		return ((int) (s0.SectorData[1] & 0xff) + ((s0.SectorData[2] & 0xff) * 0x100) + 0x09);
@@ -127,6 +118,7 @@ public class MicrodriveDirectoryEntry implements FileEntry {
 	 * 
 	 * @return
 	 */
+	@Override
 	public int GetFileSize() {
 		MicrodriveSector s0 = GetSectorByFilePartNumber(0);
 		return ((int) (s0.SectorData[1] & 0xff) + ((s0.SectorData[2] & 0xff) * 0x100));
@@ -148,24 +140,6 @@ public class MicrodriveDirectoryEntry implements FileEntry {
 		return ((int) (s0.SectorData[3] & 0xff) + ((s0.SectorData[4] & 0xff) * 0x100));
 	}
 
-	/**
-	 * 
-	 * @return
-	 */
-	public int GetVarStart() {
-		MicrodriveSector s0 = GetSectorByFilePartNumber(0);
-		return ((int) (s0.SectorData[5] & 0xff) + ((s0.SectorData[6] & 0xff) * 0x100));
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	public int GetLineStart() {
-		MicrodriveSector s0 = GetSectorByFilePartNumber(0);
-		return ((int) (s0.SectorData[7] & 0xff) + ((s0.SectorData[8] & 0xff) * 0x100));
-	}
-
 	public void RenameMicrodriveFile(String to, Disk CurrentDisk) {
 		MDFMicrodriveFile mdf = (MDFMicrodriveFile) CurrentDisk;
 
@@ -180,16 +154,6 @@ public class MicrodriveDirectoryEntry implements FileEntry {
 			}
 		}
 		SetFilename(to);
-	}
-
-	/**
-	 * Get a textual representation of the file type
-	 * 
-	 * 
-	 * @return
-	 */
-	public String GetFileTypeName() {
-		return (Speccy.SpecFileTypeToString(GetFiletype()));
 	}
 
 	/**
@@ -337,4 +301,25 @@ public class MicrodriveDirectoryEntry implements FileEntry {
 		return (match);
 	}
 
+	/**
+	 * 
+	 */
+	@Override
+	public String GetFileTypeString() {
+		return(GetSpeccyBasicDetails().BasicTypeString());
+	}
+
+	@Override
+	public SpeccyBasicDetails GetSpeccyBasicDetails() {
+		MicrodriveSector s0 = GetSectorByFilePartNumber(0);
+		int ArrayVar = (s0.SectorData[5] & 0x2f) + 'A';
+		int VarStart = (int) (s0.SectorData[5] & 0xff) + ((s0.SectorData[6] & 0xff) * 0x100);
+		int LineStart =(int) (s0.SectorData[7] & 0xff) + ((s0.SectorData[8] & 0xff) * 0x100);
+		int FileType = (int) (s0.SectorData[0] & 0xff);
+		SpeccyBasicDetails result = new SpeccyBasicDetails(FileType, VarStart, LineStart, GetVar2(), (char) ArrayVar );
+		return (result);
+	}
+	
+
+	
 }

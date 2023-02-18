@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
+import hddEditor.libs.disks.SpeccyBasicDetails;
 
 public class TrdDirectoryEntry implements FileEntry {
 	public byte DirEntryDescriptor[] = null;
@@ -65,7 +66,7 @@ public class TrdDirectoryEntry implements FileEntry {
 		if ((CurrentDisk!=null) && (this.GetFileType()=='B')) {
 			int startsector = (GetStartTrack() * CurrentDisk.GetNumSectors()) + GetStartSector();
 			//Want the 10 bytes past the EOF
-			int itemlength = GetFileLength()+0x10;
+			int itemlength = GetFileSize()+0x10;
 			//Reduce the amount we have to read. Keep incrementing the sector until there is only one or two sectors left. 
 			while (itemlength > 512) {
 				itemlength = itemlength - CurrentDisk.GetSectorSize();
@@ -121,7 +122,8 @@ public class TrdDirectoryEntry implements FileEntry {
 	 * 
 	 * @return
 	 */
-	public String GetFileTypeName() {
+	@Override
+	public String GetFileTypeString() {
 		String result = "Unknown";
 		if (GetDeleted()) {
 			result = "Deleted";
@@ -283,7 +285,7 @@ public class TrdDirectoryEntry implements FileEntry {
 	 * Get a textual representation of the directory entry
 	 */
 	public String toString() {
-		String result = "#" + DirentNum + " File: " + PadTo( GetFilename(),8) + " Typ:" + PadTo( GetFileType() + "(" + GetFileTypeName()
+		String result = "#" + DirentNum + " File: " + PadTo( GetFilename(),8) + " Typ:" + PadTo( GetFileType() + "(" + GetFileTypeString()
 				+ ") ",9)+" Var1:" + PadTo(String.valueOf(GetVar1()),5) + " var2:" + PadTo(String.valueOf(GetVar2()),5) + " sectors: " + PadTo(String.valueOf(GetFileLengthSectors()),3)
 				+ " start:" + GetStartTrack() + "/" + GetStartSector();
 		return (result);
@@ -329,7 +331,7 @@ public class TrdDirectoryEntry implements FileEntry {
 	public byte[] GetFileData() throws IOException {
 		int startsector = (GetStartTrack() * CurrentDisk.GetNumSectors()) + GetStartSector();
 
-		int length = GetFileLength();
+		int length = GetFileSize();
 		//check to see if this value is reasonable.
 		int FileSizeSectors = GetFileLengthSectors() * 256;
 		int diff = Math.abs(FileSizeSectors - length);
@@ -342,6 +344,15 @@ public class TrdDirectoryEntry implements FileEntry {
 		byte result[] = CurrentDisk.GetBytesStartingFromSector(startsector, length);
 		return(result);		 
 	}
+	
+	/**
+	 * 
+	 */
+	@Override
+	public int GetRawFileSize() {
+		return(GetFileSize());
+	}
+	
 
 	/**
 	 * Get the Speccy file length. 
@@ -351,12 +362,12 @@ public class TrdDirectoryEntry implements FileEntry {
 	 * 
 	 * @return
 	 */
-	public int GetFileLength() {
+	@Override
+	public int GetFileSize() {
 		int length = GetVar2();
 		if (GetFileType()=='B') {
 			length = GetVar1();
 		}
-		
 		return length;
 	}
 	
@@ -376,12 +387,9 @@ public class TrdDirectoryEntry implements FileEntry {
 	}
 	
 	/**
-	 * There can only be one .X
+	 * This performs a CPM-style file match except matching is 10.1 rather than 8.3
 	 */
 	@Override
-	/**
-	 * This performs a CPM-style file match
-	 */
 	public boolean DoesMatch(String wildcard) {		
 		// convert the wildcard into a search array:
 		// Split into filename and extension. pad out with spaces.
@@ -455,10 +463,15 @@ public class TrdDirectoryEntry implements FileEntry {
 				match = false;
 			}
 		}
-//		System.out.println("Match: "+wildcard+" to "+StringToMatch+" "+match+" "+new String(comp));
 		return(match);
 	}
 
-
-	
+	@Override
+	public SpeccyBasicDetails GetSpeccyBasicDetails() {
+		int VarStart = GetVar1();
+		int LoadAddress = GetVar1();
+		char ArrayVar = 'A';		
+		SpeccyBasicDetails result = new SpeccyBasicDetails(GetFileType(), VarStart, startline, LoadAddress, ArrayVar );
+		return (result);
+	}
 }

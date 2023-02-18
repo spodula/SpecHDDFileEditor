@@ -257,9 +257,9 @@ public class TrDosPartitionPage extends GenericPage {
 				TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 				String content[] = new String[5];
 				content[0] = entry.GetFilename();
-				content[1] = entry.GetFileType() + " (" + entry.GetFileTypeName() + ")";
+				content[1] = entry.GetFileType() + " (" + entry.GetFileTypeString() + ")";
 				content[2] = "Ch:" + entry.GetStartTrack() + " S:" + entry.GetStartSector();
-				content[3] = String.valueOf(entry.GetFileLength());
+				content[3] = String.valueOf(entry.GetFileSize());
 				content[4] = String.valueOf(entry.GetFileLengthSectors());
 				item2.setText(content);
 				item2.setData(entry);
