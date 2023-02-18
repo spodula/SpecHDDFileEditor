@@ -164,7 +164,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		for (MicrodriveDirectoryEntry mde : Files) {
 			SpeccyBasicDetails sd = mde.GetSpeccyBasicDetails();
 			result = result + "\n" + mde.GetFilename() + " sectors:" + mde.sectors.length + " type:";
-			result = result + Speccy.FileTypeAsString(mde.GetSpeccyBasicDetails().BasicType);
+			result = result + Speccy.FileTypeAsString(sd.BasicType);
 			result = result + " File length: " + mde.GetFileSize();
 			result = result + " Var2: " + mde.GetVar2();
 			result = result + " BASIC Variables: " + sd.VarStart;

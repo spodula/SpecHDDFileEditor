@@ -176,7 +176,7 @@ public class TrdDirectoryEntry implements FileEntry {
 	 * 
 	 * @param sa
 	 */
-	public void GetVar1(int sa) {
+	public void SetVar1(int sa) {
 		int lsb = sa & 0xff;
 		int msb = sa / 0x100;
 		DirEntryDescriptor[0x09] = (byte) (lsb & 0xff);
