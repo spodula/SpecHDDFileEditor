@@ -1,8 +1,5 @@
 package hddEditor.ui;
 //TODO: For scripting, proper error handling
-
-//TODO: Make Add /basic/code/numarray/chrarray/raw a generic method of the partition
-
 //TODO: For scripting, proper param checking.
 
 import java.io.BufferedReader;
@@ -19,12 +16,8 @@ import hddEditor.libs.Speccy;
 import hddEditor.libs.SpeccyFileEncoders;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
-import hddEditor.libs.partitions.CPMPartition;
 import hddEditor.libs.partitions.IDEDosPartition;
-import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.PlusIDEDosException;
-import hddEditor.libs.partitions.SinclairMicrodrivePartition;
-import hddEditor.libs.partitions.TrDosPartition;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 import hddEditor.libs.partitions.mdf.MicrodriveDirectoryEntry;
@@ -75,6 +68,7 @@ public class ScriptRunner {
 			}
 		} finally {
 			if (LeaveOpen) {
+				hdi.UpdateDropdown();
 				hdi.loop();
 			}
 		}
@@ -610,64 +604,22 @@ public class ScriptRunner {
 							 */
 							if (rawdata != null) {
 								IDEDosPartition part = hdi.CurrentSelectedPartition;
-								if (part.GetPartType() == PLUSIDEDOS.PARTITION_PLUS3DOS) {
-									PLUS3DOSPartition p3d = (PLUS3DOSPartition) part;
-									int v1 = 0;
-									int v2 = 0;
-									switch (BasicFileType) {
-									case Speccy.BASIC_BASIC:
-										v1 = BasicStartLine;
-										v2 = rawdata.length;
-										break;
-									case Speccy.BASIC_CODE:
-										v1 = CodeLoadAddr;
-										break;
-									case Speccy.BASIC_CHRARRAY:
-										v1 = ((byte) varname.charAt(0)) * 0x100;
-										break;
-									case Speccy.BASIC_NUMARRAY:
-										v1 = ((byte) varname.charAt(0)) * 0x100;
-										break;
-									}
-									p3d.AddPlusThreeFile(filename, rawdata, v1, v2, BasicFileType);
-								} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_CPM) {
-									CPMPartition cpp = (CPMPartition) part;
-									cpp.AddCPMFile(file.getAbsolutePath(), rawdata);
-								} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_SYSTEM) {
-									System.out.println(
-											"System partition selected. Cannot add files to the system partition.");
-								} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_TAPE_SINCLAIRMICRODRIVE) {
-									SinclairMicrodrivePartition mdp = (SinclairMicrodrivePartition) part;
-									switch (BasicFileType) {
-									case Speccy.BASIC_BASIC:
-										mdp.AddBasicFile(filename, rawdata, BasicStartLine, rawdata.length);
-										break;
-									case Speccy.BASIC_CODE:
-										mdp.AddCodeFile(filename, rawdata, CodeLoadAddr);
-										break;
-									case Speccy.BASIC_CHRARRAY:
-										mdp.AddCharArray(filename, rawdata, varname);
-										break;
-									case Speccy.BASIC_NUMARRAY:
-										mdp.AddNumericArray(filename, rawdata, varname);
-										break;
-									}
-								} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_DISK_TRDOS) {
-									TrDosPartition trd = (TrDosPartition) part;
-									switch (BasicFileType) {
-									case Speccy.BASIC_BASIC:
-										trd.AddBasicFile(filename, rawdata, BasicStartLine, rawdata.length);
-										break;
-									case Speccy.BASIC_CODE:
-										trd.AddCodeFile(filename, CodeLoadAddr, rawdata);
-										break;
-									case Speccy.BASIC_CHRARRAY:
-										trd.AddCharArray(filename, rawdata);
-										break;
-									case Speccy.BASIC_NUMARRAY:
-										trd.AddNumericArray(filename, rawdata);
-										break;
-									}
+								switch (BasicFileType) {
+								case Speccy.BASIC_BASIC:
+									part.AddBasicFile(filename, rawdata, BasicStartLine, rawdata.length);
+									break;
+								case Speccy.BASIC_CODE:
+									part.AddCodeFile(filename, CodeLoadAddr, rawdata);
+									break;
+								case Speccy.BASIC_CHRARRAY:
+									part.AddCharArray(filename, rawdata, varname);
+									break;
+								case Speccy.BASIC_NUMARRAY:
+									part.AddNumericArray(filename, rawdata, varname);
+									break;
+								default:
+									part.AddCodeFile(filename, 0, rawdata);
+									break;
 								}
 								System.out.println("Added " + file.getName());
 							}

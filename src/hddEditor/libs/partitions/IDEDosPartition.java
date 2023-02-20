@@ -479,5 +479,56 @@ public class IDEDosPartition {
 		System.out.println("Class "+this.getClass().getName()+" does not support RenameFile.");
 	}
 
+	/**
+	 * Save a passed in data with the given filename. as CODE
+	 * 
+	 * @param filename
+	 * @param address
+	 * @param data
+	 */
+	public void AddCodeFile(String filename, int address, byte[] data) throws IOException  {
+		System.out.println("Class "+this.getClass().getName()+" does not support AddRawCodeFile.");
+	}
+
+	/**
+	 * 
+	 * @param nameOnDisk
+	 * @param basicAsBytes
+	 * @param line
+	 * @param basicoffset
+	 * @throws IOException 
+	 */
+	public void AddBasicFile(String nameOnDisk, byte[] basicAsBytes, int line, int basicoffset) throws IOException {
+		System.out.println("Class "+this.getClass().getName()+" does not support AddBASICFile.");
+	}
+
+	/**
+	 * Add an pre-encoded character array to the media
+	 * 
+	 * @param filename
+	 * @param EncodedArray
+	 * @param varname
+	 * @return
+	 * @throws IOException
+	 */
+	public void AddCharArray(String filename, byte[] EncodedArray, String varname) throws IOException {
+		System.out.println("Class "+this.getClass().getName()+" does not support AddCharArray.");
+	}
+	
+	/**
+	 * Add an pre-encoded numeric array to the microdrive.
+	 * 
+	 * @param filename
+	 * @param EncodedArray
+	 * @param varname
+	 * @return
+	 * @throws IOException
+	 */
+	public void AddNumericArray(String filename, byte[] EncodedArray, String varname) throws IOException {
+		System.out.println("Class "+this.getClass().getName()+" does not support AddNumericArray.");		
+	}
+
+
+	
 
 }

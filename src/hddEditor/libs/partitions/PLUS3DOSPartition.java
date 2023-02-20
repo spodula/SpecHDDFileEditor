@@ -104,7 +104,8 @@ public class PLUS3DOSPartition extends CPMPartition {
 	 * @param address
 	 * @param data
 	 */
-	public void AddRawCodeFile(String filename, int address, byte[] data) {
+	@Override
+	public void AddCodeFile(String filename, int address, byte[] data)  throws IOException {
 		AddPlusThreeFile(filename, data, address, 0, Speccy.BASIC_CODE);
 	}
 
@@ -115,7 +116,8 @@ public class PLUS3DOSPartition extends CPMPartition {
 	 * @param line
 	 * @param basicoffset
 	 */
-	public void AddBasicFile(String nameOnDisk, byte[] basicAsBytes, int line, int basicoffset) {
+	@Override
+	public void AddBasicFile(String nameOnDisk, byte[] basicAsBytes, int line, int basicoffset)  throws IOException  {
 		AddPlusThreeFile(nameOnDisk, basicAsBytes, line, basicoffset, Speccy.BASIC_BASIC);
 	}
 
@@ -429,6 +431,45 @@ public class PLUS3DOSPartition extends CPMPartition {
 			e.printStackTrace();
 		}
 	}
-
+	
+	/**
+	 * Add an pre-encoded character array to the media
+	 * 
+	 * @param filename
+	 * @param EncodedArray
+	 * @param varname
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public void AddCharArray(String filename, byte[] EncodedArray, String varname) throws IOException {
+		if (varname.isEmpty()) {
+			varname = "A";
+		}
+		int varbyte = (int) varname.charAt(0) - 0x40;
+		varbyte = varbyte + 0xe0; // 111XXXXX
+		AddPlusThreeFile(filename, EncodedArray, varbyte * 0x100, 0,
+				Speccy.BASIC_CHRARRAY);
+	}
+	 
+	/**
+	 * Add an pre-encoded numeric array to the microdrive.
+	 * 
+	 * @param filename
+	 * @param EncodedArray
+	 * @param varname
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public void AddNumericArray(String filename, byte[] EncodedArray, String varname) throws IOException {
+		if (varname.isEmpty()) {
+			varname = "A";
+		}
+		int varbyte = (int) varname.charAt(0) - 0x40;
+		varbyte = varbyte + 0xa0; // 101XXXXX
+		AddPlusThreeFile(filename, EncodedArray, varbyte * 0x100, 0,
+				Speccy.BASIC_NUMARRAY);	
+	}
 	
 }

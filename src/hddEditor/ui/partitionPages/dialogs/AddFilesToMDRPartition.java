@@ -771,11 +771,11 @@ public class AddFilesToMDRPartition {
 					break;
 				case FILETYPE_CODE:
 					// for CODE files, put at the top of memory
-					CurrentPartition.AddCodeFile(details.filename, data, details.loadaddress);
+					CurrentPartition.AddCodeFile(details.filename, details.loadaddress, data);
 					break;
 				case FILETYPE_SCREEN:
 					// For Screen$ files, these start at 16384 (0x4000)
-					CurrentPartition.AddCodeFile(details.filename, data, 0x4000);
+					CurrentPartition.AddCodeFile(details.filename, 0x4000, data);
 					break;
 				}
 			} catch (IOException e) {

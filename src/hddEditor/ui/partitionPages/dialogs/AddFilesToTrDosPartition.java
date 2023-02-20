@@ -973,10 +973,10 @@ public class AddFilesToTrDosPartition {
 					CurrentPartition.AddBasicFile(details.filename, details.data, details.line, details.data.length);
 					break;
 				case FILETYPE_CHRARRAY:
-					CurrentPartition.AddCharArray(details.filename, details.data);
+					CurrentPartition.AddCharArray(details.filename, details.data,"A");
 					break;
 				case FILETYPE_NUMARRAY:
-					CurrentPartition.AddNumericArray(details.filename, details.data);
+					CurrentPartition.AddNumericArray(details.filename, details.data,"A");
 					break;
 				case FILETYPE_CODE:
 					// for CODE files, put at the top of memory

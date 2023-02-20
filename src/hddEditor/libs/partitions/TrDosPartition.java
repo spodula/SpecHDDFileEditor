@@ -438,6 +438,7 @@ public class TrDosPartition extends IDEDosPartition {
 	 * @param StartOfVars
 	 * @throws IOException
 	 */
+	@Override
 	public void AddBasicFile(String filename, byte[] data, int line, int StartOfVars) throws IOException {
 		byte newdata[] = new byte[data.length + 5];
 		System.arraycopy(data, 0, newdata, 0, data.length);
@@ -449,44 +450,6 @@ public class TrDosPartition extends IDEDosPartition {
 		newdata[data.length + 3] = (byte) (msb & 0xff);
 
 		AddFile(filename, 'B', newdata, StartOfVars);
-	}
-
-	/**
-	 * Add a character array
-	 * 
-	 * @param filename
-	 * @param data
-	 * @throws IOException
-	 */
-	public void AddCharArray(String filename, byte[] data) throws IOException {
-		int varbyte = (int) 'A' - 0x40;
-		varbyte = varbyte + 0xe0; // 111XXXXX
-		AddFile(filename, 'D', data, varbyte);
-	}
-
-	/**
-	 * Add a numeric array
-	 * 
-	 * @param filename
-	 * @param data
-	 * @throws IOException
-	 */
-	public void AddNumericArray(String filename, byte[] data) throws IOException {
-		int varbyte = (int) 'A' - 0x40;
-		varbyte = varbyte + 0xa0; // 101XXXXX
-		AddFile(filename, 'D', data, varbyte);
-	}
-
-	/**
-	 * Add a CODE file
-	 * 
-	 * @param filename
-	 * @param startaddress
-	 * @param data
-	 * @throws IOException
-	 */
-	public void AddCodeFile(String filename, int startaddress, byte[] data) throws IOException {
-		AddFile(filename, 'C', data, startaddress);
 	}
 
 	/**
@@ -731,6 +694,55 @@ public class TrDosPartition extends IDEDosPartition {
 			filename = filename.substring(0,filename.length()-2);
 		}
 		RenameFile(filename, filetype, newName);	
+	}
+
+	/**
+	 * Save a passed in data with the given filename. as CODE
+	 * 
+	 * @param filename
+	 * @param address
+	 * @param data
+	 * @throws IOException 
+	 */
+	@Override
+	public void AddCodeFile(String filename, int address, byte[] data) throws IOException {
+		AddFile(filename, 'C', data, address);
+	}
+		
+	/**
+	 * Add an pre-encoded numeric array to the microdrive.
+	 * 
+	 * @param filename
+	 * @param EncodedArray
+	 * @param varname
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public void AddNumericArray(String filename, byte[] EncodedArray, String varname) throws IOException {
+		if (varname.isEmpty()) {
+			varname = "A";
+		}
+		int varbyte = (int) varname.charAt(0) - 0x40;
+		varbyte = varbyte + 0xa0; // 101XXXXX
+		AddFile(filename, 'D', EncodedArray, varbyte);
+	}
+	
+	/**
+	 * Add a character array
+	 * 
+	 * @param filename
+	 * @param data
+	 * @throws IOException
+	 */
+	@Override
+	public void AddCharArray(String filename, byte[] EncodedArray, String varname) throws IOException {
+		if (varname.isEmpty()) {
+			varname = "A";
+		}
+		int varbyte = (int) varname.charAt(0) - 0x40;
+		varbyte = varbyte + 0xe0; // 111XXXXX
+		AddFile(filename, 'D', EncodedArray, varbyte);
 	}
 
 }

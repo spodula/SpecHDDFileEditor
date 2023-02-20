@@ -983,11 +983,11 @@ public class AddFilesToPlus3Partition {
 					break;
 				case FILETYPE_CODE:
 					// for CODE files, put at the top of memory
-					CurrentPartition.AddRawCodeFile(details.filename, details.LoadAddress, details.data);
+					CurrentPartition.AddCodeFile(details.filename, details.LoadAddress, details.data);
 					break;
 				case FILETYPE_SCREEN:
 					// For Screen$ files, these start at 16384 (0x4000)
-					CurrentPartition.AddRawCodeFile(details.filename, 0x4000, details.data);
+					CurrentPartition.AddCodeFile(details.filename, 0x4000, details.data);
 					break;
 				}
 			} catch (IOException e) {

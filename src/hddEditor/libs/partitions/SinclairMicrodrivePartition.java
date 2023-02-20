@@ -293,7 +293,8 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean AddCodeFile(String filename, byte[] CodeFile, int loadAddress) throws IOException {
+	@Override
+	public void AddCodeFile(String filename, int loadAddress , byte[] CodeFile) throws IOException {
 		// Create an array with space for the header, and add the file in.
 		byte data[] = new byte[CodeFile.length + 9];
 		System.arraycopy(CodeFile, 0, data, 9, CodeFile.length);
@@ -309,7 +310,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		data[8] = (byte) (0xff & 0xff);
 
 		// add the file.
-		return (AddMicrodriveFile(filename, data));
+		AddMicrodriveFile(filename, data);
 	}
 
 	/**
@@ -322,7 +323,8 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean AddBasicFile(String filename, byte[] EncodedBASICFile, int varsStart, int line) throws IOException {
+	@Override
+	public void AddBasicFile(String filename, byte[] EncodedBASICFile, int line, int varsStart) throws IOException {
 		// Create an array with space for the header, and add the file in.
 		byte data[] = new byte[EncodedBASICFile.length + 9];
 		System.arraycopy(EncodedBASICFile, 0, data, 9, EncodedBASICFile.length);
@@ -339,7 +341,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		data[8] = (byte) ((line / 0x100) & 0xff);
 
 		// add the file.
-		return (AddMicrodriveFile(filename, data));
+		AddMicrodriveFile(filename, data);
 	}
 
 	/**
@@ -351,7 +353,8 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean AddCharArray(String filename, byte[] EncodedArray, String varname) throws IOException {
+	@Override
+	public void AddCharArray(String filename, byte[] EncodedArray, String varname) throws IOException {
 		varname = (varname + "A").toUpperCase();
 		byte varenc = (byte) (varname.charAt(0) & 0xff);
 		varenc = (byte) (varenc - 'A');
@@ -372,7 +375,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		data[8] = (byte) (byte) (0xff & 0xff);
 
 		// add the file.
-		return (AddMicrodriveFile(filename, data));
+		AddMicrodriveFile(filename, data);
 	}
 
 	/**
@@ -384,7 +387,8 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean AddNumericArray(String filename, byte[] EncodedArray, String varname) throws IOException {
+	@Override
+	public void AddNumericArray(String filename, byte[] EncodedArray, String varname) throws IOException {
 		varname = (varname + "A").toUpperCase();
 		byte varenc = (byte) (varname.charAt(0) & 0xff);
 		varenc = (byte) (varenc - 'A');
@@ -405,7 +409,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		data[8] = (byte) (byte) (0xff & 0xff);
 
 		// add the file.
-		return (AddMicrodriveFile(filename, data));
+		AddMicrodriveFile(filename, data);
 	}
 
 	/**
