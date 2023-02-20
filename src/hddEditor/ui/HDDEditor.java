@@ -289,7 +289,13 @@ public class HDDEditor {
 		HDDEditor hdi = new HDDEditor();
 		hdi.MakeForm();
 		if (args.length > 0) {
-			hdi.LoadFile(args[0]);
+			if (args[0].toLowerCase().equals("script=")) {
+				ScriptRunner sr = new ScriptRunner();
+				String splitParam[] = args[0].split("=");
+				sr.RunScript(splitParam[1]);
+			} else {			
+				hdi.LoadFile(args[0]);
+			}
 		}
 		hdi.loop();
 	}
