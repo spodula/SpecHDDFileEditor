@@ -286,18 +286,22 @@ public class HDDEditor {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		HDDEditor hdi = new HDDEditor();
-		hdi.MakeForm();
 		if (args.length > 0) {
-			if (args[0].toLowerCase().equals("script=")) {
+			if (args[0].toLowerCase().startsWith("script=")) {
 				ScriptRunner sr = new ScriptRunner();
 				String splitParam[] = args[0].split("=");
 				sr.RunScript(splitParam[1]);
 			} else {			
+				HDDEditor hdi = new HDDEditor();
+				hdi.MakeForm();
 				hdi.LoadFile(args[0]);
+				hdi.loop();
 			}
+		} else {
+			HDDEditor hdi = new HDDEditor();
+			hdi.MakeForm();
+			hdi.loop();
 		}
-		hdi.loop();
 	}
 
 	/**
