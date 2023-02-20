@@ -4,7 +4,7 @@
     <name>Spectrum IDEDOS Hard drive file viewer/editor</name>
     <groupId>SpecImgManipulator</groupId>
     <artifactId>SpecImgManipulator</artifactId>
-    <version>1.4</version>
+    <version>1.5</version>
     <description>SpecImgManipulator
     	This program allows you to edit spectrum +3 hard disk images in either Raw or Realsoft HDF format. It also now allows editing of floppy disk images in DSK and TRD format. 
     </description>
@@ -21,11 +21,16 @@
     </developers>
     
     <dependencies>
-	<dependency>
+<dependency>
+    <groupId>commons-io</groupId>
+    <artifactId>commons-io</artifactId>
+    <version>2.11.0</version>
+</dependency>
+<dependency>
     <groupId>org.eclipse.platform</groupId>
     <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
     <version>3.121.0</version>
-        </dependency>
+</dependency>
     </dependencies>
     
     <build>
