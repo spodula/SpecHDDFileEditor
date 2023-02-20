@@ -26,6 +26,7 @@ File system documentation:
 * IDEDOS: https://sinclair.wiki.zxnet.co.uk/wiki/IDEDOS / http://zxvgs.yarek.com/en-idedos.html
 * CPM/+3DOS filesystem: https://cpctech.cpc-live.com/docs/p3xfer.html / https://www.seasip.info/Cpm/format22.html
 * TR-DOS filesystem: https://sinclair.wiki.zxnet.co.uk/wiki/TR-DOS_filesystem
+* MDR file: These are just Raw files with a Microdrive filesystem in them. Details of the filesystem are at  https://sinclair.wiki.zxnet.co.uk/wiki/ZX_Interface_1
 
 Requires at least Java 11 (I use OpenJDK 18 on Linux.)
 
