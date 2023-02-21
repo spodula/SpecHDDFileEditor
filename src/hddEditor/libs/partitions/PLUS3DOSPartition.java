@@ -136,18 +136,14 @@ public class PLUS3DOSPartition extends CPMPartition {
 			// allocate memory for filename and +3Dos header
 			byte rawbytes[] = new byte[cpmlen];
 			// Load file to memory.
-			for (int i = 0; i < bytes.length; i++) {
-				rawbytes[i + 0x80] = bytes[i];
-			}
+			System.arraycopy(bytes, 0, rawbytes, 0x80, bytes.length);
 
 			// Make the +3DOS header
-			for (int i = 0; i < stdheader.length; i++) {
-				rawbytes[i] = stdheader[i];
-			}
+			System.arraycopy(stdheader, 0, rawbytes, 0, stdheader.length);
 
 			// Add in the file size
 			for (int i = 0; i < 4; i++) {
-				int byt = (cpmlen & 0xff);
+				int byt = (cpmlen % 0x100);
 				rawbytes[i + 11] = (byte) (byt & 0xff);
 				cpmlen = cpmlen / 0x100;
 			}
@@ -166,7 +162,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 				checksum = checksum + (rawbytes[i] & 0xff);
 			}
 			rawbytes[127] = (byte) (checksum & 0xff);
-
+			
 			AddCPMFile(nameOnDisk, rawbytes);
 		} catch (Exception E) {
 			E.printStackTrace();

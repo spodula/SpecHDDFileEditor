@@ -591,7 +591,6 @@ public class ScriptRunner {
 					if (file.isFile()) {
 						byte rawdata[] = null;
 						try {
-							String filename = file.getName();
 							int BasicFileType = Speccy.BASIC_CODE;
 							if (Type.equals("text")) {
 								rawdata = SpeccyFileEncoders.EncodeTextFileToBASIC(file);

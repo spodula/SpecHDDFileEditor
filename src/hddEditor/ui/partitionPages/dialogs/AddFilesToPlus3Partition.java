@@ -1077,6 +1077,12 @@ public class AddFilesToPlus3Partition {
 		}
 	}
 
+	/**
+	 * Render a the file as BASIC
+	 * 
+	 * @param data
+	 * @param details
+	 */
 	private void RenderBasic(byte data[], NewFileListItem details) {
 		Plus3DosFileHeader pfd = details.fileheader;
 		if (pfd == null) {

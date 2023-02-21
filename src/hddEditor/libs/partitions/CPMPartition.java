@@ -272,8 +272,8 @@ public class CPMPartition extends IDEDosPartition {
 				// extents are considered to be full.
 				int bytesPerDirent = blocksPerDirent * BlockSize;
 				int LastDirentBytes = file.length % bytesPerDirent; // extract the bytes in the last dirent.
-				int recordsInLastDirent = LastDirentBytes / 128;
-				if (file.length % bytesPerDirent != 0) {
+				int recordsInLastDirent = LastDirentBytes / 0x80;
+				if (file.length % 0x80 != 0) {
 					recordsInLastDirent++;
 				}
 				// Updated Dirent for larger files.

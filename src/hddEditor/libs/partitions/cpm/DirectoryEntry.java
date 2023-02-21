@@ -1,4 +1,5 @@
 package hddEditor.libs.partitions.cpm;
+
 /**
  * Implementation of a standard CPM 2.2 directory entry
  * This contains one or more Dirents. (Each Dirent records 8 or 16 block numbers) 
@@ -28,7 +29,6 @@ import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.CPMPartition;
 
-
 public class DirectoryEntry implements FileEntry {
 	// the raw dirents associated with this entry
 	public Dirent[] dirents = null;
@@ -38,16 +38,15 @@ public class DirectoryEntry implements FileEntry {
 
 	// is file deleted
 	public boolean IsDeleted = false;
-	
-	//if TRUE, the directory entry is invalid.
-	public boolean BadDirEntry = false;
-	
-	//used to validate Dirent. 
-	private int maxBlocks=0;
-	
-	//Any errors parsing the Directory entry.
-	public String Errors="";
 
+	// if TRUE, the directory entry is invalid.
+	public boolean BadDirEntry = false;
+
+	// used to validate Dirent.
+	private int maxBlocks = 0;
+
+	// Any errors parsing the Directory entry.
+	public String Errors = "";
 
 	/**
 	 * Parse and return the filename from the first DIRENT.
@@ -89,7 +88,7 @@ public class DirectoryEntry implements FileEntry {
 		}
 		newdirent[dirents.length] = d;
 		dirents = newdirent;
-		//force a recalculation of if the file is valid. 
+		// force a recalculation of if the file is valid.
 		getBlocks();
 	}
 
@@ -112,52 +111,52 @@ public class DirectoryEntry implements FileEntry {
 	}
 
 	/**
-	 * Get the list of blocks in the file. Note we are doing it using a sub
-	 * function to get the numbered extent, rather than just iterating because
-	 * although all the disks i have looked at so far put the dirents for a given
-	 * file consecutively, i can't find anything in any documentation that actually
-	 * says this.
+	 * Get the list of blocks in the file. Note we are doing it using a sub function
+	 * to get the numbered extent, rather than just iterating because although all
+	 * the disks i have looked at so far put the dirents for a given file
+	 * consecutively, i can't find anything in any documentation that actually says
+	 * this.
 	 * 
-	 * Note, extents don't necessarily seem to start from 0 on +3e. unlike normal CPM.
-	 *   As such, i have removed bad extent checking.
+	 * Note, extents don't necessarily seem to start from 0 on +3e. unlike normal
+	 * CPM. As such, i have removed bad extent checking.
 	 * 
 	 * 
 	 * @return
 	 */
 	public int[] getBlocks() {
 		BadDirEntry = false;
-		
+
 		ArrayList<Integer> al = new ArrayList<Integer>();
-		String badExtents="";
-		
-		String badBlocks="";
-		
+		String badExtents = "";
+
+		String badBlocks = "";
+
 		for (int i = 0; i < dirents.length; i++) {
 			Dirent d = dirents[i];
 			if (d == null) {
-				badExtents = badExtents+", "+i;
+				badExtents = badExtents + ", " + i;
 			} else {
 				int blocks[] = d.getBlocks();
 				for (int block : blocks) {
 					if (block != 0) {
 						if (block >= maxBlocks) {
-							badBlocks = badBlocks+", "+block;
-						} 
+							badBlocks = badBlocks + ", " + block;
+						}
 						al.add(block);
 					}
 				}
 			}
 		}
-		
+
 		if (!badExtents.isEmpty()) {
-			Errors = "File is invalid due to missing (Or re-used) directory extents: #"+badExtents.substring(2);
+			Errors = "File is invalid due to missing (Or re-used) directory extents: #" + badExtents.substring(2);
 			BadDirEntry = true;
 		}
 		if (!badBlocks.isEmpty()) {
 			if (!Errors.isBlank()) {
-				Errors= Errors+"\r\n";
+				Errors = Errors + "\r\n";
 			}
-			Errors= Errors + "File is invalid due to referencing invalid blocks: #"+badBlocks.substring(2);
+			Errors = Errors + "File is invalid due to referencing invalid blocks: #" + badBlocks.substring(2);
 			BadDirEntry = true;
 		}
 
@@ -177,20 +176,22 @@ public class DirectoryEntry implements FileEntry {
 	 */
 	@Override
 	public int GetRawFileSize() {
-		//On a normal +3 disk, all dirents except the last one will be full.
-		//This doesn't seem to be the case for PLUSIDEPOS, so just get the number of blocks, and
-		//use that.
-		//GDS 25/12/2022 - The bytes in the last logical Dirent are the bytes for the last DIRENT not Block. 
-		//                  So ignore the last Dirent in file size calculations.
-		//GDS 06/02/2023 - This doesnt seem right...
-		int BytesInRestOfDirents = 0; 
+		// On a normal +3 disk, all dirents except the last one will be full.
+		// This doesn't seem to be the case for PLUSIDEPOS, so just get the number of
+		// blocks, and
+		// use that.
+		// GDS 25/12/2022 - The bytes in the last logical Dirent are the bytes for the
+		// last DIRENT not Block.
+		// So ignore the last Dirent in file size calculations.
+		// GDS 06/02/2023 - This doesnt seem right...
+		int BytesInRestOfDirents = 0;
 		Dirent lastdirent = GetLastDirent();
-		for(Dirent d:dirents) {
+		for (Dirent d : dirents) {
 			if (d != lastdirent) {
 				BytesInRestOfDirents = BytesInRestOfDirents + (d.getBlocks().length * ThisPartition.BlockSize);
 			}
-		}	
-		
+		}
+
 		// Get the number of records used in the last dirent.
 		int bytesinlld = 0;
 		if (lastdirent == null) {
@@ -198,51 +199,50 @@ public class DirectoryEntry implements FileEntry {
 		} else {
 			bytesinlld = lastdirent.GetBytesInLastDirent();
 		}
-	
+
 		return (bytesinlld + BytesInRestOfDirents);
 	}
-	
+
 	/**
-	 * Get the size of a file as seen by BASIC.
-	 * For +3DOS files, basiclly, if it has a valid header, subtract this. Otherwise
-	 * just return the file size. 
+	 * Get the size of a file as seen by BASIC. For +3DOS files, basiclly, if it has
+	 * a valid header, subtract this. Otherwise just return the file size.
 	 */
 	@Override
 	public int GetFileSize() {
 		if (GetPlus3DosHeader().IsPlusThreeDosFile) {
-			return(GetRawFileSize()-0x80);
+			return (GetRawFileSize() - 0x80);
 		} else {
-			return(GetRawFileSize());
+			return (GetRawFileSize());
 		}
 	}
-	
+
 	/**
-	 * Get the last dirent of a file. 
-	 * This dirent will be the one that is not full
+	 * Get the last dirent of a file. This dirent will be the one that is not full
 	 * 
 	 * @return
 	 */
 	private Dirent GetLastDirent() {
 		Dirent result = dirents[0];
 		int MaxExtentNum = result.GetLogicalExtentNum();
-		for (int j=1;j<dirents.length;j++) {
+		for (int j = 1; j < dirents.length; j++) {
 			if (dirents[j].GetLogicalExtentNum() > MaxExtentNum) {
 				result = dirents[j];
 				MaxExtentNum = result.GetLogicalExtentNum();
 			}
 		}
-		
-		return(result);
+
+		return (result);
 	}
 
 	/**
 	 * Get the file content. Note this includes the +3DOS header.
 	 * 
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 * @throws BadDiskFileException
 	 */
-	public byte[] GetFileData() throws IOException {
+	@Override
+	public byte[] GetFileRawData() throws IOException {
 		byte result[] = new byte[GetRawFileSize()];
 
 		// get all the blocks
@@ -261,51 +261,66 @@ public class DirectoryEntry implements FileEntry {
 				if (resultptr < eob) {
 					result[resultptr++] = x;
 				}
-			} 
+			}
 		}
 
 		return (result);
+	}
+	
+	/**
+	 * Get the file data. This will remove any +3DOS header
+	 */
+	@Override
+	public byte[] GetFileData() throws IOException {
+		byte data[] = GetFileRawData();
+		if (GetPlus3DosHeader().IsPlusThreeDosFile ) {
+			//Remove the +3DOS header
+			byte newdata[] = new byte[data.length-0x80];
+			System.arraycopy(data, 0x80, newdata, 0, newdata.length);
+			data = newdata;
+		}
+		return(data);
 	}
 
 	/**
 	 * parse the first block into a +3Dos header structure and return it.
 	 * 
 	 * @return
-	 * @throws  
+	 * @throws
 	 */
-	public Plus3DosFileHeader GetPlus3DosHeader()  {
-
+	public Plus3DosFileHeader GetPlus3DosHeader() {
 		// Load the first block of the file
 		Plus3DosFileHeader pdh = null;
 		int[] blocks = getBlocks();
 		// this fix an issue with zero length CPM files.
 		// we will just return an invalid +3 data structure.
 		// Eg, the alcatraz development disks, "New word" side A
-		if (blocks.length ==0) {
+		if (blocks.length == 0) {
 			pdh = new Plus3DosFileHeader(new byte[256]);
 		} else {
 			byte Block0[] = null;
-				if (blocks[0] >= ThisPartition.MaxBlock) {
-					//added for Double Dragon which has a directory entry 
-					//with bad Block numbers, this prevents most of the files
-					//appearing in the directory listing. 
-					System.out.println("Block "+blocks[0]+" does not exist for entry: '"+GetFilename()+"'");
-					pdh = new Plus3DosFileHeader(new byte[256]);
-				} else {
-					try {
-						Block0 = ThisPartition.GetLogicalBlock(blocks[0]);
-						pdh = new Plus3DosFileHeader(Block0);
-					} catch (IOException e) {
-					}
-					
+			if (blocks[0] >= ThisPartition.MaxBlock) {
+				// added for Double Dragon which has a directory entry
+				// with bad Block numbers, this prevents most of the files
+				// appearing in the directory listing.
+				System.out.println("Block " + blocks[0] + " does not exist for entry: '" + GetFilename() + "'");
+				pdh = new Plus3DosFileHeader(new byte[256]);
+			} else {
+				try {
+					Block0 = ThisPartition.GetLogicalBlock(blocks[0]);
+					pdh = new Plus3DosFileHeader(Block0);
+				} catch (IOException e) {
 				}
+
+			}
 		}
 		return (pdh);
-	} 
+	}
 
 	/**
 	 * Check to see if the current directory entry is a complete file. Only applies
-	 * to deleted files, Other files are assumed to be complete if the entries are complete.
+	 * to deleted files, Other files are assumed to be complete if the entries are
+	 * complete.
 	 * 
 	 * @return
 	 */
@@ -317,7 +332,7 @@ public class DirectoryEntry implements FileEntry {
 			boolean result = true;
 			int blocks[] = getBlocks();
 			for (int i : blocks) {
-				if (i< ThisPartition.bam.length ) {
+				if (i < ThisPartition.bam.length) {
 					if (ThisPartition.bam[i])
 						result = false;
 				} else {
@@ -325,14 +340,14 @@ public class DirectoryEntry implements FileEntry {
 				}
 			}
 			return (result);
-		} 
+		}
 	}
 
 	/**
 	 * Set the file to be deleted or not deleted.
 	 * 
 	 * @param deleted
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void SetDeleted(boolean deleted) throws IOException {
 		// first, set all the dirents.
@@ -360,8 +375,8 @@ public class DirectoryEntry implements FileEntry {
 					ThisPartition.bam[blocknum] = true;
 				}
 			}
-		} 
-		ThisPartition.setModified(true); 
+		}
+		ThisPartition.setModified(true);
 	}
 
 	/**
@@ -369,8 +384,8 @@ public class DirectoryEntry implements FileEntry {
 	 * 
 	 * @param value - new flag value
 	 * @param flag  - which flag (R/S/A)
-	 * @throws IOException 
-	 */ 
+	 * @throws IOException
+	 */
 	public void SetFlag(boolean value, char flag) throws IOException {
 		int bytenum = "RSArsa".indexOf(flag);
 		if (bytenum > 2)
@@ -393,13 +408,11 @@ public class DirectoryEntry implements FileEntry {
 		ThisPartition.setModified(true);
 	}
 
-
-
 	/**
 	 * Rename the current file
 	 * 
 	 * @param newFilename
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	@Override
 	public void SetFilename(String newFilename) throws IOException {
@@ -410,7 +423,7 @@ public class DirectoryEntry implements FileEntry {
 		// update the sectors.
 		ThisPartition.updateDirentBlocks();
 	}
-	
+
 	/**
 	 * ToString overridden to provide information for the directory entry
 	 * 
@@ -418,29 +431,29 @@ public class DirectoryEntry implements FileEntry {
 	 */
 	@Override
 	public String toString() {
-		String result="";
-		
+		String result = "";
+
 		result = result + "Dirents: \n";
-		for(Dirent d:dirents) {
-			result = result + d+"\n  ";
-			for(byte b: d.rawdirent) {
-				result = result + " "+ String.format("  %02X",(int) (b & 0xff));
+		for (Dirent d : dirents) {
+			result = result + d + "\n  ";
+			for (byte b : d.rawdirent) {
+				result = result + " " + String.format("  %02X", (int) (b & 0xff));
 			}
 			result = result + "\n";
 		}
-		return(result);
+		return (result);
 	}
-	
+
 	/**
 	 * This performs a CPM-style file match
 	 */
 	@Override
-	public boolean DoesMatch(String wildcard) {		
+	public boolean DoesMatch(String wildcard) {
 		// convert the wildcard into a search array:
 		// Split into filename and extension. pad out with spaces.
 		wildcard = wildcard.trim().toUpperCase();
 		if (wildcard.endsWith("*") && !wildcard.contains(".")) {
-			wildcard = wildcard+".*";
+			wildcard = wildcard + ".*";
 		}
 		String filename = "";
 		String extension = "";
@@ -493,14 +506,14 @@ public class DirectoryEntry implements FileEntry {
 		int HasDot = StringToMatch.indexOf('.');
 		String preDot = StringToMatch;
 		String PostDot = "";
-		if (HasDot>-1) {
-			preDot = StringToMatch.substring(0,HasDot);
-			PostDot = StringToMatch.substring(HasDot+1);
+		if (HasDot > -1) {
+			preDot = StringToMatch.substring(0, HasDot);
+			PostDot = StringToMatch.substring(HasDot + 1);
 		}
-		preDot = (preDot+"             ").substring(0,8);
-		PostDot = (PostDot+"   ").substring(0,3);
-		
-		StringToMatch = preDot+PostDot;
+		preDot = (preDot + "             ").substring(0, 8);
+		PostDot = (PostDot + "   ").substring(0, 3);
+
+		StringToMatch = preDot + PostDot;
 		// now search.
 		// check the filename
 		boolean match = true;
@@ -511,9 +524,9 @@ public class DirectoryEntry implements FileEntry {
 				match = false;
 			}
 		}
-		return(match);
+		return (match);
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -521,12 +534,12 @@ public class DirectoryEntry implements FileEntry {
 	public String GetFileTypeString() {
 		Plus3DosFileHeader p3d = GetPlus3DosHeader();
 		if (p3d.IsPlusThreeDosFile) {
-			return(p3d.getTypeDesc());
+			return (p3d.getTypeDesc());
 		} else {
-			return("Raw CPM");
+			return ("Raw CPM");
 		}
 	}
-	
+
 	@Override
 	public SpeccyBasicDetails GetSpeccyBasicDetails() {
 		Plus3DosFileHeader p3d = GetPlus3DosHeader();
@@ -537,9 +550,9 @@ public class DirectoryEntry implements FileEntry {
 		int VarStart = p3d.VariablesOffset;
 		int LineStart = p3d.line;
 		int LoadAddress = p3d.loadAddr;
-		char ArrayVar = (p3d.VarName+"A").charAt(0);
-		
-		SpeccyBasicDetails result = new SpeccyBasicDetails(FileType, VarStart, LineStart, LoadAddress, ArrayVar );
+		char ArrayVar = (p3d.VarName + "A").charAt(0);
+
+		SpeccyBasicDetails result = new SpeccyBasicDetails(FileType, VarStart, LineStart, LoadAddress, ArrayVar);
 		return (result);
 	}
 

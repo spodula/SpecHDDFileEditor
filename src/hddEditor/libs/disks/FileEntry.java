@@ -24,4 +24,8 @@ public interface FileEntry {
 	//Get Speccy Basic details
 	public SpeccyBasicDetails GetSpeccyBasicDetails();
 	
+	public byte[] GetFileData() throws IOException;
+	
+	public byte[] GetFileRawData() throws IOException;
+	
 }

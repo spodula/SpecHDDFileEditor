@@ -328,7 +328,16 @@ public class TrdDirectoryEntry implements FileEntry {
 	 * @return
 	 * @throws IOException 
 	 */
+	@Override
 	public byte[] GetFileData() throws IOException {
+		return(GetFileRawData());
+	}
+	
+	/**
+	 * 
+	 */
+	@Override
+	public byte[] GetFileRawData() throws IOException {
 		int startsector = (GetStartTrack() * CurrentDisk.GetNumSectors()) + GetStartSector();
 
 		int length = GetFileSize();
@@ -344,6 +353,7 @@ public class TrdDirectoryEntry implements FileEntry {
 		byte result[] = CurrentDisk.GetBytesStartingFromSector(startsector, length);
 		return(result);		 
 	}
+
 	
 	/**
 	 * 

@@ -90,8 +90,20 @@ public class DummyFileEntry implements FileEntry {
 
 	@Override
 	public SpeccyBasicDetails GetSpeccyBasicDetails() {
-		SpeccyBasicDetails result = new SpeccyBasicDetails(-1, 0, 0, 0, 'A' );
+		SpeccyBasicDetails result = new SpeccyBasicDetails(-1, 0, 0, 0, 'A');
 		return (result);
+	}
+
+	@Override
+	public byte[] GetFileData() throws IOException {
+		System.out.println("Cannot get Raw file data for this entry");
+		return null;
+	}
+
+	@Override
+	public byte[] GetFileRawData() throws IOException {
+		System.out.println("Cannot get Raw file data for this entry");
+		return null;
 	}
 
 }

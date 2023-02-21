@@ -45,7 +45,8 @@ public class MicrodriveDirectoryEntry implements FileEntry {
 	 * 
 	 * @return
 	 */
-	public byte[] GetFileRawData() {
+	@Override
+	public byte[] GetFileRawData() throws IOException {
 		int bytesrenamining = GetRawFileSize();
 		byte result[] = new byte[bytesrenamining];
 
@@ -65,7 +66,8 @@ public class MicrodriveDirectoryEntry implements FileEntry {
 	 * 
 	 * @return
 	 */
-	public byte[] GetFileData() {
+	@Override
+	public byte[] GetFileData() throws IOException {
 		byte dat[] = GetFileRawData();
 		byte result[] = new byte[dat.length - 9];
 		System.arraycopy(dat, 9, result, 0, result.length);

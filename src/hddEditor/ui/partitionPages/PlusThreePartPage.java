@@ -260,7 +260,8 @@ public class PlusThreePartPage extends GenericPage {
 			try {
 				SpecFileEditDialog = new SpectrumFileEditDialog(ParentComp.getDisplay());
 
-				byte[] data = entry.GetFileData();
+				byte[] data = entry.GetFileRawData();
+				
 				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
 					entry.SetDeleted(true);
 					((PLUS3DOSPartition) partition).AddCPMFile(entry.GetFilename(), SpecFileEditDialog.data);

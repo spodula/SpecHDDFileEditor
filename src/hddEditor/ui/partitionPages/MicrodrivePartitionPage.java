@@ -254,29 +254,37 @@ public class MicrodrivePartitionPage extends GenericPage {
 			MicrodriveDirectoryEntry entry = (MicrodriveDirectoryEntry) itms[0].getData();
 			SpecFileEditDialog = new MicrodriveFileEditDialog(ParentComp.getDisplay());
 
-			byte data[] = entry.GetFileRawData();
-			byte newdata[] = new byte[data.length - 0x09];
-			System.arraycopy(data, 0x09, newdata, 0, newdata.length);
+			byte data[];
+			try {
+				data = entry.GetFileRawData();
+				byte newdata[] = new byte[data.length - 0x09];
+				System.arraycopy(data, 0x09, newdata, 0, newdata.length);
 
-			if (SpecFileEditDialog.Show(newdata, "Editing " + entry.GetFilename(), entry)) {
-				byte NewRawData[] = new byte[newdata.length + 0x09];
-				System.arraycopy(data, 0, NewRawData, 0, 0x09);
-				System.arraycopy(newdata, 0, NewRawData, 0x09, newdata.length);
-				NewRawData[1] = (byte) ((newdata.length % 0x100) & 0xff);
-				NewRawData[2] = (byte) ((newdata.length / 0x100) & 0xff);
-				try {
-					entry.SetFileRawData(NewRawData, (MDFMicrodriveFile) partition.CurrentDisk);
-				} catch (IOException e) {
-					MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
-					messageBox.setMessage("Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
-					messageBox.setText("Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
-					messageBox.open();
-					e.printStackTrace();
+				if (SpecFileEditDialog.Show(newdata, "Editing " + entry.GetFilename(), entry)) {
+					byte NewRawData[] = new byte[newdata.length + 0x09];
+					System.arraycopy(data, 0, NewRawData, 0, 0x09);
+					System.arraycopy(newdata, 0, NewRawData, 0x09, newdata.length);
+					NewRawData[1] = (byte) ((newdata.length % 0x100) & 0xff);
+					NewRawData[2] = (byte) ((newdata.length / 0x100) & 0xff);
+					try {
+						entry.SetFileRawData(NewRawData, (MDFMicrodriveFile) partition.CurrentDisk);
+					} catch (IOException e) {
+						MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
+						messageBox
+								.setMessage("Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
+						messageBox.setText("Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
+						messageBox.open();
+						e.printStackTrace();
+					}
+					// refresh the screen.
+					AddComponents();
 				}
-				// refresh the screen.
-				AddComponents();
+				SpecFileEditDialog = null;
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
-			SpecFileEditDialog = null;
+
 		}
 	}
 
@@ -290,25 +298,30 @@ public class MicrodrivePartitionPage extends GenericPage {
 			// Create the hex edit dialog and start it.
 			HxEditDialog = new HexEditDialog(ParentComp.getDisplay());
 
-			byte data[];
-			data = entry.GetFileRawData();
+			try {
+				byte data[] = entry.GetFileRawData();
+				AddressNote NewAddressNote = new AddressNote(0, data.length, 0, "File: " + entry.GetFilename());
+				AddressNote ANArray[] = { NewAddressNote };
 
-			AddressNote NewAddressNote = new AddressNote(0, data.length, 0, "File: " + entry.GetFilename());
-			AddressNote ANArray[] = { NewAddressNote };
-
-			boolean WriteBackData = HxEditDialog.Show(data, "Editing " + entry.GetFilename(), ANArray);
-			if (WriteBackData) {
-				try {
-					entry.SetFileRawData(HxEditDialog.Data, (MDFMicrodriveFile) partition.CurrentDisk);
-				} catch (IOException e) {
-					MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
-					messageBox.setMessage("Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
-					messageBox.setText("Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
-					messageBox.open();
-					e.printStackTrace();
+				boolean WriteBackData = HxEditDialog.Show(data, "Editing " + entry.GetFilename(), ANArray);
+				if (WriteBackData) {
+					try {
+						entry.SetFileRawData(HxEditDialog.Data, (MDFMicrodriveFile) partition.CurrentDisk);
+					} catch (IOException e) {
+						MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
+						messageBox
+								.setMessage("Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
+						messageBox.setText("Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
+						messageBox.open();
+						e.printStackTrace();
+					}
 				}
+				HxEditDialog = null;
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
-			HxEditDialog = null;
+
 		}
 	}
 
@@ -384,14 +397,13 @@ public class MicrodrivePartitionPage extends GenericPage {
 	 * 
 	 */
 	protected void DoExtractAllFiles() {
-		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm (ParentComp.getDisplay()); 
+		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay());
 		try {
 			ExportAllPartsForm.ShowSinglePartition(partition);
 		} finally {
 			ExportAllPartsForm = null;
 		}
 	}
-
 
 	/**
 	 * Delete the selected file.
