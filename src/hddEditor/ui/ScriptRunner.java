@@ -208,14 +208,20 @@ public class ScriptRunner {
 
 		if (ShowOptions) {
 			System.out.println("Options: ");
-			System.out.println("  HDF8 HDF16 - 8 or 16 bit Ramsoft HDF file\n"
-					+ "     eg. new HDF8 [cyl] [heads] [spt] <filename>\n" + "  IMG8 IMG16 - 8 or 16 bit RAW file\n"
-					+ "     eg. new IMG8 [cyl] [heads] [spt] <filename>\n" + "  DSK EDSK - Amstrad/+3 Disk\n"
-					+ "     eg. new EDSK <filename>\n" + "  MDF - Sinclair microdrive cart\n"
-					+ "     eg. new MDF <label> <filename>\n" + "  TRD - TR-DOS file (Linear)\n"
-					+ "     eg. new TRD [40|80] [1|2] <label> <filename>" + "  SCL - TR-DOS file (Compressed)\n"
-					+ "     eg. new SCL <label> <filename>\n" + "     PARTITION <type num> <Size mb> <name>\n"
-					+ "     eg. new PARTITION 3 \"testpart\" 16 \n");
+			System.out.println("  HDF8 HDF16 - 8 or 16 bit Ramsoft HDF file");
+			System.out.println("     eg. new HDF8 [cyl] [heads] [spt] <filename>");
+			System.out.println("  IMG8 IMG16 - 8 or 16 bit RAW file");
+			System.out.println("     eg. new IMG8 [cyl] [heads] [spt] <filename>");
+			System.out.println("  DSK EDSK - Amstrad/+3 Disk");
+			System.out.println("     eg. new EDSK <filename>");
+			System.out.println("  MDF - Sinclair microdrive cart");
+			System.out.println("     eg. new MDF <label> <filename>");
+			System.out.println("  TRD - TR-DOS file (Linear)");
+			System.out.println("     eg. new TRD [40|80] [1|2] <label> <filename>");
+			System.out.println("  SCL - TR-DOS file (Compressed)");
+			System.out.println("     eg. new SCL <label> <filename>");
+			System.out.println("  PARTITION <type num> <Size mb> <name>");
+			System.out.println("     eg. new PARTITION 3 testpart 16");
 		}
 	}
 
@@ -323,8 +329,10 @@ public class ScriptRunner {
 		}
 		if (ShowOptions) {
 			System.out.println("Options: ");
-			System.out.println("  File <filename>\n" + "     eg. delete file bob.txt\n"
-					+ "  partition <partitionname>\n" + "     eg. delete partition testpart\n\n");
+			System.out.println("  File <filename>");
+			System.out.println("     eg. delete file bob.txt");
+			System.out.println("  partition <partitionname>");
+			System.out.println("     eg. delete partition testpart\n\n");
 
 		}
 	}
@@ -367,7 +375,8 @@ public class ScriptRunner {
 
 		if (ShowOptions) {
 			System.out.println("Options: ");
-			System.out.println("  Rename <from> <to>\n" + "     eg. rename x.txt xdxx.txt\n");
+			System.out.println("  Rename <from> <to>");
+			System.out.println("     eg. rename x.txt xdxx.txt\n");
 		}
 	}
 
@@ -502,8 +511,11 @@ public class ScriptRunner {
 			System.out.println("Options: ");
 			System.out.println("  Export <targetfolder> <wildcard> <type>");
 			System.out.println("Where: type is one of: ");
-			System.out.println(
-					" * raw       - Raw binary file in the data\n * rawheader - Raw binary file in the data Along with any Microdrive or +3DOS header\n * hex       - Hex dump of the file\n * asm       - A Disassembly of the file\n * astype    - For Basic - Text file, Array - CSV file, code length 6912 - PNG file, All others, Hex ");
+			System.out.println(" * raw       - Raw binary file in the data");
+			System.out.println(" * rawheader - Raw binary file in the data Along with any Microdrive or +3DOS header");
+			System.out.println(" * hex       - Hex dump of the file");
+			System.out.println(" * asm       - A Disassembly of the file");
+			System.out.println(" * astype    - For Basic - Text file, Array - CSV file, code length 6912 - PNG file, All others, Hex ");
 		}
 	}
 
@@ -516,14 +528,15 @@ public class ScriptRunner {
 		String params[] = GeneralUtils.splitHandleQuotes(restOfCommand.trim());
 
 		if (params.length < 2) {
-			System.out.println("Expecting add <file> <type> <params>");
+			System.out.println("Expecting add <file> <targetname> <type> <params>");
 			ShowOptions = true;
 		} else {
 			if (hdi.CurrentSelectedPartition == null) {
 				System.out.println("Add: Select a partition first");
 			} else {
 				String Sourcefile = params[0];
-				String Type = params[1].trim().toLowerCase();
+				String Targetfile = params[1];
+				String Type = params[2].trim().toLowerCase();
 
 				int BasicStartLine = 32768;
 				String varname = "A";
@@ -532,11 +545,11 @@ public class ScriptRunner {
 				boolean isbw = false;
 				int csvLineLimit = 2000;
 
-				for (int i = 2; i < params.length; i++) {
+				for (int i = 3; i < params.length; i++) {
 					String param = params[i];
 					int x = param.indexOf('=');
 					if (x == -1) {
-						System.out.println("add: Dont understand " + param + " Ignoring.");
+						System.out.println("Add: Dont understand " + param + " Ignoring.");
 					} else {
 						String paramName = param.substring(0, x).toLowerCase();
 						String paramData = param.substring(x + 1);
@@ -606,19 +619,19 @@ public class ScriptRunner {
 								IDEDosPartition part = hdi.CurrentSelectedPartition;
 								switch (BasicFileType) {
 								case Speccy.BASIC_BASIC:
-									part.AddBasicFile(filename, rawdata, BasicStartLine, rawdata.length);
+									part.AddBasicFile(Targetfile, rawdata, BasicStartLine, rawdata.length);
 									break;
 								case Speccy.BASIC_CODE:
-									part.AddCodeFile(filename, CodeLoadAddr, rawdata);
+									part.AddCodeFile(Targetfile, CodeLoadAddr, rawdata);
 									break;
 								case Speccy.BASIC_CHRARRAY:
-									part.AddCharArray(filename, rawdata, varname);
+									part.AddCharArray(Targetfile, rawdata, varname);
 									break;
 								case Speccy.BASIC_NUMARRAY:
-									part.AddNumericArray(filename, rawdata, varname);
+									part.AddNumericArray(Targetfile, rawdata, varname);
 									break;
 								default:
-									part.AddCodeFile(filename, 0, rawdata);
+									part.AddCodeFile(Targetfile, 0, rawdata);
 									break;
 								}
 								System.out.println("Added " + file.getName());
@@ -633,13 +646,22 @@ public class ScriptRunner {
 
 		if (ShowOptions) {
 			System.out.println("Options: ");
-			System.out.println("  add <file> <type>");
+			System.out.println("  add <file> <targetname> <type> <params>");
 			System.out.println("Where: type is one of: ");
-			System.out.println(" * text - Basic as text\n" + " * image - Image file as Screen$\n"
-					+ " * NumArray - Numeric array\n" + " * ChrArray - Character array\n" + " * Code\n");
-			System.out.println("and Params are:");
-			System.out.println(" * codeload=<address>\n" + " * variable=varname\n" + " * line=<BASIC start line>\n"
-					+ " * bw=<true|false>\n" + " * intensity=[0..100]\n" + " * arraylinelimit=<max lines to load>\n");
+			System.out.println(" * text - Basic as text");
+			System.out.println(" * image - Image file as Screen$");
+			System.out.println(" * NumArray - Numeric array");
+			System.out.println(" * ChrArray - Character array");
+			System.out.println(" * Code");
+			System.out.println("and Params are space seperated:");
+			System.out.println(" * codeload=<address>");
+			System.out.println(" * variable=varname");
+			System.out.println(" * line=<BASIC start line>");
+			System.out.println(" * bw=<true|false>");
+			System.out.println(" * intensity=[0..100]");
+			System.out.println(" * arraylinelimit=<max lines to load>");
+			System.out.println("Eg.");
+			System.out.println("  add c:/temp/test.jpeg test.scr image bw=false intensity=80"); 
 		}
 	}
 
