@@ -527,7 +527,7 @@ public class ScriptRunner {
 		boolean ShowOptions = false;
 		String params[] = GeneralUtils.splitHandleQuotes(restOfCommand.trim());
 
-		if (params.length < 2) {
+		if (params.length < 3) {
 			System.out.println("Expecting add <file> <targetname> <type> <params>");
 			ShowOptions = true;
 		} else {
