@@ -311,7 +311,7 @@ public class CPMPartition extends IDEDosPartition {
 			updateDirentBlocks();
 
 			// Add a directory entry.
-			RecalculateDirectoryListing();
+			ExtractDirectoryListing();
 
 			// set modified
 			setModified(true);
@@ -678,6 +678,10 @@ public class CPMPartition extends IDEDosPartition {
 	 */
 	@Override
 	public FileEntry[] GetFileList(String wildcard) {
+		//no wildcard = all files.
+		if (wildcard.isEmpty()) {
+			wildcard = "*.*";
+		}
 		ArrayList<FileEntry> results = new ArrayList<FileEntry>();
 		for (FileEntry de : DirectoryEntries) {
 			if (de.DoesMatch(wildcard)) {
