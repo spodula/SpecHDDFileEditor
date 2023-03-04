@@ -281,7 +281,6 @@ public class MicrodrivePartitionPage extends GenericPage {
 				}
 				SpecFileEditDialog = null;
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 
@@ -318,7 +317,6 @@ public class MicrodrivePartitionPage extends GenericPage {
 				}
 				HxEditDialog = null;
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 

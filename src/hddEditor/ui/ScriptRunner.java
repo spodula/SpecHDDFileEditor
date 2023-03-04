@@ -1,5 +1,4 @@
 package hddEditor.ui;
-//TODO: Bug: When adding a file, isn't represented in CAT.
 //TODO: For scripting, proper error handling
 //TODO: For scripting, proper param checking.
 
