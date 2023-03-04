@@ -240,6 +240,8 @@ public class CPMPartition extends IDEDosPartition {
 			if (filename.indexOf('.') > -1) {
 				prefix = filename.substring(filename.indexOf('.') + 1) + "   ";
 				filename = filename.substring(0, filename.indexOf('.')) + "        ";
+			} else {
+				filename = filename + "        ";
 			}
 
 			// write the dirents
@@ -391,9 +393,6 @@ public class CPMPartition extends IDEDosPartition {
 				bytesLoaded = bytesRequired;
 			}
 		}
-
-//		System.out.println(GeneralUtils.HexDump(rawDirents, 0, 256));
-
 		Dirents = new Dirent[MaxDirent + 1];
 		for (int i = 0; i <= MaxDirent; i++) {
 			Dirent d = new Dirent(i, ExtentMask);
@@ -497,12 +496,6 @@ public class CPMPartition extends IDEDosPartition {
 		// Next, the free space.
 		int Freeblocks = MaxBlock - usedblocks;
 		freeSpace = (Freeblocks * BlockSize) / 1024;
-
-		// finally output any errors:
-		/*
-		 * for (DirectoryEntry d : DirectoryEntries) { if (!d.Errors.isEmpty()) {
-		 * System.out.println("Filename: '" + d.filename() + "' - " + d.Errors); } }
-		 */
 	}
 
 	/**
