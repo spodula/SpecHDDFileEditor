@@ -367,7 +367,7 @@ public class FileNewFDDForm {
 		try {
 			AMSDiskFile ams = new AMSDiskFile();
 			ams.CreateBlankAMSDisk(filename, IsExtended);
-			System.out.println(ams);
+//			System.out.println(ams);
 			result = true;
 		} catch (Exception E) {
 			System.out.println("Error creating Amstrad disk:" + E.getMessage());
