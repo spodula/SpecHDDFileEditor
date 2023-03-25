@@ -172,7 +172,7 @@ public class CPMPartition extends IDEDosPartition {
 			if (file.length % BlockSize > 0) {
 				requiredblocks++;
 			}
-			System.out.println("Blocks required: " + requiredblocks);
+//			System.out.println("Blocks required: " + requiredblocks);
 
 			// Work out how many DIRENTS this will need
 			int blocksPerDirent = 8;
@@ -183,7 +183,7 @@ public class CPMPartition extends IDEDosPartition {
 			if (requiredblocks % blocksPerDirent > 0) {
 				direntsRequired++;
 			}
-			System.out.println("Dirents required: " + direntsRequired);
+//			System.out.println("Dirents required: " + direntsRequired);
 
 			// do we have enough dirents?
 			int freedirents = MaxDirent - usedDirEnts;
@@ -200,7 +200,7 @@ public class CPMPartition extends IDEDosPartition {
 					FreeBlocks.add(i);
 				}
 			}
-			System.out.println("Free blocks: " + FreeBlocks.size());
+//			System.out.println("Free blocks: " + FreeBlocks.size());
 
 			// write the blocks in order and allocate BAM entries.
 			ArrayList<Integer> NewBlocks = new ArrayList<Integer>();
@@ -232,7 +232,7 @@ public class CPMPartition extends IDEDosPartition {
 					FreeDirents.add(i);
 				}
 			}
-			System.out.println("Free Dirents: " + FreeDirents.size());
+	//		System.out.println("Free Dirents: " + FreeDirents.size());
 
 			// seperate the filename
 			filename = filename.toUpperCase();
@@ -303,8 +303,8 @@ public class CPMPartition extends IDEDosPartition {
 					s = s + ", ";
 					s = s + bnum;
 				}
-				System.out.println("SaveCPMFile: Dirent: " + d.entrynum + " <- " + d.GetLogicalExtentNum() + " Blocks: "
-						+ s.substring(2));
+//				System.out.println("SaveCPMFile: Dirent: " + d.entrynum + " <- " + d.GetLogicalExtentNum() + " Blocks: "
+//						+ s.substring(2));
 
 			}
 			// update sectors containing the dirents
