@@ -343,9 +343,9 @@ public class CPMPartition extends IDEDosPartition {
 
 		int ActualLogicalSector = LogicalSectorStartOfPartition + LogicalSectorInPartition;
 
-		System.out.println("SetLogicalBlock: " + BlockID + " SC:" + GetStartCyl() + " SH:" + GetStartHead()
+/*		System.out.println("SetLogicalBlock: " + BlockID + " SC:" + GetStartCyl() + " SH:" + GetStartHead()
 				+ " RealSector:" + ActualLogicalSector + " Log:" + LogicalSectorInPartition + " Startsect:"
-				+ LogicalSectorStartOfPartition);
+				+ LogicalSectorStartOfPartition); */
 
 		CurrentDisk.SetLogicalBlockFromSector(ActualLogicalSector, Block);
 
