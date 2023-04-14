@@ -93,6 +93,7 @@ public class CodeRenderer extends FileRenderer {
 				widgetSelected(arg0);
 			}
 		});
+		btn.setToolTipText("Save the file as hex");
 
 		btn = new Button(mainPage, SWT.NONE);
 		btn.setText("Extract file as Binary");
@@ -108,6 +109,7 @@ public class CodeRenderer extends FileRenderer {
 				widgetSelected(arg0);
 			}
 		});
+		btn.setToolTipText("Save the file as a raw binary file");
 
 		if (header != null) {
 			btn = new Button(mainPage, SWT.NONE);
@@ -120,7 +122,7 @@ public class CodeRenderer extends FileRenderer {
 					System.arraycopy(header, 0, newdata, 0, header.length);
 					System.arraycopy(data, 0, newdata, header.length, data.length);
 
-					DoSaveFileAsBin(data, mainPage, Filename);
+					DoSaveFileAsBin(newdata, mainPage, Filename);
 				}
 
 				@Override
@@ -128,6 +130,7 @@ public class CodeRenderer extends FileRenderer {
 					widgetSelected(arg0);
 				}
 			});
+			btn.setToolTipText("Extract the file including the OS (+3DOS/TR-DOS) header");
 		} else {
 			new Label(mainPage, SWT.NONE);
 		}
@@ -146,6 +149,8 @@ public class CodeRenderer extends FileRenderer {
 				widgetSelected(arg0);
 			}
 		});
+		btn.setToolTipText("Extract the file as a PNG image");
+
 
 		btn = new Button(mainPage, SWT.NONE);
 		btn.setText("Extract file as Asm");
@@ -161,6 +166,7 @@ public class CodeRenderer extends FileRenderer {
 				widgetSelected(arg0);
 			}
 		});
+		btn.setToolTipText("Save a disassembled text of the file");
 
 		CodeTypeDropDown = new Combo(mainPage, SWT.NONE);
 		CodeTypeDropDown.setItems(CODETYPES);
