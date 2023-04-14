@@ -80,7 +80,7 @@ public class CodeRenderer extends FileRenderer {
 		lbl = new Label(mainPage, SWT.NONE);
 
 		Button btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract file as Hex");
+		btn.setText("Extract file as Hex"); 
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
