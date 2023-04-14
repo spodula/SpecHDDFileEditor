@@ -80,7 +80,7 @@ public class CodeRenderer extends FileRenderer {
 		lbl = new Label(mainPage, SWT.NONE);
 
 		Button btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract file as Hex"); 
+		btn.setText("Extract file as Hex");
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -141,7 +141,7 @@ public class CodeRenderer extends FileRenderer {
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsPic(data, mainPage);
+				DoSaveFileAsPic(data, mainPage,Filename);
 			}
 
 			@Override
@@ -151,14 +151,13 @@ public class CodeRenderer extends FileRenderer {
 		});
 		btn.setToolTipText("Extract the file as a PNG image");
 
-
 		btn = new Button(mainPage, SWT.NONE);
 		btn.setText("Extract file as Asm");
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsAsm(data, mainPage, loadAddr);
+				DoSaveFileAsAsm(data, mainPage, loadAddr, Filename);
 			}
 
 			@Override
@@ -416,10 +415,13 @@ public class CodeRenderer extends FileRenderer {
 
 	}
 
-	protected void DoSaveFileAsAsm(byte[] data, Composite mainPage2, int loadAddr) {
+	protected void DoSaveFileAsAsm(byte[] data, Composite mainPage2, int loadAddr, String Origfilename) {
 		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
-		fd.setText("Save Assembly file as");
+		fd.setText("Save "+Origfilename+" as Assembly...");
 		String[] filterExt = { "*.*" };
+		fd.setFilterExtensions(filterExt);
+		fd.setFileName(Origfilename);		
+		
 		fd.setFilterExtensions(filterExt);
 		String selected = fd.open();
 		if (selected != null) {
@@ -434,11 +436,12 @@ public class CodeRenderer extends FileRenderer {
 	 * @param data
 	 * @param mainPage
 	 */
-	protected void DoSaveFileAsPic(byte[] data, Composite mainPage) {
+	protected void DoSaveFileAsPic(byte[] data, Composite mainPage, String Origfilename) {
 		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
-		fd.setText("Save Assembly file as");
+		fd.setText("Save "+Origfilename+" as a picture...");
 		String[] filterExt = { "*.jpg", "*.gif", "*.png", "*.bmp", "*.svg", "*.tiff", "*.ico" };
 		fd.setFilterExtensions(filterExt);
+		fd.setFileName(Origfilename);		
 		String selected = fd.open();
 		if (selected != null) {
 			FileOutputStream file;
