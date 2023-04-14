@@ -141,7 +141,7 @@ public class CodeRenderer extends FileRenderer {
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				DoSaveFileAsPic(data, mainPage,Filename);
+				DoSaveFileAsPic(data, mainPage, Filename);
 			}
 
 			@Override
@@ -149,7 +149,7 @@ public class CodeRenderer extends FileRenderer {
 				widgetSelected(arg0);
 			}
 		});
-		btn.setToolTipText("Extract the file as a PNG image");
+		btn.setToolTipText("Extract the file as an image");
 
 		btn = new Button(mainPage, SWT.NONE);
 		btn.setText("Extract file as Asm");
@@ -417,11 +417,11 @@ public class CodeRenderer extends FileRenderer {
 
 	protected void DoSaveFileAsAsm(byte[] data, Composite mainPage2, int loadAddr, String Origfilename) {
 		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
-		fd.setText("Save "+Origfilename+" as Assembly...");
+		fd.setText("Save " + Origfilename + " as Assembly...");
 		String[] filterExt = { "*.*" };
 		fd.setFilterExtensions(filterExt);
-		fd.setFileName(Origfilename);		
-		
+		fd.setFileName(Origfilename);
+
 		fd.setFilterExtensions(filterExt);
 		String selected = fd.open();
 		if (selected != null) {
@@ -438,17 +438,17 @@ public class CodeRenderer extends FileRenderer {
 	 */
 	protected void DoSaveFileAsPic(byte[] data, Composite mainPage, String Origfilename) {
 		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
-		fd.setText("Save "+Origfilename+" as a picture...");
+		fd.setText("Save " + Origfilename + " as a picture...");
 		String[] filterExt = { "*.jpg", "*.gif", "*.png", "*.bmp", "*.svg", "*.tiff", "*.ico" };
 		fd.setFilterExtensions(filterExt);
-		fd.setFileName(Origfilename);		
+		fd.setFileName(Origfilename);
 		String selected = fd.open();
 		if (selected != null) {
 			FileOutputStream file;
 			try {
 				file = new FileOutputStream(selected);
 				try {
-					ImageData image = Speccy.GetImageFromFileArray(data, 0x80);
+					ImageData image = Speccy.GetImageFromFileArray(data, 0x00);
 					ImageLoader imageLoader = new ImageLoader();
 					imageLoader.data = new ImageData[] { image };
 					int filetyp = SWT.IMAGE_JPEG;

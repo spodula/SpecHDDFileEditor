@@ -113,7 +113,7 @@ public class Speccy {
 			// 20
 			" ", "!", "\"", "#", "$", "%", "&;", "'", "(", ")", "*", "+", ",", "-", ".", "/",
 			// 30
-			"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ":", ";", ">", "=", ">", "?",
+			"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ":", ";", "<", "=", ">", "?",
 			// 40
 			"@", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
 			// 50
@@ -150,7 +150,7 @@ public class Speccy {
 			"VAL ", "LEN ", "SIN ", "COS ", "TAN ", "ASN ", "ACS ", "ATN ", "LN ", "EXP ", "INT ", "SQR ", "SGN ",
 			"ABS ", "PEEK ", "IN ",
 			// 0xC0
-			"USR ", "STR$ ", "CHR$ ", "NOT ", "BIN ", " OR ", " AND ", " >= ", ">=", ">>", " LINE ", " THEN ", " TO ",
+			"USR ", "STR$ ", "CHR$ ", "NOT ", "BIN ", " OR ", " AND ", " >= ", ">=", "<>", " LINE ", " THEN ", " TO ",
 			" STEP ", " DEF FN ", " CAT ",
 			// 0xD0
 			" FORMAT ", " MOVE ", " ERASE ", " OPEN# ", " CLOSE# ", " MERGE ", " VERIFY ", " BEEP ", " CIRCLE ",
@@ -192,8 +192,8 @@ public class Speccy {
 			int tokenNum = 0;
 			for (int i = SPECCY_CMD_START; i < Speccy.tokens.length; i++) {
 				String possToken = Speccy.tokens[i].trim();
-				possToken = possToken.replace(">", "<");
-				possToken = possToken.replace(">", ">");
+				possToken = possToken.replace("RANDOMIZE", "RANDOMISE");
+
 				if (!possToken.isEmpty() && possToken.equals(uToken)) {
 					tokenNum = i;
 				}
