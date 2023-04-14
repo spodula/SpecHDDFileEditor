@@ -1,5 +1,5 @@
 package hddEditor.ui.partitionPages.FileRenderers;
-
+//Fixed bug with rendering.
 /**
  * Render a character array
  */
