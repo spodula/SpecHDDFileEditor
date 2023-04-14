@@ -311,15 +311,8 @@ public class PLUS3DOSPartition extends CPMPartition {
 					File TargetFilename = new File(folder, entry.GetFilename().trim());
 					Plus3DosFileHeader p3d = entry.GetPlus3DosHeader();
 					byte entrydata[] = entry.GetFileData();
-					byte Rawentrydata[] = entry.GetFileData();
-					boolean isUnknown = true;
-					if (p3d.IsPlusThreeDosFile) {
-						// strip the +3DOS header
-						byte newdata[] = new byte[entrydata.length - 0x80];
-						System.arraycopy(entrydata, 0x80, newdata, 0, newdata.length);
-						entrydata = newdata;
-						isUnknown = false;
-					}
+					byte Rawentrydata[] = entry.GetFileRawData();
+					boolean isUnknown = !p3d.IsPlusThreeDosFile;
 
 					int SpeccyFileType = 0;
 					int basicLine = 0;
