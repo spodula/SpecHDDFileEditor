@@ -165,7 +165,7 @@ public class IDEDosPartition {
 		int numtracks = numCyls * HeadsPerTrack;
 		numtracks = numtracks + numHeads;
 
-		int NumSectors = numtracks * SectorsPerTrack;
+		long NumSectors = numtracks * SectorsPerTrack;
 		// Hack for 8 bit IDE devices.
 		if (CurrentDisk.GetSectorSize() == 256) {
 			NumSectors = NumSectors / 2;
@@ -380,11 +380,11 @@ public class IDEDosPartition {
 	 * @return
 	 * @throws IOException
 	 */
-	public byte[] GetDataInPartition(int startsector, int length) throws IOException {
+	public byte[] GetDataInPartition(long startsector, int length) throws IOException {
 		int LogicalSectorStartOfPartition = GetStartCyl() * CurrentDisk.GetNumHeads() * (CurrentDisk.GetNumSectors());
 		LogicalSectorStartOfPartition = LogicalSectorStartOfPartition + (GetStartHead() * CurrentDisk.GetNumSectors());
 
-		int ActualLogicalSector = LogicalSectorStartOfPartition + startsector;
+		long ActualLogicalSector = LogicalSectorStartOfPartition + startsector;
 
 		byte result[] = CurrentDisk.GetBytesStartingFromSector(ActualLogicalSector, length);
 		return (result);
@@ -401,11 +401,11 @@ public class IDEDosPartition {
 	 * @param data
 	 * @throws IOException
 	 */
-	public void SetDataInPartition(int startsector, byte data[]) throws IOException {
+	public void SetDataInPartition(long startsector, byte data[]) throws IOException {
 		int LogicalSectorStartOfPartition = GetStartCyl() * CurrentDisk.GetNumHeads() * (CurrentDisk.GetNumSectors());
 		LogicalSectorStartOfPartition = LogicalSectorStartOfPartition + (GetStartHead() * CurrentDisk.GetNumSectors());
 
-		int ActualLogicalSector = LogicalSectorStartOfPartition + startsector;
+		long ActualLogicalSector = LogicalSectorStartOfPartition + startsector;
 
 		CurrentDisk.SetLogicalBlockFromSector(ActualLogicalSector, data);
 	}

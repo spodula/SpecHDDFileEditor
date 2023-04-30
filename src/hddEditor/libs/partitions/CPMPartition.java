@@ -335,13 +335,13 @@ public class CPMPartition extends IDEDosPartition {
 	 * @throws IOException
 	 */
 	public void SetLogicalBlock(int BlockID, byte[] Block) throws IOException {
-		int LogicalSectorInPartition = (BlockID * BlockSize) / CurrentDisk.GetSectorSize();
+		long LogicalSectorInPartition = (BlockID * BlockSize) / CurrentDisk.GetSectorSize();
 
-		int LogicalSectorStartOfPartition = (GetStartCyl() + ReservedTracks) * CurrentDisk.GetNumHeads()
+		long LogicalSectorStartOfPartition = (GetStartCyl() + ReservedTracks) * CurrentDisk.GetNumHeads()
 				* (CurrentDisk.GetNumSectors());
 		LogicalSectorStartOfPartition = LogicalSectorStartOfPartition + (GetStartHead() * CurrentDisk.GetNumSectors());
 
-		int ActualLogicalSector = LogicalSectorStartOfPartition + LogicalSectorInPartition;
+		long ActualLogicalSector = LogicalSectorStartOfPartition + LogicalSectorInPartition;
 
 /*		System.out.println("SetLogicalBlock: " + BlockID + " SC:" + GetStartCyl() + " SH:" + GetStartHead()
 				+ " RealSector:" + ActualLogicalSector + " Log:" + LogicalSectorInPartition + " Startsect:"
