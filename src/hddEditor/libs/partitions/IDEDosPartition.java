@@ -363,12 +363,12 @@ public class IDEDosPartition {
 	 * @throws IOException
 	 */
 	public byte[] GetAllDataInPartition() throws IOException {
-		int LogicalSectorStartOfPartition = GetStartCyl() * CurrentDisk.GetNumHeads() * (CurrentDisk.GetNumSectors());
+		long LogicalSectorStartOfPartition = GetStartCyl() * CurrentDisk.GetNumHeads() * (CurrentDisk.GetNumSectors());
 		LogicalSectorStartOfPartition = LogicalSectorStartOfPartition + (GetStartHead() * CurrentDisk.GetNumSectors());
 
-		int NumSectors = (int)GetEndSector();
+		long NumSectors = GetEndSector() * CurrentDisk.GetSectorSize();
 		
-		byte result[] = CurrentDisk.GetBytesStartingFromSector(LogicalSectorStartOfPartition, NumSectors * CurrentDisk.GetSectorSize());
+		byte result[] = CurrentDisk.GetBytesStartingFromSector(LogicalSectorStartOfPartition, NumSectors);
 		return (result);		
 	}
 
@@ -380,7 +380,7 @@ public class IDEDosPartition {
 	 * @return
 	 * @throws IOException
 	 */
-	public byte[] GetDataInPartition(long startsector, int length) throws IOException {
+	public byte[] GetDataInPartition(long startsector, long length) throws IOException {
 		int LogicalSectorStartOfPartition = GetStartCyl() * CurrentDisk.GetNumHeads() * (CurrentDisk.GetNumSectors());
 		LogicalSectorStartOfPartition = LogicalSectorStartOfPartition + (GetStartHead() * CurrentDisk.GetNumSectors());
 

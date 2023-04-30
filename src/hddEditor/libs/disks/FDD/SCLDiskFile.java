@@ -266,8 +266,10 @@ public class SCLDiskFile extends FloppyDisk {
 	 * A bit more complex than the simple Files.
 	 */
 	@Override
-	public byte[] GetBytesStartingFromSector(long SectorNum, int sz) throws IOException {
-		byte result[] = new byte[sz];
+	public byte[] GetBytesStartingFromSector(long SectorNum, long sz) throws IOException {
+		//Note, this will restrict length for AMS files of 128Mb. This probably shouldnt be an issue. 
+		long asz = Math.min(sz,1024*1024*128);
+		byte result[] = new byte[(int)asz];
 		// Find the track and sector...
 		int TrStart = 0;
 		int TrackNum = 0;

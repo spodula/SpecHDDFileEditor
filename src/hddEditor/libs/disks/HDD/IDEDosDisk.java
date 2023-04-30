@@ -42,11 +42,10 @@ public class IDEDosDisk extends RawHDDFile {
 		super(filename);
 		parseDiskParameters();
 	}
-	
+
 	public IDEDosDisk() {
 		super();
 	}
-
 
 	/**
 	 * Extract the disk parameters from the IDEDOS partition. Including disk size,
@@ -144,15 +143,15 @@ public class IDEDosDisk extends RawHDDFile {
 	 * Get the specified number of bytes beginning at the given logical sector.
 	 * 
 	 * @param SectorNum
-	 * @param sz 
+	 * @param sz
 	 */
 	@Override
-	public byte[] GetBytesStartingFromSector(long SectorNum, int sz) throws IOException {
+	public byte[] GetBytesStartingFromSector(long SectorNum, long sz) throws IOException {
 		if (!is8Bit) {
 			byte bytes[] = super.GetBytesStartingFromSector(SectorNum, sz);
 			return (bytes);
 		} else {
-			byte rawsector[] = super.GetBytesStartingFromSector(SectorNum*2, sz * 2);
+			byte rawsector[] = super.GetBytesStartingFromSector(SectorNum * 2, sz * 2);
 			byte HalvedSector[] = HalfSector(rawsector);
 
 			return (HalvedSector);
@@ -163,7 +162,7 @@ public class IDEDosDisk extends RawHDDFile {
 	 * SetLogicalSector modified to take account of half sectors.
 	 * 
 	 * @param SectorNum
-	 * @param result 
+	 * @param result
 	 */
 	@Override
 	public void SetLogicalBlockFromSector(long SectorNum, byte result[]) throws IOException {
@@ -171,7 +170,7 @@ public class IDEDosDisk extends RawHDDFile {
 			super.SetLogicalBlockFromSector(SectorNum, result);
 		} else {
 			byte[] doubledData = DoubleSector(result);
-			super.SetLogicalBlockFromSector(SectorNum*2, doubledData);
+			super.SetLogicalBlockFromSector(SectorNum * 2, doubledData);
 		}
 	}
 

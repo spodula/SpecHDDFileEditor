@@ -124,7 +124,7 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 	 * @return 
 	 */
 	@Override
-	public byte[] GetBytesStartingFromSector(long SectorNum, int sz) throws IOException {
+	public byte[] GetBytesStartingFromSector(long SectorNum, long sz) throws IOException {
 		boolean NeedTohalf = !IsSectorHalved() && DataHalved;
 		
 		if (!NeedTohalf) {

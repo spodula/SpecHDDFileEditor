@@ -164,7 +164,7 @@ public class FloppyDisk implements Disk {
 	}
 
 	@Override
-	public byte[] GetBytesStartingFromSector(long SectorNum, int sz) throws IOException {
+	public byte[] GetBytesStartingFromSector(long SectorNum, long sz) throws IOException {
 		System.out.println("GetBytesStartingFromSector not implemented for " + getClass().getName());
 		return null;
 	}

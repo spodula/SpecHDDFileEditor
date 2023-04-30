@@ -279,13 +279,15 @@ public class MDFMicrodriveFile implements Disk {
 	 * @return
 	 */
 	@Override
-	public byte[] GetBytesStartingFromSector(long SectorNum, int sz) throws IOException {
+	public byte[] GetBytesStartingFromSector(long SectorNum, long sz) throws IOException {
 		// this is a hack to allow editing of the whole cartridge to work.
 		if (SectorNum == 0)
 			SectorNum = 0xfe;
 		// Note sectors count backwards on Microdrives.
-		byte result[] = new byte[sz];
-		int numleft = sz;
+		//As the maximum file length of a microdrive is 128Mb, Just casting to an INT.
+		byte result[] = new byte[(int)sz];
+
+		int numleft = (int)sz;
 		int ptr = 0;
 		byte data[] = new byte[0];
 		while ((numleft > 0) && (SectorNum > -1) && (data != null)) {

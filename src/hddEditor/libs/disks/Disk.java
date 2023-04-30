@@ -69,7 +69,7 @@ public interface Disk {
 	 * @return
 	 * @throws IOException
 	 */
-	public byte[] GetBytesStartingFromSector(long SectorNum, int sz) throws IOException;
+	public byte[] GetBytesStartingFromSector(long SectorNum, long sz) throws IOException;
 
 	/**
 	 * 

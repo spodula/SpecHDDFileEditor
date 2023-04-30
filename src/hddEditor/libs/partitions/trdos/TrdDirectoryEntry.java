@@ -64,7 +64,7 @@ public class TrdDirectoryEntry implements FileEntry {
 		 * For BASIC files, extract the line from the file.
 		 */
 		if ((CurrentDisk!=null) && (this.GetFileType()=='B')) {
-			int startsector = (GetStartTrack() * CurrentDisk.GetNumSectors()) + GetStartSector();
+			long startsector = (GetStartTrack() * CurrentDisk.GetNumSectors()) + GetStartSector();
 			//Want the 10 bytes past the EOF
 			int itemlength = GetFileSize()+0x10;
 			//Reduce the amount we have to read. Keep incrementing the sector until there is only one or two sectors left. 
@@ -340,10 +340,10 @@ public class TrdDirectoryEntry implements FileEntry {
 	public byte[] GetFileRawData() throws IOException {
 		int startsector = (GetStartTrack() * CurrentDisk.GetNumSectors()) + GetStartSector();
 
-		int length = GetFileSize();
+		long length = GetFileSize();
 		//check to see if this value is reasonable.
-		int FileSizeSectors = GetFileLengthSectors() * 256;
-		int diff = Math.abs(FileSizeSectors - length);
+		long FileSizeSectors = GetFileLengthSectors() * 256;
+		long diff = Math.abs(FileSizeSectors - length);
 		if (diff > 266) { //difference is out of range. (1 sector + 10 BASIC fiddle bytes)
 			//fiddle the file length.
 			length = FileSizeSectors;

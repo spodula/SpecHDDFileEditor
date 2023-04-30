@@ -291,12 +291,15 @@ public class RS_IDEFile implements HardDisk {
 	 * @param sz
 	 * @return
 	 */
-	public byte[] GetBytesStartingFromSector(long SectorNum, int sz) throws IOException {
+	public byte[] GetBytesStartingFromSector(long SectorNum, long sz) throws IOException {
 		if ((cachedSector == SectorNum) && (cache.length == sz)) {
 			return (cache);
 		}
 
-		byte result[] = new byte[sz];
+		//Note, this will restrict length for files of 128Mb. 
+		long asz = Math.min(sz,1024*1024*128);
+		byte result[] = new byte[(int)asz];
+
 		long location = SectorNum * SectorSize;
 
 		location = location + GetHDDataOffset();
