@@ -354,20 +354,7 @@ public class SystemPartPage extends GenericPage {
 			tc5.setWidth(100);
 			PartitionTable.setHeaderVisible(true);
 
-			for (IDEDosPartition part : sp.partitions) {
-				if (part.GetPartType() != 0) {
-					TableItem item2 = new TableItem(PartitionTable, SWT.NONE);
-					String content[] = new String[5];
-					content[0] = part.GetName();
-					content[1] = PLUSIDEDOS.GetTypeAsString(part.GetPartType());
-					content[2] = "Cyl:" + part.GetStartCyl() + " Head:" + part.GetStartHead();
-					content[3] = "Cyl:" + part.GetEndCyl() + " Head:" + part.GetEndHead();
-					content[4] = GeneralUtils.GetSizeAsString(part.GetSizeK() * 1024);
-
-					item2.setText(content);
-					item2.setData(part);
-				}
-			}
+			UpdatePartitionList();
 
 			PartitionTable.addSelectionListener(new SelectionListener() {
 				@Override
@@ -458,6 +445,29 @@ public class SystemPartPage extends GenericPage {
 
 			NewPartitionButton.setEnabled(CanEditPartitions);
 			ParentComp.pack();
+		}
+	}
+
+	/**
+	 * Update the partition list from the current partition (Assumed to be a system partition)
+	 */
+	private void UpdatePartitionList() {
+		SystemPartition sp = (SystemPartition) partition;
+		PartitionTable.removeAll();
+
+		for (IDEDosPartition part : sp.partitions) {
+			if (part.GetPartType() != 0) {
+				TableItem item2 = new TableItem(PartitionTable, SWT.NONE);
+				String content[] = new String[5];
+				content[0] = part.GetName();
+				content[1] = PLUSIDEDOS.GetTypeAsString(part.GetPartType());
+				content[2] = "Cyl:" + part.GetStartCyl() + " Head:" + part.GetStartHead();
+				content[3] = "Cyl:" + part.GetEndCyl() + " Head:" + part.GetEndHead();
+				content[4] = GeneralUtils.GetSizeAsString(part.GetSizeK() * 1024);
+
+				item2.setText(content);
+				item2.setData(part);
+			}
 		}
 	}
 
@@ -624,6 +634,8 @@ public class SystemPartPage extends GenericPage {
 					if (NewPartDialog.Show(sExistingPartitions) && !ParentComp.isDisposed()) {
 						try {
 							SystemPartition.CreatePartition(NewPartDialog.Name, NewPartDialog.SizeMB, NewPartDialog.PartType);
+							//update the partition list (Github issue #2: https://github.com/spodula/SpecHDDFileEditor/issues/2)
+							UpdatePartitionList();
 						} catch (PlusIDEDosException E) {
 							ErrorBox(E.partition+": "+ E.getMessage());							
 						}
