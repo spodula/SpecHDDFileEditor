@@ -38,7 +38,7 @@ public interface Disk {
 	 * @return
 	 * @throws IOException
 	 */
-	public int GetNumLogicalSectors();
+	public long GetNumLogicalSectors();
 	
 	/**
 	 * Close the disk, even if it doesn't want to..
@@ -59,7 +59,7 @@ public interface Disk {
 	 * @param result
 	 * @throws IOException
 	 */
-	public void SetLogicalBlockFromSector(int SectorNum, byte result[]) throws IOException;
+	public void SetLogicalBlockFromSector(long SectorNum, byte result[]) throws IOException;
 	
 	/**
 	 * Get a block of length SZ starting from the disk logical sector.
@@ -69,7 +69,7 @@ public interface Disk {
 	 * @return
 	 * @throws IOException
 	 */
-	public byte[] GetBytesStartingFromSector(int SectorNum, int sz) throws IOException;
+	public byte[] GetBytesStartingFromSector(long SectorNum, int sz) throws IOException;
 
 	/**
 	 * 

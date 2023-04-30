@@ -124,7 +124,7 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 	 * @return 
 	 */
 	@Override
-	public byte[] GetBytesStartingFromSector(int SectorNum, int sz) throws IOException {
+	public byte[] GetBytesStartingFromSector(long SectorNum, int sz) throws IOException {
 		boolean NeedTohalf = !IsSectorHalved() && DataHalved;
 		
 		if (!NeedTohalf) {
@@ -145,7 +145,7 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 	 * @param result[]
 	 */
 	@Override
-	public void SetLogicalBlockFromSector(int SectorNum, byte result[]) throws IOException {
+	public void SetLogicalBlockFromSector(long SectorNum, byte result[]) throws IOException {
 		boolean NeedToDouble = !IsSectorHalved() && DataHalved;
 		if (!NeedToDouble) {
 			super.SetLogicalBlockFromSector(SectorNum, result);

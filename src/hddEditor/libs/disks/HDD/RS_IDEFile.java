@@ -1,4 +1,5 @@
 package hddEditor.libs.disks.HDD;
+
 /**
  * Wrapper from V1.0 and V1.1 HDF hard disks as defined by RealSpectrum by Ramsoft. 
  * 
@@ -38,6 +39,7 @@ public class RS_IDEFile implements HardDisk {
 	public String GetFilename() {
 		return (filename);
 	}
+
 	@Override
 	public void SetFilename(String filename) {
 		this.filename = filename;
@@ -50,6 +52,7 @@ public class RS_IDEFile implements HardDisk {
 	public int GetSectorSize() {
 		return (SectorSize);
 	}
+
 	@Override
 	public void SetSectorSize(int sz) {
 		this.SectorSize = sz;
@@ -62,11 +65,11 @@ public class RS_IDEFile implements HardDisk {
 	public int GetNumCylinders() {
 		return (NumCylinders);
 	}
+
 	@Override
 	public void SetNumCylinders(int sz) {
 		this.NumCylinders = sz;
 	}
-
 
 	/**
 	 * Get the file size
@@ -83,6 +86,7 @@ public class RS_IDEFile implements HardDisk {
 	public int GetNumHeads() {
 		return (NumHeads);
 	}
+
 	@Override
 	public void SetNumHeads(int sz) {
 		this.NumHeads = sz;
@@ -95,17 +99,17 @@ public class RS_IDEFile implements HardDisk {
 	public int GetNumSectors() {
 		return (NumSectors);
 	}
+
 	@Override
 	public void SetNumSectors(int sz) {
 		this.NumSectors = sz;
 	}
 
-
 	// Simple one sector cache
 	private byte[] cache;
-	private int cachedSector = -1;
+	private long cachedSector = -1;
 
-	//Raw header data
+	// Raw header data
 	private byte RawHeaderData[] = null;
 
 	/**
@@ -120,6 +124,7 @@ public class RS_IDEFile implements HardDisk {
 		FileSize = new File(filename).length();
 		ParseDiskInfo();
 	}
+
 	public RS_IDEFile() {
 		super();
 	}
@@ -194,7 +199,7 @@ public class RS_IDEFile implements HardDisk {
 	 * @return
 	 * @throws IOException
 	 */
-	public int GetNumLogicalSectors() {
+	public long GetNumLogicalSectors() {
 		long filesize = 0;
 		try {
 			filesize = Files.size(Paths.get(filename));
@@ -203,7 +208,7 @@ public class RS_IDEFile implements HardDisk {
 			System.out.println("Failed to get filesize. " + e.getMessage());
 		}
 		long numsectors = filesize / SectorSize;
-		return ((int) numsectors);
+		return (numsectors);
 	}
 
 	/**
@@ -233,7 +238,7 @@ public class RS_IDEFile implements HardDisk {
 	}
 
 	/**
-	 * Get the File revision. 
+	 * Get the File revision.
 	 * 
 	 * @return
 	 */
@@ -260,12 +265,12 @@ public class RS_IDEFile implements HardDisk {
 	}
 
 	/**
-	 * Set the given block of data from the given logical sector. 
+	 * Set the given block of data from the given logical sector.
 	 * 
 	 * @param SectorNum
 	 * @param result
 	 */
-	public void SetLogicalBlockFromSector(int SectorNum, byte result[]) throws IOException {
+	public void SetLogicalBlockFromSector(long SectorNum, byte result[]) throws IOException {
 		cachedSector = -1;
 
 		long location = SectorNum * SectorSize;
@@ -286,7 +291,7 @@ public class RS_IDEFile implements HardDisk {
 	 * @param sz
 	 * @return
 	 */
-	public byte[] GetBytesStartingFromSector(int SectorNum, int sz) throws IOException {
+	public byte[] GetBytesStartingFromSector(long SectorNum, int sz) throws IOException {
 		if ((cachedSector == SectorNum) && (cache.length == sz)) {
 			return (cache);
 		}
@@ -310,7 +315,7 @@ public class RS_IDEFile implements HardDisk {
 	 * Check to see if the given file has a valid HDF header.
 	 * 
 	 * @param filename
-	 * @return 
+	 * @return
 	 */
 	@Override
 	public Boolean IsMyFileType(File filename) throws IOException {
@@ -337,5 +342,4 @@ public class RS_IDEFile implements HardDisk {
 		return PLUSIDEDOS.MEDIATYPE_HDD;
 	}
 
-	
 }

@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 import hddEditor.libs.PLUSIDEDOS;
 
 public class RawHDDFile implements HardDisk {
-	// File handle
+	// File handle 
 	private RandomAccessFile inFile = null;
 	// filename of the currently open file
 	public String filename = "";
@@ -34,7 +34,7 @@ public class RawHDDFile implements HardDisk {
 
 	// Simple one sector cache
 	private byte[] cache;
-	private int cachedSector = -1;
+	private long cachedSector = -1;
 
 	/**
 	 * Get and set the filename
@@ -133,7 +133,7 @@ public class RawHDDFile implements HardDisk {
 	 * @return
 	 * @throws IOException
 	 */
-	public int GetNumLogicalSectors() {
+	public long GetNumLogicalSectors() {
 		long filesize = 0;
 		try {
 			filesize = Files.size(Paths.get(filename));
@@ -141,7 +141,7 @@ public class RawHDDFile implements HardDisk {
 			System.out.println("Failed to get filesize. " + e.getMessage());
 		}
 		long numsectors = filesize / SectorSize;
-		return ((int) numsectors);
+		return (numsectors);
 	}
 
 	/**
@@ -191,7 +191,7 @@ public class RawHDDFile implements HardDisk {
 	 * @param result
 	 * @throws IOException
 	 */
-	public void SetLogicalBlockFromSector(int SectorNum, byte result[]) throws IOException {
+	public void SetLogicalBlockFromSector(long SectorNum, byte result[]) throws IOException {
 		cachedSector = -1;
 
 		long location = SectorNum * SectorSize;
@@ -211,7 +211,7 @@ public class RawHDDFile implements HardDisk {
 	 * @return
 	 * @throws IOException
 	 */
-	public byte[] GetBytesStartingFromSector(int SectorNum, int sz) throws IOException {
+	public byte[] GetBytesStartingFromSector(long SectorNum, int sz) throws IOException {
 		if ((cachedSector == SectorNum) && (cache.length == sz)) {
 			return (cache);
 		}

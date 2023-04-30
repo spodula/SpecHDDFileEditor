@@ -147,7 +147,7 @@ public class IDEDosDisk extends RawHDDFile {
 	 * @param sz 
 	 */
 	@Override
-	public byte[] GetBytesStartingFromSector(int SectorNum, int sz) throws IOException {
+	public byte[] GetBytesStartingFromSector(long SectorNum, int sz) throws IOException {
 		if (!is8Bit) {
 			byte bytes[] = super.GetBytesStartingFromSector(SectorNum, sz);
 			return (bytes);
@@ -166,7 +166,7 @@ public class IDEDosDisk extends RawHDDFile {
 	 * @param result 
 	 */
 	@Override
-	public void SetLogicalBlockFromSector(int SectorNum, byte result[]) throws IOException {
+	public void SetLogicalBlockFromSector(long SectorNum, byte result[]) throws IOException {
 		if (!is8Bit) {
 			super.SetLogicalBlockFromSector(SectorNum, result);
 		} else {

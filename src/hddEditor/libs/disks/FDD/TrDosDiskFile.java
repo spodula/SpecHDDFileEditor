@@ -183,7 +183,7 @@ public class TrDosDiskFile extends FloppyDisk {
 	 * A bit more complex than the simple Files.
 	 */
 	@Override
-	public byte[] GetBytesStartingFromSector(int SectorNum, int sz) throws IOException {
+	public byte[] GetBytesStartingFromSector(long SectorNum, int sz) throws IOException {
 		byte result[] = new byte[sz];
 		// Find the track and sector...
 		int TrStart = 0;
@@ -196,12 +196,12 @@ public class TrDosDiskFile extends FloppyDisk {
 		// Track is now the start track.
 		TrackNum--;
 		TrStart = TrStart - Track.Sectors.length;
-		int FirstSector = SectorNum - TrStart + Track.minsectorID;
+		long FirstSector = SectorNum - TrStart + Track.minsectorID;
 
 		int ptr = 0;
 		byte sector[] = new byte[1];
 		while ((ptr < sz) && (sector.length > 0)) {
-			sector = Track.GetSectorBySectorID(FirstSector).data;
+			sector = Track.GetSectorBySectorID((int)FirstSector).data;
 			System.arraycopy(sector, 0, result, ptr, Math.min(sector.length, result.length - ptr));
 
 			ptr = ptr + sector.length;
@@ -224,7 +224,7 @@ public class TrDosDiskFile extends FloppyDisk {
 	 * Write block from logical sector.
 	 */
 	@Override
-	public void SetLogicalBlockFromSector(int SectorNum, byte[] result) throws IOException {
+	public void SetLogicalBlockFromSector(long SectorNum, byte[] result) throws IOException {
 		// Find the track and sector...
 		int TrStart = 0;
 		int TrackNum = 0;
@@ -236,12 +236,12 @@ public class TrDosDiskFile extends FloppyDisk {
 		// Track is now the start track.
 		TrackNum--;
 		TrStart = TrStart - Track.Sectors.length;
-		int FirstSector = SectorNum - TrStart + Track.minsectorID;
+		long FirstSector = SectorNum - TrStart + Track.minsectorID;
 
 		int ptr = 0;
 		byte sectorData[] = new byte[1];
 		while ((ptr < result.length)) {
-			Sector sect = Track.GetSectorBySectorID(FirstSector);
+			Sector sect = Track.GetSectorBySectorID((int)FirstSector);
 			sectorData = sect.data;
 			System.arraycopy(result, ptr, sectorData, 0, Math.min(sectorData.length, result.length - ptr));
 			WriteSector(sect);

@@ -122,7 +122,7 @@ public class FloppyDisk implements Disk {
 	}
 
 	@Override
-	public int GetNumLogicalSectors() {
+	public long GetNumLogicalSectors() {
 		return NumLogicalSectors;
 	}
 
@@ -159,12 +159,12 @@ public class FloppyDisk implements Disk {
 	}
 
 	@Override
-	public void SetLogicalBlockFromSector(int SectorNum, byte[] result) throws IOException {
+	public void SetLogicalBlockFromSector(long SectorNum, byte[] result) throws IOException {
 		System.out.println("SetLogicalBlockFromSector not implemented for " + getClass().getName());
 	}
 
 	@Override
-	public byte[] GetBytesStartingFromSector(int SectorNum, int sz) throws IOException {
+	public byte[] GetBytesStartingFromSector(long SectorNum, int sz) throws IOException {
 		System.out.println("GetBytesStartingFromSector not implemented for " + getClass().getName());
 		return null;
 	}

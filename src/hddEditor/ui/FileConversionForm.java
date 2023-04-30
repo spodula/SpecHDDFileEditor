@@ -295,7 +295,8 @@ public class FileConversionForm {
 
 			System.out.println("Openning " + targFile + " for writing...");
 			try {
-
+				//GDS 30 Apr: Bug #1: Converted to use LONGs for sector numbers.
+				long ProgressScaleNum = 1;   //Scale value.
 				FileOutputStream TargetFile = new FileOutputStream(targFile);
 				try {
 					//Write HDF file if needed
@@ -303,12 +304,19 @@ public class FileConversionForm {
 						HDFUtils.WriteHDFFileHeader(SourceDisk, TargetFile, IsTarget8Bit);
 					}
 					// Write each sector in turn.
-					int Numsectors = SourceDisk.GetNumLogicalSectors();
-					pf.SetMax(Numsectors);
+					long Numsectors = SourceDisk.GetNumLogicalSectors();
+					
+					//Bug #1: Calculate the scale for the progress display sector number.
+					long ScaledNumSectors = Numsectors;
+					while (ScaledNumSectors > 100000) {
+						ScaledNumSectors = ScaledNumSectors / 10;
+						ProgressScaleNum = ProgressScaleNum * 10; 
+					}
+					pf.SetMax((int)ScaledNumSectors);
 					
 					System.out.println("Copying " + Numsectors + " sectors.");
 					int SectorSz = SourceDisk.GetSectorSize();
-					for (int sectorNum = 0; (sectorNum < Numsectors) && !cancelled; sectorNum++) {
+					for (long sectorNum = 0; (sectorNum < Numsectors) && !cancelled; sectorNum++) {
 						byte sector[] = SourceDisk.GetBytesStartingFromSector(sectorNum, SectorSz);
 						if (IsTarget8Bit & !IsTargetHDF) {
 							sector = PLUSIDEDOS.DoubleSector(sector);
@@ -320,7 +328,8 @@ public class FileConversionForm {
 						}
 						if (sectorNum % 2000 == 0) {
 							System.out.print(".");
-							pf.SetValue(sectorNum);
+							//Bug #1: Scale the sector number for the progress display
+							pf.SetValue((int) (sectorNum / ProgressScaleNum));
 							cancelled = pf.IsCancelled();
 							display.readAndDispatch();
 						}

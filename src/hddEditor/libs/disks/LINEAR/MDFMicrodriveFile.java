@@ -117,7 +117,7 @@ public class MDFMicrodriveFile implements Disk {
 	}
 
 	@Override
-	public int GetNumLogicalSectors() {
+	public long GetNumLogicalSectors() {
 		return Sectors.length;
 	}
 
@@ -204,7 +204,7 @@ public class MDFMicrodriveFile implements Disk {
 	 * @param SectorNum
 	 * @param result
 	 */
-	public void SetLogicalBlockFromSector(int SectorNum, byte[] result) throws IOException {
+	public void SetLogicalBlockFromSector(long SectorNum, byte[] result) throws IOException {
 		SetMDLogicalBlockFromSector(SectorNum, result, false, true, "");
 	}
 
@@ -217,14 +217,15 @@ public class MDFMicrodriveFile implements Disk {
 	 * @param InUse
 	 * @throws IOException
 	 */
-	public void SetMDLogicalBlockFromSector(int SectorNum, byte[] SourceFile, boolean SetFinal, boolean InUse,
+	public void SetMDLogicalBlockFromSector(long SectorNum, byte[] SourceFile, boolean SetFinal, boolean InUse,
 			String filename) throws IOException {
 		int numleft = SourceFile.length;
 		int CurrentLoc = 0;
 		byte data[] = new byte[0];
 		int FileSegmentNumber = 0;
 		while ((numleft > 0) && (SectorNum != 0xff) && (data != null)) {
-			MicrodriveSector mds = GetSectorBySectorNumber(SectorNum--);
+			MicrodriveSector mds = GetSectorBySectorNumber((int)SectorNum);
+			SectorNum = SectorNum-1;
 			if (mds != null) {
 				data = new byte[513]; // 512 bytes + checksum
 				// Copy the data to the sector
@@ -278,7 +279,7 @@ public class MDFMicrodriveFile implements Disk {
 	 * @return
 	 */
 	@Override
-	public byte[] GetBytesStartingFromSector(int SectorNum, int sz) throws IOException {
+	public byte[] GetBytesStartingFromSector(long SectorNum, int sz) throws IOException {
 		// this is a hack to allow editing of the whole cartridge to work.
 		if (SectorNum == 0)
 			SectorNum = 0xfe;
@@ -288,7 +289,8 @@ public class MDFMicrodriveFile implements Disk {
 		int ptr = 0;
 		byte data[] = new byte[0];
 		while ((numleft > 0) && (SectorNum > -1) && (data != null)) {
-			MicrodriveSector mds = GetSectorBySectorNumber(SectorNum--);
+			MicrodriveSector mds = GetSectorBySectorNumber((int)SectorNum);
+			SectorNum--;
 			if (mds != null) {
 				data = mds.SectorData;
 				// make sure we don't run out of sectors.
