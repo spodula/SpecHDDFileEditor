@@ -569,7 +569,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress) throws IOException {
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted) throws IOException {
 		FileWriter SysConfig;
 		try {
 			SysConfig = new FileWriter(new File(folder, "partition.index"));

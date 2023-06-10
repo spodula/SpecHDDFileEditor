@@ -445,7 +445,7 @@ public class IDEDosPartition {
 	 * @param progress
 	 * @throws IOException
 	 */
-	public void ExtractPartitiontoFolderAdvanced(File folder,int BasicAction, int CodeAction, int ArrayAction, int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress) throws IOException {
+	public void ExtractPartitiontoFolderAdvanced(File folder,int BasicAction, int CodeAction, int ArrayAction, int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted) throws IOException {
 		System.out.println("Class "+this.getClass().getName()+" does not support ExtractPartitiontoFolderAdvanced.");		
 	}
 

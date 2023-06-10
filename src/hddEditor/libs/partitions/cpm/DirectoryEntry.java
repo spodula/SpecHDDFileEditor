@@ -266,20 +266,20 @@ public class DirectoryEntry implements FileEntry {
 
 		return (result);
 	}
-	
+
 	/**
 	 * Get the file data. This will remove any +3DOS header
 	 */
 	@Override
 	public byte[] GetFileData() throws IOException {
 		byte data[] = GetFileRawData();
-		if (GetPlus3DosHeader().IsPlusThreeDosFile ) {
-			//Remove the +3DOS header
-			byte newdata[] = new byte[data.length-0x80];
+		if (GetPlus3DosHeader().IsPlusThreeDosFile) {
+			// Remove the +3DOS header
+			byte newdata[] = new byte[data.length - 0x80];
 			System.arraycopy(data, 0x80, newdata, 0, newdata.length);
 			data = newdata;
 		}
-		return(data);
+		return (data);
 	}
 
 	/**
@@ -350,29 +350,44 @@ public class DirectoryEntry implements FileEntry {
 	 * @throws IOException
 	 */
 	public void SetDeleted(boolean deleted) throws IOException {
-		// first, set all the dirents.
-		for (Dirent d : dirents) {
-			if (deleted) {
-				d.setType(Dirent.DIRENT_DELETED);
-			} else {
-				d.setType(Dirent.DIRENT_FILE);
-			}
-		}
-		// update the deleted flag
-		IsDeleted = deleted;
-		// fix sectors
-		ThisPartition.updateDirentBlocks();
-		// update the BAM.
-		int blocks[] = getBlocks();
-		for (int i = 0; i < blocks.length; i++) {
-			int blocknum = blocks[i];
-			if (deleted) {
+		if (deleted && IsDeleted) {
+			// update the BAM.
+			int blocks[] = getBlocks();
+			for (int i = 0; i < blocks.length; i++) {
+				int blocknum = blocks[i];
 				ThisPartition.bam[blocknum] = false;
-			} else {
-				if (ThisPartition.bam[blocknum]) {
-					System.out.println("Warning! Block " + blocknum + " Already in use!");
+			}
+			for (Dirent d : dirents) {
+				for (int i=0;i<32;i++) 
+					d.rawdirent[i] = (byte) (0xf5 & 0xff);
+			}
+			ThisPartition.updateDirentBlocks();
+			ThisPartition.ExtractDirectoryListing();
+		} else {
+			// first, set all the dirents.
+			for (Dirent d : dirents) {
+				if (deleted) {
+					d.setType(Dirent.DIRENT_DELETED);
 				} else {
-					ThisPartition.bam[blocknum] = true;
+					d.setType(Dirent.DIRENT_FILE);
+				}
+			}
+			// update the deleted flag
+			IsDeleted = deleted;
+			// fix sectors
+			ThisPartition.updateDirentBlocks();
+			// update the BAM.
+			int blocks[] = getBlocks();
+			for (int i = 0; i < blocks.length; i++) {
+				int blocknum = blocks[i];
+				if (deleted) {
+					ThisPartition.bam[blocknum] = false;
+				} else {
+					if (ThisPartition.bam[blocknum]) {
+						System.out.println("Warning! Block " + blocknum + " Already in use!");
+					} else {
+						ThisPartition.bam[blocknum] = true;
+					}
 				}
 			}
 		}

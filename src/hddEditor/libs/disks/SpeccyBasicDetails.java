@@ -25,4 +25,18 @@ public class SpeccyBasicDetails {
 		return(Speccy.SpecFileTypeToString(BasicType));
 	}
 	
+	/**
+	 * return details as a string.
+	 */
+	@Override
+	public String toString() {
+		String result = "BASIC type ID: "+BasicType+"\n"+
+	                    "Variable start: "+VarStart+"\n"+
+	                    "Start run Line: "+LineStart+"\n"+
+	                    "Load address: "+LoadAddress+"\n"+
+	                    "Variable name: "+VarName;
+		return(result);
+	}
+	
+	
 }

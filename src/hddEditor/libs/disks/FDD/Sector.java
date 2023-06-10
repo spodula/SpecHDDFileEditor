@@ -9,7 +9,7 @@ package hddEditor.libs.disks.FDD;
 
 public class Sector {
 	//Start of sector in file.
-	public int SectorStart = 0;
+	public long SectorStart = 0;
 
 	// Equivalent to the C, H, R flags from the 765
 	public int track = 0; // Cyl

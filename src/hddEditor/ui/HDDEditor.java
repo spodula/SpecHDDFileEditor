@@ -1,4 +1,5 @@
 package hddEditor.ui;
+
 /**
  * Main UI.
  */
@@ -9,6 +10,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -34,6 +38,7 @@ import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FDD.AMSDiskFile;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
+import hddEditor.libs.disks.FDD.MGTDiskFile;
 import hddEditor.libs.disks.FDD.SCLDiskFile;
 import hddEditor.libs.disks.FDD.TrDosDiskFile;
 import hddEditor.libs.disks.HDD.IDEDosDisk;
@@ -47,6 +52,7 @@ import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.ui.partitionPages.FloppyBootTrackPage;
 import hddEditor.ui.partitionPages.FloppyGenericPage;
 import hddEditor.ui.partitionPages.GenericPage;
+import hddEditor.ui.partitionPages.MGTDosPartitionPage;
 import hddEditor.ui.partitionPages.MicrodrivePartitionPage;
 import hddEditor.ui.partitionPages.PlusThreePartPage;
 import hddEditor.ui.partitionPages.SystemPartPage;
@@ -68,6 +74,7 @@ public class HDDEditor {
 	private Combo PartitionDropdown = null;
 
 	// Main page containing the partition information.
+	
 	private Composite MainPage = null;
 
 	private FileConversionForm fileConvForm = null;
@@ -129,9 +136,15 @@ public class HDDEditor {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 				FileDialog fd = new FileDialog(shell, SWT.OPEN);
-				fd.setText("Open");
-				String[] filterExt = { "*", "*.img", "*.hdf" };
+				fd.setText("Open a disk file...");
+				String[] filterExt = { "*", "*.img", "*.hdf","*.mgt","*.trd","*.scl","*.mdr","mgt" };
 				fd.setFilterExtensions(filterExt);
+				
+				if (CurrentDisk.IsOpen()) {
+					File f = new File(CurrentDisk.GetFilename());
+					fd.setFilterPath(f.getPath());
+				}
+				
 				String selected = fd.open();
 				if (selected != null) {
 					LoadFile(selected);
@@ -193,7 +206,6 @@ public class HDDEditor {
 		shell.setMenuBar(menuBar);
 	}
 
-
 	/**
 	 * Make and populate the partition dropdown
 	 * 
@@ -226,7 +238,7 @@ public class HDDEditor {
 	public void MakeForm() {
 		display = new Display();
 		shell = new Shell(display);
-		shell.setSize(920, 834);
+		shell.setSize(920, 864);
 		shell.addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent arg0) {
@@ -249,17 +261,40 @@ public class HDDEditor {
 		gridLayout.numColumns = 1;
 		gridLayout.marginLeft = 20;
 		gridLayout.marginRight = 20;
+		gridLayout.marginBottom = 20;
 		shell.setLayout(gridLayout);
 
 		MakeMenus();
 		MakeDropdown();
 
-		MainPage = new Composite(shell, SWT.NONE);
+		ScrolledComposite MainPage1 = new ScrolledComposite(shell, SWT.NONE);
+		MainPage1.setExpandHorizontal(true);
+		MainPage1.setExpandVertical(true);
+		MainPage1.setAlwaysShowScrollBars(true);
+		GridData gd = new GridData(GridData.FILL_BOTH);
+		gd.horizontalSpan = 4;
+		MainPage1.setLayoutData(gd);
+
+		MainPage = new Composite(MainPage1, SWT.NONE);
+		MainPage1.setContent(MainPage);
+		
 		gridLayout = new GridLayout();
 		gridLayout.numColumns = 4;
 		gridLayout.makeColumnsEqualWidth = true;
-		MainPage.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, true));
 		MainPage.setLayout(gridLayout);
+		
+		MainPage1.addControlListener(new ControlListener() {
+			
+			@Override
+			public void controlResized(ControlEvent arg0) {
+				MainPage1.setMinSize(MainPage.computeSize(MainPage1.getClientArea().width, SWT.DEFAULT));
+			}
+			
+			@Override
+			public void controlMoved(ControlEvent arg0) {
+			}
+		});
+				
 
 		shell.addListener(SWT.Close, new Listener() {
 			public void handleEvent(Event event) {
@@ -291,7 +326,7 @@ public class HDDEditor {
 				ScriptRunner sr = new ScriptRunner();
 				String splitParam[] = args[0].split("=");
 				sr.RunScript(splitParam[1]);
-			} else {			
+			} else {
 				HDDEditor hdi = new HDDEditor();
 				hdi.MakeForm();
 				hdi.LoadFile(args[0]);
@@ -355,12 +390,16 @@ public class HDDEditor {
 				result = new SCLDiskFile(selected);
 			} else if (new TrDosDiskFile().IsMyFileType(new File(selected))) {
 				result = new TrDosDiskFile(selected);
+			} else if (new MGTDiskFile().IsMyFileType(new File(selected))) {
+				result = new MGTDiskFile(selected);
 			} else if (new MDFMicrodriveFile().IsMyFileType(new File(selected))) {
 				result = new MDFMicrodriveFile(selected);
 			} else {
 				MessageBox messageBox = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-				messageBox.setMessage("File " + selected + " is not a Raw HD image,a RS HDF drive image, a DSK file or a TR-DOS file.");
-				messageBox.setText("File " + selected + " is not a Raw HD image,a RS HDF drive image, a DSK file or a TR-DOS file.");
+				messageBox.setMessage("File " + selected
+						+ " is not a supported file type.");
+				messageBox.setText("File " + selected
+						+ " is not a supported file type.");
 				messageBox.open();
 			}
 			/*
@@ -371,11 +410,11 @@ public class HDDEditor {
 			if (result != null)
 				System.out.println("Using " + result.getClass().getName());
 		} catch (Exception e) {
-			if (shell!=null) {
-			MessageBox messageBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-			messageBox.setMessage("Error openning file " + selected + " " + e.getMessage());
-			messageBox.setText("Error openning file " + selected + " " + e.getMessage());
-			messageBox.open();
+			if (shell != null) {
+				MessageBox messageBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+				messageBox.setMessage("Error openning file " + selected + " " + e.getMessage());
+				messageBox.setText("Error openning file " + selected + " " + e.getMessage());
+				messageBox.open();
 			} else {
 				System.out.println("Error openning file " + selected + " " + e.getMessage());
 			}
@@ -397,7 +436,8 @@ public class HDDEditor {
 			ArrayList<String> al = new ArrayList<String>();
 			for (IDEDosPartition part : CurrentHandler.SystemPart.partitions) {
 				if (part.GetPartType() != 0) {
-					String s = String.format("%-20s - %-16s %s", part.GetName(), PLUSIDEDOS.GetTypeAsString(part.GetPartType()),
+					String s = String.format("%-20s - %-16s %s", part.GetName(),
+							PLUSIDEDOS.GetTypeAsString(part.GetPartType()),
 							GeneralUtils.GetSizeAsString(part.GetSizeK() * 1024));
 					al.add(s);
 				}
@@ -405,12 +445,13 @@ public class HDDEditor {
 			entries = al.toArray(new String[0]);
 		}
 		PartitionDropdown.setItems(entries);
-		
-		//QOL improvement, GDS 11 Jan: if we are NOT dealing with a hard drive, default to probably the only real partition.
-		if (CurrentDisk.GetMediaType() ==  PLUSIDEDOS.MEDIATYPE_HDD) {
+
+		// QOL improvement, GDS 11 Jan: if we are NOT dealing with a hard drive, default
+		// to probably the only real partition.
+		if (CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_HDD) {
 			PartitionDropdown.setText(entries[0]);
 		} else {
-			PartitionDropdown.setText(entries[entries.length-1]);
+			PartitionDropdown.setText(entries[entries.length - 1]);
 		}
 		ComboChanged();
 	}
@@ -473,6 +514,9 @@ public class HDDEditor {
 		case PLUSIDEDOS.PARTITION_TAPE_SINCLAIRMICRODRIVE:
 			new MicrodrivePartitionPage(null, MainPage, part);
 			break;
+		case PLUSIDEDOS.PARTITION_DISK_PLUSD: 
+			new MGTDosPartitionPage(null, MainPage, part);
+			break;
 		case PLUSIDEDOS.PARTITION_UNKNOWN:
 			new FloppyGenericPage(null, MainPage, part);
 			break;
@@ -500,7 +544,7 @@ public class HDDEditor {
 		if (newfile != null)
 			LoadFile(newfile);
 	}
-	
+
 	/**
 	 * New floppy disk file
 	 */

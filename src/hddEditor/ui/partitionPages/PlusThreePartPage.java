@@ -122,35 +122,9 @@ public class PlusThreePartPage extends GenericPage {
 			tc4.setWidth(150);
 			tc5.setWidth(100);
 			DirectoryListing.setHeaderVisible(true);
+			
+			PopulateDirectory();
 
-			for (DirectoryEntry entry : pdp.DirectoryEntries) {
-				TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
-				item2.setData(entry);
-				String content[] = new String[5];
-				content[0] = entry.GetFilename();
-				Plus3DosFileHeader pfdh = entry.GetPlus3DosHeader();
-				if (pfdh.IsPlusThreeDosFile) {
-					content[1] = pfdh.getTypeDesc();
-					content[3] = String.valueOf(pfdh.fileSize - 0x80);
-				} else {
-					content[1] = "CPM/Invalid +3 Header";
-				}
-				content[2] = String.valueOf(entry.GetRawFileSize());
-				String s = "";
-				if (entry.IsDeleted) {
-					s = s + ",Deleted";
-				}
-				if (!entry.IsComplete()) {
-					s = s + ",Incomplete";
-				} else {
-					s = s + ",Complete";
-				}
-				if (!s.isEmpty()) {
-					s = s.substring(1);
-				}
-				content[4] = s;
-				item2.setText(content);
-			}
 
 			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.widthHint = 200;
@@ -248,7 +222,41 @@ public class PlusThreePartPage extends GenericPage {
 		}
 	}
 
+	private void PopulateDirectory() {
+		DirectoryListing.clearAll();
+		DirectoryListing.removeAll();
+		
+		PLUS3DOSPartition pdp = (PLUS3DOSPartition) partition;
+		for (DirectoryEntry entry : pdp.DirectoryEntries) {
+			TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
+			item2.setData(entry);
+			String content[] = new String[5];
+			content[0] = entry.GetFilename();
+			Plus3DosFileHeader pfdh = entry.GetPlus3DosHeader();
+			if (pfdh.IsPlusThreeDosFile) {
+				content[1] = pfdh.getTypeDesc();
+				content[3] = String.valueOf(pfdh.fileSize - 0x80);
+			} else {
+				content[1] = "CPM/Invalid +3 Header";
+			}
+			content[2] = String.valueOf(entry.GetRawFileSize());
+			String s = "";
+			if (entry.IsDeleted) {
+				s = s + ",Deleted";
+			}
+			if (!entry.IsComplete()) {
+				s = s + ",Incomplete";
+			} else {
+				s = s + ",Complete";
+			}
+			if (!s.isEmpty()) {
+				s = s.substring(1);
+			}
+			content[4] = s;
+			item2.setText(content);
+		}
 
+	}
 
 	/**
 	 * The EDIT FILE button has been pressed.
@@ -334,6 +342,7 @@ public class PlusThreePartPage extends GenericPage {
 					entry.SetDeleted(true);
 					AddComponents();
 				}
+				PopulateDirectory();
 			} catch (IOException e) {
 				ErrorBox("Error reading partition: " + e.getMessage());
 				e.printStackTrace();

@@ -31,6 +31,7 @@ public class FileExportAllPartitionsForm {
 	private Button SelectTargetFileBtn = null;
 	private Button CloseBtn = null;
 	private Button ExportBtn = null;
+	private Button IncludeDeleted = null;
 
 	private Combo BasicTargetFileType = null;
 	private Combo CodeTargetFileType = null;
@@ -43,7 +44,7 @@ public class FileExportAllPartitionsForm {
 	private String result = null;
 
 	// Entries for the comboboxes.
-	private String BasicEntries[] = { "Text", "Raw", "Raw+Header", "Hex" };
+	private String BasicEntries[] = { "Text", "Raw", "Raw+Header", "Hex", "Assembly" };
 	private String CodeEntries[] = { "Hex", "Raw", "Raw+Header", "Assembly" };
 	private String ArrayEntries[] = { "CSV", "Raw", "Raw+Header", "Hex" };
 	private String ScreenEntries[] = { "PNG", "GIF", "JPEG", "Raw", "Raw+Header", "Hex", "Assembly" };
@@ -190,6 +191,14 @@ public class FileExportAllPartitionsForm {
 		SwapTargetFileType.setText(SwapEntries[0]);
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
+		
+		lbl = new Label(shell, SWT.NONE);
+		lbl.setText("Include deleted files?:");
+		IncludeDeleted = new Button(shell, SWT.CHECK);
+		IncludeDeleted.setSelection(false);
+		new Label(shell, SWT.NONE);
+		new Label(shell, SWT.NONE);
+		
 
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
@@ -340,7 +349,7 @@ public class FileExportAllPartitionsForm {
 									pep.setMessage2(text);
 									return (pep.IsCancelled());
 								}
-							});
+							},IncludeDeleted.getSelection());
 
 					long finish = System.currentTimeMillis();
 					System.out.println(String.valueOf(finish - start) + "ms");
@@ -354,8 +363,11 @@ public class FileExportAllPartitionsForm {
 		return true;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	protected boolean DoExport() {
-
 		int BasicType = TextToIndex(BasicTargetFileType.getText(), GeneralUtils.MasterList);
 		int CodeType = TextToIndex(CodeTargetFileType.getText(), GeneralUtils.MasterList);
 		int ArrayType = TextToIndex(ArrayTargetFileType.getText(), GeneralUtils.MasterList);
@@ -390,8 +402,13 @@ public class FileExportAllPartitionsForm {
 						&& partition.GetPartType() != PLUSIDEDOS.PARTITION_UNKNOWN
 						&& partition.GetPartType() != PLUSIDEDOS.PARTITION_BAD) {
 
-					File BaseFolder = new File(directory, partition.GetName());
+
+					String strDirName = partition.GetName().replace("+", "Plus");
+					strDirName = strDirName.replace("/", "").replace("*", "");
+
+					File BaseFolder = new File(directory, strDirName);
 					System.out.print("Extracting partition" + BaseFolder + " - ");
+
 					if (!BaseFolder.exists()) {
 						BaseFolder.mkdir();
 					}
@@ -411,7 +428,7 @@ public class FileExportAllPartitionsForm {
 										pep.setMessage2(text);
 										return (pep.IsCancelled());
 									}
-								});
+								},IncludeDeleted.getSelection());
 
 						long finish = System.currentTimeMillis();
 						System.out.println(String.valueOf(finish - start) + "ms");

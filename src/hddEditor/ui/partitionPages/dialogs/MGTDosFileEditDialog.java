@@ -1,4 +1,4 @@
-package hddEditor.ui.partitionPages.dialogs; 
+package hddEditor.ui.partitionPages.dialogs;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -13,13 +13,15 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
+import hddEditor.libs.MGT;
+import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
+import hddEditor.ui.partitionPages.FileRenderers.MGT48kSnapshotRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 
-public class TrDosFileEditDialog {
+public class MGTDosFileEditDialog {
 	// Title of the page
 	private String Title = "";
 
@@ -38,7 +40,18 @@ public class TrDosFileEditDialog {
 	public byte[] data = new byte[0];
 
 	// Directory entry of the file being displayed
-	private TrdDirectoryEntry ThisEntry = null;
+	private MGTDirectoryEntry ThisEntry = null;
+
+	public MGTDosFileEditDialog(Display display) {
+		this.display = display;
+	}
+
+	public void close() {
+		shell.close();
+		if (!shell.isDisposed()) {
+			shell.dispose();
+		}
+	}
 
 	/*
 	 * Set modified text in the title
@@ -52,34 +65,6 @@ public class TrDosFileEditDialog {
 	}
 
 	/**
-	 * Constructor
-	 * 
-	 * @param display
-	 */
-	public TrDosFileEditDialog(Display display) {
-		this.display = display;
-	}
-
-	/**
-	 * Show the form
-	 * 
-	 * @param data
-	 * @param title
-	 * @param entry
-	 * @return
-	 */
-	public boolean Show(byte[] data, String title, TrdDirectoryEntry entry) {
-		this.result = false;
-		this.ThisEntry = entry;
-		this.Title = title;
-		this.data = data;
-		Createform();
-		SetModified(false);
-		loop();
-		return (result);
-	}
-
-	/**
 	 * Loop and wait
 	 */
 	public void loop() {
@@ -90,9 +75,17 @@ public class TrDosFileEditDialog {
 		}
 	}
 
-	/**
-	 * Create the form
-	 */
+	public boolean Show(byte[] data, String title, MGTDirectoryEntry entry) {
+		this.result = false;
+		this.ThisEntry = entry;
+		this.Title = title;
+		this.data = data;
+		Createform();
+		SetModified(false);
+		loop();
+		return (result);
+	}
+
 	private void Createform() {
 		shell = new Shell(display);
 		shell.setSize(900, 810);
@@ -106,7 +99,7 @@ public class TrDosFileEditDialog {
 		Label lbl = new Label(shell, SWT.NONE);
 		FontData fontData = lbl.getFont().getFontData()[0];
 		Font boldFont = new Font(display, new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
-		lbl.setText(String.format("CPM Length: %d bytes (%X)", data.length, data.length));
+		lbl.setText(String.format("File Length: %d bytes (%X)", data.length, data.length));
 		lbl.setFont(boldFont);
 
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -140,45 +133,37 @@ public class TrDosFileEditDialog {
 			public void controlMoved(ControlEvent arg0) {
 			}
 		});
-
+				
 		RenderAppropriatePage();
 
 		shell.pack();
 	}
 
-	/**
-	 * Render the correct page for the file.
-	 */
 	private void RenderAppropriatePage() {
 		try {
-			char ftype = ThisEntry.GetFileType();
-			if (ftype == 'B') {
+			int ftype = ThisEntry.GetFileType();
+			if (ftype == MGT.MGTFT_ZXBASIC) {
 				BasicRenderer CurrentRenderer = new BasicRenderer();
-				CurrentRenderer.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), ThisEntry.GetFileSize(), 
-						ThisEntry.GetVar2(), ThisEntry.startline);
-			} else if (ftype != 'D') {
+				CurrentRenderer.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), ThisEntry.GetFileSize(),
+						ThisEntry.GetSpeccyBasicDetails().VarStart, ThisEntry.GetSpeccyBasicDetails().LineStart);
+			} else if (ftype == MGT.MGTFT_ZXNUMARRAY) {
+				NumericArrayRenderer CurrentRenderer = new NumericArrayRenderer();
+				CurrentRenderer.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(),
+						"" + ThisEntry.GetSpeccyBasicDetails().VarName);
+			} else if (ftype == MGT.MGTFT_ZXSTRARRAY) {
+				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
+				CurrentRenderer.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(),
+						"" + ThisEntry.GetSpeccyBasicDetails().VarName);
+			}else if (ftype == MGT.MGTFT_ZX48SNA) {
+				MGT48kSnapshotRenderer CurrentRenderer = new MGT48kSnapshotRenderer();
+				CurrentRenderer.RenderSnapshot(MainPage, data, Title, ThisEntry); 
+			} else {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
 				CurrentRenderer.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length,
 						ThisEntry.GetVar1());
-			} else if (ThisEntry.IsCharArray()) {
-				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
-				CurrentRenderer.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A");
-			} else {
-				NumericArrayRenderer CurrentRenderer = new NumericArrayRenderer();
-				CurrentRenderer.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A");
 			}
 		} catch (Exception E) {
 			System.out.println("Error Showing " + ThisEntry.GetFilename() + ": " + E.getMessage());
-		}
-	}
-
-	/**
-	 * CLose the form.
-	 */
-	public void close() {
-		shell.close();
-		if (!shell.isDisposed()) {
-			shell.dispose();
 		}
 	}
 

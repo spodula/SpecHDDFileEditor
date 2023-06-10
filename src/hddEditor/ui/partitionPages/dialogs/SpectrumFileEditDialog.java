@@ -5,6 +5,9 @@ package hddEditor.ui.partitionPages.dialogs;
  */
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
@@ -33,7 +36,7 @@ public class SpectrumFileEditDialog {
 
 	// Composite we are parented to
 	private Composite MainPage = null;
-
+	private ScrolledComposite MainPage1 = null; 
 	// Result
 	private boolean result = false;
 
@@ -102,12 +105,13 @@ public class SpectrumFileEditDialog {
 	 */
 	private void Createform() {
 		shell = new Shell(display);
-		shell.setSize(900, 810);
+		shell.setSize(970, 810);
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 4;
 		gridLayout.makeColumnsEqualWidth = true;
 		gridLayout.marginLeft = 20;
 		gridLayout.marginRight = 20;
+		gridLayout.marginBottom = 20;
 		shell.setLayout(gridLayout);
 
 		Label lbl = new Label(shell, SWT.NONE);
@@ -116,6 +120,10 @@ public class SpectrumFileEditDialog {
 		lbl.setText(String.format("CPM Length: %d bytes (%X)", data.length, data.length));
 		lbl.setFont(boldFont);
 		lbl = new Label(shell, SWT.NONE);
+		GridData gd = new GridData(SWT.FILL, SWT.TOP , true, false);
+		gd.horizontalSpan = 2;
+		lbl.setLayoutData(gd);
+		
 		String logblocks = "";
 		int BlockCount = 0;
 		for (Dirent dirent : ThisEntry.dirents) {
@@ -128,6 +136,9 @@ public class SpectrumFileEditDialog {
 			logblocks = logblocks.substring(2);
 		}
 		lbl.setText("Logical blocks: " + BlockCount + " (" + logblocks + ")");
+		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.horizontalSpan = 2;
+		lbl.setLayoutData(gd);
 
 		Plus3DosFileHeader p3d = new Plus3DosFileHeader(data);
 		if (p3d.IsPlusThreeDosFile) {
@@ -139,25 +150,42 @@ public class SpectrumFileEditDialog {
 			lbl = new Label(shell, SWT.NONE);
 			lbl.setText("Not a +3DOS file (Or header corrupt)");
 			lbl.setFont(boldFont);
-			Plus3Size = data.length;
+			Plus3Size = data.length;   
 		}
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 4;
 		lbl.setLayoutData(gd);
 
-		MainPage = new Composite(shell, SWT.NONE);
-		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.widthHint = shell.getSize().x;
+		MainPage1 = new ScrolledComposite(shell, SWT.V_SCROLL);
+		MainPage1.setExpandHorizontal(true);
+		MainPage1.setExpandVertical(true);
+		MainPage1.setAlwaysShowScrollBars(true);
+		gd = new GridData(GridData.FILL_BOTH);
 		gd.horizontalSpan = 4;
-		MainPage.setLayoutData(gd);
+		MainPage1.setLayoutData(gd);
+
+		
+		MainPage = new Composite(MainPage1, SWT.NONE);
+		MainPage1.setContent(MainPage);
+		
 		gridLayout = new GridLayout();
 		gridLayout.numColumns = 4;
 		gridLayout.makeColumnsEqualWidth = true;
 		MainPage.setLayout(gridLayout);
-
+		
+		MainPage1.addControlListener(new ControlListener() {
+			
+			@Override
+			public void controlResized(ControlEvent arg0) {
+				MainPage1.setMinSize(MainPage.computeSize(MainPage1.getClientArea().width, SWT.DEFAULT));
+			}
+			
+			@Override
+			public void controlMoved(ControlEvent arg0) {
+			}
+		});
+				
 		RenderAppropriatePage();
-
-		shell.pack();
 	}
 
 	/**
@@ -191,8 +219,6 @@ public class SpectrumFileEditDialog {
 		 * Render the page.
 		 */
 		if (!p3d.IsPlusThreeDosFile) {
-//			FileRenderer FR = new FileRenderer();
-//			FR.Render(MainPage, newdata, ThisEntry.filename());
 			CodeRenderer CR = new CodeRenderer();
 			CR.RenderCode(MainPage, newdata, null, ThisEntry.GetFilename(), data.length, 0x0000);
 		} else if (p3d.filetype == Speccy.BASIC_BASIC) {
@@ -209,6 +235,12 @@ public class SpectrumFileEditDialog {
 			CharArrayRenderer CR = new CharArrayRenderer();
 			CR.RenderCharArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.VarName);
 		}
+		MainPage.layout();
+		MainPage.pack();
+		MainPage.setSize(MainPage.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		MainPage.layout();		
+		MainPage1.pack();
+		MainPage1.setSize(MainPage1.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 
 	/**

@@ -345,5 +345,26 @@ public class ASMLib {
 		Class me = getClass();
 		return (me.getResource(me.getSimpleName() + ".class").toString().startsWith("jar:"));
 	}
+	
+	/**
+	 * Returns a textual representation of the given Data byte if it was the Flag register
+	 * @param data
+	 * @return
+	 */
+	public static String GetFlagsAsString(byte data) {
+		int iData = (data & 0xff);
+		String z80Flags[] = { "C", "N", "P", "-", "H", "-", "Z", "S" };
+		String flags = "";
+		for (String s : z80Flags) {
+			if (!s.equals("-")) {
+				if (!flags.isBlank())
+					flags = flags + ", ";
+				flags = flags + s + ": " + (iData & 0x01);
+			}
+			iData = iData / 2;
+		}
+		return(flags);
+	}
+	
 
 }

@@ -228,7 +228,7 @@ public class CPMPartition extends IDEDosPartition {
 					FreeDirents.add(i);
 				}
 			}
-	//		System.out.println("Free Dirents: " + FreeDirents.size());
+			// System.out.println("Free Dirents: " + FreeDirents.size());
 
 			// seperate the filename
 			filename = filename.toUpperCase();
@@ -339,9 +339,11 @@ public class CPMPartition extends IDEDosPartition {
 
 		long ActualLogicalSector = LogicalSectorStartOfPartition + LogicalSectorInPartition;
 
-/*		System.out.println("SetLogicalBlock: " + BlockID + " SC:" + GetStartCyl() + " SH:" + GetStartHead()
-				+ " RealSector:" + ActualLogicalSector + " Log:" + LogicalSectorInPartition + " Startsect:"
-				+ LogicalSectorStartOfPartition); */
+		/*
+		 * System.out.println("SetLogicalBlock: " + BlockID + " SC:" + GetStartCyl() +
+		 * " SH:" + GetStartHead() + " RealSector:" + ActualLogicalSector + " Log:" +
+		 * LogicalSectorInPartition + " Startsect:" + LogicalSectorStartOfPartition);
+		 */
 
 		CurrentDisk.SetLogicalBlockFromSector(ActualLogicalSector, Block);
 
@@ -624,7 +626,8 @@ public class CPMPartition extends IDEDosPartition {
 
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress) throws IOException {
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted)
+			throws IOException {
 		try {
 			FileWriter SysConfig = new FileWriter(new File(folder, "partition.index"));
 			try {
@@ -636,27 +639,30 @@ public class CPMPartition extends IDEDosPartition {
 							break;
 						}
 					}
-					File TargetFilename = new File(folder, entry.GetFilename().trim());
-					byte file[] = entry.GetFileData();
-					Speccy.SaveFileToDiskAdvanced(TargetFilename, file, file, file.length, 3, 0, 0, 0, "A", MiscAction);
+					if (!entry.IsDeleted || IncludeDeleted) {
+						File TargetFilename = new File(folder, entry.GetFilename().trim());
+						byte file[] = entry.GetFileData();
+						Speccy.SaveFileToDiskAdvanced(TargetFilename, file, file, file.length, 3, 0, 0, 0, "A",
+								MiscAction);
 
-					SysConfig.write("<file>\n".toCharArray());
-					SysConfig.write(("  <filename>" + entry.GetFilename() + "</filename>\n").toCharArray());
-					SysConfig.write(("  <deleted>" + entry.IsDeleted + "</deleted>\n").toCharArray());
-					SysConfig.write(("  <errors>" + entry.Errors + "</errors>\n").toCharArray());
-					SysConfig.write(("  <origfiletype>CPM</origfiletype>\n").toCharArray());
-					SysConfig.write("   <cpm:blocks>\n".toCharArray());
-					int blocks[] = entry.getBlocks();
-					for (int i : blocks) {
-						SysConfig.write(("       <blockID>" + i + "</blockID>\n").toCharArray());
+						SysConfig.write("<file>\n".toCharArray());
+						SysConfig.write(("  <filename>" + entry.GetFilename() + "</filename>\n").toCharArray());
+						SysConfig.write(("  <deleted>" + entry.IsDeleted + "</deleted>\n").toCharArray());
+						SysConfig.write(("  <errors>" + entry.Errors + "</errors>\n").toCharArray());
+						SysConfig.write(("  <origfiletype>CPM</origfiletype>\n").toCharArray());
+						SysConfig.write("   <cpm:blocks>\n".toCharArray());
+						int blocks[] = entry.getBlocks();
+						for (int i : blocks) {
+							SysConfig.write(("       <blockID>" + i + "</blockID>\n").toCharArray());
+						}
+						SysConfig.write("   </cpm:blocks>\n".toCharArray());
+						SysConfig.write("   <cpm:dirents>\n".toCharArray());
+						for (Dirent d : entry.dirents) {
+							SysConfig.write(("       <dirent>" + d.toString() + "</dirent>\n").toCharArray());
+						}
+						SysConfig.write("   </cpm:dirents>\n".toCharArray());
+						SysConfig.write("</file>\n".toCharArray());
 					}
-					SysConfig.write("   </cpm:blocks>\n".toCharArray());
-					SysConfig.write("   <cpm:dirents>\n".toCharArray());
-					for (Dirent d : entry.dirents) {
-						SysConfig.write(("       <dirent>" + d.toString() + "</dirent>\n").toCharArray());
-					}
-					SysConfig.write("   </cpm:dirents>\n".toCharArray());
-					SysConfig.write("</file>\n".toCharArray());
 				}
 
 				SysConfig.write("</speccy>\n".toCharArray());
@@ -674,7 +680,7 @@ public class CPMPartition extends IDEDosPartition {
 	 */
 	@Override
 	public FileEntry[] GetFileList(String wildcard) {
-		//no wildcard = all files.
+		// no wildcard = all files.
 		if (wildcard.isEmpty()) {
 			wildcard = "*.*";
 		}
@@ -694,9 +700,9 @@ public class CPMPartition extends IDEDosPartition {
 			if (de.DoesMatch(wildcard)) {
 				de.SetDeleted(true);
 				numdeleted++;
-
 			}
 		}
+		RecalculateDirectoryListing();
 		System.out.println("Deleted " + numdeleted + " files.");
 	}
 

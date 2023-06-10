@@ -1,6 +1,9 @@
 package hddEditor.ui.partitionPages.dialogs;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
@@ -21,7 +24,7 @@ import hddEditor.ui.partitionPages.FileRenderers.FileRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 
 
-public class MicrodriveFileEditDialog {
+public class MicrodriveFileEditDialog {     
 	// Title of the page
 	private String Title = "";
 	
@@ -31,7 +34,7 @@ public class MicrodriveFileEditDialog {
 
 	// Composite we are parented to
 	private Composite MainPage = null;
-	
+	private ScrolledComposite MainPage1 = null; 	
 	// Result
 	private boolean result = false;
 
@@ -109,16 +112,35 @@ public class MicrodriveFileEditDialog {
 		
 		label("Used sectors: " + ThisEntry.sectors.length + " (" + logblocks + ")",2);
 		
-		MainPage = new Composite(shell, SWT.NONE);
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.widthHint = shell.getSize().x;
+		MainPage1 = new ScrolledComposite(shell, SWT.V_SCROLL);
+		MainPage1.setExpandHorizontal(true);
+		MainPage1.setExpandVertical(true);
+		MainPage1.setAlwaysShowScrollBars(true);
+		GridData gd = new GridData(GridData.FILL_BOTH);
 		gd.horizontalSpan = 4;
-		MainPage.setLayoutData(gd);
+		MainPage1.setLayoutData(gd);
+
+		
+		MainPage = new Composite(MainPage1, SWT.NONE);
+		MainPage1.setContent(MainPage);
+		
 		gridLayout = new GridLayout();
 		gridLayout.numColumns = 4;
 		gridLayout.makeColumnsEqualWidth = true;
 		MainPage.setLayout(gridLayout);
-
+		
+		MainPage1.addControlListener(new ControlListener() {
+			
+			@Override
+			public void controlResized(ControlEvent arg0) {
+				MainPage1.setMinSize(MainPage.computeSize(MainPage1.getClientArea().width, SWT.DEFAULT));
+			}
+			
+			@Override
+			public void controlMoved(ControlEvent arg0) {
+			}
+		});
+				
 		RenderAppropriatePage();
 		shell.pack();
 	}

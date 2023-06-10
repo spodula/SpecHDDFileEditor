@@ -10,22 +10,22 @@ import hddEditor.libs.disks.Disk;
 public class FloppyDisk implements Disk {
 	protected RandomAccessFile inFile;
 	// filename of the currently open file
-	public String filename = "";
+	public String filename;
 	// default sector size
-	public int SectorSize = 512;
+	public int SectorSize;
 	// disk size in bytes
-	public long FileSize = 0;
+	public long FileSize;
 
 	// CHS information for inheriting objects to populate
-	public int NumCylinders = 0;
-	public int NumHeads = 0;
-	public int NumSectors = 0;
+	public int NumCylinders;
+	public int NumHeads;
+	public int NumSectors;
 
 	// NUmber of logical sectors
 	public int NumLogicalSectors;
 
 	// Tracks in the file.
-	public TrackInfo diskTracks[] = null;
+	public TrackInfo diskTracks[];
 
 	/**
 	 * 
@@ -192,18 +192,45 @@ public class FloppyDisk implements Disk {
 			result = result + " Disk tracks not loaded.";
 		} else {
 			for (TrackInfo ti : diskTracks) {
-				String trk = Integer.toHexString(ti.tracknum);
-				if (trk.length() == 1) {
-					trk = "0" + trk;
+				if (ti == null) {
+					result = result + "<null track>\n";
+				} else {
+					result = result + String.format("Track: %02d/%d: ", ti.tracknum, ti.side);
+					for (Sector sect : ti.Sectors) {
+						result = result + String.format("%X(%d) ",sect.sectorID,sect.ActualSize);
+					}
+					result = result + "\n";
 				}
-				result = result + "Track: " + trk + "/" + Integer.toHexString(ti.side) + ": ";
-				for (Sector sect : ti.Sectors) {
-					result = result + Integer.toHexString(sect.sectorID) + "(" + sect.ActualSize + ") ";
-				}
-				result = result + "\n";
 			}
 		}
 
 		return (result);
 	}
+	
+	/**
+	 * Get a sector from the track/sector list.
+	 * @param c
+	 * @param h
+	 * @param s
+	 * @return
+	 */
+	protected Sector GetSectorByCHS(int c, int h, int s) {
+		Sector result = null;
+		for(TrackInfo trk:diskTracks) {
+			if ((trk.tracknum == c) && (trk.side == h)) {
+				for(Sector sect:trk.Sectors) {
+					if (sect.sectorID == s) {
+						result = sect;
+					}
+				}
+			}
+		}
+		if (result==null) {
+			System.out.println("Unable to find sector: Cyl:"+c+" Head:"+h+" Sector: "+s);
+		}
+		return(result);
+	}
+	
+
+	
 }

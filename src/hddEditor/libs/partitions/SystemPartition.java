@@ -358,7 +358,8 @@ public class SystemPartition extends IDEDosPartition {
 
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress) throws IOException {
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted)
+			throws IOException {
 		FileWriter SysConfig = new FileWriter(new File(folder, "system.config"));
 		try {
 			SysConfig.write("<plusidedos>\n".toCharArray());
@@ -597,7 +598,7 @@ public class SystemPartition extends IDEDosPartition {
 	/**
 	 * Implement deletion of selected partition
 	 * 
-	 * @throws PlusIDEDosException 
+	 * @throws PlusIDEDosException
 	 */
 	public void DeletePartition(String partname) throws PlusIDEDosException {
 		partname = partname.toUpperCase();
@@ -649,7 +650,7 @@ public class SystemPartition extends IDEDosPartition {
 			}
 		}
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -658,7 +659,8 @@ public class SystemPartition extends IDEDosPartition {
 		ArrayList<FileEntry> results = new ArrayList<FileEntry>();
 		for (IDEDosPartition idep : partitions) {
 			if (idep.GetPartType() != PLUSIDEDOS.PARTITION_UNUSED) {
-				FileEntry fe = new DummyFileEntry(idep.GetName(), idep.GetSizeK()*1024, PLUSIDEDOS.GetTypeAsString(idep.GetPartType()));
+				FileEntry fe = new DummyFileEntry(idep.GetName(), idep.GetSizeK() * 1024,
+						PLUSIDEDOS.GetTypeAsString(idep.GetPartType()));
 				if (fe.DoesMatch(wildcard)) {
 					results.add(fe);
 				}
@@ -667,5 +669,4 @@ public class SystemPartition extends IDEDosPartition {
 		return (results.toArray(new FileEntry[0]));
 	}
 
-	
 }

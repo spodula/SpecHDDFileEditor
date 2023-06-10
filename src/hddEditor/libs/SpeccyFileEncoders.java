@@ -102,7 +102,7 @@ public class SpeccyFileEncoders {
 	}
 
 	/**
-	 * Render the currently loaded image into a Spectrum compatable Coloured screen$
+	 * Render the currently loaded image into a Spectrum compatible Coloured screen$
 	 * file (6912 bytes of 8 colour-clashing goodness!). The conversion works, but
 	 * is not very good. There are better libraries available. will use a decent one
 	 * later.

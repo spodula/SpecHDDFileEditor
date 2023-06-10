@@ -524,7 +524,8 @@ public class TrDosPartition extends IDEDosPartition {
 	 */
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress) throws IOException {
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted)
+			throws IOException {
 		FileWriter SysConfig;
 		try {
 			SysConfig = new FileWriter(new File(folder, "partition.index"));
@@ -532,101 +533,107 @@ public class TrDosPartition extends IDEDosPartition {
 				SysConfig.write("<speccy>\n".toCharArray());
 				int entrynum = 0;
 				for (TrdDirectoryEntry entry : DirectoryEntries) {
-					if (progress != null) {
-						if (progress.Callback(DirectoryEntries.length, entrynum++, "File: " + entry.GetFilename()))
-							break;
-					}
-					try {
-						File TargetFilename = new File(folder, entry.GetFilename().trim() + "." + entry.GetFileType());
-						int filelength = entry.GetFileSize();
-						int SpeccyFileType = 0;
-						int basicLine = 0;
-						int basicVarsOffset = entry.GetFileSize();
-						int codeLoadAddress = 0;
-						String arrayVarName = "A";
-						int actiontype = GeneralUtils.EXPORT_TYPE_RAW;
-						if ((entry.GetFileType() != 'B') && (entry.GetFileType() != 'C')
-								&& (entry.GetFileType() != 'D')) {
-							SpeccyFileType = Speccy.BASIC_CODE;
-							codeLoadAddress = 0x10000 - entry.GetFileSize();
-							actiontype = MiscAction;
-						} else {
-							switch (entry.GetFileType()) {
-							case 'B':
-								SpeccyFileType = Speccy.BASIC_BASIC;
-								actiontype = BasicAction;
+					if ((entry.GetDeleted() == false) || IncludeDeleted) {
+						if (progress != null) {
+							if (progress.Callback(DirectoryEntries.length, entrynum++, "File: " + entry.GetFilename()))
 								break;
-							case 'D':
-								SpeccyFileType = Speccy.BASIC_NUMARRAY;
-								if (entry.IsCharArray()) {
-									SpeccyFileType = Speccy.BASIC_CHRARRAY;
-								}
-								actiontype = ArrayAction;
-								break;
-							case 'C':
+						}
+						try {
+							File TargetFilename = new File(folder,
+									entry.GetFilename().trim() + "." + entry.GetFileType());
+							int filelength = entry.GetFileSize();
+							int SpeccyFileType = 0;
+							int basicLine = 0;
+							int basicVarsOffset = entry.GetFileSize();
+							int codeLoadAddress = 0;
+							String arrayVarName = "A";
+							int actiontype = GeneralUtils.EXPORT_TYPE_RAW;
+							if ((entry.GetFileType() != 'B') && (entry.GetFileType() != 'C')
+									&& (entry.GetFileType() != 'D')) {
 								SpeccyFileType = Speccy.BASIC_CODE;
-								codeLoadAddress = entry.GetVar1();
-								actiontype = CodeAction;
+								codeLoadAddress = 0x10000 - entry.GetFileSize();
+								actiontype = MiscAction;
+							} else {
+								switch (entry.GetFileType()) {
+								case 'B':
+									SpeccyFileType = Speccy.BASIC_BASIC;
+									actiontype = BasicAction;
+									break;
+								case 'D':
+									SpeccyFileType = Speccy.BASIC_NUMARRAY;
+									if (entry.IsCharArray()) {
+										SpeccyFileType = Speccy.BASIC_CHRARRAY;
+									}
+									actiontype = ArrayAction;
+									break;
+								case 'C':
+									SpeccyFileType = Speccy.BASIC_CODE;
+									codeLoadAddress = entry.GetVar1();
+									actiontype = CodeAction;
+								}
+								basicLine = entry.startline;
+								basicVarsOffset = entry.GetVar2();
+
 							}
-							basicLine = entry.startline;
-							basicVarsOffset = entry.GetVar2();
 
+							Speccy.SaveFileToDiskAdvanced(TargetFilename, entry.GetFileData(), entry.GetFileData(),
+									filelength, SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress,
+									arrayVarName, actiontype);
+							System.out.println("Written " + entry.GetFilename().trim());
+						} catch (IOException e) {
+							System.out
+									.println("Error extracting " + entry.GetFilename().trim() + ": " + e.getMessage());
+							e.printStackTrace();
 						}
-
-						Speccy.SaveFileToDiskAdvanced(TargetFilename, entry.GetFileData(), entry.GetFileData(),
-								filelength, SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName,
-								actiontype);
-						System.out.println("Written " + entry.GetFilename().trim());
-					} catch (IOException e) {
-						System.out.println("Error extracting " + entry.GetFilename().trim() + ": " + e.getMessage());
-						e.printStackTrace();
-					}
-					SysConfig.write(("<file>\n").toCharArray());
-					SysConfig.write(
-							("   <filename>" + entry.GetFilename().trim() + "." + entry.GetFileType() + "</filename>\n")
-									.toCharArray());
-					SysConfig.write(("   <deleted>" + entry.GetDeleted() + "</deleted>\n").toCharArray());
-					SysConfig.write(("   <errors></errors>\n").toCharArray());
-					SysConfig.write(("   <filelength>" + entry.GetFileSize() + "</filelength>\n").toCharArray());
-					SysConfig.write("   <origfiletype>TRDOS</origfiletype>\n".toCharArray());
-					SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
-					int filetype = Speccy.BASIC_CODE;
-					switch (entry.GetFileType()) {
-					case 'B':
-						filetype = Speccy.BASIC_BASIC;
-						break;
-					case 'D':
-						filetype = Speccy.BASIC_NUMARRAY;
-						if (entry.IsCharArray()) {
-							filetype = Speccy.BASIC_CHRARRAY;
+						SysConfig.write(("<file>\n").toCharArray());
+						SysConfig.write(("   <filename>" + entry.GetFilename().trim() + "." + entry.GetFileType()
+								+ "</filename>\n").toCharArray());
+						SysConfig.write(("   <deleted>" + entry.GetDeleted() + "</deleted>\n").toCharArray());
+						SysConfig.write(("   <errors></errors>\n").toCharArray());
+						SysConfig.write(("   <filelength>" + entry.GetFileSize() + "</filelength>\n").toCharArray());
+						SysConfig.write("   <origfiletype>TRDOS</origfiletype>\n".toCharArray());
+						SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
+						int filetype = Speccy.BASIC_CODE;
+						switch (entry.GetFileType()) {
+						case 'B':
+							filetype = Speccy.BASIC_BASIC;
+							break;
+						case 'D':
+							filetype = Speccy.BASIC_NUMARRAY;
+							if (entry.IsCharArray()) {
+								filetype = Speccy.BASIC_CHRARRAY;
+							}
 						}
-					}
-					SysConfig.write(("       <filetype>" + filetype + "</filetype>\n").toCharArray());
-					SysConfig.write(("       <filetypename>" + Speccy.FileTypeAsString(filetype) + "</filetypename>\n")
-							.toCharArray());
-					SysConfig.write(("       <basicsize>" + entry.GetFileSize() + "</basicsize>\n").toCharArray());
-					SysConfig
-							.write(("       <basicstartline>" + entry.startline + "</basicstartline>\n").toCharArray());
-					SysConfig.write(("       <codeloadaddr>" + entry.GetVar1() + "</codeloadaddr>\n").toCharArray());
-					SysConfig.write(
-							("       <basicvarsoffset>" + entry.GetVar2() + "</basicvarsoffset>\n").toCharArray());
-					SysConfig.write(("       <arrayvarname>A</arrayvarname>\n").toCharArray());
-					SysConfig.write(("   </specbasicinfo>\n".toCharArray()));
+						SysConfig.write(("       <filetype>" + filetype + "</filetype>\n").toCharArray());
+						SysConfig.write(
+								("       <filetypename>" + Speccy.FileTypeAsString(filetype) + "</filetypename>\n")
+										.toCharArray());
+						SysConfig.write(("       <basicsize>" + entry.GetFileSize() + "</basicsize>\n").toCharArray());
+						SysConfig.write(
+								("       <basicstartline>" + entry.startline + "</basicstartline>\n").toCharArray());
+						SysConfig
+								.write(("       <codeloadaddr>" + entry.GetVar1() + "</codeloadaddr>\n").toCharArray());
+						SysConfig.write(
+								("       <basicvarsoffset>" + entry.GetVar2() + "</basicvarsoffset>\n").toCharArray());
+						SysConfig.write(("       <arrayvarname>A</arrayvarname>\n").toCharArray());
+						SysConfig.write(("   </specbasicinfo>\n".toCharArray()));
 
-					SysConfig.write(("   <trdos>\n".toCharArray()));
-					SysConfig.write(("       <filetype>" + entry.GetFileType() + "</filetype>\n").toCharArray());
-					SysConfig.write(
-							("       <filetypename>" + entry.GetFileTypeString() + "</filetypename>\n").toCharArray());
-					SysConfig.write(("       <direntnum>" + entry.DirentNum + "</direntnum>\n").toCharArray());
-					SysConfig
-							.write(("       <direntlocation>" + entry.DirentLoc + "</direntlocation>\n").toCharArray());
-					SysConfig.write(
-							("       <startsector>" + entry.GetStartSector() + "</startsector>\n").toCharArray());
-					SysConfig.write(("       <starttrack>" + entry.GetStartTrack() + "</starttrack>\n").toCharArray());
-					SysConfig.write(
-							("       <numsectors>" + entry.GetFileLengthSectors() + "</numsectors>\n").toCharArray());
-					SysConfig.write(("   </trdos>\n".toCharArray()));
-					SysConfig.write(("</file>\n").toCharArray());
+						SysConfig.write(("   <trdos>\n".toCharArray()));
+						SysConfig.write(("       <filetype>" + entry.GetFileType() + "</filetype>\n").toCharArray());
+						SysConfig.write(("       <filetypename>" + entry.GetFileTypeString() + "</filetypename>\n")
+								.toCharArray());
+						SysConfig.write(("       <direntnum>" + entry.DirentNum + "</direntnum>\n").toCharArray());
+						SysConfig.write(
+								("       <direntlocation>" + entry.DirentLoc + "</direntlocation>\n").toCharArray());
+						SysConfig.write(
+								("       <startsector>" + entry.GetStartSector() + "</startsector>\n").toCharArray());
+						SysConfig.write(
+								("       <starttrack>" + entry.GetStartTrack() + "</starttrack>\n").toCharArray());
+						SysConfig.write(("       <numsectors>" + entry.GetFileLengthSectors() + "</numsectors>\n")
+								.toCharArray());
+						SysConfig.write(("   </trdos>\n".toCharArray()));
+						SysConfig.write(("</file>\n").toCharArray());
+					}
 				}
 				SysConfig.write("</speccy>\n".toCharArray());
 			} finally {
@@ -672,15 +679,16 @@ public class TrDosPartition extends IDEDosPartition {
 		}
 		CurrentDisk.SetLogicalBlockFromSector(0, dirents);
 		// Hack for SCF disks which need to be physically written after all disk mods
-		// are done. 
+		// are done.
 		if (CurrentDisk.getClass().getName().equals(SCLDiskFile.class.getName())) {
 			SCLDiskFile scf = (SCLDiskFile) CurrentDisk;
 			scf.OperationCompleted(DirectoryEntries);
 		}
 	}
-	
+
 	/**
-	 * Rename a named file. This is the generic version that doesn't include the type separately.
+	 * Rename a named file. This is the generic version that doesn't include the
+	 * type separately.
 	 * 
 	 * @param filename
 	 * @param newName
@@ -691,9 +699,9 @@ public class TrDosPartition extends IDEDosPartition {
 		char filetype = ' ';
 		if ((filename.length() > 2) && (filename.charAt(filename.length() - 2) == '.')) {
 			filetype = filename.charAt(filename.length() - 1);
-			filename = filename.substring(0,filename.length()-2);
+			filename = filename.substring(0, filename.length() - 2);
 		}
-		RenameFile(filename, filetype, newName);	
+		RenameFile(filename, filetype, newName);
 	}
 
 	/**
@@ -702,15 +710,15 @@ public class TrDosPartition extends IDEDosPartition {
 	 * @param filename
 	 * @param address
 	 * @param data
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	@Override
 	public void AddCodeFile(String filename, int address, byte[] data) throws IOException {
 		AddFile(filename, 'C', data, address);
 	}
-		
+
 	/**
-	 * Add an pre-encoded numeric array to the microdrive.
+	 * Add an pre-encoded numeric array to the disk.
 	 * 
 	 * @param filename
 	 * @param EncodedArray
@@ -727,7 +735,7 @@ public class TrDosPartition extends IDEDosPartition {
 		varbyte = varbyte + 0xa0; // 101XXXXX
 		AddFile(filename, 'D', EncodedArray, varbyte);
 	}
-	
+
 	/**
 	 * Add a character array
 	 * 

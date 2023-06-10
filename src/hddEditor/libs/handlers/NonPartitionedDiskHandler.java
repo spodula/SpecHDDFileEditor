@@ -15,6 +15,7 @@ import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.SystemPartition;
 import hddEditor.libs.partitions.TrDosPartition;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
+import hddEditor.libs.partitions.MGTDosPartition;
 
 public class NonPartitionedDiskHandler extends OSHandler {
 
@@ -151,6 +152,15 @@ public class NonPartitionedDiskHandler extends OSHandler {
 				SystemPart.partitions = new IDEDosPartition[2];
 				SystemPart.partitions[0] = SystemPart;
 				SystemPart.partitions[1] = tdp;
+			} else if (fn.endsWith(".MGT")) {
+				MGTDosPartition mdp = new  MGTDosPartition(1, CurrentDisk, rawData, 1, false);
+				mdp.SetPartType(PLUSIDEDOS.PARTITION_DISK_PLUSD);
+				mdp.SetName("MGT/+D disk");
+				mdp.SetStartCyl(0);
+				mdp.SetStartHead(0);
+				SystemPart.partitions = new IDEDosPartition[2];
+				SystemPart.partitions[0] = SystemPart;
+				SystemPart.partitions[1] = mdp;
 			} else if (fn.endsWith(".SCL")) {
 				TrDosPartition tdp = new TrDosPartition(1, CurrentDisk, rawData, 1, false);
 				tdp.SetPartType(PLUSIDEDOS.PARTITION_DISK_TRDOS);

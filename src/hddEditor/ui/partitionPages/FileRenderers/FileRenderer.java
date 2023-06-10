@@ -20,8 +20,8 @@ import org.eclipse.swt.widgets.MessageBox;
 public class FileRenderer {
 	//Storage for the file details
 	protected String filename="";
-	protected byte data[] = null;
-	protected Composite MainPage =null;
+	public byte data[] = null;
+	public Composite MainPage =null;
 	
 	/**
 	 * Generic constructor. 

@@ -1,5 +1,4 @@
 package hddEditor.ui.partitionPages.FileRenderers;
-
 /**
  * Render a CODE file
  */
@@ -7,14 +6,13 @@ package hddEditor.ui.partitionPages.FileRenderers;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Vector;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.layout.GridData;
@@ -24,24 +22,24 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import hddEditor.libs.ASMLib;
-import hddEditor.libs.ASMLib.DecodedASM;
 import hddEditor.libs.Speccy;
+import hddEditor.ui.partitionPages.FileRenderers.RawRender.Renderer;
+import hddEditor.ui.partitionPages.FileRenderers.RawRender.SNARenderer;
+import hddEditor.ui.partitionPages.FileRenderers.RawRender.BinaryRenderer;
+import hddEditor.ui.partitionPages.FileRenderers.RawRender.ScreenRenderer;
+import hddEditor.ui.partitionPages.FileRenderers.RawRender.Z80SnapshotRenderer;
+import hddEditor.ui.partitionPages.FileRenderers.RawRender.AssemblyRenderer;
 
 public class CodeRenderer extends FileRenderer {
 	// components
 	private Text StartAddress = null;
 	private Combo CodeTypeDropDown = null;
-	private Table HexTable = null;
-	private Label[] ImageLabel = null;
+	private Vector<Renderer> Renderers = null;
 
 	// Rendering options
-	private String[] CODETYPES = { "Binary", "Screen", "Assembly" };
+	private String[] CODETYPES = { "Binary", "Screen", "Assembly", "SNA file", "Z80 file" };
 
 	/**
 	 * 
@@ -52,29 +50,44 @@ public class CodeRenderer extends FileRenderer {
 	 * @param fileSize
 	 * @param loadAddr
 	 */
-	public void RenderCode(Composite mainPage, byte data[], byte header[], String Filename, int fileSize,
+	public void RenderCode(Composite mainPage, byte data[], byte header [], String Filename, int fileSize,
 			int loadAddr) {
 		this.filename = Filename;
 		this.MainPage = mainPage;
 		this.data = data;
+		Renderers = new Vector<Renderer>();
 		Label lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("CODE file: ");
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		GridData gd = new GridData(SWT.FILL, SWT.TOP, true, true);
 		gd.horizontalSpan = 2;
+		gd.heightHint = 20;
 		lbl.setLayoutData(gd);
 
 		lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("+3DOS File length: ");
+		gd = new GridData(SWT.FILL, SWT.TOP, true, true);
+		gd.horizontalSpan = 1;
+		gd.heightHint = 20;
+		lbl.setLayoutData(gd);
+
 		lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText(String.format("%d (%X)", fileSize, fileSize));
+		gd = new GridData(SWT.FILL, SWT.TOP, true, true);
+		gd.horizontalSpan = 1;
+		gd.heightHint = 20;
+		lbl.setLayoutData(gd);
 
 		lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("Start Address: ");
+		gd.horizontalSpan = 1;
+		gd.heightHint = 20;
+		lbl.setLayoutData(gd);
 
 		StartAddress = new Text(mainPage, SWT.NONE);
 		StartAddress.setText(String.valueOf(loadAddr));
-		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd = new GridData(SWT.FILL, SWT.TOP, true, true);
 		gd.minimumWidth = 50;
+		gd.heightHint = 20;
 		StartAddress.setLayoutData(gd);
 
 		lbl = new Label(mainPage, SWT.NONE);
@@ -94,6 +107,9 @@ public class CodeRenderer extends FileRenderer {
 			}
 		});
 		btn.setToolTipText("Save the file as hex");
+		gd.horizontalSpan = 1;
+		gd.heightHint = 20;
+		btn.setLayoutData(gd);
 
 		btn = new Button(mainPage, SWT.NONE);
 		btn.setText("Extract file as Binary");
@@ -110,6 +126,9 @@ public class CodeRenderer extends FileRenderer {
 			}
 		});
 		btn.setToolTipText("Save the file as a raw binary file");
+		gd.horizontalSpan = 1;
+		gd.heightHint = 20;
+		btn.setLayoutData(gd);
 
 		if (header != null) {
 			btn = new Button(mainPage, SWT.NONE);
@@ -131,6 +150,9 @@ public class CodeRenderer extends FileRenderer {
 				}
 			});
 			btn.setToolTipText("Extract the file including the OS (+3DOS/TR-DOS) header");
+			gd.horizontalSpan = 1;
+			gd.heightHint = 20;
+			btn.setLayoutData(gd);
 		} else {
 			new Label(mainPage, SWT.NONE);
 		}
@@ -150,6 +172,9 @@ public class CodeRenderer extends FileRenderer {
 			}
 		});
 		btn.setToolTipText("Extract the file as an image");
+		gd.horizontalSpan = 1;
+		gd.heightHint = 20;
+		btn.setLayoutData(gd);
 
 		btn = new Button(mainPage, SWT.NONE);
 		btn.setText("Extract file as Asm");
@@ -166,6 +191,9 @@ public class CodeRenderer extends FileRenderer {
 			}
 		});
 		btn.setToolTipText("Save a disassembled text of the file");
+		gd.horizontalSpan = 1;
+		gd.heightHint = 20;
+		btn.setLayoutData(gd);
 
 		CodeTypeDropDown = new Combo(mainPage, SWT.NONE);
 		CodeTypeDropDown.setItems(CODETYPES);
@@ -179,118 +207,24 @@ public class CodeRenderer extends FileRenderer {
 				CodeTypeComboChanged(data, loadAddr);
 			}
 		});
+		gd.horizontalSpan = 1;
+		gd.heightHint = 35;
+		CodeTypeDropDown.setLayoutData(gd);
 
 		lbl = new Label(mainPage, SWT.NONE);
 		lbl = new Label(mainPage, SWT.NONE);
 		lbl = new Label(mainPage, SWT.NONE);
+
+		if (Filename.toUpperCase().endsWith(".SNA")) {
+			CodeTypeDropDown.setText(CODETYPES[3]);
+		}
+		if (Filename.toUpperCase().endsWith(".Z80")) {
+			CodeTypeDropDown.setText(CODETYPES[4]);
+		}
+
 		CodeTypeComboChanged(data, loadAddr);
 
 		mainPage.pack();
-	}
-
-	/**
-	 * Add the BIN (hex) option
-	 * 
-	 * @param data
-	 * @param loadAddr
-	 */
-	private void AddBin(byte data[], int loadAddr) {
-		int AddressLength = String.format("%X", data.length - 1).length();
-
-		HexTable = new Table(MainPage, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
-		HexTable.setLinesVisible(true);
-
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-		gd.horizontalSpan = 4;
-		gd.heightHint = 400;
-		HexTable.setLayoutData(gd);
-
-		TableColumn tc1 = new TableColumn(HexTable, SWT.LEFT);
-		tc1.setText("Address");
-		tc1.setWidth(80);
-		for (int i = 0; i < 16; i++) {
-			TableColumn tcx = new TableColumn(HexTable, SWT.LEFT);
-			tcx.setText(String.format("%02X", i));
-			tcx.setWidth(30);
-		}
-		TableColumn tc2 = new TableColumn(HexTable, SWT.LEFT);
-		tc2.setText("Ascii");
-		tc2.setWidth(160);
-
-		HexTable.setHeaderVisible(true);
-
-		int ptr = 0;
-		int numrows = data.length / 16;
-		if (data.length % 16 != 0) {
-			numrows++;
-		}
-		int Address = loadAddr;
-
-		Font mono = new Font(MainPage.getDisplay(), "Monospace", 10, SWT.NONE);
-		for (int rownum = 0; rownum < numrows; rownum++) {
-			TableItem Row = new TableItem(HexTable, SWT.NONE);
-
-			String asciiLine = "";
-			String content[] = new String[18];
-			String addr = String.format("%X", Address);
-			Address = Address + 16;
-			while (addr.length() < AddressLength) {
-				addr = "0" + addr;
-			}
-			content[0] = addr;
-			for (int i = 1; i < 17; i++) {
-				byte b = 0;
-				if (ptr < data.length) {
-					b = data[ptr++];
-					content[i] = String.format("%02X", (b & 0xff));
-				} else {
-					content[i] = "--";
-				}
-				if (b >= 32 && b <= 127) {
-					asciiLine = asciiLine + (char) b;
-				} else {
-					asciiLine = asciiLine + ".";
-				}
-			}
-			content[17] = asciiLine;
-			Row.setText(content);
-			Row.setFont(mono);
-		}
-	}
-
-	/**
-	 * Render the data as a Screen
-	 * 
-	 * @param data
-	 */
-	private void AddScreen(byte data[]) {
-		int base = 0;
-		ArrayList<Label> al = new ArrayList<Label>();
-		while (base < data.length) {
-			byte screen[] = new byte[0x1b00];
-			for (int i = 0; i < 0x1800; i++) {
-				screen[i] = 0;
-			}
-			byte wob = Speccy.ToAttribute(Speccy.COLOUR_BLACK, Speccy.COLOUR_WHITE, false, false);
-			for (int i = 0x1800; i < 0x1b00; i++) {
-				screen[i] = wob;
-			}
-			System.arraycopy(data, base, screen, 0, Math.min(0x1b00, data.length - base));
-
-			ImageData image = Speccy.GetImageFromFileArray(screen, 0);
-			Image img = new Image(MainPage.getDisplay(), image);
-			Label lbl = new Label(MainPage, SWT.NONE);
-			lbl.setImage(img);
-			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-			gd.minimumHeight = 192;
-			gd.minimumWidth = 256;
-			gd.horizontalSpan = 2;
-			lbl.setLayoutData(gd);
-			al.add(lbl);
-			base = base + 0x1b00;
-		}
-		ImageLabel = al.toArray(new Label[0]);
-		MainPage.pack();
 	}
 
 	/**
@@ -313,105 +247,43 @@ public class CodeRenderer extends FileRenderer {
 	 */
 	private void DoChangeCodeType(String s, byte data[], int loadAddr) {
 		// Dispose of any items that are already on the form
-		if (HexTable != null) {
-			HexTable.dispose();
-			HexTable = null;
+		for (Renderer r : Renderers) {
+			r.DisposeRenderer();
 		}
+		Renderers.clear();
 
-		if (ImageLabel != null) {
-			for (Label l : ImageLabel) {
-				l.dispose();
-			}
-			ImageLabel = null;
-		}
-
-		// Render the appropriate type
-		if (s.equals(CODETYPES[1])) {
-			AddScreen(data);
-		} else if (s.equals(CODETYPES[2])) {
-			AddAsm(data, loadAddr);
-		} else {
-			AddBin(data, loadAddr);
-		}
-		MainPage.pack();
-	}
-
-	/**
-	 * Render the code as ASM.
-	 * 
-	 * @param data
-	 * @param startaddress
-	 */
-	private void AddAsm(byte data[], int startaddress) {
-		HexTable = new Table(MainPage, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
-		HexTable.setLinesVisible(true);
-
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-		gd.horizontalSpan = 4;
-		gd.heightHint = 400;
-		HexTable.setLayoutData(gd);
-
-		TableColumn tc1 = new TableColumn(HexTable, SWT.LEFT);
-		tc1.setText("Address");
-		tc1.setWidth(80);
-		TableColumn tc2 = new TableColumn(HexTable, SWT.LEFT);
-		tc2.setText("Hex");
-		tc2.setWidth(160);
-		TableColumn tc3 = new TableColumn(HexTable, SWT.LEFT);
-		tc3.setText("Asm");
-		tc3.setWidth(160);
-		TableColumn tc4 = new TableColumn(HexTable, SWT.LEFT);
-		tc4.setText("Chr");
-		tc4.setWidth(160);
-		HexTable.setHeaderVisible(true);
-
-		ASMLib asm = new ASMLib();
-		int loadedaddress = startaddress;
-		int realaddress = 0x0000;
-		int asmData[] = new int[5];
 		try {
-			while (realaddress < data.length) {
-				String chrdata = "";
-				for (int i = 0; i < 5; i++) {
-					int d = 0;
-					if (realaddress + i < data.length) {
-						d = (int) data[realaddress + i] & 0xff;
-					}
-					asmData[i] = d;
 
-					if ((d > 0x1F) && (d < 0x7f)) {
-						chrdata = chrdata + (char) d;
-					} else {
-						chrdata = chrdata + "?";
-					}
-				}
-				// decode instruction
-				DecodedASM Instruction = asm.decode(asmData, loadedaddress);
-				// output it. - First, assemble a list of hex bytes, but pad out to 12 chars
-				// (4x3)
-				String hex = "";
-				for (int j = 0; j < Instruction.length; j++) {
-					hex = hex + String.format("%02X", asmData[j]) + " ";
-				}
-
-				TableItem Row = new TableItem(HexTable, SWT.NONE);
-				String dta[] = new String[4];
-				dta[0] = String.format("%04X", loadedaddress);
-				dta[1] = hex;
-				dta[2] = Instruction.instruction;
-				dta[3] = chrdata.substring(0, Instruction.length);
-
-				Row.setText(dta);
-
-				realaddress = realaddress + Instruction.length;
-				loadedaddress = loadedaddress + Instruction.length;
-
-			} // while
+			// Render the appropriate type
+			if (s.equals(CODETYPES[1])) {
+				ScreenRenderer renderer = new ScreenRenderer();
+				Renderers.add(renderer);
+				renderer.Render(MainPage, data);
+			} else if (s.equals(CODETYPES[2])) {
+				AssemblyRenderer renderer = new AssemblyRenderer();
+				Renderers.add(renderer);
+				renderer.Render(MainPage, data, loadAddr);
+			} else if (s.equals(CODETYPES[3])) {
+				SNARenderer renderer = new SNARenderer();
+				Renderers.add(renderer);
+				renderer.Render(MainPage, data, loadAddr, filename);
+			} else if (s.equals(CODETYPES[4])) {
+				Z80SnapshotRenderer renderer = new Z80SnapshotRenderer();
+				Renderers.add(renderer);
+				renderer.Render(MainPage, data, loadAddr, filename);
+			} else {
+				BinaryRenderer renderer = new BinaryRenderer();
+				Renderers.add(renderer);
+				renderer.Render(MainPage, data, loadAddr, 400);
+			}
 		} catch (Exception E) {
-			System.out.println("Error at: " + realaddress + "(" + loadedaddress + ")");
-			System.out.println(E.getMessage());
+			System.out.println("Error rendering:");
 			E.printStackTrace();
 		}
+		MainPage.layout();
+		MainPage.pack();
+		((ScrolledComposite) MainPage.getParent())
+				.setMinSize(MainPage.computeSize(MainPage.getClientArea().width + 1, SWT.DEFAULT));
 
 	}
 

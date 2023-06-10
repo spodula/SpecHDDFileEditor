@@ -105,7 +105,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 	 * @param data
 	 */
 	@Override
-	public void AddCodeFile(String filename, int address, byte[] data)  throws IOException {
+	public void AddCodeFile(String filename, int address, byte[] data) throws IOException {
 		AddPlusThreeFile(filename, data, address, 0, Speccy.BASIC_CODE);
 	}
 
@@ -117,7 +117,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 	 * @param basicoffset
 	 */
 	@Override
-	public void AddBasicFile(String nameOnDisk, byte[] basicAsBytes, int line, int basicoffset)  throws IOException  {
+	public void AddBasicFile(String nameOnDisk, byte[] basicAsBytes, int line, int basicoffset) throws IOException {
 		AddPlusThreeFile(nameOnDisk, basicAsBytes, line, basicoffset, Speccy.BASIC_BASIC);
 	}
 
@@ -162,7 +162,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 				checksum = checksum + (rawbytes[i] & 0xff);
 			}
 			rawbytes[127] = (byte) (checksum & 0xff);
-			
+
 			AddCPMFile(nameOnDisk, rawbytes);
 		} catch (Exception E) {
 			E.printStackTrace();
@@ -281,9 +281,9 @@ public class PLUS3DOSPartition extends CPMPartition {
 		} catch (IOException e) {
 		}
 	}
- 
+
 	/**
-	 * Extract partition with flags showing what to do with each file type. 
+	 * Extract partition with flags showing what to do with each file type.
 	 * 
 	 * @param folder
 	 * @param BasicAction
@@ -297,7 +297,8 @@ public class PLUS3DOSPartition extends CPMPartition {
 
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress) throws IOException {
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted)
+			throws IOException {
 		try {
 			FileWriter SysConfig = new FileWriter(new File(folder, "partition.index"));
 			try {
@@ -305,110 +306,117 @@ public class PLUS3DOSPartition extends CPMPartition {
 				int entrynum = 0;
 				for (DirectoryEntry entry : DirectoryEntries) {
 					if (progress != null) {
-						if (progress.Callback(DirectoryEntries.length, entrynum++, "File: " + entry.GetFilename())) 
+						if (progress.Callback(DirectoryEntries.length, entrynum++, "File: " + entry.GetFilename()))
 							break;
 					}
-					File TargetFilename = new File(folder, entry.GetFilename().trim());
-					Plus3DosFileHeader p3d = entry.GetPlus3DosHeader();
-					byte entrydata[] = entry.GetFileData();
-					byte Rawentrydata[] = entry.GetFileRawData();
-					boolean isUnknown = !p3d.IsPlusThreeDosFile;
+					if (IncludeDeleted || !entry.IsDeleted) {
+						File TargetFilename = new File(folder, entry.GetFilename().trim());
+						Plus3DosFileHeader p3d = entry.GetPlus3DosHeader();
+						byte entrydata[] = entry.GetFileData();
+						byte Rawentrydata[] = entry.GetFileRawData();
+						boolean isUnknown = !p3d.IsPlusThreeDosFile;
 
-					int SpeccyFileType = 0;
-					int basicLine = 0;
-					int basicVarsOffset = entrydata.length;
-					int codeLoadAddress = 0;
-					int filelength = 0;
-					String arrayVarName = "";
-					if (p3d == null || !p3d.IsPlusThreeDosFile) {
-						SpeccyFileType = Speccy.BASIC_CODE;
-						codeLoadAddress = 0x10000 - entrydata.length;
-						filelength = entrydata.length;
-					} else {
-						filelength = p3d.filelength;
-						SpeccyFileType = p3d.filetype;
-						basicLine = p3d.line;
-						basicVarsOffset = p3d.VariablesOffset;
-						codeLoadAddress = p3d.loadAddr;
-						arrayVarName = p3d.VarName;
-					}
-					try {
-						int actiontype = GeneralUtils.EXPORT_TYPE_RAW;
-						if (isUnknown) { // Options are: "Raw", "Hex", "Assembly"
-							actiontype = MiscAction;
+						int SpeccyFileType = 0;
+						int basicLine = 0;
+						int basicVarsOffset = entrydata.length;
+						int codeLoadAddress = 0;
+						int filelength = 0;
+						String arrayVarName = "";
+						if (p3d == null || !p3d.IsPlusThreeDosFile) {
+							SpeccyFileType = Speccy.BASIC_CODE;
+							codeLoadAddress = 0x10000 - entrydata.length;
+							filelength = entrydata.length;
 						} else {
-							// Identifed BASIC File type
-							if (SpeccyFileType == Speccy.BASIC_BASIC) { // Options are: "Text", "Raw", "Raw+Header", "Hex"
-								actiontype = BasicAction;
-							} else if ((SpeccyFileType == Speccy.BASIC_NUMARRAY) && (SpeccyFileType == Speccy.BASIC_CHRARRAY)) {
-								actiontype = ArrayAction;
-							} else if ((filelength == 6912)) { // { "PNG", "GIF", "JPEG", "Raw",
-																								// "Raw+Header", "Hex", "Assembly" };
-								actiontype = ScreenAction;
-							} else { // CODE Options: { "Raw", "Raw+Header", "Assembly", "Hex" };
-								actiontype = CodeAction;
-							}
+							filelength = p3d.filelength;
+							SpeccyFileType = p3d.filetype;
+							basicLine = p3d.line;
+							basicVarsOffset = p3d.VariablesOffset;
+							codeLoadAddress = p3d.loadAddr;
+							arrayVarName = p3d.VarName;
 						}
-						
-						Speccy.SaveFileToDiskAdvanced(TargetFilename, entrydata, Rawentrydata, filelength, SpeccyFileType, basicLine,
-								basicVarsOffset, codeLoadAddress, arrayVarName, actiontype);
-					} catch (Exception E) {
-						System.out.println("\nError extracting " + TargetFilename + "For folder: " + folder + " - "
-								+ E.getMessage());
-						E.printStackTrace();
-					}
+						try {
+							int actiontype = GeneralUtils.EXPORT_TYPE_RAW;
+							if (isUnknown) { // Options are: "Raw", "Hex", "Assembly"
+								actiontype = MiscAction;
+							} else {
+								// Identifed BASIC File type
+								if (SpeccyFileType == Speccy.BASIC_BASIC) { // Options are: "Text", "Raw", "Raw+Header",
+																			// "Hex"
+									actiontype = BasicAction;
+								} else if ((SpeccyFileType == Speccy.BASIC_NUMARRAY)
+										&& (SpeccyFileType == Speccy.BASIC_CHRARRAY)) {
+									actiontype = ArrayAction;
+								} else if ((filelength == 6912)) { // { "PNG", "GIF", "JPEG", "Raw",
+																	// "Raw+Header", "Hex", "Assembly" };
+									actiontype = ScreenAction;
+								} else { // CODE Options: { "Raw", "Raw+Header", "Assembly", "Hex" };
+									actiontype = CodeAction;
+								}
+							}
 
-					SysConfig.write("<file>\n".toCharArray());
-					SysConfig.write(("   <filename>" + entry.GetFilename().trim() + "</filename>\n").toCharArray());
-					SysConfig.write(("   <deleted>" + entry.IsDeleted + "</deleted>\n").toCharArray());
-					SysConfig.write(("   <errors>" + entry.Errors + "</errors>\n").toCharArray());
-					SysConfig.write(("   <filelength>" + entry.GetFileSize() + "</filelength>\n").toCharArray());
-					SysConfig.write("   <cpm:blocks>\n".toCharArray());
-					int blocks[] = entry.getBlocks();
-					for (int i : blocks) {
-						SysConfig.write(("       <blockID>" + i + "</blockID>\n").toCharArray());
-					}
-					SysConfig.write("   </cpm:blocks>\n".toCharArray());
-					SysConfig.write("   <cpm:dirents>\n".toCharArray());
-					for (Dirent d : entry.dirents) {
-						SysConfig.write(("       <dirent>" + d.toString() + "</dirent>\n").toCharArray());
-					}
-					SysConfig.write("   </cpm:dirents>\n".toCharArray());
+							Speccy.SaveFileToDiskAdvanced(TargetFilename, entrydata, Rawentrydata, filelength,
+									SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName,
+									actiontype);
+						} catch (Exception E) {
+							System.out.println("\nError extracting " + TargetFilename + "For folder: " + folder + " - "
+									+ E.getMessage());
+							E.printStackTrace();
+						}
 
-					if (p3d == null || !p3d.IsPlusThreeDosFile) {
-						// Treat CPM files as raw files.
-						SysConfig.write("   <origfiletype>CPM</origfiletype>\n".toCharArray());
-						SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
-						SysConfig.write(("       <filetype>3</filetype>\n").toCharArray());
-						SysConfig.write(("       <filetypename>" + Speccy.FileTypeAsString(3) + "</filetypename>\n")
-								.toCharArray());
-						SysConfig.write(("       <codeloadaddr>32768</codeloadaddr>\n").toCharArray());
-						SysConfig.write(("   </specbasicinfo>\n".toCharArray()));
-					} else {
-						SysConfig.write("   <origfiletype>PLUS3DOS</origfiletype>\n".toCharArray());
-						SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
-						SysConfig.write(("       <filetype>" + p3d.filetype + "</filetype>\n").toCharArray());
-						SysConfig.write(
-								("       <filetypename>" + Speccy.FileTypeAsString(p3d.filetype) + "</filetypename>\n")
-										.toCharArray());
-						SysConfig.write(("       <basicsize>" + p3d.filelength + "</basicsize>\n").toCharArray());
-						SysConfig.write(("       <basicstartline>" + p3d.line + "</basicstartline>\n").toCharArray());
-						SysConfig.write(("       <codeloadaddr>" + p3d.loadAddr + "</codeloadaddr>\n").toCharArray());
-						SysConfig.write(("       <basicvarsoffset>" + p3d.VariablesOffset + "</basicvarsoffset>\n")
-								.toCharArray());
-						SysConfig.write(("       <arrayvarname>" + p3d.VarName + "</arrayvarname>\n").toCharArray());
-						SysConfig.write(("   </specbasicinfo>\n".toCharArray()));
-						SysConfig.write(("   <specplus3>\n".toCharArray()));
-						SysConfig.write(("       <signature>" + p3d.Signature + "</signature>\n").toCharArray());
-						SysConfig.write(("       <softEOF>" + p3d.SoftEOF + "</softEOF>\n").toCharArray());
-						SysConfig.write(("       <iss>" + p3d.IssueNo + "</iss>\n").toCharArray());
-						SysConfig.write(("       <ver>" + p3d.VersionNo + "</ver>\n").toCharArray());
-						SysConfig.write(("       <rawsize>" + p3d.fileSize + "</rawsize>\n").toCharArray());
-						SysConfig.write(("       <checksum>" + p3d.CheckSum + "</checksum>\n").toCharArray());
-						SysConfig.write(("   </specplus3>\n".toCharArray()));
-					}
+						SysConfig.write("<file>\n".toCharArray());
+						SysConfig.write(("   <filename>" + entry.GetFilename().trim() + "</filename>\n").toCharArray());
+						SysConfig.write(("   <deleted>" + entry.IsDeleted + "</deleted>\n").toCharArray());
+						SysConfig.write(("   <errors>" + entry.Errors + "</errors>\n").toCharArray());
+						SysConfig.write(("   <filelength>" + entry.GetFileSize() + "</filelength>\n").toCharArray());
+						SysConfig.write("   <cpm:blocks>\n".toCharArray());
+						int blocks[] = entry.getBlocks();
+						for (int i : blocks) {
+							SysConfig.write(("       <blockID>" + i + "</blockID>\n").toCharArray());
+						}
+						SysConfig.write("   </cpm:blocks>\n".toCharArray());
+						SysConfig.write("   <cpm:dirents>\n".toCharArray());
+						for (Dirent d : entry.dirents) {
+							SysConfig.write(("       <dirent>" + d.toString() + "</dirent>\n").toCharArray());
+						}
+						SysConfig.write("   </cpm:dirents>\n".toCharArray());
 
-					SysConfig.write("</file>\n".toCharArray());
+						if (p3d == null || !p3d.IsPlusThreeDosFile) {
+							// Treat CPM files as raw files.
+							SysConfig.write("   <origfiletype>CPM</origfiletype>\n".toCharArray());
+							SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
+							SysConfig.write(("       <filetype>3</filetype>\n").toCharArray());
+							SysConfig.write(("       <filetypename>" + Speccy.FileTypeAsString(3) + "</filetypename>\n")
+									.toCharArray());
+							SysConfig.write(("       <codeloadaddr>32768</codeloadaddr>\n").toCharArray());
+							SysConfig.write(("   </specbasicinfo>\n".toCharArray()));
+						} else {
+							SysConfig.write("   <origfiletype>PLUS3DOS</origfiletype>\n".toCharArray());
+							SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
+							SysConfig.write(("       <filetype>" + p3d.filetype + "</filetype>\n").toCharArray());
+							SysConfig.write(("       <filetypename>" + Speccy.FileTypeAsString(p3d.filetype)
+									+ "</filetypename>\n").toCharArray());
+							SysConfig.write(("       <basicsize>" + p3d.filelength + "</basicsize>\n").toCharArray());
+							SysConfig.write(
+									("       <basicstartline>" + p3d.line + "</basicstartline>\n").toCharArray());
+							SysConfig.write(
+									("       <codeloadaddr>" + p3d.loadAddr + "</codeloadaddr>\n").toCharArray());
+							SysConfig.write(("       <basicvarsoffset>" + p3d.VariablesOffset + "</basicvarsoffset>\n")
+									.toCharArray());
+							SysConfig
+									.write(("       <arrayvarname>" + p3d.VarName + "</arrayvarname>\n").toCharArray());
+							SysConfig.write(("   </specbasicinfo>\n".toCharArray()));
+							SysConfig.write(("   <specplus3>\n".toCharArray()));
+							SysConfig.write(("       <signature>" + p3d.Signature + "</signature>\n").toCharArray());
+							SysConfig.write(("       <softEOF>" + p3d.SoftEOF + "</softEOF>\n").toCharArray());
+							SysConfig.write(("       <iss>" + p3d.IssueNo + "</iss>\n").toCharArray());
+							SysConfig.write(("       <ver>" + p3d.VersionNo + "</ver>\n").toCharArray());
+							SysConfig.write(("       <rawsize>" + p3d.fileSize + "</rawsize>\n").toCharArray());
+							SysConfig.write(("       <checksum>" + p3d.CheckSum + "</checksum>\n").toCharArray());
+							SysConfig.write(("   </specplus3>\n".toCharArray()));
+						}
+
+						SysConfig.write("</file>\n".toCharArray());
+					}
 				}
 
 				SysConfig.write("</speccy>\n".toCharArray());
@@ -420,7 +428,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Add an pre-encoded character array to the media
 	 * 
@@ -437,10 +445,9 @@ public class PLUS3DOSPartition extends CPMPartition {
 		}
 		int varbyte = (int) varname.charAt(0) - 0x40;
 		varbyte = varbyte + 0xe0; // 111XXXXX
-		AddPlusThreeFile(filename, EncodedArray, varbyte * 0x100, 0,
-				Speccy.BASIC_CHRARRAY);
+		AddPlusThreeFile(filename, EncodedArray, varbyte * 0x100, 0, Speccy.BASIC_CHRARRAY);
 	}
-	 
+
 	/**
 	 * Add an pre-encoded numeric array to the microdrive.
 	 * 
@@ -457,8 +464,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 		}
 		int varbyte = (int) varname.charAt(0) - 0x40;
 		varbyte = varbyte + 0xa0; // 101XXXXX
-		AddPlusThreeFile(filename, EncodedArray, varbyte * 0x100, 0,
-				Speccy.BASIC_NUMARRAY);	
+		AddPlusThreeFile(filename, EncodedArray, varbyte * 0x100, 0, Speccy.BASIC_NUMARRAY);
 	}
-	
+
 }
