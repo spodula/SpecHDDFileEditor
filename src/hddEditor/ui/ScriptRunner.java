@@ -1,5 +1,4 @@
 package hddEditor.ui;
-//TODO: For scripting, proper error handling
 //TODO: For scripting, proper param checking.
 
 import java.io.BufferedReader;
@@ -80,36 +79,41 @@ public class ScriptRunner {
 	 * @param command
 	 */
 	public void ExecuteCommand(int linenum, String command) {
-		command = command.trim();
-		String restOfCommand = "";
-		int spc = command.indexOf(' ');
-		if (spc != -1) {
-			restOfCommand = command.substring(spc);
-			command = command.substring(0, spc).trim();
-		}
-		command = command.toLowerCase();
+		try {
+			command = command.trim();
+			String restOfCommand = "";
+			int spc = command.indexOf(' ');
+			if (spc != -1) {
+				restOfCommand = command.substring(spc);
+				command = command.substring(0, spc).trim();
+			}
+			command = command.toLowerCase();
 
-		if (command.equals("load")) {
-			System.out.println(restOfCommand);
-			hdi.LoadFile(restOfCommand.trim());
-		} else if (command.equals("new")) {
-			DoNew(restOfCommand);
-		} else if (command.equals("show")) {
-			DoShow(restOfCommand);
-		} else if (command.equals("select")) {
-			DoSelect(restOfCommand);
-		} else if (command.equals("cat")) {
-			DoCat(restOfCommand);
-		} else if (command.equals("delete")) {
-			DoDelete(restOfCommand);
-		} else if (command.equals("rename")) {
-			DoRename(restOfCommand);
-		} else if (command.equals("add")) {
-			DoAdd(restOfCommand);
-		} else if (command.equals("export")) {
-			DoExport(restOfCommand);
-		} else {
-			System.out.println("Unknown command: " + command + " params: " + restOfCommand);
+			if (command.equals("load")) {
+				System.out.println(restOfCommand);
+				hdi.LoadFile(restOfCommand.trim());
+			} else if (command.equals("new")) {
+				DoNew(restOfCommand);
+			} else if (command.equals("show")) {
+				DoShow(restOfCommand);
+			} else if (command.equals("select")) {
+				DoSelect(restOfCommand);
+			} else if (command.equals("cat")) {
+				DoCat(restOfCommand);
+			} else if (command.equals("delete")) {
+				DoDelete(restOfCommand);
+			} else if (command.equals("rename")) {
+				DoRename(restOfCommand);
+			} else if (command.equals("add")) {
+				DoAdd(restOfCommand);
+			} else if (command.equals("export")) {
+				DoExport(restOfCommand);
+			} else {
+				System.out.println("Unknown command: " + command + " params: " + restOfCommand);
+			}
+		} catch (Exception E) {
+			System.out.println("Command " + command + " failed with error.");
+			E.printStackTrace();
 		}
 	}
 
@@ -243,7 +247,6 @@ public class ScriptRunner {
 		}
 	}
 
-	
 	/**
 	 * Display a catalog
 	 * 
@@ -270,7 +273,7 @@ public class ScriptRunner {
 				SpeccyBasicDetails sbd = fe.GetSpeccyBasicDetails();
 				switch (sbd.BasicType) {
 				case Speccy.BASIC_BASIC:
-					line = line + "Line: " + sbd.LineStart  + " Vars: " + sbd.VarStart;
+					line = line + "Line: " + sbd.LineStart + " Vars: " + sbd.VarStart;
 					break;
 				case Speccy.BASIC_CODE:
 					line = line + "Load address: " + sbd.LoadAddress;
@@ -283,8 +286,9 @@ public class ScriptRunner {
 				System.out.println(line);
 			}
 			System.out.println("\n  " + numfiles + " files found.");
-		}		
+		}
 	}
+
 	/**
 	 * 
 	 * 
@@ -359,11 +363,11 @@ public class ScriptRunner {
 						|| (part.GetPartType() == PLUSIDEDOS.PARTITION_TAPE_SINCLAIRMICRODRIVE)
 						|| (part.GetPartType() == PLUSIDEDOS.PARTITION_DISK_TRDOS)
 						|| (part.GetPartType() == PLUSIDEDOS.PARTITION_CPM)) {
-						try {
-							part.RenameFile(srcFile, destFile);
-						} catch (IOException e) {
-							System.out.println("Error Renaming file '" + srcFile + "'. " + e.getMessage());
-						}
+					try {
+						part.RenameFile(srcFile, destFile);
+					} catch (IOException e) {
+						System.out.println("Error Renaming file '" + srcFile + "'. " + e.getMessage());
+					}
 				} else if (part.GetPartType() == PLUSIDEDOS.PARTITION_SYSTEM) {
 					System.out.println("System partition selected. Use 'delete partition' to remove partitions.");
 				} else {
@@ -515,7 +519,8 @@ public class ScriptRunner {
 			System.out.println(" * rawheader - Raw binary file in the data Along with any Microdrive or +3DOS header");
 			System.out.println(" * hex       - Hex dump of the file");
 			System.out.println(" * asm       - A Disassembly of the file");
-			System.out.println(" * astype    - For Basic - Text file, Array - CSV file, code length 6912 - PNG file, All others, Hex ");
+			System.out.println(
+					" * astype    - For Basic - Text file, Array - CSV file, code length 6912 - PNG file, All others, Hex ");
 		}
 	}
 
@@ -660,7 +665,7 @@ public class ScriptRunner {
 			System.out.println(" * intensity=[0..100]");
 			System.out.println(" * arraylinelimit=<max lines to load>");
 			System.out.println("Eg.");
-			System.out.println("  add c:/temp/test.jpeg test.scr image bw=false intensity=80"); 
+			System.out.println("  add c:/temp/test.jpeg test.scr image bw=false intensity=80");
 		}
 	}
 
