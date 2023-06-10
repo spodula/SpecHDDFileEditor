@@ -1,4 +1,8 @@
 package hddEditor.ui.partitionPages;
+/*
+ * MGT technical information
+ * https://k1.spdns.de/Vintage/Sinclair/82/Peripherals/Disc%20Interfaces/DiSCiPLE%20%26%20Plus%20D%20(MGT%2C%20Datel)/disciple-tech_v8.pdf
+ */
 //TODO: Support more MGT file types:
 
 //TODO:   ZX microdrive (6)

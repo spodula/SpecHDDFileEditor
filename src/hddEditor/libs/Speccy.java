@@ -98,10 +98,10 @@ public class Speccy {
 		System.out.println(" " + GetNumberAtByte(num, base));
 	}
 
-	// zx spectrum colours in HTML RGB
-	public static final int colours[] = { 0x000000, 0x0000D7, 0xD70000, 0xD700D7, 0x00D700, 0x00D7D7, 0xD7D700,
+	// zx spectrum colours in SWT RGB (This differs from HTML RGB)
+	public static final int colours[] = { 0x000000, 0xD70000, 0x0000D7, 0xD700D7, 0x00D700, 0xD7D700, 0x00D7D7,
 			0xD7D7D7 };
-	public static final int coloursBright[] = { 0x000000, 0x0000FF, 0xFF0000, 0xFF00FF, 0x00FF00, 0x00FFFF, 0xFFFF00,
+	public static final int coloursBright[] = { 0x000000, 0xFF0000, 0x0000FF, 0xFF00FF, 0x00FF00, 0xFFFF00, 0x00FFFF,
 			0xFFFFFF };
 
 	// zx Spectrum tokens from 0 to 255
