@@ -63,7 +63,7 @@ public class TrDosPartitionPage extends GenericPage {
 			label("", 1);
 
 			// directory listing
-			DirectoryListing = new Table(ParentComp, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+			DirectoryListing = new Table(ParentComp, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 			DirectoryListing.setLinesVisible(true);
 
 			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -161,12 +161,13 @@ public class TrDosPartitionPage extends GenericPage {
 				public void widgetSelected(SelectionEvent arg0) {
 					DoExtractAllFiles();
 				}
+
 				@Override
 				public void widgetDefaultSelected(SelectionEvent arg0) {
 					widgetSelected(arg0);
 				}
 			});
-			
+
 			Btn = new Button(ParentComp, SWT.PUSH);
 			Btn.setText("Rename file");
 			Btn.setLayoutData(gd);
@@ -238,14 +239,14 @@ public class TrDosPartitionPage extends GenericPage {
 	}
 
 	protected void DoExtractAllFiles() {
-		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm (ParentComp.getDisplay()); 
+		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay());
 		try {
 			ExportAllPartsForm.ShowSinglePartition(partition);
 		} finally {
 			ExportAllPartsForm = null;
 		}
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -285,23 +286,29 @@ public class TrDosPartitionPage extends GenericPage {
 	/**
 	 * @throws IOException
 	 * 
-	 */ 
+	 */
 	protected void DoDeleteFile() {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
 			TrdDirectoryEntry entry = (TrdDirectoryEntry) itms[0].getData();
-			MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-			messageBox.setMessage("Are you sure you want to delete '" + entry.GetFilename() + "'?");
-			messageBox.setText("Are you sure you want to delete '" + entry.GetFilename() + "'?");
-			int response = messageBox.open();
-			if (response == SWT.YES) {
+			String filename = entry.GetFilename();
+			if (itms.length > 1) {
+				filename = "the selected files";
+			}
+			MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
+			messageBox.setMessage("Are you sure you want to delete " + filename + " ?");
+			messageBox.setText("Are you sure you want to delete " + filename + " ?");
+			if (messageBox.open() == SWT.YES) {
 				TrDosPartition fbc = (TrDosPartition) partition;
 				try {
-					String filename = entry.GetFilename();
-					if (entry.GetFileType()!=' ') {
-						filename = filename+"."+entry.GetFileType();
+					for (TableItem itm : itms) {
+						entry = (TrdDirectoryEntry) itm.getData();
+						filename = entry.GetFilename();
+						if (entry.GetFileType() != ' ') {
+							filename = filename + "." + entry.GetFileType();
+						}
+						fbc.DeleteFile(filename);
 					}
-					fbc.DeleteFile(filename);
 					UpdateDirectoryEntryList();
 				} catch (IOException e) {
 					ErrorBox("IO Error deleting file." + e.getMessage());

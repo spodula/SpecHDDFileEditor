@@ -60,7 +60,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 			label("", 1);
 
 			// directory listing
-			DirectoryListing = new Table(ParentComp, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+			DirectoryListing = new Table(ParentComp, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 			DirectoryListing.setLinesVisible(true);
 
 			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -412,12 +412,20 @@ public class MicrodrivePartitionPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 			MicrodriveDirectoryEntry entry = (MicrodriveDirectoryEntry) itms[0].getData();
 			try {
+				String filename = entry.GetFilename();
+				if (itms.length > 1) {
+					filename = "the selected files";
+				}
 				MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
-				messageBox.setMessage("Are you sure you want to delete " + entry.GetFilename() + " ?");
-				messageBox.setText("Are you sure you want to delete " + entry.GetFilename() + " ?");
+				messageBox.setMessage("Are you sure you want to delete " + filename + " ?");
+				messageBox.setText("Are you sure you want to delete " + filename + " ?");
+
 				if (messageBox.open() == SWT.OK) {
 					SinclairMicrodrivePartition smp = (SinclairMicrodrivePartition) partition;
-					smp.DeleteFile(entry.GetFilename());
+					for (TableItem itm:itms) {
+						entry = (MicrodriveDirectoryEntry) itm.getData();
+						smp.DeleteFile(entry.GetFilename());
+					}
 					AddComponents();
 				}
 			} catch (IOException e) {

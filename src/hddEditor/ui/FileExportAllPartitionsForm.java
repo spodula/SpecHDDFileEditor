@@ -32,6 +32,7 @@ public class FileExportAllPartitionsForm {
 	private Button CloseBtn = null;
 	private Button ExportBtn = null;
 	private Button IncludeDeleted = null;
+	private Button SpecialExport = null;
 
 	private Combo BasicTargetFileType = null;
 	private Combo CodeTargetFileType = null;
@@ -49,7 +50,7 @@ public class FileExportAllPartitionsForm {
 	private String ArrayEntries[] = { "CSV", "Raw", "Raw+Header", "Hex" };
 	private String ScreenEntries[] = { "PNG", "GIF", "JPEG", "Raw", "Raw+Header", "Hex", "Assembly" };
 	private String UnknownEntries[] = { "Hex", "Raw", "Assembly" };
-	private String SwapEntries[] = { "Hex","Raw" };
+	private String SwapEntries[] = { "Hex", "Raw" };
 
 	// Disk
 	private IDEDosPartition ThisDisk;
@@ -191,14 +192,20 @@ public class FileExportAllPartitionsForm {
 		SwapTargetFileType.setText(SwapEntries[0]);
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
-		
+
 		lbl = new Label(shell, SWT.NONE);
 		lbl.setText("Include deleted files?:");
 		IncludeDeleted = new Button(shell, SWT.CHECK);
 		IncludeDeleted.setSelection(false);
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
-		
+
+		lbl = new Label(shell, SWT.NONE);
+		lbl.setText("Special export mode?:");
+		SpecialExport = new Button(shell, SWT.CHECK);
+		SpecialExport.setSelection(false);
+		new Label(shell, SWT.NONE);
+		new Label(shell, SWT.NONE);
 
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
@@ -217,8 +224,14 @@ public class FileExportAllPartitionsForm {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				if (SinglePartitionMode) {
-					if (DoExportSingle()) {
-						shell.close();
+					if (SpecialExport.getSelection()) {
+						if (DoSpecialExport()) {
+							shell.close();
+						}
+					} else {
+						if (DoExportSingle()) {
+							shell.close();
+						}
 					}
 				} else {
 					if (DoExport()) {
@@ -298,19 +311,53 @@ public class FileExportAllPartitionsForm {
 		return (result);
 	}
 
+	/*
+	 * This is my special export which creates a folder off different file types.
+	 * This is basically a utility for me. 
+	 */
+	
+	protected boolean DoSpecialExport() {
+		String TargetFolder = Targetfile.getText();
+		DoExportFlags( GeneralUtils.EXPORT_TYPE_TXT, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_CSV, 
+				GeneralUtils.EXPORT_TYPE_PNG, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX, TargetFolder);
+		File asm = new File(TargetFolder,"ASM");
+		asm.mkdir();
+		DoExportFlags( GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM, 
+				GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM, asm.getAbsolutePath());
+		File cpm = new File(TargetFolder,"CPM");
+		cpm.mkdir();
+		DoExportFlags( GeneralUtils.EXPORT_TYPE_RAWANDHEADER, GeneralUtils.EXPORT_TYPE_RAWANDHEADER, GeneralUtils.EXPORT_TYPE_RAWANDHEADER, 
+				GeneralUtils.EXPORT_TYPE_RAWANDHEADER, GeneralUtils.EXPORT_TYPE_RAWANDHEADER, GeneralUtils.EXPORT_TYPE_RAWANDHEADER, cpm.getAbsolutePath());
+		File hex = new File(TargetFolder,"HEX");
+		hex.mkdir();
+		DoExportFlags( GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX, 
+				GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX, hex.getAbsolutePath());
+		File raw = new File(TargetFolder,"RAW");
+		raw.mkdir();
+		DoExportFlags( GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW, 
+				GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW, raw.getAbsolutePath());
+		
+		return true;
+	}
+
+
+	
 	/**
 	 * 
 	 * @return
 	 */
 	protected boolean DoExportSingle() {
-
 		int BasicType = TextToIndex(BasicTargetFileType.getText(), GeneralUtils.MasterList);
 		int CodeType = TextToIndex(CodeTargetFileType.getText(), GeneralUtils.MasterList);
 		int ArrayType = TextToIndex(ArrayTargetFileType.getText(), GeneralUtils.MasterList);
 		int ScreenType = TextToIndex(ScreenTargetFileType.getText(), GeneralUtils.MasterList);
 		int UnknownType = TextToIndex(UnknownTargetFileType.getText(), GeneralUtils.MasterList);
 		int SwapType = TextToIndex(SwapTargetFileType.getText(), GeneralUtils.MasterList);
+		String TargetFolder = Targetfile.getText();
+		return (DoExportFlags(BasicType, CodeType, ArrayType, ScreenType, UnknownType, SwapType, TargetFolder));
+	}
 
+	protected boolean DoExportFlags(int BasicType, int CodeType, int ArrayType, int ScreenType, int UnknownType, int SwapType, String TargetFolder) {
 		System.out.println("Basic type: " + BasicType + " " + GeneralUtils.MasterList[BasicType]);
 		System.out.println("Code type: " + CodeType + " " + GeneralUtils.MasterList[CodeType]);
 		System.out.println("Array type: " + ArrayType + " " + GeneralUtils.MasterList[ArrayType]);
@@ -320,13 +367,13 @@ public class FileExportAllPartitionsForm {
 
 		PartitionExportProgress pep = new PartitionExportProgress(shell.getDisplay());
 		try {
-			pep.Show("Exporting Partition "+ThisDisk.GetName(), "Partition:", "File:");
+			pep.Show("Exporting Partition " + ThisDisk.GetName(), "Partition:", "File:");
 			pep.SetMax1(1);
 			pep.SetMax2(1);
 			pep.SetValue1(0);
 			pep.SetValue2(0);
 			int PartNum = 0;
-			File directory = new File(Targetfile.getText());
+			File directory = new File(TargetFolder);
 			pep.setMessage1("Exporting partition " + ThisDisk.GetName() + " ("
 					+ PLUSIDEDOS.GetTypeAsString(ThisDisk.GetPartType()) + ")");
 			pep.SetValue1(PartNum++);
@@ -339,6 +386,7 @@ public class FileExportAllPartitionsForm {
 					ThisDisk.ExtractPartitiontoFolderAdvanced(directory, BasicType, CodeType, ArrayType, ScreenType,
 							UnknownType, SwapType, new ProgressCallback() {
 								int lastmax = 0;
+
 								@Override
 								public boolean Callback(int max, int value, String text) {
 									if (max != lastmax) {
@@ -349,7 +397,7 @@ public class FileExportAllPartitionsForm {
 									pep.setMessage2(text);
 									return (pep.IsCancelled());
 								}
-							},IncludeDeleted.getSelection());
+							}, IncludeDeleted.getSelection());
 
 					long finish = System.currentTimeMillis();
 					System.out.println(String.valueOf(finish - start) + "ms");
@@ -402,7 +450,6 @@ public class FileExportAllPartitionsForm {
 						&& partition.GetPartType() != PLUSIDEDOS.PARTITION_UNKNOWN
 						&& partition.GetPartType() != PLUSIDEDOS.PARTITION_BAD) {
 
-
 					String strDirName = partition.GetName().replace("+", "Plus");
 					strDirName = strDirName.replace("/", "").replace("*", "");
 
@@ -428,7 +475,7 @@ public class FileExportAllPartitionsForm {
 										pep.setMessage2(text);
 										return (pep.IsCancelled());
 									}
-								},IncludeDeleted.getSelection());
+								}, IncludeDeleted.getSelection());
 
 						long finish = System.currentTimeMillis();
 						System.out.println(String.valueOf(finish - start) + "ms");

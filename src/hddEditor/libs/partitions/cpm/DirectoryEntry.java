@@ -48,6 +48,8 @@ public class DirectoryEntry implements FileEntry {
 	// Any errors parsing the Directory entry.
 	public String Errors = "";
 
+	//if deleting multiple items, delay the reload of the directory.
+	public boolean DelayReload = false;
 	/**
 	 * Parse and return the filename from the first DIRENT.
 	 * 
@@ -361,8 +363,10 @@ public class DirectoryEntry implements FileEntry {
 				for (int i=0;i<32;i++) 
 					d.rawdirent[i] = (byte) (0xf5 & 0xff);
 			}
-			ThisPartition.updateDirentBlocks();
-			ThisPartition.ExtractDirectoryListing();
+			if (!DelayReload) {
+				ThisPartition.updateDirentBlocks();
+				ThisPartition.ExtractDirectoryListing();
+			}
 		} else {
 			// first, set all the dirents.
 			for (Dirent d : dirents) {

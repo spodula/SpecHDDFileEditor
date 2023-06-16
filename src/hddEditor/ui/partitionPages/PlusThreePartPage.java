@@ -5,6 +5,7 @@ package hddEditor.ui.partitionPages;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -27,6 +28,7 @@ import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
+import hddEditor.libs.partitions.CPMPartition;
 import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;
 import hddEditor.ui.partitionPages.dialogs.AddFilesToPlus3Partition;
@@ -98,7 +100,7 @@ public class PlusThreePartPage extends GenericPage {
 
 			label("", 4);
 			// directory listing
-			DirectoryListing = new Table(ParentComp, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+			DirectoryListing = new Table(ParentComp, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 			DirectoryListing.setLinesVisible(true);
 
 			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -335,11 +337,24 @@ public class PlusThreePartPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 			DirectoryEntry entry = (DirectoryEntry) itms[0].getData();
 			try {
+				String filename = entry.GetFilename();
+				if (itms.length > 1) {
+					filename = "the selected files";
+				}
 				MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
-				messageBox.setMessage("Are you sure you want to delete " + entry.GetFilename() + " ?");
-				messageBox.setText("Are you sure you want to delete " + entry.GetFilename() + " ?");
+				messageBox.setMessage("Are you sure you want to delete " + filename + " ?");
+				messageBox.setText("Are you sure you want to delete " + filename + " ?");
 				if (messageBox.open() == SWT.OK) {
-					entry.SetDeleted(true);
+					//for +3dos files, deleting deleted files causes a reload of the dirents. 
+					//This means the existing ones are invalidated. so we set a delayed reload and do it at the end.
+					for (TableItem en:itms) {
+						DirectoryEntry ent = (DirectoryEntry) en.getData();
+						ent.DelayReload = true;
+						ent.SetDeleted(true);
+						ent.DelayReload = false;
+					}
+					((CPMPartition) partition).updateDirentBlocks();
+					((CPMPartition) partition).ExtractDirectoryListing();
 					AddComponents();
 				}
 				PopulateDirectory();

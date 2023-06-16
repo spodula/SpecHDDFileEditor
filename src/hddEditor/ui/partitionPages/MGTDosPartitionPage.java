@@ -3,6 +3,7 @@ package hddEditor.ui.partitionPages;
  * MGT technical information
  * https://k1.spdns.de/Vintage/Sinclair/82/Peripherals/Disc%20Interfaces/DiSCiPLE%20%26%20Plus%20D%20(MGT%2C%20Datel)/disciple-tech_v8.pdf
  */
+
 //TODO: Support more MGT file types:
 
 //TODO:   ZX microdrive (6)
@@ -47,7 +48,7 @@ import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
 public class MGTDosPartitionPage extends GenericPage {
 	Table DirectoryListing = null;
 	MGTDosFileEditDialog SpecFileEditDialog = null;
-	AddFilesToMGTPartition AddFilesDialog = null; 
+	AddFilesToMGTPartition AddFilesDialog = null;
 
 	RenameFileDialog RenFileDialog = null;
 	HexEditDialog HxEditDialog = null;
@@ -63,7 +64,7 @@ public class MGTDosPartitionPage extends GenericPage {
 			super.AddBasicDetails();
 
 			// directory listing
-			DirectoryListing = new Table(ParentComp, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+			DirectoryListing = new Table(ParentComp, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 			DirectoryListing.setLinesVisible(true);
 
 			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -198,7 +199,8 @@ public class MGTDosPartitionPage extends GenericPage {
 				}
 			});
 			ParentComp.getShell().pack();
-			((ScrolledComposite)ParentComp.getParent()).setMinSize(ParentComp.computeSize(ParentComp.getParent().getClientArea().width+1, SWT.DEFAULT));
+			((ScrolledComposite) ParentComp.getParent())
+					.setMinSize(ParentComp.computeSize(ParentComp.getParent().getClientArea().width + 1, SWT.DEFAULT));
 		}
 
 	}
@@ -241,7 +243,7 @@ public class MGTDosPartitionPage extends GenericPage {
 		}
 	}
 
-	protected void DoAddFiles() {		
+	protected void DoAddFiles() {
 		AddFilesDialog = new AddFilesToMGTPartition(ParentComp.getDisplay());
 		AddFilesDialog.Show("Add files", (MGTDosPartition) partition);
 		AddFilesDialog = null;
@@ -254,18 +256,26 @@ public class MGTDosPartitionPage extends GenericPage {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
 			MGTDirectoryEntry entry = (MGTDirectoryEntry) itms[0].getData();
-			MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-			messageBox.setMessage("Are you sure you want to delete '" + entry.GetFilename() + "'?");
-			messageBox.setText("Are you sure you want to delete '" + entry.GetFilename() + "'?");
+			String filename = entry.GetFilename();
+			if (itms.length > 1) {
+				filename = "the selected files";
+			}
+			MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
+			messageBox.setMessage("Are you sure you want to delete " + filename + " ?");
+			messageBox.setText("Are you sure you want to delete " + filename + " ?");
+
 			int response = messageBox.open();
 			if (response == SWT.YES) {
 				TrDosPartition fbc = (TrDosPartition) partition;
 				try {
-					String filename = entry.GetFilename();
-					if (entry.GetFileType() != ' ') {
-						filename = filename + "." + entry.GetFileType();
+					for (TableItem itm : itms) {
+						entry = (MGTDirectoryEntry) itm.getData();
+						String fn = entry.GetFilename();
+						if (entry.GetFileType() != ' ') {
+							filename = filename + "." + entry.GetFileType();
+						}
+						fbc.DeleteFile(fn);
 					}
-					fbc.DeleteFile(filename);
 					UpdateDirectoryEntryList();
 				} catch (IOException e) {
 					ErrorBox("IO Error deleting file." + e.getMessage());
