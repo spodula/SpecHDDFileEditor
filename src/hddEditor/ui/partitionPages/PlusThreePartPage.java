@@ -5,7 +5,6 @@ package hddEditor.ui.partitionPages;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;

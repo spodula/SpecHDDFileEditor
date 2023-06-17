@@ -1,6 +1,5 @@
 package hddEditor.libs.partitions;
 //TODO: MGTDOSPARTITION: Unidos subdirectories.
-//TODO: MGT file type exports
 
 import java.io.File;
 import java.io.FileWriter;

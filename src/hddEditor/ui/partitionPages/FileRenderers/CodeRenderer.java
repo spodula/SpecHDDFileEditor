@@ -28,6 +28,7 @@ import hddEditor.libs.Speccy;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.Renderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.SNARenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.BinaryRenderer;
+import hddEditor.ui.partitionPages.FileRenderers.RawRender.RamDump;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.ScreenRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.Z80SnapshotRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.AssemblyRenderer;
@@ -39,7 +40,7 @@ public class CodeRenderer extends FileRenderer {
 	private Vector<Renderer> Renderers = null;
 
 	// Rendering options
-	private String[] CODETYPES = { "Binary", "Screen", "Assembly", "SNA file", "Z80 file" };
+	private String[] CODETYPES = { "Binary", "Screen", "Assembly", "SNA file", "Z80 file","48k Ram Dump" };
 
 	/**
 	 * 
@@ -271,6 +272,10 @@ public class CodeRenderer extends FileRenderer {
 				Z80SnapshotRenderer renderer = new Z80SnapshotRenderer();
 				Renderers.add(renderer);
 				renderer.Render(MainPage, data, loadAddr, filename);
+			} else if (s.equals(CODETYPES[5])) {
+				RamDump renderer = new RamDump();
+				Renderers.add(renderer);
+				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a , new int [0], filename);
 			} else {
 				BinaryRenderer renderer = new BinaryRenderer();
 				Renderers.add(renderer);
