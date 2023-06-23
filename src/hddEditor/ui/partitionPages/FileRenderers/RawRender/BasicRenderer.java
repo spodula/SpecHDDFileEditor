@@ -293,6 +293,7 @@ public class BasicRenderer implements Renderer {
 	 * @param VarData
 	 */
 	private void DecodeVariables(Composite mainPage, byte[] VarData) {
+		try {
 		int ptr = 0x00;
 		if (ptr >= (VarData.length)) {
 			TableItem Row = new TableItem(Variables, SWT.NONE);
@@ -329,7 +330,10 @@ public class BasicRenderer implements Renderer {
 				}
 			}
 		}
-
+		} catch (Exception E) {
+			TableItem Row = new TableItem(Variables, SWT.NONE);
+			Row.setText(new String[] { "Failed to decode variables.", "", "" });
+		}
 	}
 
 	/**

@@ -137,7 +137,7 @@ public class HDDEditor {
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 				FileDialog fd = new FileDialog(shell, SWT.OPEN);
 				fd.setText("Open a disk file...");
-				String[] filterExt = { "*", "*.img", "*.hdf","*.mgt","*.trd","*.scl","*.mdr","mgt" };
+				String[] filterExt = { "*", "*.img", "*.hdf","*.mgt","*.trd","*.scl","*.mdr","*.mgt" };
 				fd.setFilterExtensions(filterExt);
 				
 				if (CurrentDisk.IsOpen()) {
