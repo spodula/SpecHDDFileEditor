@@ -7,7 +7,6 @@ package hddEditor.ui.partitionPages;
 //TODO: Support more MGT file types:
 
 //TODO: ZX microdrive (6)
-//TODO: ZX 128K snapshot (9)
 //TODO: Opentype (10)
 //TODO: UNIDOS Subdirectory (12)
 //TODO: UNIDOS create?(13)

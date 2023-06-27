@@ -1,5 +1,4 @@
 package hddEditor.ui;
-//TODO: For scripting, proper param checking.
 
 import java.io.BufferedReader;
 import java.io.File;

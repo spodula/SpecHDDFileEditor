@@ -19,6 +19,7 @@ import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.MGT48kSnapshotRenderer;
+import hddEditor.ui.partitionPages.FileRenderers.MGT128kSnapshotRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.MGTExecuteRenderer;
 
@@ -158,6 +159,10 @@ public class MGTDosFileEditDialog {
 			} else if (ftype == MGT.MGTFT_ZX48SNA) {
 				MGT48kSnapshotRenderer CurrentRenderer = new MGT48kSnapshotRenderer();
 				CurrentRenderer.RenderSnapshot(MainPage, data, ThisEntry.GetFilename(), ThisEntry);
+			} else if (ftype == MGT.MGTFT_ZX128SNA) {
+				MGT128kSnapshotRenderer CurrentRenderer = new MGT128kSnapshotRenderer();
+				CurrentRenderer.RenderSnapshot(MainPage, data, ThisEntry.GetFilename(), ThisEntry);
+				
 			} else if (ftype == MGT.MGTFT_ZXEXE) {
 				MGTExecuteRenderer CurrentRenderer = new MGTExecuteRenderer();
 				CurrentRenderer.Render(MainPage, data, ThisEntry.GetFilename());
