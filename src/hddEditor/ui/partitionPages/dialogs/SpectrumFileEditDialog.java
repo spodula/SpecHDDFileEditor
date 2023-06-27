@@ -143,9 +143,9 @@ public class SpectrumFileEditDialog {
 		Plus3DosFileHeader p3d = new Plus3DosFileHeader(data);
 		if (p3d.IsPlusThreeDosFile) {
 			lbl = new Label(shell, SWT.NONE);
-			lbl.setText(String.format("+3DOS Length: %d bytes (%X)", p3d.fileSize, p3d.fileSize));
+			lbl.setText(String.format("+3DOS Length: %d bytes (%X)", p3d.filelength, p3d.filelength));
 			lbl.setFont(boldFont);
-			Plus3Size = p3d.fileSize + 0x80;
+			Plus3Size = p3d.filelength + 0x80;
 		} else {
 			lbl = new Label(shell, SWT.NONE);
 			lbl.setText("Not a +3DOS file (Or header corrupt)");
@@ -220,14 +220,14 @@ public class SpectrumFileEditDialog {
 		 */
 		if (!p3d.IsPlusThreeDosFile) {
 			CodeRenderer CR = new CodeRenderer();
-			CR.RenderCode(MainPage, newdata, null, ThisEntry.GetFilename(), data.length, 0x0000);
+			CR.RenderCode(MainPage, newdata, null, ThisEntry.GetFilename(), newdata.length, 0x0000);
 		} else if (p3d.filetype == Speccy.BASIC_BASIC) {
 			BasicRenderer BR = new BasicRenderer();
 			BR.RenderBasic(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.filelength, 
 					p3d.VariablesOffset, p3d.line);
 		} else if (p3d.filetype == Speccy.BASIC_CODE) {
 			CodeRenderer CR = new CodeRenderer();
-			CR.RenderCode(MainPage, newdata, header, ThisEntry.GetFilename(), data.length, p3d.loadAddr);
+			CR.RenderCode(MainPage, newdata, header, ThisEntry.GetFilename(), newdata.length, p3d.loadAddr);
 		} else if (p3d.filetype == Speccy.BASIC_NUMARRAY) {
 			NumericArrayRenderer NR = new NumericArrayRenderer();
 			NR.RenderNumericArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.VarName);

@@ -1,6 +1,4 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
-//TODO: Displayed +3DOS file length on properties screen is incorrect.
-
 /**
  * This object implements displaying of a dump of memory. from 16384 to 65535.
  * It will try to decode any BASIC if found. 
