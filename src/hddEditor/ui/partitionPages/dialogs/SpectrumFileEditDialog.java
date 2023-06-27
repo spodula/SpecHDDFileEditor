@@ -138,14 +138,14 @@ public class SpectrumFileEditDialog {
 		lbl.setText("Logical blocks: " + BlockCount + " (" + logblocks + ")");
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 2;
-		lbl.setLayoutData(gd);
+		lbl.setLayoutData(gd); 
 
 		Plus3DosFileHeader p3d = new Plus3DosFileHeader(data);
 		if (p3d.IsPlusThreeDosFile) {
 			lbl = new Label(shell, SWT.NONE);
-			lbl.setText(String.format("+3DOS Length: %d bytes (%X)", p3d.filelength, p3d.filelength));
+			lbl.setText(String.format("+3DOS Length: %d bytes (%X)", p3d.fileSize, p3d.fileSize));
 			lbl.setFont(boldFont);
-			Plus3Size = p3d.filelength + 0x80;
+			Plus3Size = p3d.fileSize + 0x80;
 		} else {
 			lbl = new Label(shell, SWT.NONE);
 			lbl.setText("Not a +3DOS file (Or header corrupt)");

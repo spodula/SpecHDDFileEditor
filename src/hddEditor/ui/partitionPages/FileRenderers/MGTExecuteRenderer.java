@@ -1,4 +1,13 @@
 package hddEditor.ui.partitionPages.FileRenderers;
+/**
+ * from :https://web.archive.org/web/20080514125600/http://www.ramsoft.bbk.org/tech/mgt_tech.txt
+ * MGT file type: 
+ * EXECUTE (type 11)
+ * -----------------
+ * 210-255 Same as CODE file (type 4), but Length=510 and Start=0x1BD6 implicitly
+ *         (0x3DB6 for +D). The sector is loaded into the interface RAM
+ *         and executed (it should contain relocatable code!).
+ */
 
 import java.util.Vector;
 

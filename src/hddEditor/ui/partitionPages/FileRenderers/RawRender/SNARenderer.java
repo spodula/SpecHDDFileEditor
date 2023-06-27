@@ -1,6 +1,7 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
 /**
  * Render a SNA file, including trying to decode BASIC programs.
+ * https://sinclair.wiki.zxnet.co.uk/wiki/SNA_format
  */
 
 import java.util.ArrayList;
