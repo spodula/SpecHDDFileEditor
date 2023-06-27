@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
+//TODO: Displayed +3DOS file length on properties screen is incorrect.
 
 /**
  * This object implements displaying of a dump of memory. from 16384 to 65535.
@@ -383,8 +384,6 @@ public class RamDump implements Renderer {
 				sb.append("No codeblocks found.");
 			}
 			GeneralUtils.WriteBlockToDisk(sb.toString().getBytes(), RootFile.getAbsoluteFile() + ".Codeblocks");
-
 		}
 	}
-
 }

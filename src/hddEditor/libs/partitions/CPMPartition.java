@@ -224,11 +224,12 @@ public class CPMPartition extends IDEDosPartition {
 			ArrayList<Integer> FreeDirents = new ArrayList<Integer>();
 			for (int i = 0; i < Dirents.length; i++) {
 				int typ = Dirents[i].getType();
+				//System.out.println(typ);
 				if (typ == Dirent.DIRENT_DELETED || typ == Dirent.DIRENT_UNUSED) {
 					FreeDirents.add(i);
 				}
 			}
-			// System.out.println("Free Dirents: " + FreeDirents.size());
+			//System.out.println("Free Dirents: " + FreeDirents.size());
 
 			// seperate the filename
 			filename = filename.toUpperCase();

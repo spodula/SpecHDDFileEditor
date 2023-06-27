@@ -361,7 +361,7 @@ public class DirectoryEntry implements FileEntry {
 			}
 			for (Dirent d : dirents) {
 				for (int i=0;i<32;i++) 
-					d.rawdirent[i] = (byte) (0xf5 & 0xff);
+					d.rawdirent[i] = (byte) (0xe5 & 0xff);
 			}
 			if (!DelayReload) {
 				ThisPartition.updateDirentBlocks();
