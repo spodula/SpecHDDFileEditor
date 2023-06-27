@@ -20,6 +20,7 @@ import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.MGT48kSnapshotRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
+import hddEditor.ui.partitionPages.FileRenderers.MGTExecuteRenderer;
 
 public class MGTDosFileEditDialog {
 	// Title of the page
@@ -154,9 +155,12 @@ public class MGTDosFileEditDialog {
 				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
 				CurrentRenderer.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(),
 						"" + ThisEntry.GetSpeccyBasicDetails().VarName);
-			}else if (ftype == MGT.MGTFT_ZX48SNA) {
+			} else if (ftype == MGT.MGTFT_ZX48SNA) {
 				MGT48kSnapshotRenderer CurrentRenderer = new MGT48kSnapshotRenderer();
-				CurrentRenderer.RenderSnapshot(MainPage, data, Title, ThisEntry); 
+				CurrentRenderer.RenderSnapshot(MainPage, data, ThisEntry.GetFilename(), ThisEntry);
+			} else if (ftype == MGT.MGTFT_ZXEXE) {
+				MGTExecuteRenderer CurrentRenderer = new MGTExecuteRenderer();
+				CurrentRenderer.Render(MainPage, data, ThisEntry.GetFilename());
 			} else {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
 				CurrentRenderer.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length,

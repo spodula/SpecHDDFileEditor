@@ -6,16 +6,15 @@ package hddEditor.ui.partitionPages;
 
 //TODO: Support more MGT file types:
 
-//TODO:   ZX microdrive (6)
-//TODO:   ZX 128K snapshot (9)
-//TODO:   Opentype (10)
-//TODO:   ZX Execute (11)
-//TODO:   UNIDOS Subdirectory (12)
-//TODO:   UNIDOS create?(13)
-//TODO:   SAM types 16-20, 22,23
-//TODO:   Masterdos subdirectory (21)
-//TODO:   EDOS (23-26)
-//TODO:   HDOS (28-31)
+//TODO: ZX microdrive (6)
+//TODO: ZX 128K snapshot (9)
+//TODO: Opentype (10)
+//TODO: UNIDOS Subdirectory (12)
+//TODO: UNIDOS create?(13)
+//TODO: SAM types 16-20, 22,23
+//TODO: Masterdos subdirectory (21)
+//TODO: EDOS (23-26)
+//TODO: HDOS (28-31)
 //TODO: MGT - Support defrag
 
 import java.io.IOException;
