@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
+
 /**
  * This object implements displaying of a dump of memory. from 16384 to 65535.
  * It will try to decode any BASIC if found. 
@@ -151,35 +152,33 @@ public class RamDump implements Renderer {
 
 		if (is128K) {
 			int pagedram = i128BankOrder[2];
-			int ptr = 0x1b;
+			int ptr = 0;
 			for (int i = 0; i < i128BankOrder.length; i++) {
 				int rambank = i128BankOrder[i];
-				if (rambank != pagedram) {
-					if (rambank == 99)
-						rambank = pagedram;
-					int startAddress = 0xc000;
-					if (i == 0)
-						startAddress = 0x4000;
-					if (i == 1)
-						startAddress = 0x8000;
+				if (rambank == 99)
+					rambank = pagedram;
+				int startAddress = 0xc000;
+				if (i == 0)
+					startAddress = 0x4000;
+				if (i == 1)
+					startAddress = 0x8000;
 
-					lbl = new Label(TargetPage, SWT.NONE);
-					labels.add(lbl);
-					lbl.setText("Ram bank " + rambank + " (" + Integer.toHexString(startAddress) + "-"
-							+ Integer.toHexString(startAddress + 0x3fff) + ")");
-					gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-					gd.horizontalSpan = 4;
-					lbl.setFont(boldFont);
-					lbl.setLayoutData(gd);
+				lbl = new Label(TargetPage, SWT.NONE);
+				labels.add(lbl);
+				lbl.setText("Ram bank " + rambank + " (" + Integer.toHexString(startAddress) + "-"
+						+ Integer.toHexString(startAddress + 0x3fff) + ")");
+				gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+				gd.horizontalSpan = 4;
+				lbl.setFont(boldFont);
+				lbl.setLayoutData(gd);
 
-					byte memdata[] = new byte[0x4000];
-					int actualdatalength = Math.min(0x4000, data.length - ptr);
-					System.arraycopy(data, ptr, memdata, 0, actualdatalength);
-					ptr = ptr + actualdatalength;
-					BinaryRenderer BinRenderer = new BinaryRenderer();
-					Renderers.add(BinRenderer);
-					BinRenderer.Render(TargetPage, memdata, startAddress, 200);
-				}
+				byte memdata[] = new byte[0x4000];
+				int actualdatalength = Math.min(0x4000, data.length - ptr);
+				System.arraycopy(data, ptr, memdata, 0, actualdatalength);
+				ptr = ptr + actualdatalength;
+				BinaryRenderer BinRenderer = new BinaryRenderer();
+				Renderers.add(BinRenderer);
+				BinRenderer.Render(TargetPage, memdata, startAddress, 200);
 			}
 		} else {
 			byte memdata[] = new byte[42240];
@@ -199,7 +198,7 @@ public class RamDump implements Renderer {
 		if (result != null) {
 			File rootfolder = new File(result);
 			File RootFile = new File(rootfolder, fName);
-			//firstly BASIC...
+			// firstly BASIC...
 			// save any basic
 			if (IYReg == 0x5c3a) {
 				SaveBasicFile(RootFile);
@@ -209,23 +208,23 @@ public class RamDump implements Renderer {
 			byte ram[] = new byte[49152];
 			System.arraycopy(rawdata, 0, ram, 0, Math.min(49152, rawdata.length));
 			GeneralUtils.WriteBlockToDisk(ram, RootFile.getAbsoluteFile() + ".ramdump");
-			
-			//Each ram bank.
-			int ptr=0;
-			for (int page:i128BankOrder) {
+
+			// Each ram bank.
+			int ptr = 0;
+			for (int page : i128BankOrder) {
 				byte currentdata[] = new byte[0x4000];
 				System.arraycopy(rawdata, ptr, currentdata, 0, 0x4000);
-				GeneralUtils.WriteBlockToDisk(currentdata, RootFile.getAbsoluteFile() + "Page"+page);
+				GeneralUtils.WriteBlockToDisk(currentdata, RootFile.getAbsoluteFile() + "Page" + page);
 				if ((page == 5) || (page == 7)) {
-					//Images, both in page 5 and 7
+					// Images, both in page 5 and 7
 					ImageData image = Speccy.GetImageFromFileArray(currentdata, 0);
 					ImageLoader saver = new ImageLoader();
 					saver.data = new ImageData[] { image };
-					saver.save(RootFile.getAbsoluteFile() +"Page"+page+ ".image", SWT.IMAGE_PNG);					
+					saver.save(RootFile.getAbsoluteFile() + "Page" + page + ".image", SWT.IMAGE_PNG);
 				}
-				ptr = ptr  + 0x4000;
+				ptr = ptr + 0x4000;
 			}
-			
+
 		}
 	}
 
@@ -259,10 +258,11 @@ public class RamDump implements Renderer {
 				EndOfAnyBasic = SaveBasicFile(RootFile);
 			}
 			// save any code.
-			
+
 			/*
-			 * Make a file map. This groups together bytes until a gap of 400 zeroes, after which 
-			 * we consider it a new file. So we end up with an array with the file number. 
+			 * Make a file map. This groups together bytes until a gap of 400 zeroes, after
+			 * which we consider it a new file. So we end up with an array with the file
+			 * number.
 			 */
 			int files[] = new int[49152];
 			for (int i = 0; i < files.length; i++) {
@@ -306,9 +306,9 @@ public class RamDump implements Renderer {
 				}
 				System.out.print(files[i]);
 			}
-			System.out.println(); 
+			System.out.println();
 
-			//Now output each file.
+			// Now output each file.
 			StringBuffer sb = new StringBuffer();
 			int StartOfRun = 0;
 			int CurrentFile = 0;
@@ -330,8 +330,8 @@ public class RamDump implements Renderer {
 					CurrentFile = fNum;
 					StartOfRun = Ptr;
 				}
-			} 
-			//output the last file.
+			}
+			// output the last file.
 			if (CurrentFile != 0) {
 				int Ptr = 0xC000;
 				String newfilename = RootFile.getAbsoluteFile() + "." + Integer.toHexString(StartOfRun + 16384) + "-"
@@ -427,6 +427,6 @@ public class RamDump implements Renderer {
 				System.out.println("Cannot write basic file - IO error.");
 			}
 		}
-		return(EndOfAnyBasic);
+		return (EndOfAnyBasic);
 	}
 }

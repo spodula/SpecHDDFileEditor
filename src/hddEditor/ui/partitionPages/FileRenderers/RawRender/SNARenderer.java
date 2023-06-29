@@ -118,7 +118,18 @@ public class SNARenderer extends RamDump {
 		
 		byte rawdata[] = null;
 		if (is128K) {
+			lbl = new Label(TargetPage, SWT.NONE);
+			labels.add(lbl);
+			lbl.setText("PC: " + ((data[49179] & 0xff) + (data[49179] & 0xff) * 256));
+			lbl.setLayoutData(gd);
+
+			
 			int pagedram = (data[49181] & 0x07);
+			lbl = new Label(TargetPage, SWT.NONE);
+			labels.add(lbl);
+			lbl.setText("7ffd: " + pagedram);
+			lbl.setLayoutData(gd);
+			
 			if ((pagedram==5) || (pagedram==2)) {
 				RamBankOrder= new int[9];
 			}
