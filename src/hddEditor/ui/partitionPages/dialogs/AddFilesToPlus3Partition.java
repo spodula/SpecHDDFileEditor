@@ -971,7 +971,7 @@ public class AddFilesToPlus3Partition {
 				case FILETYPE_BASIC:
 					String Startline = StartLine.getText();
 					int line = Integer.valueOf(Startline);
-					CurrentPartition.AddBasicFile(details.filename, details.data, line, details.data.length - 0x80);
+					CurrentPartition.AddBasicFile(details.filename, details.data, line, details.data.length);
 					break;
 				case FILETYPE_CHRARRAY:
 					CurrentPartition.AddPlusThreeFile(details.filename, details.data, varname * 0x100, 0,
