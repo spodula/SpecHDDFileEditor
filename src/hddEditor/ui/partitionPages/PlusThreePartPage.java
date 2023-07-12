@@ -1,5 +1,4 @@
 package hddEditor.ui.partitionPages;
-//TODO: Delete partition doesnt work.
 
 /**
  * implementation of the +3DOS partition specific partition pages 

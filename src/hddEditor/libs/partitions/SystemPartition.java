@@ -648,6 +648,7 @@ public class SystemPartition extends IDEDosPartition {
 				 */
 				partitions[NewFreePartition.DirentNum] = NewFreePartition;
 			}
+			UpdatePartitionListOnDisk();
 		}
 	}
 
