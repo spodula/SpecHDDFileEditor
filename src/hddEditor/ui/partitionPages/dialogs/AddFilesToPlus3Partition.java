@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.dialogs;
+//TODO: When adding basic text files, doesnt seem to split seperate INK and PAPER commands, eg,print at 21,0;PAPER 6;INK 0;" 
 
 /**
  * Add files to the +3DOS partition
@@ -658,12 +659,13 @@ public class AddFilesToPlus3Partition {
 	 * Add BINARY file(s) as a CODE file.
 	 */
 	protected void DoAddBinaryFiles() {
+		
 		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
 		fd.setText("Open CODE file");
 		String[] filterExt = { "*" };
 		fd.setFilterExtensions(filterExt);
-		if ((fd.open() != null) && (fd.getFileNames().length > 0)) {
-			/*
+    	if ((fd.open() != null) && (fd.getFileNames().length > 0)) { 
+		/*
 			 * Iterate all the files selected.
 			 */
 			for (String filename : fd.getFileNames()) {

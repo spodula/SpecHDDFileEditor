@@ -1,8 +1,9 @@
 package hddEditor.ui.partitionPages;
+//TODO: Delete partition doesnt work.
+
 /**
  * implementation of the +3DOS partition specific partition pages 
  */
-
 
 import java.io.IOException;
 
@@ -38,7 +39,7 @@ import hddEditor.ui.partitionPages.dialogs.SpectrumFileEditDialog;
 
 public class PlusThreePartPage extends GenericPage {
 	Table DirectoryListing;
-	
+
 	/*
 	 * Dialog pointers so we can forcibly close them if necessary.
 	 */
@@ -46,7 +47,7 @@ public class PlusThreePartPage extends GenericPage {
 	RenameFileDialog RenFileDialog = null;
 	HexEditDialog HxEditDialog = null;
 	AddFilesToPlus3Partition AddFilesDialog = null;
-	
+
 	/**
 	 * 
 	 * @param root
@@ -67,10 +68,10 @@ public class PlusThreePartPage extends GenericPage {
 			RemoveComponents();
 			PLUS3DOSPartition pdp = (PLUS3DOSPartition) partition;
 			super.AddBasicDetails();
-			ParentComp.addDisposeListener(new DisposeListener() {	
+			ParentComp.addDisposeListener(new DisposeListener() {
 				@Override
 				public void widgetDisposed(DisposeEvent arg0) {
-					CloseDialogs();					
+					CloseDialogs();
 				}
 			});
 
@@ -123,9 +124,8 @@ public class PlusThreePartPage extends GenericPage {
 			tc4.setWidth(150);
 			tc5.setWidth(100);
 			DirectoryListing.setHeaderVisible(true);
-			
-			PopulateDirectory();
 
+			PopulateDirectory();
 
 			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.widthHint = 200;
@@ -218,15 +218,58 @@ public class PlusThreePartPage extends GenericPage {
 				}
 			});
 
+			Btn = new Button(ParentComp, SWT.PUSH);
+			Btn.setText("Undelete file");
+			Btn.setLayoutData(gd);
+			Btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					DoUndeleteFile();
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+
 			label("", 1);
 			ParentComp.pack();
+		}
+	}
+
+	protected void DoUndeleteFile() {
+		TableItem itms[] = DirectoryListing.getSelection();
+		if ((itms != null) && (itms.length != 0)) {
+			try {
+				for (TableItem en : itms) {
+					DirectoryEntry ent = (DirectoryEntry) en.getData();
+					if (ent.IsComplete()) {
+						ent.SetDeleted(false);
+					} else {
+						MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+						messageBox.setMessage("The file " + ent.GetFilename()+ "is incomplete and may not work. Un-delete?");
+						messageBox.setText("Incomplete file");
+						if (messageBox.open() == SWT.YES) {
+							ent.SetDeleted(false);
+						}
+					}
+				}
+				((CPMPartition) partition).updateDirentBlocks();
+				((CPMPartition) partition).ExtractDirectoryListing();
+				AddComponents();
+				PopulateDirectory();
+			} catch (IOException e) {
+				ErrorBox("Error reading partition: " + e.getMessage());
+				e.printStackTrace();
+			}
 		}
 	}
 
 	private void PopulateDirectory() {
 		DirectoryListing.clearAll();
 		DirectoryListing.removeAll();
-		
+
 		PLUS3DOSPartition pdp = (PLUS3DOSPartition) partition;
 		for (DirectoryEntry entry : pdp.DirectoryEntries) {
 			TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
@@ -270,7 +313,7 @@ public class PlusThreePartPage extends GenericPage {
 				SpecFileEditDialog = new SpectrumFileEditDialog(ParentComp.getDisplay());
 
 				byte[] data = entry.GetFileRawData();
-				
+
 				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
 					entry.SetDeleted(true);
 					((PLUS3DOSPartition) partition).AddCPMFile(entry.GetFilename(), SpecFileEditDialog.data);
@@ -344,9 +387,10 @@ public class PlusThreePartPage extends GenericPage {
 				messageBox.setMessage("Are you sure you want to delete " + filename + " ?");
 				messageBox.setText("Are you sure you want to delete " + filename + " ?");
 				if (messageBox.open() == SWT.OK) {
-					//for +3dos files, deleting deleted files causes a reload of the dirents. 
-					//This means the existing ones are invalidated. so we set a delayed reload and do it at the end.
-					for (TableItem en:itms) {
+					// for +3dos files, deleting deleted files causes a reload of the dirents.
+					// This means the existing ones are invalidated. so we set a delayed reload and
+					// do it at the end.
+					for (TableItem en : itms) {
 						DirectoryEntry ent = (DirectoryEntry) en.getData();
 						ent.DelayReload = true;
 						ent.SetDeleted(true);
@@ -365,13 +409,14 @@ public class PlusThreePartPage extends GenericPage {
 	}
 
 	protected void DoExtractAllFiles() {
-		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm (ParentComp.getDisplay()); 
+		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay());
 		try {
 			ExportAllPartsForm.ShowSinglePartition(partition);
 		} finally {
 			ExportAllPartsForm = null;
 		}
 	}
+
 	/**
 	 * Rename the current file.
 	 */
@@ -384,11 +429,11 @@ public class PlusThreePartPage extends GenericPage {
 				try {
 					entry.SetFilename(RenFileDialog.NewName);
 					// refresh the screen.
-					AddComponents();					
+					AddComponents();
 				} catch (IOException e) {
 					MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
-					messageBox.setMessage("Error Renaming " + entry.GetFilename() + ": "+e.getMessage());
-					messageBox.setText("Error Renaming " + entry.GetFilename() + ": "+e.getMessage());
+					messageBox.setMessage("Error Renaming " + entry.GetFilename() + ": " + e.getMessage());
+					messageBox.setText("Error Renaming " + entry.GetFilename() + ": " + e.getMessage());
 					messageBox.open();
 					e.printStackTrace();
 				}
@@ -398,8 +443,8 @@ public class PlusThreePartPage extends GenericPage {
 	}
 
 	/**
-	 * Force any dialogs that are still open to close. 
-	 * This avoids exceptions on exit. 
+	 * Force any dialogs that are still open to close. This avoids exceptions on
+	 * exit.
 	 */
 	protected void CloseDialogs() {
 		if (SpecFileEditDialog != null) {

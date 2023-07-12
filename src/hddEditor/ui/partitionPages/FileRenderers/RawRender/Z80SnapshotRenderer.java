@@ -1,5 +1,4 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
-//TODO: Undelete for +3 files.
 
 import java.util.ArrayList;
 
