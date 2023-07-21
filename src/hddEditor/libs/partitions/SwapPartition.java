@@ -94,7 +94,8 @@ public class SwapPartition extends IDEDosPartition {
 				SysConfig.close();
 			}
 			byte data[] = GetAllDataInPartition();
-			Speccy.SaveFileToDiskAdvanced(folder, data, data, BasicAction, CodeAction, ArrayAction, ScreenAction,
+			
+			Speccy.SaveFileToDiskAdvanced(new File(folder,"swap.data"), data, data, BasicAction, CodeAction, ArrayAction, ScreenAction,
 					MiscAction, null, SwapAction);
 		} catch (IOException e) {
 			System.out.println("Error extracting files: " + e.getMessage());

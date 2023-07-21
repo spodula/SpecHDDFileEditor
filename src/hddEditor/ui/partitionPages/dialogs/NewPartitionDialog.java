@@ -178,7 +178,7 @@ public class NewPartitionDialog {
 					char c = e.character;
 					//check characers are 0-9. a-z and "_"
 					if ((c >= '0' && c <= '9') || (c < 0x20) || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
-							|| c == '_') {
+							|| c == '_'|| c == '-'|| c == '+') {
 						e.doit = true;
 						//check we have reached max length
 						if (((txt.length() > 14) && (c > 0x1f)) && PartName.getSelectionText().length()==0) {
