@@ -15,11 +15,19 @@ public class Z80SnapshotRenderer extends RamDump {
 	private ArrayList<Label> labels = null;
 	private ArrayList<Renderer> Renderers = null;
 
+	/**
+	 * Array object for each individual page.
+	 */
 	private class z80Page {
+		//Length while compressed
 		public int CompressedLength;
+		//Is block compressed
 		public boolean IsCompressed;
+		//z80 page number. (Note, this differs from the 128k page number).
 		public int Pagenum;
+		//Raw (compressed) data
 		public byte Rawdata[];
+		//uncompressed data
 		public byte Data[];
 
 		/**
@@ -36,9 +44,11 @@ public class Z80SnapshotRenderer extends RamDump {
 				result = -1;
 			return(result);
 		}
-		
 	}
 
+	/**
+	 * Remove all the components created by this object
+	 */
 	@Override
 	public void DisposeRenderer() {
 		super.DisposeRenderer();
@@ -59,15 +69,17 @@ public class Z80SnapshotRenderer extends RamDump {
 	}
 
 	/**
-	 * Render the code as SNA
+	 * Treat the file as a z80 file.
 	 * 
-	 * @param data
-	 * @param loadAddr
+	 * @param TargetPage - Page to render to.
+	 * @param data - Data to render
+	 * @param loadAddr - Load address (unused)
+	 * @param filename - Filename
 	 */
 	private String[] snaVars = { "A", "F", "BC", "HL", "PC", "SP", "I", "R", "FLAGS", "DE", "BC'", "DE'", "HL'", "A'",
 			"F'", "IY", "IX", "Int Status", "IFF2", "FLAGS2" };
 	private int[] snaLen = { 1, 1, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 1, 1, 2, 2, 1, 1, 1 };
-
+	
 	public void Render(Composite TargetPage, byte[] data, int loadAddr, String filename) {
 		labels = new ArrayList<Label>();
 		Renderers = new ArrayList<Renderer>();
@@ -417,7 +429,7 @@ public class Z80SnapshotRenderer extends RamDump {
 	}
 
 	/**
-	 * 
+	 * Extract the pages from the z80 files into an array of z80Page objects.
 	 * 
 	 * @param data
 	 * @param blockstart
@@ -458,9 +470,11 @@ public class Z80SnapshotRenderer extends RamDump {
 	}
 
 	/**
+	 * Extract the block and decompress it. 
+	 * Z80 files are compressed using a simple RLE scheme.
 	 * 
-	 * @param block
-	 * @param ExpectedLength
+	 * @param block - Block to decompress
+	 * @param ExpectedLength - Expected length of the block. Usually 16384.
 	 * @return
 	 */
 	private byte[] ExtractCompressedBlock(byte[] block, int ExpectedLength) {
@@ -513,6 +527,7 @@ public class Z80SnapshotRenderer extends RamDump {
 	}
 
 	/**
+	 * convert a boolean value to "on" or "off"
 	 * 
 	 * @param value
 	 * @return

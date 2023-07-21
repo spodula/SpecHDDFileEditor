@@ -20,6 +20,9 @@ public class SNARenderer extends RamDump {
 	private ArrayList<Label> labels = null;
 	private ArrayList<Renderer> Renderers = null;
 	
+	/**
+	 * Remove all the components created by this object
+	 */
 	@Override
 	public void DisposeRenderer() {
 		super.DisposeRenderer();
@@ -40,17 +43,19 @@ public class SNARenderer extends RamDump {
 	}
 	
 	
-	/**
-	 * Render the code as SNA
-	 * 
-	 * @param data
-	 * @param loadAddr
-	 */
 	private String[] snaVars = { "I", "HL'", "DE'", "BC'", "AF'", "HL", "DE", "BC", "IY", "IX", "IFF2", "R", "AF", "SP",
 			"IM", "Border" };
 	private int[] snaLen = { 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 1, 1 };
 
 	
+	/**
+	 * Treat the file as a SNA style file.
+	 * 
+	 * @param TargetPage - page to render to.
+	 * @param data - data to render
+	 * @param loadAddr - Load address - Unused for the SNA renderer.
+	 * @param filename - Filename
+	 */
 	public void Render(Composite TargetPage, byte[] data, int loadAddr, String filename) {
 		labels = new ArrayList<Label>();
 		Renderers = new ArrayList<Renderer>();
@@ -159,8 +164,6 @@ public class SNARenderer extends RamDump {
 			rawdata = new byte[49152];
 			System.arraycopy(data, 0x1b, rawdata, 0, Math.min(data.length-0x1b,49152));
 		}
-		
-		
 		super.Render(TargetPage, rawdata, loadAddr, is128K, IY, RamBankOrder, filename);
 	}
 }
