@@ -1778,7 +1778,7 @@ public class Speccy {
 			GeneralUtils.WriteBlockToDisk(hexdata.getBytes(), targetFilename);
 			break;
 		case GeneralUtils.EXPORT_TYPE_ASM:
-			DoSaveFileAsAsm(entrydata, targetFilename.getAbsolutePath(), 0);
+			DoSaveFileAsAsm(entrydata, targetFilename.getAbsolutePath(), codeLoadAddress);
 			break;
 		case GeneralUtils.EXPORT_TYPE_TXT:
 			SaveBasicFile(targetFilename, entrydata, basicLine, basicVarsOffset, filelength);
