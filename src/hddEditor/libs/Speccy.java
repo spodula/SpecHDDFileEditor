@@ -296,9 +296,16 @@ public class Speccy {
 					SetCharArray(Line, 40, new String(chrdata).substring(0, Instruction.length));
 					sb.append(new String(Line).trim());
 					sb.append(cr);
-
+					//gds 20 Aug 2023, extra CRLF after a RET or a JP
+					if (Instruction.length>0) {
+						int firstbyte = asmData[0];
+						if ((firstbyte == 195) || (firstbyte == 201)) {
+							sb.append(cr);						
+						}
+					}
+					
 					realaddress = realaddress + Instruction.length;
-					loadedaddress = loadedaddress + Instruction.length;
+					loadedaddress  = loadedaddress + Instruction.length;
 				} // while
 			} catch (Exception E) {
 				System.out.println("Error at: " + realaddress + "(" + loadedaddress + ")");
