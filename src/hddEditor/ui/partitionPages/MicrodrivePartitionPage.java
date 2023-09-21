@@ -422,7 +422,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 
 				if (messageBox.open() == SWT.OK) {
 					SinclairMicrodrivePartition smp = (SinclairMicrodrivePartition) partition;
-					for (TableItem itm:itms) {
+					for (TableItem itm : itms) {
 						entry = (MicrodriveDirectoryEntry) itm.getData();
 						smp.DeleteFile(entry.GetFilename());
 					}

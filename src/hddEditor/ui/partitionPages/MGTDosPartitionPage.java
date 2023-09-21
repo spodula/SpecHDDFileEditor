@@ -5,17 +5,17 @@ package hddEditor.ui.partitionPages;
  */
 
 //TODO: Support more MGT file types:
-
-//TODO: ZX microdrive (6)
-//TODO: Opentype (10)
-//TODO: UNIDOS Subdirectory (12)
-//TODO: UNIDOS create?(13)
-//TODO: SAM types 16-20, 22,23
-//TODO: Masterdos subdirectory (21)
-//TODO: EDOS (23-26)
-//TODO: HDOS (28-31)
-//TODO: MGT - Support defrag
-
+/*
+  o ZX microdrive (6)
+  o Opentype (10)
+  o UNIDOS Subdirectory (12)
+  o UNIDOS create?(13)
+  o SAM types 16-20, 22,23
+  o Masterdos subdirectory (21)
+  o EDOS (23-26)
+  o HDOS (28-31)
+  o MGT - Support defrag
+*/
 import java.io.IOException;
 
 import org.eclipse.swt.SWT;
@@ -204,7 +204,7 @@ public class MGTDosPartitionPage extends GenericPage {
 	}
 
 	protected void DoDefragDisk() {
-		// TODO Defrag disk
+		// TODO MGT: Defrag disk
 
 	}
 

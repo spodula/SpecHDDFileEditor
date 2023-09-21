@@ -1,5 +1,4 @@
 package hddEditor.libs.partitions;
-//TODO: MGTDOSPARTITION: Unidos subdirectories.
 
 import java.io.File;
 import java.io.FileWriter;

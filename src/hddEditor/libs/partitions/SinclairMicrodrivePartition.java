@@ -294,7 +294,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 * @throws IOException
 	 */
 	@Override
-	public void AddCodeFile(String filename, int loadAddress , byte[] CodeFile) throws IOException {
+	public void AddCodeFile(String filename, int loadAddress, byte[] CodeFile) throws IOException {
 		// Create an array with space for the header, and add the file in.
 		byte data[] = new byte[CodeFile.length + 9];
 		System.arraycopy(CodeFile, 0, data, 9, CodeFile.length);
@@ -569,7 +569,8 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted) throws IOException {
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted)
+			throws IOException {
 		FileWriter SysConfig;
 		try {
 			SysConfig = new FileWriter(new File(folder, "partition.index"));
@@ -583,7 +584,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 						}
 					}
 					SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
-					
+
 					File TargetFilename = new File(folder, entry.GetFilename().trim());
 					byte entrydata[] = entry.GetFileData();
 					byte Rawentrydata[] = entry.GetFileRawData();
@@ -594,7 +595,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 					int basicLine = sd.LineStart;
 					int basicVarsOffset = sd.VarStart;
 					int codeLoadAddress = sd.LoadAddress;
-					String arrayVarName = (sd.VarName+" ").trim();
+					String arrayVarName = (sd.VarName + " ").trim();
 
 					try {
 						int actiontype = GeneralUtils.EXPORT_TYPE_RAW;
@@ -636,13 +637,12 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 					SysConfig.write("   <origfiletype>MDF</origfiletype>\n".toCharArray());
 					SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
 					SysConfig.write(("       <filetype>" + sbd.BasicType + "</filetype>\n").toCharArray());
-					SysConfig.write(("       <filetypename>" + sbd.BasicTypeString() + "</filetypename>\n").toCharArray());
+					SysConfig.write(
+							("       <filetypename>" + sbd.BasicTypeString() + "</filetypename>\n").toCharArray());
 					SysConfig.write(("       <basicsize>" + entry.GetFileSize() + "</basicsize>\n").toCharArray());
-					SysConfig.write(
-							("       <basicstartline>" + sbd.LineStart + "</basicstartline>\n").toCharArray());
+					SysConfig.write(("       <basicstartline>" + sbd.LineStart + "</basicstartline>\n").toCharArray());
 					SysConfig.write(("       <codeloadaddr>" + sbd.LoadAddress + "</codeloadaddr>\n").toCharArray());
-					SysConfig.write(
-							("       <basicvarsoffset>" + sbd.VarStart + "</basicvarsoffset>\n").toCharArray());
+					SysConfig.write(("       <basicvarsoffset>" + sbd.VarStart + "</basicvarsoffset>\n").toCharArray());
 					SysConfig.write(("       <arrayvarname>A</arrayvarname>\n").toCharArray());
 					SysConfig.write(("   </specbasicinfo>\n".toCharArray()));
 					SysConfig.write(("   <microdrivespecific>\n".toCharArray()));
