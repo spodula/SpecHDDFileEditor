@@ -1,0 +1,196 @@
+ZX Spectrum TAP format
+Details of the layout can be found in: 
+https://sinclair.wiki.zxnet.co.uk/wiki/TAP_format
+https://k1.spdns.de/Develop/Projects/zasm/Info/tap.txt
+https://documentation.help/BASin/format_tape.html
+
+TAP files are very simple files used to represent normal-speed Speccy loader files as created by the standard
+ROM routines or similar copies of the loader.
+ 
+They can't be used for speedloaders, for which TZX files should be used instead.
+
+TAP files are made up of individual blocks, one for each written tape block.
+This means you can actually add two TAP files together by simply contatenating them.
+
+Block:
++-------+------------------------------------------------+
+| 00-01 | Block size LSB/MSB not including this byte pair|
+| 02    | Flag byte (0x00=header), 0xff = data block)    |
+| 03-xx | Data                                           |
+| xx+1  | Checksum byte **                               |
++-------+------------------------------------------------+
+
+The checksum is simply all the data including the flag byte XORd together
+
+The test tape contains the same 4 files all all the others, so contains 8 blocks, 4 header blocks and 4 data blocks.
+
+Contents of the file:
+
+filename "basic", BASIC: File length: 416, Variable start: 281, Start run Line: 300
+filename "code", CODE: Load address: 30000, File length: 2000
+filename "cdata", Character array: Variable name: A, File length: 55
+filename "ndata", numeric array: Variable name: A, File length: 35
+
+This consists of pairs of blocks:
+BASIC file:
+Header: (21 bytes)
+	13 00 -Block length ($0013 = 19 bytes, 17 bytes saved by the rom + flag byte+ checksum byte)
+	00 - Flag byte ($00 = header block)
+	This is the standard 17 byte BASIC header
+		00	-BASIC file type 0 (BASIC) 
+		62 61 73 69 63 20 20 20 20 20 - "basic     " (filename padded with spaces) 
+		A0 01 - data File length ($01A0 = 416 bytes)
+		2C 01 - BASIC run line ($012C = 300)
+		19 01 - Start of variables in file ($0119 = 281)
+	CE - Checksum
+
+Data: (420 bytes)
+	A2 01 - Block length ($01A2 = 418 bytes, 416 saved from the rom+flag+checksum)
+	FF - Flag byte ($FF = data block)
+	Data as saved by the rom: 
+	00 0A - Line 10 
+		16 00 - Size = $0016 = 22 bytes long.
+		E9 61 24 28 31 30 0E 00 00 0A 00 00 2C 35 0E 00 00 05 00 00 29 0D  - DIM a$(10,5)(End of line) 
+    00 14 - Line 20
+     	14 00 - Size = $0014 = 20 bytes long. 
+     	E9 62 28 32 0E 00 00 02 00 00 2C 33 0E 00 00 03 00 00 29 0D - DIM b(2,3)(End of line) 
+     	
+    00 1E - Line 30
+    	14 00 - Size = $0014 = 20 bytes long.
+    	EB 61 3D 31 0E 00 00 01 00 00 CC 31 30 0E 00 00 0A 00 00 0D - FOR a=1 to 10(End of line)
+    	
+    00 28 - Line 40
+        13 00 - Size = $0013 = 19 bytes long.
+        F1 61 24 28 61 2C 33 0E 00 00 03 00 00 29 3D 22 78 22 0D - let a$(a,3)="x"(end of line)
+        
+    00 32 - Line 50
+    	13 00 - Size = $0013 = 19 bytes long.
+    	F1 61 24 28 61 2C 34 0E 00 00 04 00 00 29 3D 22 79 22 0D - let a$(a,4)="y"(end of line)
+    	
+	00 3C - Line 60
+		13 00 - Size = $0013 = 19 bytes long.
+		F1 61 24 28 61 2C 35 0E 00 00 05 00 00 29 3D 22 7A 22 0D - let a$(a,5)="z"(end of line)
+		
+	00 46 - Line 70
+		03 00 - Size = $0003 = 3 bytes long.
+		F3 61 0D - Next a(End of line)
+		
+	00 50 - Line 80
+		0C 00 - Size = $000C = 12 bytes long.
+		F1 78 3D 31 30 0E 00 00 0A 00 00 0D - LET x=10(End of line)
+
+	00 5A - Line 90
+        12 00 - Size = $0012 = 18 bytes long.
+        F1 72 24 3D 22 74 65 73 74 20 73 74 72 69 6E 67 22 0D - let r$="test string"(End of line)  
+
+	00 64 - Line 100
+		13 00 - Size = $0013 = 19 bytes long.
+		F8 22 62 61 73 69 63 22 CA 33 30 30 0E 00 00 2C 01 00 0D - SAVE "basic" line 300(End of line)
+		
+	00 6E - Line 110
+		1F 00 - Size = $001f = 31 bytes long.
+		F8 22 63 6F 64 65 22 AF 33 30 30 30 30 0E 00 00 30 75 00 2C 32 30 30 30 0E 00 00 D0 07 00 0D
+			save "code" code 30000,2000(End of line)
+			
+	00 78 - Line 120
+		0E 00 - Size = $000E = 14 bytes long. 
+		F8 22 63 64 61 74 61 22 E4 61 24 28 29 0D - SAVE "cdata" data a$()(End of line)
+		
+	00 82 - Line 130
+		0D 00 - Size =$000D = 13 bytes long.
+		F8 22 6E 64 61 74 61 22 E4 62 28 29 0D - SAVE "ndata" data b()(End of line)
+	 
+	Variables
+		C1 = 110|00001 = 110 = Character array, 00001 = 'A'-0x60  
+			37 00 - Size of data + Dims = 0x0037 = 55 bytes
+			02	-	 Number of dimensions = 2 
+			0A 00 - Dim 1 = 10
+			05 00 - Dim 2 = 5
+			20 20 78 79 7A
+			20 20 78 79 7A
+			20 20 78 79 7A
+			20 20 78 79 7A
+			20 20 78 79 7A
+			20 20 78 79 7A
+			20 20 78 79 7A
+			20 20 78 79 7A
+			20 20 78 79 7A
+			20 20 78 79 7A
+			
+		82 = 100|00010 = 100 = numeric array, 00010 = 'B'-0x60 
+		  23 00 - Size of data + dims = 0x0023 = 35 bytes 
+		  02 - Number of dimensions = 2 
+		  02 00 - Dim 1 = 2 
+		  03 00 - Dim 2 = 3 
+		  00 00 00 00 00  00 00 00 00 00  00 00 00 00 00
+		  00 00 00 00 00  00 00 00 00 00  00 00 00 00 00
+		  
+		E1 = 111|00001 = 111 = for/next, 00001 = 'A'-0x60
+		  00 00 0B 00 00 - VALUE = 11
+		  00 00 0A 00 00 - LIMIT = 10
+		  00 00 01 00 00 - STEP = 1
+		  1E 00 - Loop line = $001e = 30
+		  02 - Statement number = 2
+		  
+		78 = 011|11000 = Number (single character), 11000 = 'X'-0x60
+		  00 00 0A 00 00 - VALUE = 10
+		  
+		52 = 010|10010 = String, 10010 = 'R'-0x60
+		  0B 00 - Length = 11 
+		  74 65 73 74 20 73 74 72 69 6E 67 = "test string"
+		    
+	32 - Checksum                
+
+CODE file
+Header: (21 bytes)
+	13 00 - Block length ($0013 = 19 bytes, 17 bytes saved by the rom + flag byte+ checksum byte)
+	00 - Flag byte ($00 = header block)
+	This is the standard 17 byte BASIC header
+		03	-BASIC file type 0 (BASIC) 
+		63 6F 64 65 20 20 20 20 20 20 - "code      " (filename padded with spaces) 
+		d0 07 - data File length ($07D0 = 2000 bytes)
+		30 75 - Load address ($7530 = 30000)
+		19 80 - unused for CODE files.
+	05 - Checksum
+
+Data block: (2004 bytes)
+	D2 07 - block length ($07D2 = 2002, 2000 saved by rom + flag + checksum)
+ 	FF    - Flag byte ($FF = data block)
+ 	.. too much data to bother with
+ 	FF - Checksum byte
+ 	
+Character data file:
+Header: (21 bytes)
+	13 00 - Block length ($0013 = 19 bytes, 17 bytes saved by the rom + flag byte+ checksum byte)
+	00 - Flag byte ($00 = header block)
+		(standard 17 byte BASIC header)
+		02 - Character array 
+		63 64 61 74 61 20 20 20 20 20 "cdata     "(filename padded with spaces) 
+    	37 00 - Data file length = $0037 = 55 bytes.
+    	30 C1 - byte 0 unused, byte 1=$C1 110|00001 = 110 = Character array, 00001 = 'A'-0x60  
+    	19 80 - Unused
+    0E - Checksum
+    
+Data block:
+    39 00 - Block length ($0039 = 57 bytes)
+    FF - Flag byte ($FF = data block) 
+		- Data
+	F2 - Checksum
+	
+Numeric data file:	
+Header: (21 bytes)
+	13 00 - Block length ($0013 = 19 bytes, 17 bytes saved by the rom + flag byte+ checksum byte)
+	00 - Flag byte ($00 = header block)
+		(standard 17 byte BASIC header)
+		01 - Numeric array 
+		6E 64 61 74 61 20 20 20 20 20 "ndata     " (filename padded with spaces) 
+    	23 00 - Data file length = $0023 = 35 bytes.
+    	30 82 - byte 0 unused, byte 1=$82= 100|00010 = 100 = numeric array, 00010 = 'B'-0x60  
+    	19 80 - Unused
+    57 - Checksum
+
+Data block:
+	25 00 - data block length = $0025 = 37 bytes
+	FF - Flag byte ($FF = data block)  
+		..data
+	FC - Checksum
