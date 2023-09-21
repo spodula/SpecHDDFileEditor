@@ -17,8 +17,18 @@ import hddEditor.libs.disks.LINEAR.TAPFile.TAPBlock;
 import hddEditor.libs.partitions.tap.TapDirectoryEntry;
 
 public class TAPPartition extends IDEDosPartition {
+	//Parsed directory entries.
 	public TapDirectoryEntry DirectoryEntries[];
 
+	/**
+	 * Constructor for a TAP partition. 
+	 * 
+	 * @param DirentLocation
+	 * @param RawDisk
+	 * @param RawPartition
+	 * @param DirentNum
+	 * @param Initialise
+	 */
 	public TAPPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise) {
 		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise);
 	}
@@ -432,7 +442,9 @@ public class TAPPartition extends IDEDosPartition {
 	}
 
 	/**
+	 * Get the file list given a wildcard
 	 * 
+	 * @return 
 	 */
 	@Override
 	public FileEntry[] GetFileList(String wildcard) {
@@ -446,6 +458,7 @@ public class TAPPartition extends IDEDosPartition {
 	}
 
 	/**
+	 * Delete the given file(s)
 	 * 
 	 * @param filename
 	 * @throws IOException
@@ -504,7 +517,5 @@ public class TAPPartition extends IDEDosPartition {
 		} catch (IOException | BadDiskFileException e) {
 			e.printStackTrace();
 		}
-
 	}
-
 }
