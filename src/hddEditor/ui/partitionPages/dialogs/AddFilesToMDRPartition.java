@@ -59,7 +59,7 @@ public class AddFilesToMDRPartition {
 	 * Current disk.
 	 */
 	private SinclairMicrodrivePartition CurrentPartition = null;
-	
+
 	/*
 	 * File types. Note, 0-3 correspond to the normal speccy file types, 4 and 5 are
 	 * types used to denote additional processing.
@@ -69,7 +69,7 @@ public class AddFilesToMDRPartition {
 	private final static int FILETYPE_CHRARRAY = 2;
 	private final static int FILETYPE_CODE = 3;
 	private final static int FILETYPE_SCREEN = 4;
-	
+
 	/*
 	 * This class is used to store the details the files we want to add.
 	 */
@@ -87,14 +87,14 @@ public class AddFilesToMDRPartition {
 		public int Intensity = 0;
 		// BW/colour flag (SCREEN$)
 		public boolean IsBlackWhite = false;
-		//Start line number (BASIC)
-		public int line=0;
-		//Load address (CODE)
+		// Start line number (BASIC)
+		public int line = 0;
+		// Load address (CODE)
 		public int loadaddress = 0;
 		// Raw file data.
 		public byte[] data = null;
 	}
-	
+
 	/**
 	 * 
 	 * @param display
@@ -102,7 +102,7 @@ public class AddFilesToMDRPartition {
 	public AddFilesToMDRPartition(Display display) {
 		this.display = display;
 	}
-	
+
 	/**
 	 * Show the dialog
 	 * 
@@ -114,6 +114,7 @@ public class AddFilesToMDRPartition {
 		Createform(title);
 		loop();
 	}
+
 	/**
 	 * Create the components on the form.
 	 * 
@@ -301,13 +302,12 @@ public class AddFilesToMDRPartition {
 				widgetSelected(arg0);
 			}
 		});
-		
+
 		l = new Label(shell, SWT.LEFT);
 		l.setText("CODE load address: ");
 
 		LoadAddress = new Text(shell, SWT.BORDER);
 		LoadAddress.setText("16384");
-
 
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
@@ -401,7 +401,7 @@ public class AddFilesToMDRPartition {
 		}
 		shell.dispose();
 	}
-	
+
 	/**
 	 * Add a text file as a BASIC file.
 	 */
@@ -576,7 +576,6 @@ public class AddFilesToMDRPartition {
 		}
 	}
 
-
 	/**
 	 * Convert and Add image files as SCREEN$ errors Supports all image types
 	 * ImageIO supports (PNG, GIF, JPEG, BMP, WEBMP)
@@ -602,12 +601,13 @@ public class AddFilesToMDRPartition {
 					 * Convert and scale the image
 					 */
 					int bwslider = intensitySlider.getSelection();
-					byte buffer[] = SpeccyFileEncoders.ScaleImage(shell.getDisplay(), bwslider, RawImage, IsBWCheck.getSelection());
+					byte buffer[] = SpeccyFileEncoders.ScaleImage(shell.getDisplay(), bwslider, RawImage,
+							IsBWCheck.getSelection());
 
 					/*
 					 * Create the row texts.
 					 */
-					String DosFileName = UniqueifyName(filename.substring(0,10).toLowerCase());
+					String DosFileName = UniqueifyName((filename+"           ").substring(0,10).toLowerCase());
 					TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 					String values[] = new String[5];
 					values[0] = filedets.getAbsolutePath();
@@ -641,6 +641,7 @@ public class AddFilesToMDRPartition {
 			}
 		}
 	}
+
 	/**
 	 * Add a csv file as a numeric array
 	 */
@@ -755,7 +756,7 @@ public class AddFilesToMDRPartition {
 			NewFileListItem details = (NewFileListItem) file.getData();
 			try {
 				byte data[] = details.data;
-				
+
 				// Default variable name for arrays
 				switch (details.FileType) {
 				case FILETYPE_BASIC:
@@ -812,7 +813,6 @@ public class AddFilesToMDRPartition {
 			 */
 			int treatAs = details.FileType;
 			byte data[] = details.data;
-
 
 			/*
 			 * Actually render the file
@@ -1118,8 +1118,8 @@ public class AddFilesToMDRPartition {
 				TableItem SelectedFile = DirectoryListing.getSelection()[0];
 				NewFileListItem details = (NewFileListItem) SelectedFile.getData();
 				// Render the image
-				byte buffer[] = SpeccyFileEncoders.ScaleImage(shell.getDisplay(), intensitySlider.getSelection(), details.OriginalImage,
-						IsBWCheck.getSelection());
+				byte buffer[] = SpeccyFileEncoders.ScaleImage(shell.getDisplay(), intensitySlider.getSelection(),
+						details.OriginalImage, IsBWCheck.getSelection());
 				// write it back to the buffer and the listbox.
 				details.data = buffer;
 				details.Intensity = intensitySlider.getSelection();
@@ -1138,7 +1138,7 @@ public class AddFilesToMDRPartition {
 	}
 
 	/**
-	 * Modify the given filename so its unique in the current selection. 
+	 * Modify the given filename so its unique in the current selection.
 	 * 
 	 * @param s
 	 * @return
@@ -1160,7 +1160,7 @@ public class AddFilesToMDRPartition {
 		/*
 		 * Add in the files on the disk..
 		 */
-		for (MicrodriveDirectoryEntry d : CurrentPartition.Files ) {
+		for (MicrodriveDirectoryEntry d : CurrentPartition.Files) {
 			String fname = d.GetFilename();
 			currentlist.add(fname);
 		}
@@ -1176,7 +1176,7 @@ public class AddFilesToMDRPartition {
 			if (FileFound) {
 				String numstr = String.valueOf(num++);
 				if (numstr.length() + origfile.length() > 10) {
-					origfile = origfile.substring(0,10-numstr.length());
+					origfile = origfile.substring(0, 10 - numstr.length());
 				}
 				result = origfile + numstr;
 			}
@@ -1204,6 +1204,4 @@ public class AddFilesToMDRPartition {
 
 	}
 
-	
-	
 }
