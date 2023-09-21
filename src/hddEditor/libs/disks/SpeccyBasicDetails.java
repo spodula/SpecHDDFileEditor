@@ -20,23 +20,40 @@ public class SpeccyBasicDetails {
 		LoadAddress = loadaddress;
 		VarName = varname;
 	}
-	
+
 	public String BasicTypeString() {
-		return(Speccy.SpecFileTypeToString(BasicType));
+		return (Speccy.SpecFileTypeToString(BasicType));
 	}
-	
+
 	/**
 	 * return details as a string.
 	 */
 	@Override
 	public String toString() {
-		String result = "BASIC type ID: "+BasicType+"\n"+
-	                    "Variable start: "+VarStart+"\n"+
-	                    "Start run Line: "+LineStart+"\n"+
-	                    "Load address: "+LoadAddress+"\n"+
-	                    "Variable name: "+VarName;
-		return(result);
+		String result = "BASIC type ID: " + BasicType + "\n" + "Variable start: " + VarStart + "\n" + "Start run Line: "
+				+ LineStart + "\n" + "Load address: " + LoadAddress + "\n" + "Variable name: " + VarName;
+		return (result);
 	}
-	
-	
+
+	/**
+	 * Return only those details associated with the file type.
+	 * @return
+	 */
+	public String GetSpecificDetails() {
+		String result = "BASIC type ID: " + BasicType;
+		switch (BasicType) {
+		case 0:
+			result = "LINE: " + LineStart + ", Varstart=" + VarStart;
+			break;
+		case 1:
+		case 2:
+			result = "Variable: " + VarName;
+			break;
+		case 3:
+			result = "Load addr: " + LoadAddress;
+			break;
+		}
+		return (result);
+	}
+
 }
