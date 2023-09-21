@@ -224,8 +224,8 @@ public class MDFMicrodriveFile implements Disk {
 		byte data[] = new byte[0];
 		int FileSegmentNumber = 0;
 		while ((numleft > 0) && (SectorNum != 0xff) && (data != null)) {
-			MicrodriveSector mds = GetSectorBySectorNumber((int)SectorNum);
-			SectorNum = SectorNum-1;
+			MicrodriveSector mds = GetSectorBySectorNumber((int) SectorNum);
+			SectorNum = SectorNum - 1;
 			if (mds != null) {
 				data = new byte[513]; // 512 bytes + checksum
 				// Copy the data to the sector
@@ -284,14 +284,14 @@ public class MDFMicrodriveFile implements Disk {
 		if (SectorNum == 0)
 			SectorNum = 0xfe;
 		// Note sectors count backwards on Microdrives.
-		//As the maximum file length of a microdrive is 128Mb, Just casting to an INT.
-		byte result[] = new byte[(int)sz];
+		// As the maximum file length of a microdrive is 128Mb, Just casting to an INT.
+		byte result[] = new byte[(int) sz];
 
-		int numleft = (int)sz;
+		int numleft = (int) sz;
 		int ptr = 0;
 		byte data[] = new byte[0];
 		while ((numleft > 0) && (SectorNum > -1) && (data != null)) {
-			MicrodriveSector mds = GetSectorBySectorNumber((int)SectorNum);
+			MicrodriveSector mds = GetSectorBySectorNumber((int) SectorNum);
 			SectorNum--;
 			if (mds != null) {
 				data = mds.SectorData;
@@ -316,18 +316,20 @@ public class MDFMicrodriveFile implements Disk {
 	 * @return
 	 */
 	public Boolean IsMyFileType(File filename) throws IOException {
-		inFile = new RandomAccessFile(filename, "r");
-		try {
-			byte FileData[] = new byte[0x21f];
-			inFile.seek(0);
-			inFile.read(FileData);
-			MicrodriveSector msh = new MicrodriveSector(FileData, 0);
-			if (msh.IsSectorChecksumValid()) {
-				return (true);
+		if (filename.getName().toUpperCase().endsWith(".MDR")) {
+			inFile = new RandomAccessFile(filename, "r");
+			try {
+				byte FileData[] = new byte[0x21f];
+				inFile.seek(0);
+				inFile.read(FileData);
+				MicrodriveSector msh = new MicrodriveSector(FileData, 0);
+				if (msh.IsSectorChecksumValid()) {
+					return (true);
+				}
+			} finally {
+				inFile.close();
+				inFile = null;
 			}
-		} finally {
-			inFile.close();
-			inFile = null;
 		}
 		return (false);
 	}
@@ -379,28 +381,28 @@ public class MDFMicrodriveFile implements Disk {
 	public void CreateBlankMicrodriveCart(String Filename, String VolumeName) throws IOException {
 		// b5 to 01
 		filename = Filename;
-		//Create a file with lots of blank sectors.
+		// Create a file with lots of blank sectors.
 		FileOutputStream NewFile = new FileOutputStream(Filename);
 		try {
 			for (int SectorNum = 0xb5; SectorNum > 0; SectorNum--) {
 				byte SectorData[] = new byte[0x21f];
-				//Initialise the sector information
+				// Initialise the sector information
 				MicrodriveSector msh = new MicrodriveSector(SectorData, 0);
 				msh.setVolumeName(VolumeName);
 				msh.setSectorFlagByte(0x00);
 				msh.SetSectorNumber(SectorNum);
 				msh.setSegmentNumber(0);
 				msh.CalculateHeaderChecksum();
-				//write our new sector information to disk. 
+				// write our new sector information to disk.
 				NewFile.write(msh.SectorHeader);
 				NewFile.write(msh.SectorData);
 			}
 		} finally {
-			//Close, forcing flush
+			// Close, forcing flush
 			NewFile.close();
 			NewFile = null;
 		}
-		//Load the newly created file. 
+		// Load the newly created file.
 		inFile = new RandomAccessFile(filename, "rw");
 		FileSize = new File(filename).length();
 		ParseMDFFile();
