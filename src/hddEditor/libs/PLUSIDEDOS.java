@@ -33,6 +33,7 @@ public class PLUSIDEDOS {
 	public static final int PARTITION_FREE = 0xFF;
 	//These are not valid Partition IDs, just used by this program
 	public static final int PARTITION_TAPE_SINCLAIRMICRODRIVE = 0x70;
+	public static final int PARTITION_TAPE_TAP = 0x71;
 
 	/*
 	 * Partition flags
