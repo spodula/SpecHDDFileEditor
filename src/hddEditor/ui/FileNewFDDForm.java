@@ -17,6 +17,7 @@ import hddEditor.libs.disks.FDD.AMSDiskFile;
 import hddEditor.libs.disks.FDD.SCLDiskFile;
 import hddEditor.libs.disks.FDD.TrDosDiskFile;
 import hddEditor.libs.disks.LINEAR.MDFMicrodriveFile;
+import hddEditor.libs.disks.LINEAR.TAPFile;
 
 public class FileNewFDDForm {
 	// Form components
@@ -115,7 +116,7 @@ public class FileNewFDDForm {
 		lbl.setText("Target file type:");
 
 		TargetFileType = new Combo(shell, SWT.CHECK);
-		String entries[] = { "Amstrad +3 DSK file", "128K Microdrive cart", "TR-DOS file (TRD/SCL)" };
+		String entries[] = { "Amstrad +3 DSK file", "128K Microdrive cart", "TR-DOS file (TRD/SCL)","TAP file" };
 		TargetFileType.setItems(entries);
 		TargetFileType.setText(entries[0]);
 		TargetFileType.addSelectionListener(new SelectionListener() {
@@ -220,7 +221,7 @@ public class FileNewFDDForm {
 		boolean IsAmstradDisk = tftString.contains("AMSTRAD");
 		boolean IsTRDOSDisk = tftString.contains("TR-DOS");
 		boolean IsMicrodriveCart = tftString.contains("MICRODRIVE");
-
+		
 		AmstradExtendedCB.setEnabled(IsAmstradDisk);
 		trdCompressed.setEnabled(IsTRDOSDisk);
 		TrDosDiskFormat.setEnabled(IsTRDOSDisk);
@@ -260,6 +261,7 @@ public class FileNewFDDForm {
 		boolean IsAmstradDisk = Filetype.contains("AMSTRAD");
 		boolean IsTRDOSDisk = Filetype.contains("TR-DOS");
 		boolean IsMicrodriveCart = Filetype.contains("MICRODRIVE");
+		boolean IsTAPFile = Filetype.contains("TAP");
 
 		boolean createResult = false;
 		if (IsAmstradDisk) {
@@ -284,6 +286,8 @@ public class FileNewFDDForm {
 			}
 		} else if (IsMicrodriveCart) {
 			createResult = CreateMDFFile(Filename, Label);
+		} else if (IsTAPFile) {
+			createResult = CreateTAPFile(Filename);
 		}
 
 		if (createResult) {
@@ -306,6 +310,26 @@ public class FileNewFDDForm {
 			result = true;
 		} catch (Exception E) {
 			System.out.println("Error creating cart:" + E.getMessage());
+			E.printStackTrace();
+		}
+
+		return (result);
+	}
+
+	/**
+	 * Create a blank TAP file cart
+	 * 
+	 * @param filename
+	 * @return
+	 */
+	private boolean CreateTAPFile(String filename) {
+		boolean result = false;
+		try {
+			TAPFile tap = new TAPFile();
+			tap.CreateEmptyTapeFile(filename);
+			result = true;
+		} catch (Exception E) {
+			System.out.println("Error creating tape:" + E.getMessage());
 			E.printStackTrace();
 		}
 
