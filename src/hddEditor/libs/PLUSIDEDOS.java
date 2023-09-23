@@ -80,9 +80,12 @@ public class PLUSIDEDOS {
 			new PARTSTRING(PARTITION_DISK_ELWRO800, "Elwo 800 Jr Disk image", PART_SPECIAL | PART_DISKIMAGE),
 			new PARTSTRING(PARTITION_DISK_AMSTRADCPC, "Amstrad CPC disk image", PART_SPECIAL | PART_DISKIMAGE),
 			new PARTSTRING(PARTITION_DISK_AMSTRADPCW, "Amstrad PCW disk image", PART_SPECIAL | PART_DISKIMAGE),
+			new PARTSTRING(PARTITION_TAPE_SINCLAIRMICRODRIVE , "Sinclair Microdrive image", PART_SPECIAL ),
+			new PARTSTRING(PARTITION_TAPE_TAP,"Sinclair TAP file", PART_SPECIAL ),
 			new PARTSTRING(PARTITION_BAD, "Bad disk space", PART_SPECIAL),
-			new PARTSTRING(PARTITION_FREE, "Free disk space", PART_SPECIAL), };
+			new PARTSTRING(PARTITION_FREE, "Free disk space", PART_SPECIAL) };
 
+	
 	/**
 	 * Generate the generic bits of an IDEDOS partition (name, type, locations,
 	 * sector location)
@@ -244,63 +247,10 @@ public class PLUSIDEDOS {
 	 */
 	public static String GetTypeAsString(int partType) {
 		String result = "Invalid";
-		switch (partType) {
-		case 0:
-			result = " Unused ";
-			break;
-		case 1:
-			result = " System ";
-			break;
-		case 2:
-			result = " Swap   ";
-			break;
-		case 3:
-			result = " +3DOS  ";
-			break;
-		case 4:
-			result = " CPM    ";
-			break;
-		case 5:
-			result = " Boot   ";
-			break;
-		case 0x10:
-			result = " MS-DOS ";
-			break;
-		case 0x20:
-			result = " UZI(X) ";
-			break;
-		case 0x30:
-			result = " TR-DOS ";
-			break;
-		case 0x31:
-			result = " SAMDOS ";
-			break;
-		case 0x32:
-			result = " MB-02  ";
-			break;
-		case 0x33:
-			result = " TOS A.2";
-			break;
-		case 0x40:
-			result = " +3 Floppy image";
-			break;
-		case 0x41:
-			result = " Elwo 800 Jr Image";
-			break;
-		case 0x48:
-			result = " Amstrad CPC image";
-			break;
-		case 0x49:
-			result = " Amstrad PCW image";
-			break;
-		case 0xfe:
-			result = " BAD    ";
-			break;
-		case 0xff:
-			result = " Free  ";
-			break;
-		case 0x70: 
-			result = " Microdrive cart";
+		for (PARTSTRING parttype: PartTypes) {
+			if (parttype.PartID == partType) {
+				result = parttype.Name;
+			}
 		}
 		return (result);
 	}
