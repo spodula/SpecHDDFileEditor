@@ -12,6 +12,7 @@ import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.SpeccyFileEncoders;
+import hddEditor.libs.disks.ExtendedSpeccyBasicDetails;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.IDEDosPartition;
@@ -19,6 +20,7 @@ import hddEditor.libs.partitions.PlusIDEDosException;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 import hddEditor.libs.partitions.mdf.MicrodriveDirectoryEntry;
+import hddEditor.libs.partitions.tap.TapDirectoryEntry;
 import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
 
 public class ScriptRunner {
@@ -184,6 +186,11 @@ public class ScriptRunner {
 					FNFDD.DoCreateFile(params[2], "MICRODRIVE", params[1], false, "", false);
 					hdi.LoadFile(params[2]);
 					System.out.println(">Cart " + params[2] + " created and loaded.");
+				} else if (disktype.startsWith("TAP")) {
+					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display);
+					FNFDD.DoCreateFile(params[2], "TAP", params[1], false, "", false);
+					hdi.LoadFile(params[2]);
+					System.out.println(">Tape " + params[2] + " created and loaded.");
 				} else if (disktype.startsWith("TRD")) {
 					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display);
 					String TRDOSFormat = params[1] + " TRACKS " + params[2] + " HEADS";
@@ -360,6 +367,7 @@ public class ScriptRunner {
 				IDEDosPartition part = hdi.CurrentSelectedPartition;
 				if ((part.GetPartType() == PLUSIDEDOS.PARTITION_PLUS3DOS)
 						|| (part.GetPartType() == PLUSIDEDOS.PARTITION_TAPE_SINCLAIRMICRODRIVE)
+						|| (part.GetPartType() == PLUSIDEDOS.PARTITION_TAPE_TAP)
 						|| (part.GetPartType() == PLUSIDEDOS.PARTITION_DISK_TRDOS)
 						|| (part.GetPartType() == PLUSIDEDOS.PARTITION_CPM)) {
 					try {
@@ -447,6 +455,19 @@ public class ScriptRunner {
 							basicVarsOffset = sbd.VarStart;
 							codeLoadAddress = mde.GetVar2();
 							arrayVarName = "A";
+							break;
+						case PLUSIDEDOS.PARTITION_TAPE_TAP:
+							TapDirectoryEntry tde = (TapDirectoryEntry) entry;
+							ExtendedSpeccyBasicDetails tsbd = (ExtendedSpeccyBasicDetails) entry
+									.GetSpeccyBasicDetails();
+							filedata = tde.GetFileData();
+							rawdata = tde.GetFileRawData();
+							filelength = tde.GetFileSize();
+							SpeccyFileType = tsbd.BasicType;
+							basicline = tsbd.LineStart;
+							basicVarsOffset = tsbd.VarStart;
+							codeLoadAddress = tsbd.LoadAddress;
+							arrayVarName = tsbd.VarName + "";
 							break;
 						case PLUSIDEDOS.PARTITION_DISK_TRDOS:
 							TrdDirectoryEntry trd = (TrdDirectoryEntry) entry;
