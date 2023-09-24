@@ -1,4 +1,5 @@
 package hddEditor.libs.disks.LINEAR;
+//TODO: when extracting files disk, sometimes get extranious F5's
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,39 +16,40 @@ public class TAPFile implements Disk {
 	protected RandomAccessFile inFile;
 	// filename of the currently open file
 	public String filename;
-	// disk size in bytes
-	public long FileSize;
-	//Storage for the Tape blocks
+	// Storage for the Tape blocks
 	public TAPBlock Blocks[];
-	
+
 	/*
 	 * Storage for individual tape blocks.
 	 */
 	public class TAPBlock {
-		//Actual data 
+		// Actual data
 		public byte data[];
-		//Flag byte. (Usually $00 = header, $FF = data
+		// Flag byte. (Usually $00 = header, $FF = data
 		public int flagbyte;
-		//TAP block Checksum
+		// TAP block Checksum
 		public int checksum;
-		//Length of the entire block including the two length bytes, checksum and flagbyte
+		// Length of the entire block including the two length bytes, checksum and flag byte
 		public int rawblocklength;
-		//Block number in the file
+		// Block number in the file
 		public int blocknum;
-		//is the checsum valid?
+		// is the checksum valid?
 		public boolean IsChecksumValid;
-		//Pointer to the location in the file.
+		// Pointer to the location in the file.
 		public int fileLocation;
 
 		/**
 		 * Constructor used for reading from the tape
 		 * 
-		 * @param block - data block being parsed 
+		 * @param block - data block being parsed
 		 * @param start - Start of the current block
-		 * @param bNum - Block number.
+		 * @param bNum  - Block number.
 		 * @throws IOException
 		 */
 		public TAPBlock(byte block[], int start, int bNum) throws IOException {
+			if (block.length < 4) {
+				throw new IOException("TAP File has extranius bits a at the end");
+			}
 			fileLocation = start;
 			int length = (block[start] & 0xff) + ((block[start + 1] & 0xff) * 256);
 			if (block.length < (start + length + 2)) {
@@ -64,6 +66,7 @@ public class TAPFile implements Disk {
 
 		/**
 		 * Update a the current data block including its checksums and lengths.
+		 * 
 		 * @param block - New data block.
 		 */
 		public void UpdateBlockData(byte block[]) {
@@ -75,8 +78,8 @@ public class TAPFile implements Disk {
 		/**
 		 * Constructor for a new tape block.
 		 * 
-		 * @param fileloc - Location in the file.
-		 * @param block - data for the block
+		 * @param fileloc  - Location in the file.
+		 * @param block    - data for the block
 		 * @param flagbyte - flag byte
 		 * @throws IOException
 		 */
@@ -111,8 +114,10 @@ public class TAPFile implements Disk {
 		}
 
 		/**
-		 * Get the raw block for saving to disk including its length bytes, flag bytes and checksum.
-		 * This block can be written straight to disk without further processing.
+		 * Get the raw block for saving to disk including its length bytes, flag bytes
+		 * and checksum. This block can be written straight to disk without further
+		 * processing.
+		 * 
 		 * @return
 		 */
 		public byte[] GetRawBlock() {
@@ -143,6 +148,7 @@ public class TAPFile implements Disk {
 
 		/**
 		 * If the data block is a basic header, return it as a BASIC header.
+		 * 
 		 * @return
 		 */
 		public ExtendedSpeccyBasicDetails DecodeHeader() {
@@ -176,7 +182,6 @@ public class TAPFile implements Disk {
 		}
 		inFile = new RandomAccessFile(fl, "rw");
 		this.filename = filename;
-		FileSize = fl.length();
 		ParseTAPFile();
 	}
 
@@ -186,7 +191,6 @@ public class TAPFile implements Disk {
 	public TAPFile() {
 		inFile = null;
 		this.filename = "";
-		FileSize = 0;
 	}
 
 	/**
@@ -214,7 +218,7 @@ public class TAPFile implements Disk {
 	}
 
 	/**
-	 * Return a dummy value as the blocks can be any size for TAP files. 
+	 * Return a dummy value as the blocks can be any size for TAP files.
 	 */
 	@Override
 	public int GetSectorSize() {
@@ -251,7 +255,9 @@ public class TAPFile implements Disk {
 	 * Get the file size.
 	 */
 	public long GetFileSize() {
-		return (FileSize);
+		File fl = new File(filename);
+
+		return (fl.length());
 	}
 
 	@Override
@@ -368,10 +374,12 @@ public class TAPFile implements Disk {
 
 	/**
 	 * Parse the TAP file into blocks.
+	 * 
 	 * @throws IOException
 	 */
 	public void ParseTAPFile() throws IOException {
-		byte FileData[] = new byte[(int) FileSize];
+
+		byte FileData[] = new byte[(int) GetFileSize()];
 		inFile.seek(0);
 		inFile.read(FileData);
 
@@ -390,11 +398,12 @@ public class TAPFile implements Disk {
 
 	/**
 	 * Return all the data as a block.
+	 * 
 	 * @return
 	 * @throws IOException
 	 */
 	public byte[] GetAllData() throws IOException {
-		byte FileData[] = new byte[(int) FileSize];
+		byte FileData[] = new byte[(int) GetFileSize()];
 		inFile.seek(0);
 		inFile.read(FileData);
 		return (FileData);
@@ -402,6 +411,7 @@ public class TAPFile implements Disk {
 
 	/**
 	 * Set the tape file, Probably dangerous.
+	 * 
 	 * @param FileData
 	 * @return
 	 * @throws IOException
@@ -426,11 +436,12 @@ public class TAPFile implements Disk {
 
 	/**
 	 * Test harness
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		try {
-			String filename = "/home/graham/a.tap";
+			String filename = "/home/graham/x.tap";
 
 			TAPFile mdt = new TAPFile();
 			if (mdt.IsMyFileType(new File(filename))) {
@@ -456,7 +467,7 @@ public class TAPFile implements Disk {
 		int filelen = 0;
 		for (TAPBlock Block : Blocks) {
 			Block.fileLocation = filelen;
-			byte data[] = Block.GetRawBlock();
+			byte data[] = Block.GetRawBlock();               
 			inFile.write(data);
 			filelen = filelen + data.length;
 		}
@@ -465,6 +476,7 @@ public class TAPFile implements Disk {
 
 	/**
 	 * Delete the given block.
+	 * 
 	 * @param block
 	 * @throws IOException
 	 */
@@ -493,14 +505,14 @@ public class TAPFile implements Disk {
 	public void AddBlock(byte[] block, int flag) throws IOException {
 		TAPBlock newblock = new TAPBlock(Blocks.length, block, flag);
 		TAPBlock newBlocks[] = new TAPBlock[Blocks.length + 1];
-		System.arraycopy(Blocks, 0, newBlocks, 0, Blocks.length);
 		newBlocks[Blocks.length] = newblock;
 		Blocks = newBlocks;
 		RewriteFile();
+		ParseTAPFile();
 	}
 
 	/**
-	 *	Create a blank TAP file. Pretty simple
+	 * Create a blank TAP file. Pretty simple
 	 * 
 	 * @param Filename
 	 * @throws IOException
@@ -516,7 +528,6 @@ public class TAPFile implements Disk {
 		}
 		// Load the newly created file.
 		inFile = new RandomAccessFile(Filename, "rw");
-		FileSize = new File(Filename).length();
 		ParseTAPFile();
 	}
 
