@@ -505,6 +505,7 @@ public class TAPFile implements Disk {
 	public void AddBlock(byte[] block, int flag) throws IOException {
 		TAPBlock newblock = new TAPBlock(Blocks.length, block, flag);
 		TAPBlock newBlocks[] = new TAPBlock[Blocks.length + 1];
+		System.arraycopy(Blocks, 0, newBlocks, 0, Blocks.length);
 		newBlocks[Blocks.length] = newblock;
 		Blocks = newBlocks;
 		RewriteFile();

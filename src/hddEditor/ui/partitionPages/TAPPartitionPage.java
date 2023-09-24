@@ -162,6 +162,35 @@ public class TAPPartitionPage extends GenericPage {
 				}
 			});
 			ParentComp.pack();
+			Btn = new Button(ParentComp, SWT.PUSH);
+			Btn.setText("Move file up");
+			Btn.setLayoutData(gd);
+			Btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					DoMoveUp();
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+			Btn = new Button(ParentComp, SWT.PUSH);
+			Btn.setText("Move file Down");
+			Btn.setLayoutData(gd);
+			Btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					DoMoveDown();
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+			ParentComp.pack();
 		}
 	}
 
@@ -336,5 +365,16 @@ public class TAPPartitionPage extends GenericPage {
 			AddComponents();
 		}
 	}
+	
+	protected void DoMoveDown() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	protected void DoMoveUp() {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }

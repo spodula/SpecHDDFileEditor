@@ -17,11 +17,11 @@ import hddEditor.libs.disks.LINEAR.TAPFile.TAPBlock;
 import hddEditor.libs.partitions.tap.TapDirectoryEntry;
 
 public class TAPPartition extends IDEDosPartition {
-	//Parsed directory entries.
+	// Parsed directory entries.
 	public TapDirectoryEntry DirectoryEntries[];
 
 	/**
-	 * Constructor for a TAP partition. 
+	 * Constructor for a TAP partition.
 	 * 
 	 * @param DirentLocation
 	 * @param RawDisk
@@ -163,7 +163,7 @@ public class TAPPartition extends IDEDosPartition {
 	 * @param param2
 	 * @throws IOException
 	 */
-	public void AddSpeccyHeader(String filename, int filetype, int filelength, int param1, int param2)
+	public void AddSpeccyHeader(TAPFile tap, String filename, int filetype, int filelength, int param1, int param2)
 			throws IOException {
 		byte data[] = new byte[17];
 		data[0] = (byte) (filetype & 0xff);
@@ -180,7 +180,6 @@ public class TAPPartition extends IDEDosPartition {
 		data[15] = (byte) (param2 & 0xff);
 		data[16] = (byte) ((param2 / 0x100) & 0xff);
 
-		TAPFile tap = (TAPFile) CurrentDisk;
 		tap.AddBlock(data, 0);
 	}
 
@@ -195,9 +194,9 @@ public class TAPPartition extends IDEDosPartition {
 	 */
 	@Override
 	public void AddCodeFile(String filename, int loadAddress, byte[] CodeFile) throws IOException {
-		AddSpeccyHeader(filename, Speccy.BASIC_CODE, CodeFile.length, loadAddress, 32768);
-
 		TAPFile tap = (TAPFile) CurrentDisk;
+		AddSpeccyHeader(tap, filename, Speccy.BASIC_CODE, CodeFile.length, loadAddress, 32768);
+
 		tap.AddBlock(CodeFile, 255);
 		LoadPartitionSpecificInformation();
 	}
@@ -214,9 +213,9 @@ public class TAPPartition extends IDEDosPartition {
 	 */
 	@Override
 	public void AddBasicFile(String filename, byte[] EncodedBASICFile, int line, int varsStart) throws IOException {
-		AddSpeccyHeader(filename, Speccy.BASIC_BASIC, EncodedBASICFile.length, line, varsStart);
-
 		TAPFile tap = (TAPFile) CurrentDisk;
+		AddSpeccyHeader(tap, filename, Speccy.BASIC_BASIC, EncodedBASICFile.length, line, varsStart);
+
 		tap.AddBlock(EncodedBASICFile, 255);
 		LoadPartitionSpecificInformation();
 	}
@@ -233,10 +232,9 @@ public class TAPPartition extends IDEDosPartition {
 	@Override
 	public void AddCharArray(String filename, byte[] EncodedArray, String varname) throws IOException {
 		int encodedVarName = ((((varname + "A").charAt(0) & 0xff) - 0x60 + 0xC0) & 0xff);
-
-		AddSpeccyHeader(filename, Speccy.BASIC_CHRARRAY, EncodedArray.length, encodedVarName * 0x100, 0);
-
 		TAPFile tap = (TAPFile) CurrentDisk;
+
+		AddSpeccyHeader(tap, filename, Speccy.BASIC_CHRARRAY, EncodedArray.length, encodedVarName * 0x100, 0);
 		tap.AddBlock(EncodedArray, 255);
 		LoadPartitionSpecificInformation();
 	}
@@ -253,10 +251,9 @@ public class TAPPartition extends IDEDosPartition {
 	@Override
 	public void AddNumericArray(String filename, byte[] EncodedArray, String varname) throws IOException {
 		int encodedVarName = ((((varname + "A").charAt(0) & 0xff) - 0x60 + 0x80) & 0xff);
-
-		AddSpeccyHeader(filename, Speccy.BASIC_NUMARRAY, EncodedArray.length, encodedVarName * 0x100, 0);
-
 		TAPFile tap = (TAPFile) CurrentDisk;
+
+		AddSpeccyHeader(tap, filename, Speccy.BASIC_NUMARRAY, EncodedArray.length, encodedVarName * 0x100, 0);
 		tap.AddBlock(EncodedArray, 255);
 		LoadPartitionSpecificInformation();
 	}
@@ -320,14 +317,13 @@ public class TAPPartition extends IDEDosPartition {
 	}
 
 	/**
-	 * Get the size in Kbytes of the partition. As usual, this differs for tapes as
-	 * the file size is effectively infinate.
+	 * Get the size in Kbytes of the partition. As usual, this differs for tapes.
 	 * 
 	 * @return
 	 */
 	@Override
 	public int GetSizeK() {
-		return ((int) 99999999);
+		return ((int) (((TAPFile) CurrentDisk).GetFileSize() / 1024));
 	}
 
 	/**
@@ -337,7 +333,7 @@ public class TAPPartition extends IDEDosPartition {
 	 */
 	public void Pack() throws IOException {
 	}
-
+ 
 	/**
 	 * Extract partition with flags showing what to do with each file type.
 	 * 
@@ -444,7 +440,7 @@ public class TAPPartition extends IDEDosPartition {
 	/**
 	 * Get the file list given a wildcard
 	 * 
-	 * @return 
+	 * @return
 	 */
 	@Override
 	public FileEntry[] GetFileList(String wildcard) {
@@ -505,7 +501,7 @@ public class TAPPartition extends IDEDosPartition {
 	public static void main(String[] args) {
 		TAPFile tdf;
 		try {
-			tdf = new TAPFile("/home/graham/a.tap");
+			tdf = new TAPFile("/home/graham/x.tap");
 
 			TAPPartition trp = new TAPPartition(0, tdf, new byte[64], 1, false);
 			System.out.println(trp);
