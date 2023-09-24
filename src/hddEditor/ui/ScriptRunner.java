@@ -188,9 +188,9 @@ public class ScriptRunner {
 					System.out.println(">Cart " + params[2] + " created and loaded.");
 				} else if (disktype.startsWith("TAP")) {
 					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display);
-					FNFDD.DoCreateFile(params[2], "TAP", params[1], false, "", false);
-					hdi.LoadFile(params[2]);
-					System.out.println(">Tape " + params[2] + " created and loaded.");
+					FNFDD.DoCreateFile(params[1], "TAP", params[1], false, "", false);
+					hdi.LoadFile(params[1]);
+					System.out.println(">Tape " + params[1] + " created and loaded.");
 				} else if (disktype.startsWith("TRD")) {
 					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display);
 					String TRDOSFormat = params[1] + " TRACKS " + params[2] + " HEADS";
@@ -226,6 +226,8 @@ public class ScriptRunner {
 			System.out.println("     eg. new EDSK <filename>");
 			System.out.println("  MDF - Sinclair microdrive cart");
 			System.out.println("     eg. new MDF <label> <filename>");
+			System.out.println("  TAP - Basic TAP file");
+			System.out.println("     eg. new TAP <filename>");
 			System.out.println("  TRD - TR-DOS file (Linear)");
 			System.out.println("     eg. new TRD [40|80] [1|2] <label> <filename>");
 			System.out.println("  SCL - TR-DOS file (Compressed)");
