@@ -7,13 +7,13 @@ Features:
 * Open, read and write MDF microdrive files.
 * Convert between Hard disk file types
 * Add and delete partitions for various types on hard drives.
-* Add and remove spectrum +3 files on +3DOS and TR-DOS partitions:
+* Add and remove spectrum +3 files on +3DOS partitions, TR-DOS files, MGT files, Microdrive files and TAP files:
 * * Basic files as both Plain text and pre-tokenised
 * * Add JPEG/GIF/PNG files as SCREEN$ files
 * * CSV files as Numeric arrays
 * * Text files as character arrays
-* * Raw CPM files without +3DOS headers
-* View and extract Spectrum +3 files:
+* * Raw CPM files without +3DOS headers 
+* View and extract Spectrum files:
 * * Decode and View basic files including export as text
 * * View and extract SCREEN$ files
 * * View and extract code files as binary, Hex and assembly
@@ -27,6 +27,7 @@ File system documentation:
 * CPM/+3DOS filesystem: https://cpctech.cpc-live.com/docs/p3xfer.html / https://www.seasip.info/Cpm/format22.html
 * TR-DOS filesystem: https://sinclair.wiki.zxnet.co.uk/wiki/TR-DOS_filesystem
 * MDR file: These are just Raw files with a Microdrive filesystem in them. Details of the filesystem are at  https://sinclair.wiki.zxnet.co.uk/wiki/ZX_Interface_1
+* TAP file: https://sinclair.wiki.zxnet.co.uk/wiki/TAP_format
 
 Requires at least Java 11 (I use OpenJDK 18 on Linux.)
 
