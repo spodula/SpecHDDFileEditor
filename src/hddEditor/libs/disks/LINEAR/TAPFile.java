@@ -29,7 +29,8 @@ public class TAPFile implements Disk {
 		public int flagbyte;
 		// TAP block Checksum
 		public int checksum;
-		// Length of the entire block including the two length bytes, checksum and flag byte
+		// Length of the entire block including the two length bytes, checksum and flag
+		// byte
 		public int rawblocklength;
 		// Block number in the file
 		public int blocknum;
@@ -435,29 +436,6 @@ public class TAPFile implements Disk {
 	}
 
 	/**
-	 * Test harness
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		try {
-			String filename = "/home/graham/x.tap";
-
-			TAPFile mdt = new TAPFile();
-			if (mdt.IsMyFileType(new File(filename))) {
-				System.out.println("File is a valid TAP file.");
-				mdt = new TAPFile(filename);
-				System.out.println(mdt);
-			} else {
-				System.out.println("File is not a valid Tap file.");
-			}
-
-		} catch (IOException | BadDiskFileException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
 	 * Update the file from the current block list.
 	 * 
 	 * @throws IOException
@@ -467,7 +445,7 @@ public class TAPFile implements Disk {
 		int filelen = 0;
 		for (TAPBlock Block : Blocks) {
 			Block.fileLocation = filelen;
-			byte data[] = Block.GetRawBlock();               
+			byte data[] = Block.GetRawBlock();
 			inFile.write(data);
 			filelen = filelen + data.length;
 		}
@@ -530,6 +508,99 @@ public class TAPFile implements Disk {
 		// Load the newly created file.
 		inFile = new RandomAccessFile(Filename, "rw");
 		ParseTAPFile();
+	}
+
+	/**
+	 * Return the index of the given block in the block list.
+	 * 
+	 * @param block
+	 * @return
+	 */
+	private int GetBlockIndex(TAPBlock block) {
+		int idx = 0;
+		for (TAPBlock b : Blocks) {
+			if (b.equals(block)) {
+				return (idx);
+			}
+			idx++;
+		}
+		return (-1);
+	}
+
+	/**
+	 * move the given block up the list.
+	 * The DoRewrite flag is used to indicate the file should be re-written.
+	 * This is because for blocks that need to be kept together, EG, header/data pairs.
+	 * if you rewrite after the header, the data block becomes invalid and doesn't get moved.
+	 * 
+	 * @param block
+	 * @param DoRewrite
+	 * @throws IOException
+	 */
+	public void MoveBlockUp(TAPBlock block, boolean DoRewrite) throws IOException {
+		int idx = GetBlockIndex(block);
+		if (idx > 0) { // ignore -1 (not found) and 0 (top)
+			TAPBlock block1 = Blocks[idx];
+			TAPBlock block2 = Blocks[idx - 1];
+
+			Blocks[idx - 1] = block1;
+			Blocks[idx] = block2;
+
+			if (DoRewrite) {
+				RewriteFile();
+				ParseTAPFile();
+			}
+		}
+	}
+
+	/**
+	 * Move the given block down the list.
+	 * 
+	 * @param block
+	 * @param DoRewrite
+	 * @throws IOException
+	 */
+	public void MoveBlockDown(TAPBlock block, boolean DoRewrite) throws IOException {
+		int idx = GetBlockIndex(block);
+		if ((idx > -1) && (idx < (Blocks.length - 1))) { // ignore -1 (not found) and blocknum-1 (bottom)
+			TAPBlock block1 = Blocks[idx];
+			TAPBlock block2 = Blocks[idx + 1];
+
+			Blocks[idx + 1] = block1;
+			Blocks[idx] = block2;
+
+			if (DoRewrite) {
+				RewriteFile();
+				ParseTAPFile();
+			}
+		}
+	}
+
+	/**
+	 * Test harness
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		try {
+			String filename = "/home/graham/x.tap";
+
+			TAPFile mdt = new TAPFile();
+			if (mdt.IsMyFileType(new File(filename))) {
+				System.out.println("File is a valid TAP file.");
+				mdt = new TAPFile(filename);
+				System.out.println(mdt);
+//				mdt.MoveBlockDown(mdt.Blocks[0],true);
+//				System.out.println(mdt);
+//				mdt.MoveBlockUp(mdt.Blocks[1],true);
+//				System.out.println(mdt);
+			} else {
+				System.out.println("File is not a valid Tap file.");
+			}
+
+		} catch (IOException | BadDiskFileException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

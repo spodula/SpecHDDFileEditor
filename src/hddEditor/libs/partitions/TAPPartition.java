@@ -101,9 +101,9 @@ public class TAPPartition extends IDEDosPartition {
 		result = result + "\nNumSectors: " + mdf.GetNumSectors();
 
 		result = result + "\n\nBlocks: ";
-		for (TAPFile.TAPBlock mde : mdf.Blocks) {
-			result = result + "\n#" + mde.blocknum + ": " + mde;
-		}
+//		for (TAPFile.TAPBlock mde : mdf.Blocks) {
+//			result = result + "\n#" + mde.blocknum + ": " + mde;
+//		}
 		result = result + "\n\nDirectory entries: ";
 		int i = 0;
 		for (TapDirectoryEntry entry : DirectoryEntries) {
@@ -333,7 +333,7 @@ public class TAPPartition extends IDEDosPartition {
 	 */
 	public void Pack() throws IOException {
 	}
- 
+
 	/**
 	 * Extract partition with flags showing what to do with each file type.
 	 * 
@@ -494,6 +494,40 @@ public class TAPPartition extends IDEDosPartition {
 	}
 
 	/**
+	 * Move the given directory entry up.
+	 * 
+	 * @param entry
+	 * @throws IOException
+	 */
+	public void MoveDirectoryEntryUp(TapDirectoryEntry entry) throws IOException {
+		TAPFile tap = (TAPFile) CurrentDisk;
+		if (entry.HeaderBlock != null) {
+			tap.MoveBlockUp(entry.HeaderBlock, (entry.DataBlock==null));
+		}
+		if (entry.DataBlock != null) {
+			tap.MoveBlockUp(entry.DataBlock, true);
+		}
+		LoadPartitionSpecificInformation();
+	}
+
+	/**
+	 * Move the given directory entry down.
+	 * 
+	 * @param entry
+	 * @throws IOException
+	 */
+	public void MoveDirectoryEntryDown(TapDirectoryEntry entry) throws IOException {
+		TAPFile tap = (TAPFile) CurrentDisk;
+		if (entry.DataBlock != null) {
+			tap.MoveBlockDown(entry.DataBlock, (entry.HeaderBlock == null));
+		}
+		if (entry.HeaderBlock != null) {
+			tap.MoveBlockDown(entry.HeaderBlock, true);
+		}
+		LoadPartitionSpecificInformation();
+	}
+
+	/**
 	 * Test harness.
 	 * 
 	 * @param args
@@ -505,9 +539,9 @@ public class TAPPartition extends IDEDosPartition {
 
 			TAPPartition trp = new TAPPartition(0, tdf, new byte[64], 1, false);
 			System.out.println(trp);
-//			byte xxx[] = new byte[100];
-
-			// trp.AddCodeFile("text.bin", 16384,xxx);
+			//trp.MoveDirectoryEntryUp(trp.DirectoryEntries[0]);
+			System.out.println(trp);
+			//trp.MoveDirectoryEntryDown(trp.DirectoryEntries[0]);
 			System.out.println(trp);
 
 		} catch (IOException | BadDiskFileException e) {

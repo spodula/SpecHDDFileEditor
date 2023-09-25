@@ -228,7 +228,6 @@ public class TAPPartitionPage extends GenericPage {
 	protected void DoEditFile() {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
-
 			TapDirectoryEntry entry = (TapDirectoryEntry) itms[0].getData();
 			SpecFileEditDialog = new TapFileEditDialog(ParentComp.getDisplay());
 
@@ -360,20 +359,48 @@ public class TAPPartitionPage extends GenericPage {
 		AddFilesDialog = new AddFilesToTAPPartition(ParentComp.getDisplay());
 		AddFilesDialog.Show("Add files", (TAPPartition) partition);
 		AddFilesDialog = null;
-		// TODO: Add files.
 		if (!ParentComp.isDisposed()) {
 			AddComponents();
 		}
 	}
+
 	
+	/**
+	 * 
+	 */
 	protected void DoMoveDown() {
-		// TODO Auto-generated method stub
-		
+		TAPPartition tapp = (TAPPartition)partition; 
+		if (DirectoryListing.getSelectionCount() > 0) {
+			TableItem Selected[] = DirectoryListing.getSelection();
+			for (int idx = Selected.length-1;idx > -1;idx--) {
+				TapDirectoryEntry SelItm = (TapDirectoryEntry)Selected[idx].getData();
+				try {
+					tapp.MoveDirectoryEntryDown(SelItm);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			AddComponents();
+		}		
 	}
 
+	/**
+	 * 
+	 */
 	protected void DoMoveUp() {
-		// TODO Auto-generated method stub
-		
+		TAPPartition tapp = (TAPPartition)partition; 
+		if (DirectoryListing.getSelectionCount() > 0) {
+			TableItem Selected[] = DirectoryListing.getSelection();
+			for (TableItem sel:Selected) {
+				TapDirectoryEntry SelItm = (TapDirectoryEntry)sel.getData();
+				try {
+					tapp.MoveDirectoryEntryUp(SelItm);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			AddComponents();
+		}		
 	}
 
 
