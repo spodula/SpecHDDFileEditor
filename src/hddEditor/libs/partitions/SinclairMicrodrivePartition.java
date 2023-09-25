@@ -17,7 +17,7 @@ import hddEditor.libs.disks.LINEAR.MicrodriveSector;
 import hddEditor.libs.partitions.mdf.MicrodriveDirectoryEntry;
 
 public class SinclairMicrodrivePartition extends IDEDosPartition {
-	public MicrodriveDirectoryEntry Files[];
+	public MicrodriveDirectoryEntry DirectoryEntries[];
 
 	/**
 	 * Create a microdrive virtual partition.
@@ -147,7 +147,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 			}
 		}
 
-		Files = dirents.toArray(new MicrodriveDirectoryEntry[0]);
+		DirectoryEntries = dirents.toArray(new MicrodriveDirectoryEntry[0]);
 	}
 
 	/**
@@ -161,7 +161,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		result = result + "\nNumSectors: " + mdf.GetNumSectors();
 
 		result = result + "\n\nFiles: ";
-		for (MicrodriveDirectoryEntry mde : Files) {
+		for (MicrodriveDirectoryEntry mde : DirectoryEntries) {
 			SpeccyBasicDetails sd = mde.GetSpeccyBasicDetails();
 			result = result + "\n" + mde.GetFilename() + " sectors:" + mde.sectors.length + " type:";
 			result = result + Speccy.FileTypeAsString(sd.BasicType);
@@ -182,7 +182,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	public MicrodriveDirectoryEntry GetFileByName(String filename) {
 		MicrodriveDirectoryEntry result = null;
 		filename = filename.trim().toUpperCase();
-		for (MicrodriveDirectoryEntry file : Files) {
+		for (MicrodriveDirectoryEntry file : DirectoryEntries) {
 			if (file.GetFilename().trim().toUpperCase().equals(filename)) {
 				result = file;
 			}
@@ -424,8 +424,8 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		// find the file in the list
 		int foundfile = -1;
 		filename = filename.trim().toUpperCase();
-		for (int i = 0; i < Files.length; i++) {
-			if (Files[i].GetFilename().trim().toUpperCase().equals(filename)) {
+		for (int i = 0; i < DirectoryEntries.length; i++) {
+			if (DirectoryEntries[i].GetFilename().trim().toUpperCase().equals(filename)) {
 				foundfile = i;
 			}
 		}
@@ -433,7 +433,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 			System.out.println("File " + filename + " not found.");
 			throw new IOException("File " + filename + " not found.");
 		} else {
-			Files[foundfile].RenameMicrodriveFile(newName, CurrentDisk);
+			DirectoryEntries[foundfile].RenameMicrodriveFile(newName, CurrentDisk);
 		}
 	}
 
@@ -517,7 +517,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 
 		int CurrentSectorNumber = mdf.Sectors.length;
 		// Iterate through each file
-		for (MicrodriveDirectoryEntry File : Files) {
+		for (MicrodriveDirectoryEntry File : DirectoryEntries) {
 			// Copy sector to latest location
 			for (int sNum = 0; sNum < File.sectors.length; sNum++) {
 				NewSectors[CurrentSectorNumber--] = File.GetSectorByFilePartNumber(sNum);
@@ -577,9 +577,9 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 			try {
 				SysConfig.write("<speccy>\n".toCharArray());
 				int entrynum = 0;
-				for (MicrodriveDirectoryEntry entry : Files) {
+				for (MicrodriveDirectoryEntry entry : DirectoryEntries) {
 					if (progress != null) {
-						if (progress.Callback(Files.length, entrynum++, "File: " + entry.GetFilename())) {
+						if (progress.Callback(DirectoryEntries.length, entrynum++, "File: " + entry.GetFilename())) {
 							break;
 						}
 					}
@@ -705,7 +705,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	@Override
 	public FileEntry[] GetFileList(String wildcard) {
 		ArrayList<FileEntry> results = new ArrayList<FileEntry>();
-		for (FileEntry de : Files) {
+		for (FileEntry de : DirectoryEntries) {
 			if (de.DoesMatch(wildcard)) {
 				results.add(de);
 			}
@@ -722,7 +722,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	public void DeleteFile(String wildcard) throws IOException {
 		// find the file in the list
 		wildcard = wildcard.trim();
-		for (MicrodriveDirectoryEntry mde : Files) {
+		for (MicrodriveDirectoryEntry mde : DirectoryEntries) {
 			if (mde.DoesMatch(wildcard)) {
 
 				// Blank the sectors
@@ -746,14 +746,14 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 					}
 				}
 				// remove the filename from the list.
-				MicrodriveDirectoryEntry newfiles[] = new MicrodriveDirectoryEntry[Files.length - 1];
+				MicrodriveDirectoryEntry newfiles[] = new MicrodriveDirectoryEntry[DirectoryEntries.length - 1];
 				int entryNum = 0;
-				for (int i = 0; i < Files.length; i++) {
-					if (mde != Files[i]) {
-						newfiles[entryNum++] = Files[i];
+				for (int i = 0; i < DirectoryEntries.length; i++) {
+					if (mde != DirectoryEntries[i]) {
+						newfiles[entryNum++] = DirectoryEntries[i];
 					}
 				}
-				Files = newfiles;
+				DirectoryEntries = newfiles;
 			}
 		}
 	}

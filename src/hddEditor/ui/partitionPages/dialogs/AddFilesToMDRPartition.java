@@ -1160,7 +1160,7 @@ public class AddFilesToMDRPartition {
 		/*
 		 * Add in the files on the disk..
 		 */
-		for (MicrodriveDirectoryEntry d : CurrentPartition.Files) {
+		for (MicrodriveDirectoryEntry d : CurrentPartition.DirectoryEntries) {
 			String fname = d.GetFilename();
 			currentlist.add(fname);
 		}

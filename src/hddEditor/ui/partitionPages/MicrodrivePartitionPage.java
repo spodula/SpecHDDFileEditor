@@ -206,7 +206,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 		if (!DirectoryListing.isDisposed()) {
 			DirectoryListing.removeAll();
 			SinclairMicrodrivePartition smp = (SinclairMicrodrivePartition) partition;
-			for (MicrodriveDirectoryEntry entry : smp.Files) {
+			for (MicrodriveDirectoryEntry entry : smp.DirectoryEntries) {
 				TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 				String content[] = new String[5];
 				SpeccyBasicDetails spd = entry.GetSpeccyBasicDetails();
