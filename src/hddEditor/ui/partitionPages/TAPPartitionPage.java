@@ -1,5 +1,4 @@
 package hddEditor.ui.partitionPages;
-//TODO: on TAP file, reorganise
 
 import java.io.IOException;
 
@@ -321,7 +320,7 @@ public class TAPPartitionPage extends GenericPage {
 	}
 
 	/**
-	 * Delete the selected file.
+	 * Delete the selected file(s).
 	 * 
 	 */
 	protected void DoDeleteFile() {
@@ -366,7 +365,7 @@ public class TAPPartitionPage extends GenericPage {
 
 	
 	/**
-	 * 
+	 * Move the selected files down the list.
 	 */
 	protected void DoMoveDown() {
 		TAPPartition tapp = (TAPPartition)partition; 
@@ -385,7 +384,7 @@ public class TAPPartitionPage extends GenericPage {
 	}
 
 	/**
-	 * 
+	 * Move the selected files up the list.
 	 */
 	protected void DoMoveUp() {
 		TAPPartition tapp = (TAPPartition)partition; 

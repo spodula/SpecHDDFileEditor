@@ -3,6 +3,7 @@ package hddEditor.libs.partitions;
 import java.io.IOException;
 
 import hddEditor.libs.disks.Disk;
+import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.FDD.FloppyDisk;
 import hddEditor.libs.disks.FDD.Sector;
 import hddEditor.libs.disks.FDD.TrackInfo;
@@ -155,5 +156,16 @@ public class FloppyBootTrack extends IDEDosPartition {
 			System.out.println("FloppyBootTrack: cannot load first track...");
 		}
 	}
+
+	/**
+	 * Get all the files on this partition.
+	 * 
+	 * @return
+	 */
+	@Override	
+	public FileEntry[] GetFileList() {
+		return null;
+	}
+
 	
 }

@@ -753,4 +753,14 @@ public class TrDosPartition extends IDEDosPartition {
 		AddFile(filename, 'D', EncodedArray, varbyte);
 	}
 
+	/**
+	 * Get all the files on this partition.
+	 * 
+	 * @return
+	 */
+	@Override	
+	public FileEntry[] GetFileList() {
+		return DirectoryEntries;
+	}
+
 }

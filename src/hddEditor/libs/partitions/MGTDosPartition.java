@@ -678,4 +678,15 @@ public class MGTDosPartition extends IDEDosPartition {
 		int variable = (((varname.toUpperCase() + "A").charAt(0) - 0x40) | 0xC0) * 256;
 		AddFile(filename, MGT.MGTFT_ZXSTRARRAY - 1, EncodedArray, 0xffff, 0, variable);
 	}
+	
+	/**
+	 * Get all the files on this partition.
+	 * 
+	 * @return
+	 */
+	@Override	
+	public FileEntry[] GetFileList() {
+		return DirectoryEntries;
+	}
+
 }

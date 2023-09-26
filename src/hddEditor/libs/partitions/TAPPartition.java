@@ -548,4 +548,15 @@ public class TAPPartition extends IDEDosPartition {
 			e.printStackTrace();
 		}
 	}
+	/**
+	 * Get all the files on this partition.
+	 * 
+	 * @return
+	 */
+	@Override	
+	public FileEntry[] GetFileList() {
+		return DirectoryEntries;
+	}
+
+	
 }

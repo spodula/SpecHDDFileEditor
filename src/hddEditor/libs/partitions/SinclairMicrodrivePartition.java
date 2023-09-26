@@ -757,4 +757,15 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 			}
 		}
 	}
+	
+	/**
+	 * Get all the files on this partition.
+	 * 
+	 * @return
+	 */
+	@Override	
+	public FileEntry[] GetFileList() {
+		return DirectoryEntries;
+	}
+
 }
