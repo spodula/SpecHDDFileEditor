@@ -133,7 +133,7 @@ public class MGTDosPartition extends IDEDosPartition {
 	public static void main(String[] args) {
 		MGTDiskFile tdf;
 		try {
-			tdf = new MGTDiskFile("/home/graham/Artist2.mgt");
+			tdf = new MGTDiskFile(new File("/home/graham/Artist2.mgt"));
 			MGTDosPartition trp = new MGTDosPartition(0, tdf, new byte[64], 1, false);
 			System.out.println(trp);
 			byte data[] = new byte[4444];

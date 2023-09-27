@@ -1,5 +1,4 @@
 package hddEditor.libs;
-//TODO: neatness, convert to use FILE exclusively.
 
 import java.io.File;
 import java.io.IOException;
@@ -32,21 +31,21 @@ public class DiskUtils {
 		Disk result = null;
 		try {
 			if (new IDEDosDisk().IsMyFileType(file)) {
-				result = new IDEDosDisk(file.getAbsolutePath());
+				result = new IDEDosDisk(file);
 			} else if (new RS_IDEDosDisk().IsMyFileType(file)) {
-				result = new RS_IDEDosDisk(file.getAbsolutePath());
+				result = new RS_IDEDosDisk(file);
 			} else if (new AMSDiskFile().IsMyFileType(file)) {
-				result = new AMSDiskFile(file.getAbsolutePath());
+				result = new AMSDiskFile(file);
 			} else if (new SCLDiskFile().IsMyFileType(file)) {
-				result = new SCLDiskFile(file.getAbsolutePath());
+				result = new SCLDiskFile(file);
 			} else if (new TrDosDiskFile().IsMyFileType(file)) {
-				result = new TrDosDiskFile(file.getAbsolutePath());
+				result = new TrDosDiskFile(file);
 			} else if (new MGTDiskFile().IsMyFileType(file)) {
-				result = new MGTDiskFile(file.getAbsolutePath());
+				result = new MGTDiskFile(file);
 			} else if (new MDFMicrodriveFile().IsMyFileType(file)) {
-				result = new MDFMicrodriveFile(file.getAbsolutePath());
+				result = new MDFMicrodriveFile(file);
 			} else if (new TAPFile().IsMyFileType(file)) {
-				result = new TAPFile(file.getAbsolutePath());
+				result = new TAPFile(file);
 			} else {
 				throw new IOException("Error decoding file, File " + file.getAbsolutePath() + " is not a supported file type.");
 			}

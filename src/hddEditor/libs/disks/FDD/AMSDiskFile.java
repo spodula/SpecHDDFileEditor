@@ -93,22 +93,22 @@ public class AMSDiskFile extends FloppyDisk {
 
 	public boolean IsValid = false;
 
-	public AMSDiskFile(String filename) throws IOException, BadDiskFileException {
-		super(filename);
+	public AMSDiskFile(File file) throws IOException, BadDiskFileException {
+		super(file);
 		IsValid = false;
 		ParseDisk();
 	}
 
 	public AMSDiskFile() {
 		inFile = null;
-		filename = "";
+		file = null;
 		IsValid = false;
 		SetNumCylinders(0);
 	}
 
 	private void ParseDisk() throws IOException, BadDiskFileException {
 		NumLogicalSectors = 0;
-		InputStream in = new FileInputStream(filename);
+		InputStream in = new FileInputStream(file);
 		try {
 			// Read the ADF Disk info block into a bit of memory
 			// This bit is always 256 bytes long.
@@ -276,7 +276,7 @@ public class AMSDiskFile extends FloppyDisk {
 			String filename = "/home/graham/test-extended.dsk";
 			if (new AMSDiskFile().IsMyFileType(new File(filename))) {
 //				new AMSDiskFile().CreateBlankAMSDisk(filename,true);
-				h = new AMSDiskFile(filename);
+				h = new AMSDiskFile(new File(filename));
 				System.out.println(h);
 				System.out.println("Track 1:");
 				byte data[] = h.GetBytesStartingFromSector(9, 512);
@@ -413,8 +413,8 @@ public class AMSDiskFile extends FloppyDisk {
 	 * @throws IOException
 	 * @throws BadDiskFileException 
 	 */
-	public void CreateBlankAMSDisk(String Filename, boolean Extended) throws IOException, BadDiskFileException {
-		FileOutputStream NewFile = new FileOutputStream(Filename);
+	public void CreateBlankAMSDisk(File file, boolean Extended) throws IOException, BadDiskFileException {
+		FileOutputStream NewFile = new FileOutputStream(file);
 		try {
 			/*
 			 * Disk information block.....
@@ -515,9 +515,9 @@ public class AMSDiskFile extends FloppyDisk {
 		/*
 		 *  Load the newly created file.
 		 */
-		this.filename = Filename;
-		inFile = new RandomAccessFile(filename, "rw");
-		FileSize = new File(filename).length();
+		this.file = file;
+		inFile = new RandomAccessFile(file, "rw");
+		FileSize = file.length();
 		IsValid = false;
 		ParseDisk();
 		

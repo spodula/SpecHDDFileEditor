@@ -535,7 +535,7 @@ public class TAPPartition extends IDEDosPartition {
 	public static void main(String[] args) {
 		TAPFile tdf;
 		try {
-			tdf = new TAPFile("/home/graham/x.tap");
+			tdf = new TAPFile(new File("/home/graham/x.tap"));
 
 			TAPPartition trp = new TAPPartition(0, tdf, new byte[64], 1, false);
 			System.out.println(trp);

@@ -45,8 +45,8 @@ public class SCLDiskFile extends FloppyDisk {
 	 * @throws IOException
 	 * @throws BadDiskFileException
 	 */
-	public SCLDiskFile(String filename) throws IOException, BadDiskFileException {
-		super(filename);
+	public SCLDiskFile(File file) throws IOException, BadDiskFileException {
+		super(file);
 		IsValid = false;
 		BackupMade = false;
 		ParseDisk();
@@ -257,7 +257,7 @@ public class SCLDiskFile extends FloppyDisk {
 	 */
 	public SCLDiskFile() {
 		inFile = null;
-		filename = "";
+		file = null;
 		IsValid = false;
 		SetNumCylinders(0);
 	}
@@ -440,7 +440,7 @@ public class SCLDiskFile extends FloppyDisk {
 	public static void main(String[] args) {
 		SCLDiskFile tdf;
 		try {
-			tdf = new SCLDiskFile("/home/graham/tmp/bj2.scl");
+			tdf = new SCLDiskFile(new File("/home/graham/tmp/bj2.scl"));
 			System.out.println(tdf);
 		} catch (IOException | BadDiskFileException e) {
 			e.printStackTrace();
@@ -455,8 +455,8 @@ public class SCLDiskFile extends FloppyDisk {
 	 * @param filename
 	 * @throws IOException 
 	 */
-	public void CreateBlankSCLDisk(String filename) throws IOException {
-		FileOutputStream NewFile = new FileOutputStream(filename);
+	public void CreateBlankSCLDisk(File newfile) throws IOException {
+		FileOutputStream NewFile = new FileOutputStream(newfile);
 		try {
 			NewFile.write(Signature.getBytes());
 			byte numfiles[] = new byte[1];
@@ -471,9 +471,9 @@ public class SCLDiskFile extends FloppyDisk {
 		/*
 		 *  Load the newly created file.
 		 */
-		inFile = new RandomAccessFile(filename, "rw");
-		this.filename = filename;
-		FileSize = new File(filename).length();
+		inFile = new RandomAccessFile(newfile, "rw");
+		this.file = newfile;
+		FileSize = file.length();
 		IsValid = false;
 		BackupMade = false;
 		ParseDisk();

@@ -21,7 +21,7 @@ public class RS_IDEFile implements HardDisk {
 	// File handle
 	private RandomAccessFile inFile = null;
 	// filename of the currently open file
-	public String filename = "";
+	public File file;
 	// default sector size
 	public int SectorSize = 512;
 	// disk size in bytes
@@ -37,12 +37,12 @@ public class RS_IDEFile implements HardDisk {
 	 */
 	@Override
 	public String GetFilename() {
-		return (filename);
+		return (file.getAbsolutePath());
 	}
 
 	@Override
 	public void SetFilename(String filename) {
-		this.filename = filename;
+		this.file = new File(filename);
 	}
 
 	/**
@@ -118,10 +118,10 @@ public class RS_IDEFile implements HardDisk {
 	 * @param filename
 	 * @throws IOException
 	 */
-	public RS_IDEFile(String filename) throws IOException {
-		inFile = new RandomAccessFile(filename, "rw");
-		this.filename = filename;
-		FileSize = new File(filename).length();
+	public RS_IDEFile(File file) throws IOException {
+		inFile = new RandomAccessFile(file, "rw");
+		this.file = file;
+		FileSize = file.length();
 		ParseDiskInfo();
 	}
 
@@ -180,7 +180,7 @@ public class RS_IDEFile implements HardDisk {
 	 */
 	@Override
 	public String toString() {
-		String result = "Filename: " + filename;
+		String result = "Filename: " + file.getAbsolutePath();
 		result = result + "\nLogical sectors: " + GetNumLogicalSectors();
 		result = result + "\nCylinders: " + NumCylinders;
 		result = result + "\nHeads: " + NumHeads;
@@ -202,7 +202,7 @@ public class RS_IDEFile implements HardDisk {
 	public long GetNumLogicalSectors() {
 		long filesize = 0;
 		try {
-			filesize = Files.size(Paths.get(filename));
+			filesize = Files.size(Paths.get(file.getAbsolutePath()));
 			filesize = filesize - GetHDDataOffset();
 		} catch (IOException e) {
 			System.out.println("Failed to get filesize. " + e.getMessage());
@@ -220,7 +220,7 @@ public class RS_IDEFile implements HardDisk {
 			try {
 				inFile.close();
 			} catch (IOException e) {
-				System.out.println("Failed to close file " + filename + " with error " + e.getMessage());
+				System.out.println("Failed to close file " + file.getName() + " with error " + e.getMessage());
 				e.printStackTrace();
 			}
 			inFile = null;
@@ -254,7 +254,7 @@ public class RS_IDEFile implements HardDisk {
 	public static void main(String[] args) {
 		RS_IDEFile h;
 		try {
-			h = new RS_IDEFile("/data1/IDEDOS/Workbench2.3_4Gb_8Bits.hdf");
+			h = new RS_IDEFile(new File("/data1/IDEDOS/Workbench2.3_4Gb_8Bits.hdf"));
 			System.out.println(h);
 			h.close();
 		} catch (FileNotFoundException e) {

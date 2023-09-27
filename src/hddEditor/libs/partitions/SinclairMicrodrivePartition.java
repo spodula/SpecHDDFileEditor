@@ -44,7 +44,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		try {
 //			tdf = new MDFMicrodriveFile("/home/graham/rothi.mdr");
 //			tdf = new MDFMicrodriveFile("/home/graham/DEMO.MDR");
-			tdf = new MDFMicrodriveFile("/home/graham/demo.mdr");
+			tdf = new MDFMicrodriveFile(new File("/home/graham/demo.mdr"));
 			SinclairMicrodrivePartition trp = new SinclairMicrodrivePartition(0, tdf, new byte[64], 1, false);
 			System.out.println(tdf);
 //			trp.Files[0].RenameMicrodriveFile("Test2", tdf);

@@ -13,22 +13,22 @@ import hddEditor.libs.disks.FDD.BadDiskFileException;
 public class MDFMicrodriveFile implements Disk {
 	protected RandomAccessFile inFile;
 	// filename of the currently open file
-	public String filename;
+	public File file;
 	// disk size in bytes
 	public long FileSize;
 
 	public MicrodriveSector Sectors[];
 
-	public MDFMicrodriveFile(String filename) throws IOException, BadDiskFileException {
-		inFile = new RandomAccessFile(filename, "rw");
-		this.filename = filename;
-		FileSize = new File(filename).length();
+	public MDFMicrodriveFile(File file) throws IOException, BadDiskFileException {
+		inFile = new RandomAccessFile(file, "rw");
+		this.file = file;
+		FileSize = file.length();
 		ParseMDFFile();
 	}
 
 	public MDFMicrodriveFile() {
 		inFile = null;
-		this.filename = "";
+		this.file = null;
 		FileSize = 0;
 	}
 
@@ -57,12 +57,12 @@ public class MDFMicrodriveFile implements Disk {
 
 	@Override
 	public String GetFilename() {
-		return (filename);
+		return (file.getAbsolutePath());
 	}
 
 	@Override
 	public void SetFilename(String filename) {
-		this.filename = filename;
+		this.file = new File(filename);
 	}
 
 	@Override
@@ -130,7 +130,7 @@ public class MDFMicrodriveFile implements Disk {
 			try {
 				inFile.close();
 			} catch (IOException e) {
-				System.out.println("Failed to close file " + filename + " with error " + e.getMessage());
+				System.out.println("Failed to close file " + file.getName() + " with error " + e.getMessage());
 				e.printStackTrace();
 			}
 			inFile = null;
@@ -360,7 +360,7 @@ public class MDFMicrodriveFile implements Disk {
 			MDFMicrodriveFile mdt = new MDFMicrodriveFile();
 			if (mdt.IsMyFileType(new File(filename))) {
 				System.out.println("File is a valid microdrive file.");
-				mdt = new MDFMicrodriveFile(filename);
+				mdt = new MDFMicrodriveFile(new File(filename));
 				System.out.println(mdt);
 			} else {
 				System.out.println("File is not a valid microdrive file.");
@@ -378,11 +378,10 @@ public class MDFMicrodriveFile implements Disk {
 	 * @param title
 	 * @throws IOException
 	 */
-	public void CreateBlankMicrodriveCart(String Filename, String VolumeName) throws IOException {
+	public void CreateBlankMicrodriveCart(File file, String VolumeName) throws IOException {
 		// b5 to 01
-		filename = Filename;
 		// Create a file with lots of blank sectors.
-		FileOutputStream NewFile = new FileOutputStream(Filename);
+		FileOutputStream NewFile = new FileOutputStream(file);
 		try {
 			for (int SectorNum = 0xb5; SectorNum > 0; SectorNum--) {
 				byte SectorData[] = new byte[0x21f];
@@ -403,8 +402,9 @@ public class MDFMicrodriveFile implements Disk {
 			NewFile = null;
 		}
 		// Load the newly created file.
-		inFile = new RandomAccessFile(filename, "rw");
-		FileSize = new File(filename).length();
+		this.file = file;
+		inFile = new RandomAccessFile(file, "rw");
+		FileSize = file.length();
 		ParseMDFFile();
 	}
 

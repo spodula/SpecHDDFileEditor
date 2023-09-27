@@ -15,7 +15,7 @@ import hddEditor.libs.disks.FDD.BadDiskFileException;
 public class TAPFile implements Disk {
 	protected RandomAccessFile inFile;
 	// filename of the currently open file
-	public String filename;
+	public File file;
 	// Storage for the Tape blocks
 	public TAPBlock Blocks[];
 
@@ -176,13 +176,12 @@ public class TAPFile implements Disk {
 	 * @throws IOException
 	 * @throws BadDiskFileException
 	 */
-	public TAPFile(String filename) throws IOException, BadDiskFileException {
-		File fl = new File(filename);
-		if (!fl.exists()) {
-			throw new BadDiskFileException("File " + filename + " does not exist.");
+	public TAPFile(File file) throws IOException, BadDiskFileException {
+		if (!file.exists()) {
+			throw new BadDiskFileException("File " + file.getAbsolutePath() + " does not exist.");
 		}
-		inFile = new RandomAccessFile(fl, "rw");
-		this.filename = filename;
+		inFile = new RandomAccessFile(file, "rw");
+		this.file = file;
 		ParseTAPFile();
 	}
 
@@ -191,7 +190,7 @@ public class TAPFile implements Disk {
 	 */
 	public TAPFile() {
 		inFile = null;
-		this.filename = "";
+		this.file = null;
 	}
 
 	/**
@@ -207,7 +206,7 @@ public class TAPFile implements Disk {
 	 */
 	@Override
 	public String GetFilename() {
-		return (filename);
+		return (file.getAbsolutePath());
 	}
 
 	/**
@@ -215,7 +214,7 @@ public class TAPFile implements Disk {
 	 */
 	@Override
 	public void SetFilename(String filename) {
-		this.filename = filename;
+		this.file = new File(filename);
 	}
 
 	/**
@@ -256,9 +255,7 @@ public class TAPFile implements Disk {
 	 * Get the file size.
 	 */
 	public long GetFileSize() {
-		File fl = new File(filename);
-
-		return (fl.length());
+		return (file.length());
 	}
 
 	@Override
@@ -311,7 +308,7 @@ public class TAPFile implements Disk {
 			try {
 				inFile.close();
 			} catch (IOException e) {
-				System.out.println("Failed to close file " + filename + " with error " + e.getMessage());
+				System.out.println("Failed to close file " + file.getName() + " with error " + e.getMessage());
 				e.printStackTrace();
 			}
 			inFile = null;
@@ -362,7 +359,7 @@ public class TAPFile implements Disk {
 	public Boolean IsMyFileType(File filename) throws IOException {
 		if (filename.getName().toUpperCase().endsWith("TAP")) {
 			try {
-				TAPFile mdt = new TAPFile(filename.getAbsolutePath());
+				TAPFile mdt = new TAPFile(filename);
 				mdt.close();
 				return true;
 			} catch (Exception E) {
@@ -428,7 +425,7 @@ public class TAPFile implements Disk {
 	 * Overridden TOString for debugging purposes.
 	 */
 	public String toString() {
-		String result = "Filename: " + filename + "\n";
+		String result = "Filename: " + file.getName() + "\n";
 		for (TAPBlock t : Blocks) {
 			result = result + "#" + t.blocknum + ": " + t + "\n";
 		}
@@ -496,17 +493,14 @@ public class TAPFile implements Disk {
 	 * @param Filename
 	 * @throws IOException
 	 */
-	public void CreateEmptyTapeFile(String Filename) throws IOException {
-		FileOutputStream NewFile = new FileOutputStream(Filename);
-		try {
-		} finally {
-			filename = Filename;
-			// Close, forcing flush
-			NewFile.close();
-			NewFile = null;
-		}
+	public void CreateEmptyTapeFile(File file) throws IOException {
+		FileOutputStream NewFile = new FileOutputStream(file);
+		// Close, forcing flush
+		NewFile.close();
+		NewFile = null;
 		// Load the newly created file.
-		inFile = new RandomAccessFile(Filename, "rw");
+		this.file = file;
+		inFile = new RandomAccessFile(file, "rw");
 		ParseTAPFile();
 	}
 
@@ -528,10 +522,10 @@ public class TAPFile implements Disk {
 	}
 
 	/**
-	 * move the given block up the list.
-	 * The DoRewrite flag is used to indicate the file should be re-written.
-	 * This is because for blocks that need to be kept together, EG, header/data pairs.
-	 * if you rewrite after the header, the data block becomes invalid and doesn't get moved.
+	 * move the given block up the list. The DoRewrite flag is used to indicate the
+	 * file should be re-written. This is because for blocks that need to be kept
+	 * together, EG, header/data pairs. if you rewrite after the header, the data
+	 * block becomes invalid and doesn't get moved.
 	 * 
 	 * @param block
 	 * @param DoRewrite
@@ -588,7 +582,7 @@ public class TAPFile implements Disk {
 			TAPFile mdt = new TAPFile();
 			if (mdt.IsMyFileType(new File(filename))) {
 				System.out.println("File is a valid TAP file.");
-				mdt = new TAPFile(filename);
+				mdt = new TAPFile(new File(filename));
 				System.out.println(mdt);
 //				mdt.MoveBlockDown(mdt.Blocks[0],true);
 //				System.out.println(mdt);

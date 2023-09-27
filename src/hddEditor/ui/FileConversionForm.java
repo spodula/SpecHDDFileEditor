@@ -238,12 +238,13 @@ public class FileConversionForm {
 	 * @return
 	 */
 	private Disk GetCorrectDiskFromFile(String Filename) {
+		File f = new File(Filename);
 		Disk result = null;
 		try {
-			if (new IDEDosDisk().IsMyFileType(new File(Filename))) {
-				result = new IDEDosDisk(Filename);
-			} else if (new RS_IDEDosDisk().IsMyFileType(new File(Filename))) {
-				result = new RS_IDEDosDisk(Filename);
+			if (new IDEDosDisk().IsMyFileType(f)) {
+				result = new IDEDosDisk(f);
+			} else if (new RS_IDEDosDisk().IsMyFileType(f)) {
+				result = new RS_IDEDosDisk(f);
 			} else {
 				MessageBox messageBox = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
 				messageBox.setMessage("File " + Filename + " is not a Raw HD image or RS HDF drive image.");

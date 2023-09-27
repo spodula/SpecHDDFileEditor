@@ -31,8 +31,8 @@ public class MGTDiskFile extends FloppyDisk {
 	 * @throws IOException
 	 * @throws BadDiskFileException
 	 */
-	public MGTDiskFile(String filename) throws IOException, BadDiskFileException {
-		super(filename);
+	public MGTDiskFile(File file) throws IOException, BadDiskFileException {
+		super(file);
 		IsValid = false;
 		ParseDisk();
 	}
@@ -117,7 +117,7 @@ public class MGTDiskFile extends FloppyDisk {
 	 */
 	public MGTDiskFile() {
 		inFile = null;
-		filename = "";
+		file = null;
 		IsValid = false;
 		SetNumCylinders(0);
 	}
@@ -131,7 +131,7 @@ public class MGTDiskFile extends FloppyDisk {
 		String filename = "/home/graham/Retro/mgt/Artist2.mgt";
 		MGTDiskFile mdf;
 		try {
-			mdf = new MGTDiskFile(filename);
+			mdf = new MGTDiskFile(new File(filename));
 			try {
 				if (mdf.IsMyFileType(new File(filename))) {
 					System.out.println("File is MGT");
@@ -309,8 +309,8 @@ public class MGTDiskFile extends FloppyDisk {
 		 * Load the newly created file.
 		 */
 		inFile = new RandomAccessFile(Filename, "rw");
-		this.filename = Filename;
-		FileSize = new File(Filename).length();
+		this.file = new File(Filename);
+		FileSize = file.length();
 		IsValid = false;
 		ParseDisk();
 	}

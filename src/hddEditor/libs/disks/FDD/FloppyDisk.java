@@ -10,7 +10,7 @@ import hddEditor.libs.disks.Disk;
 public class FloppyDisk implements Disk {
 	protected RandomAccessFile inFile;
 	// filename of the currently open file
-	public String filename;
+	public File file;
 	// default sector size
 	public int SectorSize;
 	// disk size in bytes
@@ -33,10 +33,10 @@ public class FloppyDisk implements Disk {
 	 * @throws IOException
 	 * @throws BadDiskFileException
 	 */
-	public FloppyDisk(String filename) throws IOException, BadDiskFileException {
-		inFile = new RandomAccessFile(filename, "rw");
-		this.filename = filename;
-		FileSize = new File(filename).length();
+	public FloppyDisk(File file) throws IOException, BadDiskFileException {
+		inFile = new RandomAccessFile(file, "rw");
+		this.file = file;
+		FileSize = file.length();
 	}
 
 	/**
@@ -44,7 +44,7 @@ public class FloppyDisk implements Disk {
 	 */
 	public FloppyDisk() {
 		inFile = null;
-		this.filename = "";
+		this.file = null;
 		FileSize = 0;
 	}
 
@@ -53,12 +53,12 @@ public class FloppyDisk implements Disk {
 	 */
 	@Override
 	public String GetFilename() {
-		return (filename);
+		return (file.getAbsolutePath());
 	}
 
 	@Override
 	public void SetFilename(String filename) {
-		this.filename = filename;
+		this.file = new File(filename);
 	}
 
 	/**
@@ -135,7 +135,7 @@ public class FloppyDisk implements Disk {
 			try {
 				inFile.close();
 			} catch (IOException e) {
-				System.out.println("Failed to close file " + filename + " with error " + e.getMessage());
+				System.out.println("Failed to close file " + file.getName() + " with error " + e.getMessage());
 				e.printStackTrace();
 			}
 			inFile = null;
@@ -180,7 +180,7 @@ public class FloppyDisk implements Disk {
 	 */
 	@Override
 	public String toString() {
-		String result = "Filename: " + filename;
+		String result = "Filename: " + file.getAbsolutePath();
 		result = result + "\nLogical sectors: " + GetNumLogicalSectors();
 		result = result + "\nCylinders: " + NumCylinders;
 		result = result + "\nHeads: " + NumHeads;

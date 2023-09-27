@@ -1,5 +1,7 @@
 package hddEditor.ui;
 
+import java.io.File;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -306,7 +308,7 @@ public class FileNewFDDForm {
 		boolean result = false;
 		try {
 			MDFMicrodriveFile mdf = new MDFMicrodriveFile();
-			mdf.CreateBlankMicrodriveCart(filename, Label);
+			mdf.CreateBlankMicrodriveCart(new File(filename), Label);
 			result = true;
 		} catch (Exception E) {
 			System.out.println("Error creating cart:" + E.getMessage());
@@ -326,7 +328,7 @@ public class FileNewFDDForm {
 		boolean result = false;
 		try {
 			TAPFile tap = new TAPFile();
-			tap.CreateEmptyTapeFile(filename);
+			tap.CreateEmptyTapeFile(new File(filename));
 			result = true;
 		} catch (Exception E) {
 			System.out.println("Error creating tape:" + E.getMessage());
@@ -348,7 +350,7 @@ public class FileNewFDDForm {
 		boolean result = false;
 		try {
 			TrDosDiskFile trd = new TrDosDiskFile();
-			trd.CreateBlankTRDOSDisk(filename, tracks, heads, Label);
+			trd.CreateBlankTRDOSDisk(new File(filename), tracks, heads, Label);
 			result = true;
 		} catch (Exception E) {
 			System.out.println("Error creating Compressed TR-DOS disk:" + E.getMessage());
@@ -369,7 +371,7 @@ public class FileNewFDDForm {
 		boolean result = false;
 		try {
 			SCLDiskFile scl = new SCLDiskFile();
-			scl.CreateBlankSCLDisk(filename);
+			scl.CreateBlankSCLDisk(new File(filename));
 			result = true;
 		} catch (Exception E) {
 			System.out.println("Error creating Compressed TR-DOS disk:" + E.getMessage());
@@ -390,7 +392,7 @@ public class FileNewFDDForm {
 		boolean result = false;
 		try {
 			AMSDiskFile ams = new AMSDiskFile();
-			ams.CreateBlankAMSDisk(filename, IsExtended);
+			ams.CreateBlankAMSDisk(new File(filename), IsExtended);
 //			System.out.println(ams);
 			result = true;
 		} catch (Exception E) {

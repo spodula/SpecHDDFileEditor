@@ -1,5 +1,6 @@
 package hddEditor.libs.handlers;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -212,7 +213,7 @@ public class NonPartitionedDiskHandler extends OSHandler {
 	public static void main(String[] args) {
 		NonPartitionedDiskHandler h;
 		try {
-			Disk disk = new TrDosDiskFile("/home/graham/tmp/ufo.trd");
+			Disk disk = new TrDosDiskFile(new File("/home/graham/tmp/ufo.trd"));
 			h = new NonPartitionedDiskHandler(disk);
 			PLUS3DOSPartition p3d = (PLUS3DOSPartition) h.SystemPart.partitions[2];
 			System.out.println("---------------------");

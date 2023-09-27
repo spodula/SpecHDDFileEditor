@@ -28,15 +28,15 @@ public class TrDosDiskFile extends FloppyDisk {
 	public int TRDOSID = 0;
 	public String Disklabel = "";
 
-	public TrDosDiskFile(String filename) throws IOException, BadDiskFileException {
-		super(filename);
+	public TrDosDiskFile(File file) throws IOException, BadDiskFileException {
+		super(file);
 		IsValid = false;
 		ParseDisk();
 	}
 
 	public TrDosDiskFile() {
 		inFile = null;
-		filename = "";
+		file = null;
 		IsValid = false;
 		SetNumCylinders(0);
 	}
@@ -171,7 +171,7 @@ public class TrDosDiskFile extends FloppyDisk {
 	public static void main(String[] args) {
 		TrDosDiskFile tdf;
 		try {
-			tdf = new TrDosDiskFile("/home/graham/tmp/ufo.trd");
+			tdf = new TrDosDiskFile(new File("/home/graham/tmp/ufo.trd"));
 			System.out.println(tdf);
 		} catch (IOException | BadDiskFileException e) {
 			e.printStackTrace();
@@ -315,8 +315,8 @@ public class TrDosDiskFile extends FloppyDisk {
 	 * @param heads
 	 * @throws IOException
 	 */
-	public void CreateBlankTRDOSDisk(String filename, int cyls, int heads, String DiskLabel) throws IOException {
-		FileOutputStream NewFile = new FileOutputStream(filename);
+	public void CreateBlankTRDOSDisk(File file, int cyls, int heads, String DiskLabel) throws IOException {
+		FileOutputStream NewFile = new FileOutputStream(file);
 		try {
 		    /*
 		     * Create and write the first track (Blank directory entries + disk descriptor
@@ -378,9 +378,9 @@ public class TrDosDiskFile extends FloppyDisk {
 		/*
 		 *  Load the newly created file.
 		 */
-		inFile = new RandomAccessFile(filename, "rw");
-		this.filename = filename;
-		FileSize = new File(filename).length();
+		this.file = file;
+		inFile = new RandomAccessFile(this.file, "rw");
+		FileSize = file.length();
 		IsValid = false;
 		ParseDisk();
 	}

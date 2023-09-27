@@ -287,8 +287,10 @@ public class FileNewHDDForm {
 			}
 	}
 
+	//TODO: Move DoCreateFile from FileNewHDDForm to appropriate disk objects.
 	/**
 	 * Actually create the file.
+	 * NOTE: Most of this wants moving to the Disk objects.
 	 * 
 	 * @param IsTargetHDF   - TRUE = HDF, FALSE = Raw IMG
 	 * @param IsTarget8Bit  - TRUE = 8 bit, FALSE = 16 bit 

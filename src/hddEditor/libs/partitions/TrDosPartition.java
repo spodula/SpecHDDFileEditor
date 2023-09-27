@@ -152,7 +152,7 @@ public class TrDosPartition extends IDEDosPartition {
 	public static void main(String[] args) {
 		TrDosDiskFile tdf;
 		try {
-			tdf = new TrDosDiskFile("/home/graham/tmp/ufo.trd");
+			tdf = new TrDosDiskFile(new File("/home/graham/tmp/ufo.trd"));
 			TrDosPartition trp = new TrDosPartition(0, tdf, new byte[64], 1, false);
 			System.out.println(trp);
 		} catch (IOException | BadDiskFileException e) {
