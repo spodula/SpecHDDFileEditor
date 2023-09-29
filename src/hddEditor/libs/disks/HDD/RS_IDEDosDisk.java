@@ -1,5 +1,7 @@
 package hddEditor.libs.disks.HDD;
 
+import java.io.File;
+
 /**
  * This is a wrapper around an IDE dos raw disk, which extracts the disk parameters
  * from the IDEDOS partition.  it will also transparently handle 8/16 bit access.
@@ -37,15 +39,15 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 	 * @param filename
 	 * @throws IOException
 	 */
-	public RS_IDEDosDisk(String filename) throws IOException {
-		super(filename);
+	public RS_IDEDosDisk(File file) throws IOException {
+		super(file);
 		parseDiskParameters();
 	}
 
 	public RS_IDEDosDisk() {
 		super();
 	}
-	
+
 	/**
 	 * Extract the disk parameters from the IDEDOS partition. Including disk size,
 	 * 8/16 bit access and sector size.
@@ -57,10 +59,10 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 		 * CHeck to see if we are only using the first 8 bytes of a word.
 		 */
 		byte FirstSector[] = GetBytesStartingFromSector(0, 512);
-	
+
 		String s = new String(FirstSector, StandardCharsets.UTF_8);
 		if (s.startsWith(IDEDOSHEADER)) {
-			//for HDF files, sectors can come pre-halved. 
+			// for HDF files, sectors can come pre-halved.
 			DataHalved = IsSectorHalved();
 			if (DataHalved) {
 				SectorSize = 256;
@@ -85,7 +87,7 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 	/**
 	 * ToString overridden to show local flags
 	 * 
-	 * @return 
+	 * @return
 	 */
 	@Override
 	public String toString() {
@@ -102,12 +104,12 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 	public static void main(String[] args) {
 		RS_IDEDosDisk h;
 		try {
-			//h = new RS_IDEDosDisk("/data1/IDEDOS/Workbench2.3_4Gb_8Bits.hdf");
-			h = new RS_IDEDosDisk("/home/graham/2gtest.hdf");
+			// h = new RS_IDEDosDisk("/data1/IDEDOS/Workbench2.3_4Gb_8Bits.hdf");
+			h = new RS_IDEDosDisk(new File("/home/graham/newdisk.hdf"));
 			System.out.println(h);
-			//First sector:
-			byte data[] = h.GetBytesStartingFromSector(0,512);
-			System.out.println(GeneralUtils.HexDump(data, 0, 512,0));
+			// First sector:
+			byte data[] = h.GetBytesStartingFromSector(0, 512);
+			System.out.println(GeneralUtils.HexDump(data, 0, 512, 0));
 			h.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -120,18 +122,18 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 	 * Get the specified number of bytes beginning at the given logical sector.
 	 * 
 	 * @param SectorNum
-	 * @param sz 
-	 * @return 
+	 * @param sz
+	 * @return
 	 */
 	@Override
 	public byte[] GetBytesStartingFromSector(long SectorNum, long sz) throws IOException {
 		boolean NeedTohalf = !IsSectorHalved() && DataHalved;
-		
+
 		if (!NeedTohalf) {
 			byte bytes[] = super.GetBytesStartingFromSector(SectorNum, sz);
 			return (bytes);
 		} else {
-			byte rawsector[] = super.GetBytesStartingFromSector(SectorNum*2, sz * 2);
+			byte rawsector[] = super.GetBytesStartingFromSector(SectorNum * 2, sz * 2);
 			byte HalvedSector[] = HalfSector(rawsector);
 
 			return (HalvedSector);
@@ -151,10 +153,10 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 			super.SetLogicalBlockFromSector(SectorNum, result);
 		} else {
 			byte[] doubledData = DoubleSector(result);
-			super.SetLogicalBlockFromSector(SectorNum*2, doubledData);
+			super.SetLogicalBlockFromSector(SectorNum * 2, doubledData);
 		}
 	}
-	
+
 	/**
 	 * process the sector to extract the 8 bit data.
 	 * 
@@ -188,6 +190,5 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 
 		return (result);
 	}
-
 
 }

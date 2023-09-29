@@ -3,6 +3,7 @@ package hddEditor.libs.handlers;
  * base object of the OS handler. 
  */
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -45,7 +46,7 @@ public class OSHandler {
 	public static void main(String[] args) {
 		OSHandler h;
 		try {
-			Disk disk = new IDEDosDisk("/data1/idedos.dsk");
+			Disk disk = new IDEDosDisk(new File("/data1/idedos.dsk"));
 			h = new OSHandler(disk);
 			System.out.println(h);
 			disk.close();

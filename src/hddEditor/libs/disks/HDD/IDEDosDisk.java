@@ -38,8 +38,8 @@ public class IDEDosDisk extends RawHDDFile {
 	 * @param filename
 	 * @throws IOException
 	 */
-	public IDEDosDisk(String filename) throws IOException {
-		super(filename);
+	public IDEDosDisk(File file) throws IOException {
+		super(file);
 		parseDiskParameters();
 	}
 
@@ -129,7 +129,7 @@ public class IDEDosDisk extends RawHDDFile {
 	public static void main(String[] args) {
 		RawHDDFile h;
 		try {
-			h = new IDEDosDisk("/data1/IDEDOS/2gdeletedpart.img");
+			h = new IDEDosDisk(new File ("/data1/IDEDOS/2gdeletedpart.img"));
 			System.out.println(h);
 			h.close();
 		} catch (FileNotFoundException e) {

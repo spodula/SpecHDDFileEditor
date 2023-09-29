@@ -79,6 +79,12 @@ public class Z80SnapshotRenderer extends RamDump {
 	private String[] snaVars = { "A", "F", "BC", "HL", "PC", "SP", "I", "R", "FLAGS", "DE", "BC'", "DE'", "HL'", "A'",
 			"F'", "IY", "IX", "Int Status", "IFF2", "FLAGS2" };
 	private int[] snaLen = { 1, 1, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 1, 1, 2, 2, 1, 1, 1 };
+
+	String HWv2[] = { "48K", "48K + IF1", "SAMRAM", "128K", "128K + IF1", "-", "-", "-", "-", "-", "-", "-",
+			"-", "-", "-" };
+	String HWv3[] = { "48K", "48K + IF1", "SAMRAM", "48K + MGT", "128K", "128K + IF1", "128K + MGT", "+3", "+3",
+			"Pentagon 128", "Scorpion 256", "Didaktik-Kompakt", "+2", "+2A", "TC2048", "TC2068" };
+
 	
 	public void Render(Composite TargetPage, byte[] data, int loadAddr, String filename) {
 		labels = new ArrayList<Label>();
@@ -97,8 +103,8 @@ public class Z80SnapshotRenderer extends RamDump {
 			if (data[30] == 23)
 				version = 2;
 
-			// 128k snapshots are supported in V2 and V3 snapshots, so figure out which it
-			// is...
+			// 128k snapshots are supported in V2 and V3 snapshots, 
+			// so figure out which it is...
 			if (version == 2) {
 				is128K = (data[34] > 2);
 			} else {
@@ -234,10 +240,6 @@ public class Z80SnapshotRenderer extends RamDump {
 
 			boolean IsModified = ((data[37] & 0xff) & 0x80) != 0;
 
-			String HWv2[] = { "48K", "48K + IF1", "SAMRAM", "128K", "128K + IF1", "-", "-", "-", "-", "-", "-", "-",
-					"-", "-", "-" };
-			String HWv3[] = { "48K", "48K + IF1", "SAMRAM", "48K + MGT", "128K", "128K + IF1", "128K + MGT", "+3", "+3",
-					"Pentagon 128", "Scorpion 256", "Didaktik-Kompakt", "+2", "+2A", "TC2048", "TC2068" };
 			int hwMode = data[34] & 0x0f;
 			String shwMode = HWv3[hwMode];
 			if (version == 2) {

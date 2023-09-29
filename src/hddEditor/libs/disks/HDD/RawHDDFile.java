@@ -21,16 +21,16 @@ public class RawHDDFile implements HardDisk {
 	// File handle 
 	private RandomAccessFile inFile = null;
 	// filename of the currently open file
-	public String filename = "";
+	protected File file;
 	// default sector size
-	public int SectorSize = 512;
+	protected int SectorSize = 512;
 	// disk size in bytes
-	public long FileSize = 0;
+	protected long FileSize = 0;
 
 	// CHS information for inheriting objects to populate
-	public int NumCylinders = 0;
-	public int NumHeads = 0;
-	public int NumSectors = 0;
+	protected int NumCylinders = 0;
+	protected int NumHeads = 0;
+	protected int NumSectors = 0;
 
 	// Simple one sector cache
 	private byte[] cache;
@@ -40,10 +40,10 @@ public class RawHDDFile implements HardDisk {
 	 * Get and set the filename
 	 */
 	public String GetFilename() {
-		return (filename);
+		return (file.getAbsolutePath());
 	}
 	public void SetFilename(String filename) {
-		this.filename = filename;
+		this.file = new File(filename);
 	}
 
 	/**
@@ -99,10 +99,10 @@ public class RawHDDFile implements HardDisk {
 	 * @param filename
 	 * @throws FileNotFoundException
 	 */
-	public RawHDDFile(String filename) throws FileNotFoundException {
-		inFile = new RandomAccessFile(filename, "rw");
-		this.filename = filename;
-		FileSize = new File(filename).length();
+	public RawHDDFile(File file) throws FileNotFoundException {
+		inFile = new RandomAccessFile(file, "rw");
+		this.file = file;
+		FileSize = file.length();
 	}
 	
 	/**
@@ -117,7 +117,7 @@ public class RawHDDFile implements HardDisk {
 	 */
 	@Override
 	public String toString() {
-		String result = "Filename: " + filename;
+		String result = "Filename: " + file.getAbsolutePath();
 		result = result + "\nLogical sectors: " + GetNumLogicalSectors();
 		result = result + "\nCylinders: " + NumCylinders;
 		result = result + "\nHeads: " + NumHeads;
@@ -136,7 +136,7 @@ public class RawHDDFile implements HardDisk {
 	public long GetNumLogicalSectors() {
 		long filesize = 0;
 		try {
-			filesize = Files.size(Paths.get(filename));
+			filesize = Files.size(Paths.get(file.getAbsolutePath()));
 		} catch (IOException e) {
 			System.out.println("Failed to get filesize. " + e.getMessage());
 		}
@@ -152,7 +152,7 @@ public class RawHDDFile implements HardDisk {
 			try {
 				inFile.close();
 			} catch (IOException e) {
-				System.out.println("Failed to close file " + filename + " with error " + e.getMessage());
+				System.out.println("Failed to close file " + file.getName() + " with error " + e.getMessage());
 				e.printStackTrace();
 			}
 			inFile = null;
@@ -176,7 +176,7 @@ public class RawHDDFile implements HardDisk {
 	public static void main(String[] args) {
 		RawHDDFile h;
 		try {
-			h = new RawHDDFile("/data1/idedos.dsk");
+			h = new RawHDDFile(new File("/data1/idedos.dsk"));
 			System.out.println(h);
 			h.close();
 		} catch (FileNotFoundException e) {

@@ -121,7 +121,7 @@ public class RamDump implements Renderer {
 		Font boldFont = new Font(lbl.getShell().getDisplay(),
 				new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 
-		if (IY == 0x5c3a) {
+//		if (IY == 0x5c3a) {
 			// check for BASIC.
 			int diff = 0x4000;
 
@@ -138,7 +138,7 @@ public class RamDump implements Renderer {
 				Renderers.add(BR);
 				BR.AddBasicFile(TargetPage, BasicData, BasicData.length, VARS - PROG);
 			}
-		}
+	//	}
 
 		if (is128K) {
 			lbl.setText("Paged in memory (5B00-7FFF)=bank 5, (8000-BFFF)=bank 2, (C000-FFFF)=bank " + i128BankOrder[2]);

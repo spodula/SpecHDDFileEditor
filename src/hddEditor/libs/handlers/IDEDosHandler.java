@@ -1,5 +1,7 @@
 package hddEditor.libs.handlers;
 
+import java.io.File;
+
 /**
  * This object parses the IDEDOS partitions.
  * 
@@ -100,7 +102,7 @@ public class IDEDosHandler extends OSHandler {
 	public static void main(String[] args) {
 		IDEDosHandler h;
 		try {
-			IDEDosDisk disk = new IDEDosDisk("/data1/IDEDOS/2gtest.img");
+			IDEDosDisk disk = new IDEDosDisk(new File("/data1/IDEDOS/2gtest.img"));
 			h = new IDEDosHandler(disk);
 			PLUS3DOSPartition p3d = (PLUS3DOSPartition) h.SystemPart.partitions[1];
 			System.out.println("---------------------");

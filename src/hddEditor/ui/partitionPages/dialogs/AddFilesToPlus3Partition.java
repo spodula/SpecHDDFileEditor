@@ -659,13 +659,13 @@ public class AddFilesToPlus3Partition {
 	 * Add BINARY file(s) as a CODE file.
 	 */
 	protected void DoAddBinaryFiles() {
-		
+
 		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
 		fd.setText("Open CODE file");
 		String[] filterExt = { "*" };
 		fd.setFilterExtensions(filterExt);
-    	if ((fd.open() != null) && (fd.getFileNames().length > 0)) { 
-		/*
+		if ((fd.open() != null) && (fd.getFileNames().length > 0)) {
+			/*
 			 * Iterate all the files selected.
 			 */
 			for (String filename : fd.getFileNames()) {
