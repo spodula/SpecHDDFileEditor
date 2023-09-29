@@ -24,5 +24,4 @@ public class FreePartition extends IDEDosPartition {
 	public FreePartition(int tag, Disk RawDisk, byte[] RawPartition,int DirentNum, boolean Initialise) {
 		super(tag, RawDisk, RawPartition,DirentNum,Initialise);
 	}
-
 }

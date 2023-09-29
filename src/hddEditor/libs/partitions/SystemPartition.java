@@ -669,5 +669,5 @@ public class SystemPartition extends IDEDosPartition {
 		}
 		return (results.toArray(new FileEntry[0]));
 	}
-
+	
 }

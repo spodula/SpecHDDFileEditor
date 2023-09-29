@@ -529,6 +529,14 @@ public class IDEDosPartition {
 	}
 
 
+	/**
+	 * Get all the files on this partition.
+	 * 
+	 * @return
+	 */
+	public FileEntry[] GetFileList() {
+		return null;
+	}
 	
 
 }
