@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Text;
 import hddEditor.libs.Speccy;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.Renderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.SNARenderer;
+import hddEditor.ui.partitionPages.FileRenderers.RawRender.SPRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.BinaryRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.RamDump;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.ScreenRenderer;
@@ -40,7 +41,7 @@ public class CodeRenderer extends FileRenderer {
 	private Vector<Renderer> Renderers = null;
 
 	// Rendering options
-	private String[] CODETYPES = { "Binary", "Screen", "Assembly", "SNA file", "Z80 file","48k Ram Dump" };
+	private String[] CODETYPES = { "Binary", "Screen", "Assembly", "SNA file", "Z80 file","48k Ram Dump", ".SP file" };
 
 	/**
 	 * 
@@ -222,6 +223,9 @@ public class CodeRenderer extends FileRenderer {
 		if (Filename.toUpperCase().endsWith(".Z80")) {
 			CodeTypeDropDown.setText(CODETYPES[4]);
 		}
+		if (Filename.toUpperCase().trim().endsWith(".SP")) {
+			CodeTypeDropDown.setText(CODETYPES[6]);
+		}
 
 		CodeTypeComboChanged(data, loadAddr);
 
@@ -274,6 +278,10 @@ public class CodeRenderer extends FileRenderer {
 				renderer.Render(MainPage, data, loadAddr, filename);
 			} else if (s.equals(CODETYPES[5])) {
 				RamDump renderer = new RamDump();
+				Renderers.add(renderer);
+				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a , new int [0], filename);
+			} else if (s.equals(CODETYPES[6])) {
+				RamDump renderer = new SPRenderer();
 				Renderers.add(renderer);
 				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a , new int [0], filename);
 			} else {
