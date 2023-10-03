@@ -247,8 +247,8 @@ public class SpectrumFileEditDialog {
 	 * CLose the form.
 	 */
 	public void close() {
-		shell.close();
 		if (!shell.isDisposed()) {
+			shell.close();
 			shell.dispose();
 		}
 	}
