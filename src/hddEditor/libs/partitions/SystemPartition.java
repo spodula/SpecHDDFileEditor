@@ -458,7 +458,7 @@ public class SystemPartition extends IDEDosPartition {
 				IDEDosPartition FoundPartiton = null;
 				for (IDEDosPartition part : partitions) {
 					if (part.GetPartType() == PLUSIDEDOS.PARTITION_FREE) {
-						int PartitonSizeMb = part.GetSizeK() / 1024;
+						long PartitonSizeMb = part.GetSizeK() / 1024;
 						if (PartitonSizeMb >= Partsize) {
 							FoundPartiton = part;
 							if (FoundPartiton.DirentNum == partitions.length - 1) {
@@ -481,17 +481,17 @@ public class SystemPartition extends IDEDosPartition {
 					// defrag the disk.
 					if (!IsLastFreeSpacePartition) {
 						FoundPartiton.SetPartType(PartType);
-						int PartitonSizeMb = FoundPartiton.GetSizeK() / 1024;
+						long PartitonSizeMb = FoundPartiton.GetSizeK() / 1024;
 						if (PartitonSizeMb != Partsize) {
 							PartitonSizeMb = Partsize;
-							int NumSectors = PartitonSizeMb * 1024 * 1024 / CurrentDisk.GetSectorSize();
+							long NumSectors = PartitonSizeMb * 1024 * 1024 / CurrentDisk.GetSectorSize();
 
-							int NumCyls = NumSectors / CurrentDisk.GetNumSectors();
+							long NumCyls = NumSectors / CurrentDisk.GetNumSectors();
 							if (NumSectors % CurrentDisk.GetNumSectors() != 0) {
 								NumCyls++;
 							}
-							int Tracks = NumCyls / CurrentDisk.GetNumHeads();
-							int Heads = NumCyls % CurrentDisk.GetNumHeads();
+							int Tracks = (int) (NumCyls / CurrentDisk.GetNumHeads());
+							int Heads = (int) (NumCyls % CurrentDisk.GetNumHeads());
 
 							Heads = Heads + FoundPartiton.GetStartHead();
 							if (Heads >= CurrentDisk.GetNumHeads()) {
@@ -660,7 +660,7 @@ public class SystemPartition extends IDEDosPartition {
 		ArrayList<FileEntry> results = new ArrayList<FileEntry>();
 		for (IDEDosPartition idep : partitions) {
 			if (idep.GetPartType() != PLUSIDEDOS.PARTITION_UNUSED) {
-				FileEntry fe = new DummyFileEntry(idep.GetName(), idep.GetSizeK() * 1024,
+				FileEntry fe = new DummyFileEntry(idep.GetName(), (int)( idep.GetSizeK() * 1024),
 						PLUSIDEDOS.GetTypeAsString(idep.GetPartType()));
 				if (fe.DoesMatch(wildcard)) {
 					results.add(fe);

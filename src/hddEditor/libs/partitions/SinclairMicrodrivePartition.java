@@ -498,7 +498,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 * @return
 	 */
 	@Override
-	public int GetSizeK() {
+	public long GetSizeK() {
 		MDFMicrodriveFile mdf = (MDFMicrodriveFile) CurrentDisk;
 		int NumSectors = mdf.Sectors.length;
 		return ((int) NumSectors / 2);

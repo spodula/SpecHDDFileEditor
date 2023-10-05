@@ -273,8 +273,8 @@ public class IDEDosPartition {
 	 * 
 	 * @return
 	 */
-	public int GetSizeK() {
-		return ((int) GetEndSector() / 2);
+	public long GetSizeK() {
+		return (GetEndSector() / 2);
 	}
 
 	/**

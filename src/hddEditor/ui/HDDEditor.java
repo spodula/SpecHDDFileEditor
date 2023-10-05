@@ -365,7 +365,7 @@ public class HDDEditor {
 			}
 		} catch (IOException e) {
 			MessageBox messageBox = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-			messageBox.setMessage(e.getMessage());
+			messageBox.setMessage("Cannot load file.");
 			messageBox.setText(e.getMessage());
 			messageBox.open();
 			System.out.println("Loading failed. " + e.getMessage());
@@ -515,12 +515,11 @@ public class HDDEditor {
 			current = current + "                     ";
 			current = current.substring(0, 20).trim();
 		}
-		
 		fileImportForm = new FileImportForm(display, CurrentHandler);
-		
-		fileImportForm.Show(current);
-		fileImportForm = null;
-		// force a reload of the current partition.
-		ComboChanged();
+		try {
+			fileImportForm.Show(current);
+		} finally {
+			fileImportForm = null;
+		}
 	}
 }

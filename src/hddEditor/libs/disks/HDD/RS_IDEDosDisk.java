@@ -47,7 +47,8 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 	public RS_IDEDosDisk() {
 		super();
 	}
-
+	
+	
 	/**
 	 * Extract the disk parameters from the IDEDOS partition. Including disk size,
 	 * 8/16 bit access and sector size.

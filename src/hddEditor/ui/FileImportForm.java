@@ -246,7 +246,7 @@ public class FileImportForm {
 				if (part.GetPartType() != 0) {
 					String s = String.format("%-20s - %-16s %s", part.GetName(),
 							PLUSIDEDOS.GetTypeAsString(part.GetPartType()),
-							GeneralUtils.GetSizeAsString(part.GetSizeK() * 1024));
+							GeneralUtils.GetSizeAsString(((long) part.GetSizeK()) * (long) 1024));
 					al.add(s);
 				}
 			}

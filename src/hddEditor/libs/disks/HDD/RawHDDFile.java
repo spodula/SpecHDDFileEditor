@@ -15,10 +15,11 @@ import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.PLUSIDEDOS;
 
 public class RawHDDFile implements HardDisk {
-	// File handle 
+	// File handle
 	private RandomAccessFile inFile = null;
 	// filename of the currently open file
 	protected File file;
@@ -42,6 +43,7 @@ public class RawHDDFile implements HardDisk {
 	public String GetFilename() {
 		return (file.getAbsolutePath());
 	}
+
 	public void SetFilename(String filename) {
 		this.file = new File(filename);
 	}
@@ -52,6 +54,7 @@ public class RawHDDFile implements HardDisk {
 	public int GetSectorSize() {
 		return (SectorSize);
 	}
+
 	public void SetSectorSize(int sz) {
 		this.SectorSize = sz;
 	}
@@ -62,6 +65,7 @@ public class RawHDDFile implements HardDisk {
 	public int GetNumCylinders() {
 		return (NumCylinders);
 	}
+
 	public void SetNumCylinders(int sz) {
 		this.NumCylinders = sz;
 	}
@@ -79,6 +83,7 @@ public class RawHDDFile implements HardDisk {
 	public int GetNumHeads() {
 		return (NumHeads);
 	}
+
 	public void SetNumHeads(int sz) {
 		this.NumHeads = sz;
 	}
@@ -89,6 +94,7 @@ public class RawHDDFile implements HardDisk {
 	public int GetNumSectors() {
 		return (NumSectors);
 	}
+
 	public void SetNumSectors(int sz) {
 		this.NumSectors = sz;
 	}
@@ -104,7 +110,7 @@ public class RawHDDFile implements HardDisk {
 		this.file = file;
 		FileSize = file.length();
 	}
-	
+
 	/**
 	 * Constructor creating an unopened file object
 	 */
@@ -185,7 +191,7 @@ public class RawHDDFile implements HardDisk {
 	}
 
 	/**
-	 * Set data from the given logical sector with the specified data. 
+	 * Set data from the given logical sector with the specified data.
 	 * 
 	 * @param SectorNum
 	 * @param result
@@ -216,9 +222,9 @@ public class RawHDDFile implements HardDisk {
 			return (cache);
 		}
 
-		//Note, this will restrict length for files of 128Mb. 
-		long asz = Math.min(sz,1024*1024*128);
-		byte result[] = new byte[(int)asz];
+		// Note, this will restrict length for files of 128Mb.
+		long asz = Math.min(sz, 1024 * 1024 * 128);
+		byte result[] = new byte[(int) asz];
 		long location = SectorNum * SectorSize;
 
 		inFile.seek(location);
@@ -232,8 +238,8 @@ public class RawHDDFile implements HardDisk {
 	}
 
 	/**
-	 * Check to see if i can identify this file as one i can open...
-	 * At this level, always false. 
+	 * Check to see if i can identify this file as one i can open... At this level,
+	 * always false.
 	 * 
 	 * @param filename
 	 */
@@ -250,5 +256,21 @@ public class RawHDDFile implements HardDisk {
 		return PLUSIDEDOS.MEDIATYPE_HDD;
 	}
 
+	/**
+	 * Resize disk
+	 * @throws IOException 
+	 */
+	@Override
+	public void ResizeDisk(int NewCyls) throws IOException {
+		// TODO Auto-generated method stub
+		Long newsize = ((long) NewCyls) * ((long) (GetNumHeads() * GetNumSectors() * GetSectorSize()));
+		System.out.println(this.getClass().getName() + ": Resizing disk " + GetFilename() + " from " 
+				+ GetFileSize() + " (" +GeneralUtils.GetSizeAsString(GetFileSize())+") "
+				+ " to " 
+				+ String.valueOf(newsize) + " (" +GeneralUtils.GetSizeAsString(NewCyls)+") ");
+		inFile.setLength(newsize);
+		
+		SetNumCylinders(NewCyls);
+	}
 
 }

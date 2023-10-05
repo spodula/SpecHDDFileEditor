@@ -128,7 +128,7 @@ public class RS_IDEFile implements HardDisk {
 	public RS_IDEFile() {
 		super();
 	}
-
+	
 	/**
 	 * Parse the RS_IDE disk and check the header
 	 * 
@@ -345,4 +345,11 @@ public class RS_IDEFile implements HardDisk {
 		return PLUSIDEDOS.MEDIATYPE_HDD;
 	}
 
+	@Override
+	public void ResizeDisk(int NewCyls) throws IOException {
+		Long newsize = (((long) NewCyls) * ((long) (GetNumHeads() * GetNumSectors() * GetSectorSize()))) + (long) GetHDDataOffset();
+		System.out.println(this.getClass().getName() + ": Resizing disk " + GetFilename() + " from " + GetFileSize()
+				+ " to " + String.valueOf(newsize));
+		inFile.setLength(newsize);
+	}
 }

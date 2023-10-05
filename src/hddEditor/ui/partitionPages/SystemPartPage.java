@@ -19,11 +19,14 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -40,6 +43,7 @@ import hddEditor.ui.HDDEditor;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.NewPartitionDialog;
+import hddEditor.ui.partitionPages.dialogs.ShrinkDiskDialog;
 
 public class SystemPartPage extends GenericPage {
 	// Flag to block writing to the disk.
@@ -49,6 +53,7 @@ public class SystemPartPage extends GenericPage {
 	HexEditDialog HxEditDialog = null;
 	NewPartitionDialog NewPartDialog = null;
 	FileExportAllPartitionsForm ExportAllPartsForm = null;
+	ShrinkDiskDialog ShrinkDiskForm = null;
 
 	// Basic editor colour components.
 	Button becBright = null;
@@ -83,9 +88,7 @@ public class SystemPartPage extends GenericPage {
 	Button GotoPartitionButton = null;
 	Button NewPartitionButton = null;
 	Button DoExtractAllPartitionButton = null;
-	Button DoExtractAllPartitionButton2 = null;
-	Button DoExtractAllPartitionButton3 = null;
-	Button DoExtractAllPartitionButton4 = null;
+	Button ShrinkDisk = null;
 
 	// Partition table
 	Table PartitionTable = null;
@@ -159,8 +162,8 @@ public class SystemPartPage extends GenericPage {
 			RemoveComponents();
 			SystemPartition sp = (SystemPartition) partition;
 			int numUsedPartitions = 0;
-			int usedSpace = 0;
-			int freeSpace = 0;
+			long usedSpace = 0;
+			long freeSpace = 0;
 			for (IDEDosPartition idp : sp.partitions) {
 				if (idp.GetPartType() > 0) {
 					numUsedPartitions++;
@@ -429,9 +432,10 @@ public class SystemPartPage extends GenericPage {
 					widgetSelected(arg0);
 				}
 			});
-			DoExtractAllPartitionButton4 = button("Dump partitions");
-			DoExtractAllPartitionButton4.setLayoutData(gd);
-			DoExtractAllPartitionButton4.addSelectionListener(new SelectionListener() {
+			
+			DoExtractAllPartitionButton = button("Dump partitions");
+			DoExtractAllPartitionButton.setLayoutData(gd);
+			DoExtractAllPartitionButton.addSelectionListener(new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
 					DoExtractAllPartitions();
@@ -443,6 +447,20 @@ public class SystemPartPage extends GenericPage {
 				}
 			});
 
+			ShrinkDisk = button("Shrink disk");
+			ShrinkDisk.setLayoutData(gd);
+			ShrinkDisk.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					DoShrinkDisk();
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+			
 			NewPartitionButton.setEnabled(CanEditPartitions);
 			ParentComp.pack();
 		}
@@ -732,6 +750,27 @@ public class SystemPartPage extends GenericPage {
 		}
 		if (ExportAllPartsForm != null) {
 			ExportAllPartsForm.close();
+		}
+		if (ShrinkDiskForm != null) {
+			ShrinkDiskForm.close();
+		}
+	}
+	
+	/**
+	 * Do Shrink disk.
+	 */
+	protected void DoShrinkDisk() {
+		SystemPartition sp = (SystemPartition) partition;
+		boolean result = false;
+		ShrinkDiskForm = new ShrinkDiskDialog(ParentComp.getDisplay());
+		try {
+			result = ShrinkDiskForm.Show(sp);
+		} finally {
+			ShrinkDiskForm = null;
+		}
+		//Force a reload to make sure all parameters are up to date. 
+		if (result) {
+			RootPage.LoadFile(sp.CurrentDisk.GetFilename());
 		}
 	}
 }

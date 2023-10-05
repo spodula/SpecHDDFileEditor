@@ -322,8 +322,8 @@ public class TAPPartition extends IDEDosPartition {
 	 * @return
 	 */
 	@Override
-	public int GetSizeK() {
-		return ((int) (((TAPFile) CurrentDisk).GetFileSize() / 1024));
+	public long GetSizeK() {
+		return (((TAPFile) CurrentDisk).GetFileSize() / 1024);
 	}
 
 	/**

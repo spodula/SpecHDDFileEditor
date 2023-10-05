@@ -30,7 +30,7 @@ public class GeneralUtils {
 	 * 
 	 * @return
 	 */
-	public static String GetSizeAsString(int size) {
+	public static String GetSizeAsString(long size) {
 		if (size < 1024) {
 			return (String.format("%3d", size) + "b");
 		}
@@ -43,8 +43,12 @@ public class GeneralUtils {
 			return (String.format("%3d", size) + "Mb");
 		}
 		size = size / 1024;
-		return (String.format("%3d", size) + "Gb");
+		if (size < 1024) {
+			return (String.format("%3d", size) + "Gb");
+		}
 
+		size = size / 1024;
+		return (String.format("%3d", size) + "Tb");
 	}
 
 	/**
