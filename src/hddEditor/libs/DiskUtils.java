@@ -1,5 +1,4 @@
 package hddEditor.libs;
-//TODO: Shrink disk
 
 import java.io.File;
 import java.io.IOException;

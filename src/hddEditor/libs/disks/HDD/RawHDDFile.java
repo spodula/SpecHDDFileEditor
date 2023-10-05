@@ -262,7 +262,6 @@ public class RawHDDFile implements HardDisk {
 	 */
 	@Override
 	public void ResizeDisk(int NewCyls) throws IOException {
-		// TODO Auto-generated method stub
 		Long newsize = ((long) NewCyls) * ((long) (GetNumHeads() * GetNumSectors() * GetSectorSize()));
 		System.out.println(this.getClass().getName() + ": Resizing disk " + GetFilename() + " from " 
 				+ GetFileSize() + " (" +GeneralUtils.GetSizeAsString(GetFileSize())+") "

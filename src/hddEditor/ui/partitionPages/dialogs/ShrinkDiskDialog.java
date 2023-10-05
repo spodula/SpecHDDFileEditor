@@ -222,8 +222,7 @@ public class ShrinkDiskDialog {
 		ResizeImage();
 	}
 
-	// TODO: Need a better way of getting colours
-	private int sectionvalues[] = { 0xdddddd, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff, 0xddddfff,
+	private int sectionval[] = { 0xdddddd, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0x00ffff, 0xff00ff, 0xddddfff,
 			0x880000, 0x008800, 0x000088, 0x888800, 0x008888, 0x880088, 0x8888888, 0x440000, 0x004400, 0x000044,
 			0x444400, 0x004444, 0x440044, 0x4444444, 0xCC0000, 0x00CC00, 0x0000CC, 0xCCCC00, 0x00CCCC, 0xCC00CC,
 			0xCCCCCCC, 0xCC8800, 0x00CC88, 0x0088CC, 0xCCCC88, 0x88CCCC, 0xCC88CC };
@@ -241,7 +240,7 @@ public class ShrinkDiskDialog {
 		int col[] = new int[w];
 		// Preset all colours to "Not allocated"
 		for (int i = 0; i < w; i++) {
-			col[i] = sectionvalues[0];
+			col[i] = sectionval[0];
 		}
 
 		int currcol = 1;
@@ -252,7 +251,7 @@ public class ShrinkDiskDialog {
 
 			for (int i = Startpos; i < Endpos; i++) {
 				if (i < w) {
-					col[i] = sectionvalues[currcol];
+					col[i] = sectionval[currcol% sectionval.length];
 				} else {
 					if (!ExceedMsg) {
 						System.out.println("WARNING: Partition \"" + part.GetName() + "\" exceeds size of file.");
@@ -301,7 +300,7 @@ public class ShrinkDiskDialog {
 				s[4] = String.valueOf(part.GetEndCyl());
 				item.setText(s);
 
-				int rgb = sectionvalues[currcol++];
+				int rgb = sectionval[currcol++ % sectionval.length];
 				int r = rgb & 0xff;
 				int g = (rgb / 0x100) & 0xff;
 				int b = (rgb / 0x10000) & 0xff;
@@ -348,7 +347,6 @@ public class ShrinkDiskDialog {
 				try {
 					hdd.ResizeDisk(newCyl);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					error = e.getMessage();
 				}
 			}

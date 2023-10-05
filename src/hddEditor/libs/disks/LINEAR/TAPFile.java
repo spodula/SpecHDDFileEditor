@@ -49,7 +49,7 @@ public class TAPFile implements Disk {
 		 */
 		public TAPBlock(byte block[], int start, int bNum) throws IOException {
 			if (block.length < 4) {
-				throw new IOException("TAP File has extranius bits a at the end");
+				throw new IOException("TAP File has extraneous bits at the end");
 			}
 			fileLocation = start;
 			int length = (block[start] & 0xff) + ((block[start + 1] & 0xff) * 256);
