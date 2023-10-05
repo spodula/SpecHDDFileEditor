@@ -19,14 +19,11 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -146,6 +143,7 @@ public class SystemPartPage extends GenericPage {
 	/**
 	 * Constructor
 	 * 
+	 * @param root
 	 * @param parent
 	 * @param partition
 	 */
@@ -489,6 +487,9 @@ public class SystemPartPage extends GenericPage {
 		}
 	}
 
+	/**
+	 * Extract all partitions to disk.
+	 */
 	protected void DoExtractAllPartitions() {
 		ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay());
 		try {

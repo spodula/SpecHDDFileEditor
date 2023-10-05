@@ -275,9 +275,10 @@ public class DirectoryEntry implements FileEntry {
 	@Override
 	public byte[] GetFileData() throws IOException {
 		byte data[] = GetFileRawData();
-		if (GetPlus3DosHeader().IsPlusThreeDosFile) {
+		Plus3DosFileHeader p3d = GetPlus3DosHeader(); 
+		if (p3d.IsPlusThreeDosFile) {
 			// Remove the +3DOS header
-			byte newdata[] = new byte[data.length - 0x80];
+			byte newdata[] = new byte[Math.min(p3d.filelength, data.length - 0x80)];
 			System.arraycopy(data, 0x80, newdata, 0, newdata.length);
 			data = newdata;
 		}

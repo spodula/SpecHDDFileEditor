@@ -58,6 +58,7 @@ public class HDDEditor {
 	public IDEDosPartition CurrentSelectedPartition = null;
 
 	private static String DefaultDropDownText = "<No Disk loaded>";
+	
 	// SWT display object
 	public Display display = null;
 
@@ -71,6 +72,8 @@ public class HDDEditor {
 
 	private Composite MainPage = null;
 
+	//Sub-forms. These are recorded so they can get
+	//forcibly closed if the main form closed.
 	private FileConversionForm fileConvForm = null;
 	private FileNewHDDForm fileNewHDDForm = null;
 	private FileNewFDDForm fileNewFDDForm = null;
@@ -509,6 +512,9 @@ public class HDDEditor {
 			LoadFile(newfile);
 	}
 
+	/**
+	 * Show the "Copy from another disk" form.
+	 */
 	protected void ShowCopyForm() {
 		String current = PartitionDropdown.getText();
 		if (current != null) {

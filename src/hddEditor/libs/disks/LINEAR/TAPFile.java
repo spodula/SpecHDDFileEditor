@@ -1,5 +1,4 @@
 package hddEditor.libs.disks.LINEAR;
-//TODO: when extracting files disk, sometimes get extranious F5's
 
 import java.io.File;
 import java.io.FileOutputStream;
