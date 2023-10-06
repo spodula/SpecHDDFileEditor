@@ -1,4 +1,5 @@
 package hddEditor.ui;
+//TODO: when importing from another disk, refresh directory listing.
 
 /**
  * Main UI.

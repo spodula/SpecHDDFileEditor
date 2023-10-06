@@ -1628,7 +1628,7 @@ public class Speccy {
 			break;
 		}
 
-	}
+	} 
 
 	private static void SaveCodeFile(File targetFilename, byte[] data, int codeLoadAddress, int filelength,
 			boolean OutAsHex) throws IOException {

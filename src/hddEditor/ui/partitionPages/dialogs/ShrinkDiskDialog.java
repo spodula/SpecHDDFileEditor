@@ -338,14 +338,14 @@ public class ShrinkDiskDialog {
 				//Modify the last partition
 				MaxPartition.SetEndCyl(newCyl);
 				//Modify the IDEDOS disk parameters
-				syspart.SetNumCyls(newCyl);
+				syspart.SetNumCyls(newCyl+1);
 				//update the disk.
 				syspart.UpdatePartitionListOnDisk();
 				
 				//Modify the underlying disk parameters
 				HardDisk hdd = (HardDisk) syspart.CurrentDisk; 
 				try {
-					hdd.ResizeDisk(newCyl);
+					hdd.ResizeDisk(newCyl+1);
 				} catch (IOException e) {
 					error = e.getMessage();
 				}
