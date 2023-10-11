@@ -1,6 +1,4 @@
 package hddEditor.ui;
-//TODO: when importing from another disk, refresh directory listing.
-
 /**
  * Main UI.
  */
@@ -50,7 +48,7 @@ import hddEditor.ui.partitionPages.SystemPartPage;
 import hddEditor.ui.partitionPages.TAPPartitionPage;
 import hddEditor.ui.partitionPages.TrDosPartitionPage;
 
-public class HDDEditor { 
+public class HDDEditor {
 	public static String[] SUPPORTEDFILETYPES = { "*", "*.img", "*.hdf", "*.mgt", "*.trd", "*.scl", "*.mdr", "*.mgt",
 			"*.tap" };
 
@@ -59,7 +57,7 @@ public class HDDEditor {
 	public IDEDosPartition CurrentSelectedPartition = null;
 
 	private static String DefaultDropDownText = "<No Disk loaded>";
-	
+
 	// SWT display object
 	public Display display = null;
 
@@ -73,8 +71,8 @@ public class HDDEditor {
 
 	private Composite MainPage = null;
 
-	//Sub-forms. These are recorded so they can get
-	//forcibly closed if the main form closed.
+	// Sub-forms. These are recorded so they can get
+	// forcibly closed if the main form closed.
 	private FileConversionForm fileConvForm = null;
 	private FileNewHDDForm fileNewHDDForm = null;
 	private FileNewFDDForm fileNewFDDForm = null;
@@ -525,6 +523,8 @@ public class HDDEditor {
 		fileImportForm = new FileImportForm(display, CurrentHandler);
 		try {
 			fileImportForm.Show(current);
+			//force a refresh
+			ComboChanged();
 		} finally {
 			fileImportForm = null;
 		}

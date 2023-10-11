@@ -25,7 +25,6 @@ import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.ProgressCallback;
 import hddEditor.libs.partitions.SystemPartition;
-import hddEditor.libs.partitions.cpm.Dirent;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 import hddEditor.ui.partitionPages.dialogs.PartitionExportProgress;
 
