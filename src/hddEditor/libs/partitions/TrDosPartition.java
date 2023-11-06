@@ -1,5 +1,6 @@
 package hddEditor.libs.partitions;
 
+
 /**
  * This is the implementation of a TR_DOS partition. Note that this actually duplicates
  * some of the code in the TRD disk handler code, due to the fact it requires the same
@@ -763,4 +764,26 @@ public class TrDosPartition extends IDEDosPartition {
 		return DirectoryEntries;
 	}
 
+	/**
+	 * Uniquify a filename if required. (IE, a disk)
+	 * @param filename
+	 * @return
+	 */
+	@Override
+	public String UniqueifyFileNameIfRequired(String filename) {
+		String ofilename = filename.trim();
+		if (ofilename.length() > 6) {
+			ofilename = ofilename.substring(0,6);
+		}
+		
+		int index=1;
+		FileEntry existingEntries[] = GetFileList(filename);
+		while (existingEntries.length > 0) {
+			filename = ofilename + String.format("%02d", index++);
+			existingEntries = GetFileList(filename);			
+		}
+		return filename;
+	}
+
+	
 }

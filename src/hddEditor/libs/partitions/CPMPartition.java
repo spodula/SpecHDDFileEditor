@@ -738,4 +738,26 @@ public class CPMPartition extends IDEDosPartition {
 		return DirectoryEntries;
 	}
 	
+	
+	/**
+	 * Uniquify a filename if required. (IE, a disk)
+	 * @param filename
+	 * @return
+	 */
+	@Override
+	public String UniqueifyFileNameIfRequired(String filename) {
+		String prefix = CPM.FixFullName(filename);
+		if (prefix.indexOf(".") > -1) {
+			prefix = prefix.substring(0,prefix.indexOf("."));
+		}
+		
+		int index=1;
+		FileEntry existingEntries[] = GetFileList(filename);
+		while (existingEntries.length > 0) {
+			filename = prefix+"."+String.format("%03d", index++);
+			existingEntries = GetFileList(filename);			
+		}
+		return filename;
+	}
+	
 }

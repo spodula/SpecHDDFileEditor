@@ -58,7 +58,7 @@ public class Speccy {
 		if (filetype > -1 && filetype < filetypeNames.length) {
 			result = filetypeNames[filetype];
 		}
-		return(result);
+		return (result);
 	}
 
 	/**
@@ -296,16 +296,16 @@ public class Speccy {
 					SetCharArray(Line, 40, new String(chrdata).substring(0, Instruction.length));
 					sb.append(new String(Line).trim());
 					sb.append(cr);
-					//gds 20 Aug 2023, extra CRLF after a RET or a JP
-					if (Instruction.length>0) {
+					// gds 20 Aug 2023, extra CRLF after a RET or a JP
+					if (Instruction.length > 0) {
 						int firstbyte = asmData[0];
 						if ((firstbyte == 195) || (firstbyte == 201)) {
-							sb.append(cr);						
+							sb.append(cr);
 						}
 					}
-					
+
 					realaddress = realaddress + Instruction.length;
-					loadedaddress  = loadedaddress + Instruction.length;
+					loadedaddress = loadedaddress + Instruction.length;
 				} // while
 			} catch (Exception E) {
 				System.out.println("Error at: " + realaddress + "(" + loadedaddress + ")");
@@ -1628,7 +1628,7 @@ public class Speccy {
 			break;
 		}
 
-	} 
+	}
 
 	private static void SaveCodeFile(File targetFilename, byte[] data, int codeLoadAddress, int filelength,
 			boolean OutAsHex) throws IOException {

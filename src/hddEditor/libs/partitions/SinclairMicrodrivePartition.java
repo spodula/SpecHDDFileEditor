@@ -768,4 +768,29 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		return DirectoryEntries;
 	}
 
+	/**
+	 * Uniquify a filename if required. (IE, a disk)
+	 * @param filename
+	 * @return
+	 */
+	@Override
+	public String UniqueifyFileNameIfRequired(String filename) {
+		String ofilename = filename.trim();
+		if (ofilename.length() > 7) {
+			ofilename = ofilename.substring(0,7);
+		}
+		
+		int index=1;
+		FileEntry existingEntries[] = GetFileList(filename);
+		while (existingEntries.length > 0) {
+			if (filename.length() > 7) {
+				filename = filename.substring(0,7);
+			}
+			filename = ofilename + String.format("%03d", index++);
+			existingEntries = GetFileList(filename);			
+		}
+		return filename;
+	}
+
+	
 }

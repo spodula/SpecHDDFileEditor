@@ -1,4 +1,6 @@
 package hddEditor.ui;
+//TODO, rename files that don't fit new filename lengths
+//TODO, when importing files, rename duplicate files
 
 import java.io.File;
 import java.io.IOException;
@@ -316,23 +318,28 @@ public class FileImportForm {
 					if (itm.getChecked()) {
 						FileEntry fe = (FileEntry) itm.getData();
 						SpeccyBasicDetails sbd = fe.GetSpeccyBasicDetails();
+						String filename = fe.GetFilename();
 
+						FileEntry otherentries[] =  TargetPartition.GetFileList(filename);
+						if (otherentries != null && otherentries.length>0) {
+							filename =  TargetPartition.UniqueifyFileNameIfRequired(filename);
+						}
 						switch (sbd.BasicType) {
 						case Speccy.BASIC_BASIC:
-							TargetPartition.AddBasicFile(fe.GetFilename(), fe.GetFileData(), sbd.LineStart,
+							TargetPartition.AddBasicFile(filename, fe.GetFileData(), sbd.LineStart,
 									sbd.VarStart);
 							break;
 						case Speccy.BASIC_NUMARRAY:
-							TargetPartition.AddNumericArray(fe.GetFilename(), fe.GetFileData(), sbd.VarName + "");
+							TargetPartition.AddNumericArray(filename, fe.GetFileData(), sbd.VarName + "");
 							break;
 						case Speccy.BASIC_CHRARRAY:
-							TargetPartition.AddCharArray(fe.GetFilename(), fe.GetFileData(), sbd.VarName + "");
+							TargetPartition.AddCharArray(filename, fe.GetFileData(), sbd.VarName + "");
 							break;
 						case Speccy.BASIC_CODE:
-							TargetPartition.AddCodeFile(fe.GetFilename(), sbd.LoadAddress, fe.GetFileData());
+							TargetPartition.AddCodeFile(filename, sbd.LoadAddress, fe.GetFileData());
 							break;
 						default:
-							TargetPartition.AddCodeFile(fe.GetFilename(), 0, fe.GetFileData());
+							TargetPartition.AddCodeFile(filename, 0, fe.GetFileData());
 							break;
 						}
 					}
@@ -346,7 +353,6 @@ public class FileImportForm {
 			messageBox.setText(e.getMessage());
 			messageBox.open();
 			System.out.println("Copy failed. " + e.getMessage());
-
 		}
 	}
 }

@@ -689,4 +689,26 @@ public class MGTDosPartition extends IDEDosPartition {
 		return DirectoryEntries;
 	}
 
+	/**
+	 * Uniquify a filename if required. (IE, a disk)
+	 * @param filename
+	 * @return
+	 */
+	@Override
+	public String UniqueifyFileNameIfRequired(String filename) {
+		String ofilename = filename.trim();
+		if (ofilename.length() > 8) {
+			ofilename = ofilename.substring(0,8);
+		}
+		
+		int index=1;
+		FileEntry existingEntries[] = GetFileList(filename);
+		while (existingEntries.length > 0) {
+			filename = ofilename + String.format("%02d", index++);
+			existingEntries = GetFileList(filename);			
+		}
+		return filename;
+	}
+
+	
 }

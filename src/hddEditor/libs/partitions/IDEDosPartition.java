@@ -1,4 +1,5 @@
 package hddEditor.libs.partitions;
+//TODO: seem to have broken microdrive support
 
 import java.io.File;
 
@@ -536,6 +537,15 @@ public class IDEDosPartition {
 	 */
 	public FileEntry[] GetFileList() {
 		return null;
+	}
+	
+	/**
+	 * Uniquify a filename if required. (IE, a disk)
+	 * @param filename
+	 * @return
+	 */
+	public String UniqueifyFileNameIfRequired(String filename) {
+		return filename;
 	}
 	
 
