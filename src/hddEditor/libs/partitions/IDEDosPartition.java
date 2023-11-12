@@ -1,5 +1,5 @@
 package hddEditor.libs.partitions;
-//TODO: seem to have broken microdrive support
+//TODO: seem to be creating broken microdrive files
 
 import java.io.File;
 

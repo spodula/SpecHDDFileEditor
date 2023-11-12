@@ -364,8 +364,22 @@ public class TAPPartition extends IDEDosPartition {
 						}
 					}
 					SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
-
-					File TargetFilename = new File(folder, entry.GetFilename().trim());
+					String fn = entry.GetFilename().trim();
+					String tfn = "";
+					for (int i=0;i<fn.length();i++) {
+						char c = fn.charAt(i);
+						if (c!=' '|| Character.isLetterOrDigit(c)|| c!='.') {
+							tfn = tfn+c;
+						} else {
+							tfn = tfn+"_";
+						}
+					}
+					tfn = tfn.trim();
+					if (tfn.charAt(tfn.length()-1) == '.') {
+						tfn = tfn.substring(0,tfn.length()-1);
+					}
+					
+					File TargetFilename = new File(folder, tfn.trim());
 					byte entrydata[] = entry.GetFileData();
 					byte Rawentrydata[] = entry.GetFileRawData();
 
