@@ -375,6 +375,7 @@ public class FileExportAllPartitionsForm {
 				System.out.println(ThisDisk.getClass().getCanonicalName());
 				String PartClass = ThisDisk.getClass().getCanonicalName();
 				boolean HasDeletedFiles = PartClass.contains("PLUS3DOSPartition");
+
 				if ((ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_FREE
 						&& ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_UNUSED
 						&& ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_UNKNOWN
@@ -397,6 +398,16 @@ public class FileExportAllPartitionsForm {
 							File filefolder = new File(directory, fn.toUpperCase());
 							pep.setMessage2(file.GetFilename());
 							pep.SetValue2(filenum++);
+
+							// create blank sysconfig file.
+							FileWriter SysConfig;
+							try {
+								SysConfig = new FileWriter(new File(filefolder, "partition.index"), false);
+								SysConfig.close();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 
 							File asm = new File(filefolder, "ASM");
 							File cpm = new File(filefolder, "CPM");
@@ -475,11 +486,10 @@ public class FileExportAllPartitionsForm {
 									Speccy.SaveFileToDiskAdvanced(new File(filefolder, file.GetFilename()), data,
 											cpmdata, filelength, SpeccyFileType, basicLine, basicVarsOffset,
 											codeLoadAddress, arrayVarName, actiontype);
-									FileWriter SysConfig = new FileWriter(new File(filefolder, "partition.index"),
+									SysConfig = new FileWriter(new File(filefolder, "partition.index"),
 											true);
 									try {
 										// TODO: SYSCONFIG needs to be moved to a library
-										// TODO: Need to erase old partition.index files
 										SysConfig.write("<file>\n".toCharArray());
 										SysConfig.write(("   <filename>" + file.GetFilename().trim() + "</filename>\n")
 												.toCharArray());

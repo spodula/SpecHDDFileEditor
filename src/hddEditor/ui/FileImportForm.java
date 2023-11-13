@@ -1,6 +1,5 @@
 package hddEditor.ui;
 //TODO, rename files that don't fit new filename lengths
-//TODO, when importing files, rename duplicate files
 
 import java.io.File;
 import java.io.IOException;

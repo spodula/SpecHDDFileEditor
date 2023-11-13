@@ -1,4 +1,5 @@
 package hddEditor.ui;
+
 /**
  * New file form...
  */
@@ -28,7 +29,7 @@ import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.ui.partitionPages.dialogs.ProgesssForm;
 
 public class FileNewHDDForm {
-	//Form components
+	// Form components
 	private Display display = null;
 	private Shell shell = null;
 
@@ -42,11 +43,11 @@ public class FileNewHDDForm {
 	private Text Heads = null;
 	private Text Spt = null;
 	private Text SizeMB = null;
-	
-	//Result to return. 
+
+	// Result to return.
 	private String result = null;
 
-	//Flag to prevent an endless loop when the boxes are being edited. 
+	// Flag to prevent an endless loop when the boxes are being edited.
 	private boolean ModInProgress = false;
 
 	/**
@@ -196,7 +197,7 @@ public class FileNewHDDForm {
 				int head = Integer.parseInt(Heads.getText());
 				int spt = Integer.parseInt(Spt.getText());
 
-				if (DoCreateFile(s.contains("HDF"),s.contains("8 bit"),Targetfile.getText(), cyl, head, spt)) {
+				if (DoCreateFile(s.contains("HDF"), s.contains("8 bit"), Targetfile.getText(), cyl, head, spt)) {
 					shell.close();
 				}
 			}
@@ -264,7 +265,7 @@ public class FileNewHDDForm {
 	}
 
 	/**
-	 * This updates the size MB fields when either Cyls, Heads, or SPT are modified. 
+	 * This updates the size MB fields when either Cyls, Heads, or SPT are modified.
 	 */
 	protected void UpdateSizeMBField() {
 		if (!ModInProgress && !SizeMB.isDisposed())
@@ -287,17 +288,18 @@ public class FileNewHDDForm {
 			}
 	}
 
-	//TODO: Move DoCreateFile from FileNewHDDForm to appropriate disk objects.
+	// TODO: Move DoCreateFile from FileNewHDDForm to appropriate disk objects.
 	/**
-	 * Actually create the file.
-	 * NOTE: Most of this wants moving to the Disk objects.
+	 * Actually create the file.DoCreateFile NOTE: Most of this wants moving to the Disk
+	 * objects.
 	 * 
-	 * @param IsTargetHDF   - TRUE = HDF, FALSE = Raw IMG
-	 * @param IsTarget8Bit  - TRUE = 8 bit, FALSE = 16 bit 
+	 * @param IsTargetHDF  - TRUE = HDF, FALSE = Raw IMG
+	 * @param IsTarget8Bit - TRUE = 8 bit, FALSE = 16 bit
 	 * @param targFile
 	 * @return TRUE if file successfully created.
 	 */
-	public boolean DoCreateFile(boolean IsTargetHDF , boolean IsTarget8Bit, String targFile, int cyl, int head, int spt) {
+	public boolean DoCreateFile(boolean IsTargetHDF, boolean IsTarget8Bit, String targFile, int cyl, int head,
+			int spt) {
 		result = null;
 		boolean SuccessfullyCreated = false;
 		ProgesssForm pf = new ProgesssForm(display);
@@ -309,10 +311,10 @@ public class FileNewHDDForm {
 			}
 			if (IsTargetHDF) {
 				s = s + " Ramsoft HDF file";
-			} else { 
+			} else {
 				s = s + " Raw disk image";
 			}
-			pf.Show("Creating file...", "Creating "+s+" \""+new File(targFile).getName()+"\"");
+			pf.Show("Creating file...", "Creating " + s + " \"" + new File(targFile).getName() + "\"");
 			try {
 				int sectorSz = 512;
 				if (IsTarget8Bit) {
@@ -326,21 +328,24 @@ public class FileNewHDDForm {
 						HDFUtils.WriteHDFFileHeader(TargetFile, IsTarget8Bit, cyl, head, spt);
 					}
 					// Write out an IDEDOS header
-					byte SysPart[] = PLUSIDEDOS.GetSystemPartition(cyl, head, spt, sectorSz, IsTarget8Bit && !IsTargetHDF);
+					byte SysPart[] = PLUSIDEDOS.GetSystemPartition(cyl, head, spt, sectorSz,
+							IsTarget8Bit && !IsTargetHDF);
 					TargetFile.write(SysPart);
-					
+
 					// Write out the free space header
-					byte FsPart[] = PLUSIDEDOS.GetFreeSpacePartition(0,1,cyl,1,sectorSz, IsTarget8Bit && !IsTargetHDF, head, spt);
+					byte FsPart[] = PLUSIDEDOS.GetFreeSpacePartition(0, 1, cyl, 1, sectorSz,
+							IsTarget8Bit && !IsTargetHDF, head, spt);
 					TargetFile.write(FsPart);
-					
+
 					/*
-					 * Write a blank file for the rest. 
+					 * Write a blank file for the rest.
 					 */
 					int NumLogicalSectors = (cyl * head * spt) - spt + 1;
 
 					byte oneSector[] = new byte[512];
 					if (IsTarget8Bit && IsTargetHDF) {
-						//for raw files, still want to write 512 byte sectors even if only half is used. 
+						// for raw files, still want to write 512 byte sectors even if only half is
+						// used.
 						oneSector = new byte[256];
 					}
 					pf.SetMax(NumLogicalSectors);
