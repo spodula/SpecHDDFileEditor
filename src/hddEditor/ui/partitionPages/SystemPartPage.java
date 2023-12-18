@@ -755,6 +755,9 @@ public class SystemPartPage extends GenericPage {
 		if (ShrinkDiskForm != null) {
 			ShrinkDiskForm.close();
 		}
+		if (RenFileDialog != null) {
+			RenFileDialog.close();
+		}
 	}
 	
 	/**
