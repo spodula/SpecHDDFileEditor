@@ -287,7 +287,6 @@ public class SystemPartition extends IDEDosPartition {
 				System.out.println("Error updating System DIRENT: " + e.getMessage());
 				e.printStackTrace();
 			}
-
 	}
 
 	/**

@@ -246,8 +246,10 @@ public class PlusThreePartPage extends GenericPage {
 					if (ent.IsComplete()) {
 						ent.SetDeleted(false);
 					} else {
-						MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-						messageBox.setMessage("The file " + ent.GetFilename()+ "is incomplete and may not work. Un-delete?");
+						MessageBox messageBox = new MessageBox(ParentComp.getShell(),
+								SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+						messageBox.setMessage(
+								"The file " + ent.GetFilename() + "is incomplete and may not work. Un-delete?");
 						messageBox.setText("Incomplete file");
 						if (messageBox.open() == SWT.YES) {
 							ent.SetDeleted(false);

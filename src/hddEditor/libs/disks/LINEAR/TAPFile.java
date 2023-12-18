@@ -385,10 +385,32 @@ public class TAPFile implements Disk {
 
 		ArrayList<TAPBlock> TapBlocks = new ArrayList<TAPBlock>();
 
-		while (ptr < FileData.length - 1) {
-			TAPBlock tb = new TAPBlock(FileData, ptr, blocknum++);
+		try {
+			while (ptr < FileData.length - 1) {
+				TAPBlock tb = new TAPBlock(FileData, ptr, blocknum++);
+				TapBlocks.add(tb);
+				ptr = ptr + tb.rawblocklength;
+			}
+		} catch (Exception E) {
+		    byte bd[] = new byte[19];
+		    bd[0] = 0x13;
+		    bd[1] = 0x00;
+		    bd[2] = 0x00;
+		    bd[3] = 0x00;
+		    bd[4] = 'B';
+		    bd[5] = 'A';
+		    bd[6] = 'D';
+		    bd[7] = ' ';
+		    bd[8] = ' ';
+		    bd[9] = 'D';
+		    bd[10] = 'A';
+		    bd[11] = 'T';
+		    bd[12] = 'A';
+		    		
+		    
+			TAPBlock tb = new TAPBlock(bd, 0, blocknum++);
 			TapBlocks.add(tb);
-			ptr = ptr + tb.rawblocklength;
+
 		}
 		Blocks = TapBlocks.toArray(new TAPBlock[0]);
 	}

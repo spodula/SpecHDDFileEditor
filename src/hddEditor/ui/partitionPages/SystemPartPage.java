@@ -40,6 +40,7 @@ import hddEditor.ui.HDDEditor;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.NewPartitionDialog;
+import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
 import hddEditor.ui.partitionPages.dialogs.ShrinkDiskDialog;
 
 public class SystemPartPage extends GenericPage {
@@ -51,6 +52,7 @@ public class SystemPartPage extends GenericPage {
 	NewPartitionDialog NewPartDialog = null;
 	FileExportAllPartitionsForm ExportAllPartsForm = null;
 	ShrinkDiskDialog ShrinkDiskForm = null;
+	RenameFileDialog RenFileDialog = null;
 
 	// Basic editor colour components.
 	Button becBright = null;
@@ -86,6 +88,7 @@ public class SystemPartPage extends GenericPage {
 	Button NewPartitionButton = null;
 	Button DoExtractAllPartitionButton = null;
 	Button ShrinkDisk = null;
+	Button RenamePartition = null;
 
 	// Partition table
 	Table PartitionTable = null;
@@ -430,7 +433,7 @@ public class SystemPartPage extends GenericPage {
 					widgetSelected(arg0);
 				}
 			});
-			
+
 			DoExtractAllPartitionButton = button("Dump partitions");
 			DoExtractAllPartitionButton.setLayoutData(gd);
 			DoExtractAllPartitionButton.addSelectionListener(new SelectionListener() {
@@ -458,14 +461,29 @@ public class SystemPartPage extends GenericPage {
 					widgetSelected(arg0);
 				}
 			});
-			
+
+			RenamePartition = button("Rename partition");
+			RenamePartition.setLayoutData(gd);
+			RenamePartition.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					DoRenamePartition();
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+
 			NewPartitionButton.setEnabled(CanEditPartitions);
 			ParentComp.pack();
 		}
 	}
 
 	/**
-	 * Update the partition list from the current partition (Assumed to be a system partition)
+	 * Update the partition list from the current partition (Assumed to be a system
+	 * partition)
 	 */
 	private void UpdatePartitionList() {
 		SystemPartition sp = (SystemPartition) partition;
@@ -652,11 +670,13 @@ public class SystemPartPage extends GenericPage {
 					NewPartDialog = new NewPartitionDialog(ParentComp.getDisplay());
 					if (NewPartDialog.Show(sExistingPartitions) && !ParentComp.isDisposed()) {
 						try {
-							SystemPartition.CreatePartition(NewPartDialog.Name, NewPartDialog.SizeMB, NewPartDialog.PartType);
-							//update the partition list (Github issue #2: https://github.com/spodula/SpecHDDFileEditor/issues/2)
+							SystemPartition.CreatePartition(NewPartDialog.Name, NewPartDialog.SizeMB,
+									NewPartDialog.PartType);
+							// update the partition list (Github issue #2:
+							// https://github.com/spodula/SpecHDDFileEditor/issues/2)
 							UpdatePartitionList();
 						} catch (PlusIDEDosException E) {
-							ErrorBox(E.partition+": "+ E.getMessage());							
+							ErrorBox(E.partition + ": " + E.getMessage());
 						}
 					}
 					NewPartDialog = null;
@@ -664,7 +684,6 @@ public class SystemPartPage extends GenericPage {
 			}
 		}
 	}
-
 
 	/**
 	 * Implement deletion of selected partition
@@ -690,7 +709,7 @@ public class SystemPartPage extends GenericPage {
 						try {
 							SystemPartition.DeletePartition(partName);
 						} catch (PlusIDEDosException e) {
-							ErrorBox("Error deleting partition '"+partName+"'. "+e.getMessage());
+							ErrorBox("Error deleting partition '" + partName + "'. " + e.getMessage());
 						}
 						RootPage.UpdateDropdown();
 					}
@@ -759,7 +778,7 @@ public class SystemPartPage extends GenericPage {
 			RenFileDialog.close();
 		}
 	}
-	
+
 	/**
 	 * Do Shrink disk.
 	 */
@@ -772,9 +791,35 @@ public class SystemPartPage extends GenericPage {
 		} finally {
 			ShrinkDiskForm = null;
 		}
-		//Force a reload to make sure all parameters are up to date. 
+		// Force a reload to make sure all parameters are up to date.
 		if (result) {
 			RootPage.LoadFile(sp.CurrentDisk.GetFilename());
 		}
 	}
+
+	protected void DoRenamePartition() {
+		TableItem itms[] = PartitionTable.getSelection();
+		if ((itms != null) && (itms.length != 0)) {
+			String partName = itms[0].getText(0).trim();
+			IDEDosPartition part = RootPage.CurrentHandler.GetPartitionByName(partName);
+			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay());
+			if (RenFileDialog.Show(part.GetName())) {
+				try {
+					part.SetName(RenFileDialog.NewName);
+					SystemPartition sp = (SystemPartition) partition;
+					sp.UpdatePartitionListOnDisk();
+					// refresh the screen.
+					AddComponents();
+				} catch (Exception e) {
+					MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
+					messageBox.setMessage("Error Renaming " + part.GetName() + ": " + e.getMessage());
+					messageBox.setText("Error Renaming " + part.GetName() + ": " + e.getMessage());
+					messageBox.open();
+					e.printStackTrace();
+				}
+			}
+			RenFileDialog = null;
+		}
+	}
+
 }
