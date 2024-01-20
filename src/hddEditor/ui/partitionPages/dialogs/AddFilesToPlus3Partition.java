@@ -1,5 +1,4 @@
 package hddEditor.ui.partitionPages.dialogs;
-//TODO: When adding basic text files, doesnt seem to split seperate INK and PAPER commands, eg,print at 21,0;PAPER 6;INK 0;" 
 
 /**
  * Add files to the +3DOS partition

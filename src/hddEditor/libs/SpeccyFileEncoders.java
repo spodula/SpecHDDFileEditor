@@ -32,7 +32,7 @@ public class SpeccyFileEncoders {
 	public static byte[] EncodeTextFileToBASIC(File filedets) {
 		BufferedReader br;
 		/*
-		 * Read the file and tokenise it. Note, no syntax checking is done, so if your
+		 * Read the file and tokenize it. Note, no syntax checking is done, so if your
 		 * basic is invalid, it will still be added
 		 */
 		byte BasicAsBytes[] = new byte[0xffff];

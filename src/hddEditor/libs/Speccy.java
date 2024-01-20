@@ -68,12 +68,31 @@ public class Speccy {
 	 */
 	public static void main(String[] args) {
 		// test for numeric encoding and decoding.
-		System.out.println("These values should match within 31 bits ( Approx 9-10)");
+		System.out.println("===============Numeric encoding test================");
+		System.out.println("The value and the re-encoded value should match within 31 bits ( Approx 9-10)");
+		System.out.println("Value         neg    00      01      02      03      04      Re-encoded value");
 		outputnum(-3212.0);
 		outputnum(4096.0);
 		outputnum(1323234.0);
 		outputnum(23.0);
 		outputnum(14096.1);
+
+		// Test for line tokenisation and encoding
+		System.out.println("===============Line tokenisation test================");
+		// String line = "10 print at 21,0;PAPER 6;INK 0;\"Loading BAK2SCL2\"";
+		String line = "10 if a<=10 then goto 100";
+		System.out.println("Line to decode: " + line);
+		byte target[] = new byte[1024];
+		int last = DecodeBasicLine(line, target, 0);
+
+		System.out.println("Result:");
+		for (int i = 0; i < last; i++) {
+			String s = String.format("%2d %3d (%2x)", i, target[i], target[i]);
+			if (target[i] >= ' ' && target[i] < 0x7f) {
+				s = s + " " + String.valueOf((char) target[i]);
+			}
+			System.out.println(s);
+		}
 	}
 
 	/**
@@ -84,18 +103,23 @@ public class Speccy {
 	 */
 	static void outputnum(Double x) {
 		// number
-		System.out.print(" " + x + " ");
+		String s = String.format(" %10.2f ", x);
 		// output the encoded value
 		byte num[] = EncodeValue(x, false);
+		if (num.length != 7) {
+			s = s + "        ";
+		}
 		for (byte n : num) {
-			System.out.print(" " + (int) (n & 0xff));
+			int i = (int) (n & 0xff);
+			s = s + String.format("%3d(%02x) ", i, i);
 		}
 		// re-encode the number and output it. should match within 31 bits ( Approx 9-10
 		// decimal places)
 		int base = 1;
 		if (num.length == 7)
 			base = 2;
-		System.out.println(" " + GetNumberAtByte(num, base));
+		s = s + GetNumberAtByte(num, base);
+		System.out.println(s);
 	}
 
 	// zx spectrum colours in SWT RGB (This differs from HTML RGB)
@@ -150,7 +174,7 @@ public class Speccy {
 			"VAL ", "LEN ", "SIN ", "COS ", "TAN ", "ASN ", "ACS ", "ATN ", "LN ", "EXP ", "INT ", "SQR ", "SGN ",
 			"ABS ", "PEEK ", "IN ",
 			// 0xC0
-			"USR ", "STR$ ", "CHR$ ", "NOT ", "BIN ", " OR ", " AND ", " >= ", ">=", "<>", " LINE ", " THEN ", " TO ",
+			"USR ", "STR$ ", "CHR$ ", "NOT ", "BIN ", " OR ", " AND ", "<=", ">=", "<>", " LINE ", " THEN ", " TO ",
 			" STEP ", " DEF FN ", " CAT ",
 			// 0xD0
 			" FORMAT ", " MOVE ", " ERASE ", " OPEN# ", " CLOSE# ", " MERGE ", " VERIFY ", " BEEP ", " CIRCLE ",
@@ -466,8 +490,6 @@ public class Speccy {
 			if (inrem || (chr != NUMSTART)) {
 				String tokenvalue = Speccy.tokens[chr];
 				if (DisplayValueOnly) {
-					tokenvalue = tokenvalue.replace(">", ">");
-					tokenvalue = tokenvalue.replace(">", "<");
 					tokenvalue = tokenvalue.replace("GOSUB", "GO SUB");
 					tokenvalue = tokenvalue.replace("GOTO", "GO TO");
 				}
@@ -1144,6 +1166,7 @@ public class Speccy {
 		String err = "";
 		// split line
 		ArrayList<String> TokenList = SplitLine(Line);
+
 		// read the line number
 		if (TokenList.size() > 0) {
 			// get the initial token Should be the line number
@@ -1215,7 +1238,7 @@ public class Speccy {
 				// Dont try to switch states going forward.
 				curritem = curritem + chr;
 			} else if (state == STATE_NONE) {
-				// if we are in state_none, swtich to another state.
+				// if we are in state_none, switch to another state.
 				if (IsNumber(chr)) {
 					state = STATE_NUMBER;
 					curritem = curritem + chr;
@@ -1357,7 +1380,7 @@ public class Speccy {
 	 * @return TRUE if a seperator character
 	 */
 	private static boolean IsSeperator(char chr) {
-		String seperators = ":, ";
+		String seperators = ";:, ";
 		return (seperators.indexOf(chr) > -1);
 	}
 
