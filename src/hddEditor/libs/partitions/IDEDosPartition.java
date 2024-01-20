@@ -1,5 +1,4 @@
 package hddEditor.libs.partitions;
-//TODO: seem to be creating broken microdrive files
 
 import java.io.File;
 

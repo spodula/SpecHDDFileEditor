@@ -168,21 +168,7 @@ public class MDFMicrodriveFile implements Disk {
 				}
 			}
 		}
-		/*
-		 * for (MicrodriveSector Sector : Sectors) { String hs =
-		 * Integer.toHexString(Sector.GetSectorNumber()); if (hs.length()==1) { hs =
-		 * "0"+hs; }
-		 * 
-		 * result = result + "\n#" + hs + " "; if (Sector.IsSectorChecksumValid()) {
-		 * result = result + "Valid   "; } else { result = result + "Invalid "; } if
-		 * (Sector.IsHeaderChecksumValid()) { result = result + "Valid   "; } else {
-		 * result = result + "Invalid "; } if (Sector.IsFileChecksumValid()) { result =
-		 * result + "Valid   "; } else { result = result + "Invalid "; }
-		 * 
-		 * if ((Sector.GetFlagByte() % 0x04) == 0) { result = result + "<free>"; } else
-		 * { result = result + Sector.getFileName() + " part:" +
-		 * Sector.getSegmentNumber() + " Flags: " + Sector.getSectorFlagsAsString(); } }
-		 */
+
 		return (result);
 	}
 
@@ -316,20 +302,20 @@ public class MDFMicrodriveFile implements Disk {
 	 * @return
 	 */
 	public Boolean IsMyFileType(File filename) throws IOException {
-		if (filename.getName().toUpperCase().endsWith(".MDR")) {
-			inFile = new RandomAccessFile(filename, "r");
-			try {
-				byte FileData[] = new byte[0x21f];
-				inFile.seek(0);
-				inFile.read(FileData);
-				MicrodriveSector msh = new MicrodriveSector(FileData, 0);
-				if (msh.IsSectorChecksumValid()) {
-					return (true);
-				}
-			} finally {
-				inFile.close();
-				inFile = null;
+		inFile = new RandomAccessFile(filename, "r");
+		try {
+			byte FileData[] = new byte[0x21f];
+			inFile.seek(0);
+			inFile.read(FileData);
+			MicrodriveSector msh = new MicrodriveSector(FileData, 0);
+			if (msh.IsSectorChecksumValid()) {
+				return (true);
+			} else {
+				System.out.println("MDRfile: Not a valid microdrive file: Bad sector checksum");
 			}
+		} finally {
+			inFile.close();
+			inFile = null;
 		}
 		return (false);
 	}
@@ -391,7 +377,8 @@ public class MDFMicrodriveFile implements Disk {
 				msh.setSectorFlagByte(0x00);
 				msh.SetSectorNumber(SectorNum);
 				msh.setSegmentNumber(0);
-				msh.CalculateHeaderChecksum();
+				msh.setHeaderChecksum(msh.CalculateHeaderChecksum());
+				msh.setSectorChecksum(msh.CalculateSectorChecksum());
 				// write our new sector information to disk.
 				NewFile.write(msh.SectorHeader);
 				NewFile.write(msh.SectorData);

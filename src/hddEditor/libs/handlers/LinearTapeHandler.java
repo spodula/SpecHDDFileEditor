@@ -27,9 +27,9 @@ public class LinearTapeHandler extends OSHandler {
 		SystemPart.SetEndSector(
 				(long) (CurrentDisk.GetNumCylinders() * CurrentDisk.GetNumHeads() * CurrentDisk.GetNumSectors()));
 
-		String fn = CurrentDisk.GetFilename().toUpperCase();
-
-		if (fn.endsWith(".MDR")) {
+		String cn = CurrentDisk.getClass().getName();
+		
+		if (cn.endsWith("MDFMicrodriveFile")) {
 			rawData = PLUSIDEDOS.GetSystemPartition(CurrentDisk.GetNumCylinders(), CurrentDisk.GetNumHeads(),
 					CurrentDisk.GetNumSectors(),CurrentDisk.GetSectorSize() , false);
 			SinclairMicrodrivePartition smp = new SinclairMicrodrivePartition(1, CurrentDisk, rawData, 1, false);
@@ -41,7 +41,7 @@ public class LinearTapeHandler extends OSHandler {
 			SystemPart.partitions = new IDEDosPartition[2];
 			SystemPart.partitions[0] = SystemPart;
 			SystemPart.partitions[1] = smp;
-		} else if (fn.endsWith(".TAP")) {
+		} else if (cn.endsWith("TAPFile")) {
 			rawData = PLUSIDEDOS.GetSystemPartition(CurrentDisk.GetNumCylinders(), CurrentDisk.GetNumHeads(),
 					CurrentDisk.GetNumSectors(),CurrentDisk.GetSectorSize() , false);
 	
