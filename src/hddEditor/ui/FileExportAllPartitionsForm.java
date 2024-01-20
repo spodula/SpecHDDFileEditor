@@ -26,6 +26,7 @@ import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.ProgressCallback;
 import hddEditor.libs.partitions.SystemPartition;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
+import hddEditor.libs.partitions.tap.TapDirectoryEntry;
 import hddEditor.ui.partitionPages.dialogs.PartitionExportProgress;
 
 public class FileExportAllPartitionsForm {
@@ -405,7 +406,6 @@ public class FileExportAllPartitionsForm {
 								SysConfig = new FileWriter(new File(filefolder, "partition.index"), false);
 								SysConfig.close();
 							} catch (IOException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 
@@ -497,7 +497,7 @@ public class FileExportAllPartitionsForm {
 												.toCharArray());
 										if (p3d == null || !p3d.IsPlusThreeDosFile) {
 											// Treat CPM files as raw files.
-											SysConfig.write("   <origfiletype>CPM</origfiletype>\n".toCharArray());
+											SysConfig.write("   <origfiletype>TAP</origfiletype>\n".toCharArray());
 											SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
 											SysConfig.write(("       <filetype>3</filetype>\n").toCharArray());
 											SysConfig.write(("       <filetypename>" + Speccy.FileTypeAsString(3)
@@ -506,7 +506,7 @@ public class FileExportAllPartitionsForm {
 													("       <codeloadaddr>32768</codeloadaddr>\n").toCharArray());
 											SysConfig.write(("   </specbasicinfo>\n".toCharArray()));
 										} else {
-											SysConfig.write("   <origfiletype>PLUS3DOS</origfiletype>\n".toCharArray());
+											SysConfig.write("   <origfiletype>TAP</origfiletype>\n".toCharArray());
 											SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
 											SysConfig.write(("       <filetype>" + p3d.filetype + "</filetype>\n")
 													.toCharArray());
@@ -527,19 +527,15 @@ public class FileExportAllPartitionsForm {
 													.write(("       <arrayvarname>" + p3d.VarName + "</arrayvarname>\n")
 															.toCharArray());
 											SysConfig.write(("   </specbasicinfo>\n".toCharArray()));
-											SysConfig.write(("   <specplus3>\n".toCharArray()));
-											SysConfig.write(("       <signature>" + p3d.Signature + "</signature>\n")
+											SysConfig.write(("   <tap>\n".toCharArray()));
+											SysConfig.write(("       <srcfile>" + ThisDisk.CurrentDisk.GetFilename()+ "</srcfile>\n")
 													.toCharArray());
-											SysConfig.write(
-													("       <softEOF>" + p3d.SoftEOF + "</softEOF>\n").toCharArray());
-											SysConfig.write(("       <iss>" + p3d.IssueNo + "</iss>\n").toCharArray());
-											SysConfig
-													.write(("       <ver>" + p3d.VersionNo + "</ver>\n").toCharArray());
-											SysConfig.write(
-													("       <rawsize>" + p3d.fileSize + "</rawsize>\n").toCharArray());
-											SysConfig.write(("       <checksum>" + p3d.CheckSum + "</checksum>\n")
-													.toCharArray());
-											SysConfig.write(("   </specplus3>\n".toCharArray()));
+											TapDirectoryEntry tf = (TapDirectoryEntry)file;
+											SysConfig.write(("       <datablocknum>"+tf.DataBlock.blocknum+"</datablocknum>\n").toCharArray());
+											if (tf.HeaderBlock!=null) {
+												SysConfig.write(("       <headerblocknum>"+tf.HeaderBlock.blocknum+"</headerblocknum>\n").toCharArray());												
+											}
+											SysConfig.write(("   </tap>\n".toCharArray()));
 										}
 
 										SysConfig.write("</file>\n".toCharArray());

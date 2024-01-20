@@ -1,5 +1,6 @@
 package hddEditor.ui;
-//TODO, rename files that don't fit new filename lengths
+//TODO: viewer for sprites
+//TODO: support for TZX file
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +21,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.DiskUtils;
 import hddEditor.libs.GeneralUtils;
@@ -37,7 +37,7 @@ public class FileImportForm {
 	private Display display = null;
 	private Shell shell = null;
 
-	private Text Sourcefile = null;
+	private Label Sourcefile = null;
 
 	private Combo SourcePartition = null;
 	private Button SelectSourceFileBtn = null;
@@ -47,7 +47,6 @@ public class FileImportForm {
 
 	private Disk CurrentSourceDisk = null;
 	private OSHandler CurrentSourceHandler = null;
-
 	private OSHandler CurrentTargetHandler;
 
 	private Combo TargetPartition = null;
@@ -92,11 +91,12 @@ public class FileImportForm {
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
 
-		Sourcefile = new Text(shell, SWT.BORDER);
+		Sourcefile = new Label(shell, SWT.BORDER);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 3;
 		gd.widthHint = 600;
 		Sourcefile.setLayoutData(gd);
+		Sourcefile.setAlignment(SWT.CENTER);
 		Sourcefile.setText("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
 		SelectSourceFileBtn = new Button(shell, SWT.BORDER);
@@ -111,6 +111,7 @@ public class FileImportForm {
 				FileDialog fd = new FileDialog(shell, SWT.OPEN);
 				fd.setText("Select source file");
 				fd.setFilterExtensions(HDDEditor.SUPPORTEDFILETYPES);
+				
 				String selected = fd.open();
 				if (selected != null) {
 					Sourcefile.setText(selected);
@@ -319,10 +320,7 @@ public class FileImportForm {
 						SpeccyBasicDetails sbd = fe.GetSpeccyBasicDetails();
 						String filename = fe.GetFilename();
 
-						FileEntry otherentries[] =  TargetPartition.GetFileList(filename);
-						if (otherentries != null && otherentries.length>0) {
-							filename =  TargetPartition.UniqueifyFileNameIfRequired(filename);
-						}
+						filename =  TargetPartition.UniqueifyFileNameIfRequired(filename);
 						switch (sbd.BasicType) {
 						case Speccy.BASIC_BASIC:
 							TargetPartition.AddBasicFile(filename, fe.GetFileData(), sbd.LineStart,

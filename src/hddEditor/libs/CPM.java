@@ -52,13 +52,12 @@ public class CPM {
 	public static String Validchars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\"#$'@^_{}~`_";
 	
 	public static boolean CharIsCPMValid(char c) {
-		boolean found = false;
 		for(int j=0;j<Validchars.length();j++) {
 			if (Validchars.charAt(j) == c) {
-				found = true;
+				return(true);
 			}
 		}
-		return (found);
+		return (false);
 	}
 
 }

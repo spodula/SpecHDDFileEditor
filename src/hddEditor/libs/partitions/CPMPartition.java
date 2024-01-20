@@ -224,12 +224,12 @@ public class CPMPartition extends IDEDosPartition {
 			ArrayList<Integer> FreeDirents = new ArrayList<Integer>();
 			for (int i = 0; i < Dirents.length; i++) {
 				int typ = Dirents[i].getType();
-				//System.out.println(typ);
+				// System.out.println(typ);
 				if (typ == Dirent.DIRENT_DELETED || typ == Dirent.DIRENT_UNUSED) {
 					FreeDirents.add(i);
 				}
 			}
-			//System.out.println("Free Dirents: " + FreeDirents.size());
+			// System.out.println("Free Dirents: " + FreeDirents.size());
 
 			// seperate the filename
 			filename = filename.toUpperCase();
@@ -733,31 +733,35 @@ public class CPMPartition extends IDEDosPartition {
 	 * 
 	 * @return
 	 */
-	@Override	
+	@Override
 	public FileEntry[] GetFileList() {
 		return DirectoryEntries;
 	}
-	
-	
+
 	/**
 	 * Uniquify a filename if required. (IE, a disk)
+	 * 
 	 * @param filename
 	 * @return
 	 */
 	@Override
 	public String UniqueifyFileNameIfRequired(String filename) {
+		//Initial correction for CPM entries
+		filename = CPM.FixFullName(filename);
+		
+		//Split prefix and suffix
 		String prefix = CPM.FixFullName(filename);
 		if (prefix.indexOf(".") > -1) {
-			prefix = prefix.substring(0,prefix.indexOf("."));
+			prefix = prefix.substring(0, prefix.indexOf("."));
 		}
-		
-		int index=1;
+
+		int index = 1;
 		FileEntry existingEntries[] = GetFileList(filename);
 		while (existingEntries.length > 0) {
-			filename = prefix+"."+String.format("%03d", index++);
-			existingEntries = GetFileList(filename);			
+			filename = prefix + "." + String.format("%03d", index++);
+			existingEntries = GetFileList(filename);
 		}
 		return filename;
 	}
-	
+
 }
