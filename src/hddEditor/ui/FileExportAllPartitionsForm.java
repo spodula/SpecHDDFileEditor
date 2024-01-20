@@ -3,6 +3,7 @@ package hddEditor.ui;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -486,59 +487,61 @@ public class FileExportAllPartitionsForm {
 									Speccy.SaveFileToDiskAdvanced(new File(filefolder, file.GetFilename()), data,
 											cpmdata, filelength, SpeccyFileType, basicLine, basicVarsOffset,
 											codeLoadAddress, arrayVarName, actiontype);
-									SysConfig = new FileWriter(new File(filefolder, "partition.index"),
-											true);
+									SysConfig = new FileWriter(new File(filefolder, "partition.index"), true);
 									try {
-										// TODO: SYSCONFIG needs to be moved to a library
-										SysConfig.write("<file>\n".toCharArray());
-										SysConfig.write(("   <filename>" + file.GetFilename().trim() + "</filename>\n")
-												.toCharArray());
-										SysConfig.write(("   <filelength>" + file.GetFileSize() + "</filelength>\n")
-												.toCharArray());
-										if (p3d == null || !p3d.IsPlusThreeDosFile) {
-											// Treat CPM files as raw files.
-											SysConfig.write("   <origfiletype>TAP</origfiletype>\n".toCharArray());
-											SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
-											SysConfig.write(("       <filetype>3</filetype>\n").toCharArray());
-											SysConfig.write(("       <filetypename>" + Speccy.FileTypeAsString(3)
-													+ "</filetypename>\n").toCharArray());
-											SysConfig.write(
-													("       <codeloadaddr>32768</codeloadaddr>\n").toCharArray());
-											SysConfig.write(("   </specbasicinfo>\n".toCharArray()));
-										} else {
-											SysConfig.write("   <origfiletype>TAP</origfiletype>\n".toCharArray());
-											SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
-											SysConfig.write(("       <filetype>" + p3d.filetype + "</filetype>\n")
-													.toCharArray());
-											SysConfig.write(
-													("       <filetypename>" + Speccy.FileTypeAsString(p3d.filetype)
-															+ "</filetypename>\n").toCharArray());
-											SysConfig.write(("       <basicsize>" + p3d.filelength + "</basicsize>\n")
-													.toCharArray());
-											SysConfig.write(
-													("       <basicstartline>" + p3d.line + "</basicstartline>\n")
-															.toCharArray());
-											SysConfig.write(
-													("       <codeloadaddr>" + p3d.loadAddr + "</codeloadaddr>\n")
-															.toCharArray());
-											SysConfig.write(("       <basicvarsoffset>" + p3d.VariablesOffset
-													+ "</basicvarsoffset>\n").toCharArray());
-											SysConfig
-													.write(("       <arrayvarname>" + p3d.VarName + "</arrayvarname>\n")
-															.toCharArray());
-											SysConfig.write(("   </specbasicinfo>\n".toCharArray()));
-											SysConfig.write(("   <tap>\n".toCharArray()));
-											SysConfig.write(("       <srcfile>" + ThisDisk.CurrentDisk.GetFilename()+ "</srcfile>\n")
-													.toCharArray());
-											TapDirectoryEntry tf = (TapDirectoryEntry)file;
-											SysConfig.write(("       <datablocknum>"+tf.DataBlock.blocknum+"</datablocknum>\n").toCharArray());
-											if (tf.HeaderBlock!=null) {
-												SysConfig.write(("       <headerblocknum>"+tf.HeaderBlock.blocknum+"</headerblocknum>\n").toCharArray());												
-											}
-											SysConfig.write(("   </tap>\n".toCharArray()));
-										}
+										PrintWriter SysConfigp = new PrintWriter(SysConfig);
+										try {
+											SysConfigp.println("<file>");
+											SysConfigp.println(
+													"   <filename>" + file.GetFilename().trim() + "</filename>");
+											SysConfigp
+													.println("   <filelength>" + file.GetFileSize() + "</filelength>");
 
-										SysConfig.write("</file>\n".toCharArray());
+											if (p3d == null || !p3d.IsPlusThreeDosFile) {
+												// Treat CPM files as raw files.
+												SysConfigp.println("   <origfiletype>TAP</origfiletype>");
+												SysConfigp.println("   <specbasicinfo>");
+												SysConfigp.println("       <filetype>3</filetype>");
+												SysConfigp.println("       <filetypename>" + Speccy.FileTypeAsString(3)
+														+ "</filetypename>");
+												SysConfigp.println("       <codeloadaddr>32768</codeloadaddr>");
+												SysConfigp.println("   </specbasicinfo>");
+											} else {
+												SysConfigp.println("   <origfiletype>TAP</origfiletype>");
+												SysConfigp.println("   <specbasicinfo>");
+												SysConfigp.println("       <filetype>" + p3d.filetype + "</filetype>");
+												SysConfigp.println("       <filetypename>"
+														+ Speccy.FileTypeAsString(p3d.filetype) + "</filetypename>");
+												SysConfigp.println(
+														"       <basicsize>" + p3d.filelength + "</basicsize>");
+												SysConfigp.println(
+														"       <basicstartline>" + p3d.line + "</basicstartline>");
+												SysConfigp.println(
+														"       <codeloadaddr>" + p3d.loadAddr + "</codeloadaddr>");
+												SysConfigp.println("       <basicvarsoffset>" + p3d.VariablesOffset
+														+ "</basicvarsoffset>");
+												SysConfigp.println(
+														"       <arrayvarname>" + p3d.VarName + "</arrayvarname>");
+												SysConfigp.println("   </specbasicinfo>");
+											}
+											if (file.getClass().getName().endsWith("TapDirectoryEntry")) {
+												SysConfigp.println("   <tap>");
+												SysConfigp.println("       <srcfile>"
+														+ ThisDisk.CurrentDisk.GetFilename() + "</srcfile>");
+												TapDirectoryEntry tf = (TapDirectoryEntry) file;
+												SysConfigp.println("       <datablocknum>" + tf.DataBlock.blocknum
+														+ "</datablocknum>");
+												if (tf.HeaderBlock != null) {
+													SysConfigp.println("       <headerblocknum>"
+															+ tf.HeaderBlock.blocknum + "</headerblocknum>");
+												}
+												SysConfigp.println("   </tap>");
+											}
+
+											SysConfigp.println("</file>");
+										} finally {
+											SysConfigp.close();
+										}
 									} finally {
 										SysConfig.close();
 									}
