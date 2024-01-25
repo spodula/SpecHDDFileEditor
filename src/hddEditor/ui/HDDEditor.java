@@ -136,7 +136,7 @@ public class HDDEditor {
 				fd.setText("Open a media file...");
 				fd.setFilterExtensions(HDDEditor.SUPPORTEDFILETYPES);
 
-				if (CurrentDisk.IsOpen()) {
+				if (CurrentDisk!=null && CurrentDisk.IsOpen()) {
 					File f = new File(CurrentDisk.GetFilename());
 					fd.setFilterPath(f.getPath());
 				}
