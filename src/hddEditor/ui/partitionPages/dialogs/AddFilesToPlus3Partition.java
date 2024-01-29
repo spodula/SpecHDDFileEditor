@@ -25,6 +25,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -1066,7 +1067,7 @@ public class AddFilesToPlus3Partition {
 				break;
 			case FILETYPE_CODE:
 			case FILETYPE_CPM:
-				RenderCode(data);
+				RenderCode(details);
 				break;
 			case FILETYPE_SCREEN:
 				RenderScreen(data, details);
@@ -1075,6 +1076,9 @@ public class AddFilesToPlus3Partition {
 
 			MainPage.pack();
 			shell.pack();
+			shell.layout(true,true);
+			final Point newSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);  
+			shell.setSize(newSize);
 		}
 	}
 
@@ -1274,7 +1278,9 @@ public class AddFilesToPlus3Partition {
 	 * 
 	 * @param data
 	 */
-	private void RenderCode(byte data[]) {
+	private void RenderCode(NewFileListItem details) {
+		byte data[] = details.data;
+
 		int AddressLength = String.format("%X", data.length - 1).length();
 
 		Table HexTable = new Table(MainPage, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
@@ -1304,7 +1310,7 @@ public class AddFilesToPlus3Partition {
 		if (data.length % 16 != 0) {
 			numrows++;
 		}
-		int Address = 0;
+		int Address = details.LoadAddress;
 
 		Font mono = new Font(MainPage.getDisplay(), "Monospace", 10, SWT.NONE);
 		for (int rownum = 0; rownum < numrows; rownum++) {

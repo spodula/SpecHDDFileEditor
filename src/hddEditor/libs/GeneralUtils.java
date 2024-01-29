@@ -1,5 +1,4 @@
 package hddEditor.libs;
-//TODO: Drag and drop files into partitions
 
 import java.io.File;
 import java.io.FileInputStream;

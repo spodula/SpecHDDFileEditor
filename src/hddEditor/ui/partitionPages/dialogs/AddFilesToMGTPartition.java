@@ -19,6 +19,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -867,6 +868,10 @@ public class AddFilesToMGTPartition {
 
 			MainPage.pack();
 			shell.pack();
+			shell.layout(true,true);
+			final Point newSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);  
+			shell.setSize(newSize);
+
 		} 
 	}
 
