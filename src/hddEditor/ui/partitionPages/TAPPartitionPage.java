@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.TableItem;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.LINEAR.TAPFile;
 import hddEditor.libs.partitions.IDEDosPartition;
-import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.TAPPartition;
 import hddEditor.libs.partitions.tap.TapDirectoryEntry;
 import hddEditor.ui.FileExportAllPartitionsForm;
@@ -37,7 +36,6 @@ import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
 import hddEditor.ui.partitionPages.dialogs.TapFileEditDialog;
 import hddEditor.ui.partitionPages.dialogs.drop.DropFilesToTapPartition;
-import hddEditor.ui.partitionPages.dialogs.drop.DropFilestoPlus3Partition;
 
 public class TAPPartitionPage extends GenericPage {
 	Table DirectoryListing = null;

@@ -40,9 +40,7 @@ import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.SpeccyFileEncoders;
 import hddEditor.libs.partitions.IDEDosPartition;
-import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
-import hddEditor.ui.partitionPages.dialogs.drop.GenericDropForm.NewFileListItem;
 
 public class GenericDropForm {
 
