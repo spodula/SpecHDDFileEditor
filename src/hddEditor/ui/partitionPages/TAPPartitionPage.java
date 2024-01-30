@@ -1,8 +1,19 @@
 package hddEditor.ui.partitionPages;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -16,6 +27,7 @@ import org.eclipse.swt.widgets.TableItem;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.LINEAR.TAPFile;
 import hddEditor.libs.partitions.IDEDosPartition;
+import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.TAPPartition;
 import hddEditor.libs.partitions.tap.TapDirectoryEntry;
 import hddEditor.ui.FileExportAllPartitionsForm;
@@ -24,6 +36,8 @@ import hddEditor.ui.partitionPages.dialogs.AddFilesToTAPPartition;
 import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
 import hddEditor.ui.partitionPages.dialogs.TapFileEditDialog;
+import hddEditor.ui.partitionPages.dialogs.drop.DropFilesToTapPartition;
+import hddEditor.ui.partitionPages.dialogs.drop.DropFilestoPlus3Partition;
 
 public class TAPPartitionPage extends GenericPage {
 	Table DirectoryListing = null;
@@ -78,6 +92,47 @@ public class TAPPartitionPage extends GenericPage {
 			tc3.setWidth(150);
 			tc4.setWidth(100);
 			DirectoryListing.setHeaderVisible(true);
+			
+			/***********************************************************************************/
+
+			// Create the drop target
+			DropTarget target = new DropTarget(DirectoryListing, DND.DROP_LINK | DND.DROP_COPY | DND.DROP_DEFAULT);
+			Transfer[] types = new Transfer[] { TextTransfer.getInstance() };
+			target.setTransfer(types);
+			target.addDropListener(new DropTargetAdapter() {
+				public void dragEnter(DropTargetEvent event) {
+					if (event.detail == DND.DROP_DEFAULT) {
+						event.detail = (event.operations & DND.DROP_COPY) != 0 ? DND.DROP_COPY : DND.DROP_NONE;
+					}
+
+					// Allow dropping text only
+					for (int i = 0, n = event.dataTypes.length; i < n; i++) {
+						if (TextTransfer.getInstance().isSupportedType(event.dataTypes[i])) {
+							event.currentDataType = event.dataTypes[i];
+						}
+					}
+				}
+
+				public void dragOver(DropTargetEvent event) {
+					event.feedback = DND.FEEDBACK_SELECT | DND.FEEDBACK_SCROLL;
+				}
+
+				public void drop(DropTargetEvent event) {
+					if (TextTransfer.getInstance().isSupportedType(event.currentDataType)) {
+						String[] filenames = null;
+						if (event.data instanceof String[]) {
+							filenames = (String[]) event.data;
+						} else if (event.data instanceof String) {
+							filenames = ((String) event.data).split("\n");
+						}
+						if (filenames != null) {
+							DoDropFile(filenames);
+						}
+					}
+				}
+			});
+			/***********************************************************************************/
+
 
 			UpdateDirectoryEntryList();
 
@@ -190,6 +245,31 @@ public class TAPPartitionPage extends GenericPage {
 				}
 			});
 			ParentComp.pack();
+		}
+	}
+
+	protected void DoDropFile(String[] filenames) {
+		File fFiles[] = new File[filenames.length];
+		int i = 0;
+		for (String file : filenames) {
+			try {
+				URL url = new URL(file);
+				URI uri = url.toURI();
+				file = uri.getPath();
+			} catch (MalformedURLException e) {
+				System.out.println("Cannot parse " + file);
+			} catch (URISyntaxException e) {
+				System.out.println("Cannot parse " + file);
+			}
+			System.out.println(file);
+			fFiles[i++] = new File(file);
+		}
+
+		DropFilesToTapPartition DropFilesDialog = new DropFilesToTapPartition(ParentComp.getDisplay());
+		DropFilesDialog.Show("Add files", partition, fFiles);
+		DropFilesDialog = null;
+		if (!ParentComp.isDisposed()) {
+			AddComponents();
 		}
 	}
 

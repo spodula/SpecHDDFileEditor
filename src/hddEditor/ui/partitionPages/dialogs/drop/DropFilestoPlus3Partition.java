@@ -1,5 +1,5 @@
 package hddEditor.ui.partitionPages.dialogs.drop;
-//TODO: add drag from to MDR, MGT, TAP, TRDOS
+//TODO: add drag from to MDR, MGT, TRDOS
 
 //TODO: Drag from program
 
@@ -176,7 +176,7 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 	}
 
 	/**
-	 * Quick hack routine to get the file data from a file taking into account the
+	 * Routine to get the file data from a file taking into account the
 	 * +3DOS file type header for the appropriate type.
 	 * 
 	 * @param details

@@ -1103,7 +1103,6 @@ public class GenericDropForm {
 	 * Add the files. This is the generic method.  Override it to add additional file types.
 	 */
 	protected void DoAddFiles() {
-		PLUS3DOSPartition pfd = (PLUS3DOSPartition) CurrentPartition;
 		TableItem files[] = DirectoryListing.getItems();
 		for (TableItem file : files) {
 			NewFileListItem details = (NewFileListItem) file.getData();
