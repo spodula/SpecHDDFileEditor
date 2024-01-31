@@ -48,11 +48,11 @@ import hddEditor.libs.partitions.TrDosPartition;
 import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
 import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;
-import hddEditor.ui.partitionPages.dialogs.AddFilesToMGTPartition;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.MGTDosFileEditDialog;
 import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
+import hddEditor.ui.partitionPages.dialogs.AddFiles.AddFilesToMGTPartition;
 import hddEditor.ui.partitionPages.dialogs.drop.DropFilesToTapPartition;
 
 public class MGTDosPartitionPage extends GenericPage {

@@ -42,11 +42,11 @@ import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 import hddEditor.libs.partitions.CPMPartition;
 import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;
-import hddEditor.ui.partitionPages.dialogs.AddFilesToPlus3Partition;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
 import hddEditor.ui.partitionPages.dialogs.SpectrumFileEditDialog;
+import hddEditor.ui.partitionPages.dialogs.AddFiles.AddFilesToPlus3Partition;
 import hddEditor.ui.partitionPages.dialogs.drop.DropFilestoPlus3Partition;
 
 public class PlusThreePartPage extends GenericPage {

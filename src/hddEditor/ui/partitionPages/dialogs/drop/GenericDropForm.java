@@ -1,4 +1,8 @@
 package hddEditor.ui.partitionPages.dialogs.drop;
+/**
+ * Drag and drop form. Contains most of the common elements for items 
+ * dropped from an external source.
+ */
 
 import java.awt.image.BufferedImage;
 import java.io.File;

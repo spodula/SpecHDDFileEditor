@@ -1,4 +1,4 @@
-package hddEditor.ui.partitionPages.dialogs;
+package hddEditor.ui.partitionPages.dialogs.AddFiles;
 
 /**
  * Add files to the +3DOS partition

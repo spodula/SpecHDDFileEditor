@@ -31,10 +31,10 @@ import hddEditor.libs.partitions.TAPPartition;
 import hddEditor.libs.partitions.tap.TapDirectoryEntry;
 import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;
-import hddEditor.ui.partitionPages.dialogs.AddFilesToTAPPartition;
 import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
 import hddEditor.ui.partitionPages.dialogs.TapFileEditDialog;
+import hddEditor.ui.partitionPages.dialogs.AddFiles.AddFilesToTAPPartition;
 import hddEditor.ui.partitionPages.dialogs.drop.DropFilesToTapPartition;
 
 public class TAPPartitionPage extends GenericPage {

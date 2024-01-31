@@ -29,11 +29,11 @@ import hddEditor.libs.partitions.TrDosPartition;
 import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
 import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;
-import hddEditor.ui.partitionPages.dialogs.AddFilesToTrDosPartition;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
 import hddEditor.ui.partitionPages.dialogs.TrDosFileEditDialog;
+import hddEditor.ui.partitionPages.dialogs.AddFiles.AddFilesToTrDosPartition;
 import hddEditor.ui.partitionPages.dialogs.drop.DropFilesToTapPartition;
 
 public class TrDosPartitionPage extends GenericPage {

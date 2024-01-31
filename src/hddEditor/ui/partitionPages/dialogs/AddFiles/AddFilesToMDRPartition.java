@@ -1,4 +1,4 @@
-package hddEditor.ui.partitionPages.dialogs;
+package hddEditor.ui.partitionPages.dialogs.AddFiles;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
