@@ -80,6 +80,13 @@ public class HDDEditor {
 
 	private String helpcontext = "Main";
 
+	public int dragindex = 0;
+	String dragtypes[] = { "TYPE","RAW","HEX" };
+	
+	public static int DRAG_TYPE = 0;
+	public static int DRAG_RAW = 1;
+	public static int DRAG_HEX = 2;
+	
 	/**
 	 * Make the menus
 	 */
@@ -193,9 +200,38 @@ public class HDDEditor {
 			}
 		});
 
+		MenuItem OptMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
+		OptMenuHeader.setText("&Drag out default");
+		
+		Menu OptMenu = new Menu(shell, SWT.DROP_DOWN);
+		OptMenuHeader.setMenu(OptMenu);
+
+
+		for(int i=0; i<dragtypes.length;i++) {
+			MenuItem DefaultDragTypeItem = new MenuItem(OptMenu, SWT.RADIO);
+			DefaultDragTypeItem.setText("&Drag out default: "+dragtypes[i]);
+			DefaultDragTypeItem.setData(i);
+			DefaultDragTypeItem.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					dragindex = (int) arg0.widget.getData();
+					System.out.println(dragindex);
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+			if (i==0) {
+				DefaultDragTypeItem.setSelection(true);
+			}
+			
+		}
+		
 		MenuItem helpMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
 		helpMenuHeader.setText("&Help");
-
+		
 		Menu helpMenu = new Menu(shell, SWT.DROP_DOWN);
 		helpMenuHeader.setMenu(helpMenu);
 
@@ -318,8 +354,12 @@ public class HDDEditor {
 	public void loop() {
 		shell.open();
 		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
+			try {
+				if (!display.readAndDispatch())
 				display.sleep();
+			} catch (Exception E) {
+				E.printStackTrace();
+			}
 		}
 		display.dispose();
 	}
@@ -464,16 +504,16 @@ public class HDDEditor {
 			new TrDosPartitionPage(this, MainPage, part);
 			break;
 		case PLUSIDEDOS.PARTITION_TAPE_SINCLAIRMICRODRIVE:
-			new MicrodrivePartitionPage(null, MainPage, part);
+			new MicrodrivePartitionPage(this, MainPage, part);
 			break;
 		case PLUSIDEDOS.PARTITION_TAPE_TAP:
-			new TAPPartitionPage(null, MainPage, part);
+			new TAPPartitionPage(this, MainPage, part);
 			break;
 		case PLUSIDEDOS.PARTITION_DISK_PLUSD:
-			new MGTDosPartitionPage(null, MainPage, part);
+			new MGTDosPartitionPage(this, MainPage, part);
 			break;
 		case PLUSIDEDOS.PARTITION_UNKNOWN:
-			new FloppyGenericPage(null, MainPage, part);
+			new FloppyGenericPage(this, MainPage, part);
 			break;
 		default:
 			new GenericPage(this, MainPage, part);

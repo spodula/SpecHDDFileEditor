@@ -9,7 +9,6 @@ public class DropFilesToTapPartition extends GenericDropForm {
 
 	public DropFilesToTapPartition(Display display) {
 		super(display);
-		// TODO Auto-generated constructor stub
 	}
 	
 	@Override

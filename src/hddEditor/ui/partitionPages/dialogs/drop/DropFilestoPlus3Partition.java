@@ -3,9 +3,6 @@ package hddEditor.ui.partitionPages.dialogs.drop;
  * Extra bits required to drop to a +3DOS partition
  * Mostly additions to allow dropping +3DOS files with headers
  */
-//TODO: Drag from program
-//TODO: Drag out to disk
-//TODO: Drag out to program
 
 import java.io.File;
 import java.io.IOException;

@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages;
+//TODO: Subclass some of the Partition page stuff.
 
 import java.io.File;
 
@@ -14,10 +15,13 @@ import java.net.URL;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSource;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.DropTargetEvent;
-import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -35,6 +39,9 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Speccy;
+import hddEditor.libs.disks.FileEntry;
+import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
@@ -141,8 +148,7 @@ public class PlusThreePartPage extends GenericPage {
 
 			// Create the drop target
 			DropTarget target = new DropTarget(DirectoryListing, DND.DROP_LINK | DND.DROP_COPY | DND.DROP_DEFAULT);
-			Transfer[] types = new Transfer[] { TextTransfer.getInstance() };
-			target.setTransfer(types);
+			target.setTransfer(new Transfer[] { FileTransfer.getInstance() });
 			target.addDropListener(new DropTargetAdapter() {
 				public void dragEnter(DropTargetEvent event) {
 					if (event.detail == DND.DROP_DEFAULT) {
@@ -151,7 +157,7 @@ public class PlusThreePartPage extends GenericPage {
 
 					// Allow dropping text only
 					for (int i = 0, n = event.dataTypes.length; i < n; i++) {
-						if (TextTransfer.getInstance().isSupportedType(event.dataTypes[i])) {
+						if (FileTransfer.getInstance().isSupportedType(event.dataTypes[i])) {
 							event.currentDataType = event.dataTypes[i];
 						}
 					}
@@ -162,7 +168,7 @@ public class PlusThreePartPage extends GenericPage {
 				}
 
 				public void drop(DropTargetEvent event) {
-					if (TextTransfer.getInstance().isSupportedType(event.currentDataType)) {
+					if (FileTransfer.getInstance().isSupportedType(event.currentDataType)) {
 						String[] filenames = null;
 						if (event.data instanceof String[]) {
 							filenames = (String[]) event.data;
@@ -175,6 +181,96 @@ public class PlusThreePartPage extends GenericPage {
 					}
 				}
 			});
+			
+			/***********************************************************************************/
+			DragSource source = new DragSource(DirectoryListing, DND.DROP_MOVE | DND.DROP_COPY );
+			source.setTransfer(new Transfer[] { FileTransfer.getInstance() });
+			source.addDragListener(new DragSourceListener() {
+				File tempfiles[];
+
+				public void dragStart(DragSourceEvent event) {
+					event.doit = DirectoryListing.getSelectionCount() != 0;
+					if (event.doit) {
+						TableItem ItemsToDrag[] = DirectoryListing.getSelection();
+						tempfiles = new File[ItemsToDrag.length];
+						int i = 0;
+						for (TableItem item : ItemsToDrag) {
+							try {
+								File f = File.createTempFile("YYYY", "xxx");
+								int exporttype = RootPage.dragindex;
+								
+								FileEntry entry = (FileEntry) item.getData();
+								System.out.println("Exporttype:" +exporttype);
+								if (exporttype==HDDEditor.DRAG_TYPE) {
+									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
+									int actiontype = GeneralUtils.EXPORT_TYPE_HEX;
+									switch (sd.BasicType) {
+									case (Speccy.BASIC_BASIC):
+										actiontype = GeneralUtils.EXPORT_TYPE_TXT;
+										break;
+									case (Speccy.BASIC_NUMARRAY):
+										actiontype = GeneralUtils.EXPORT_TYPE_CSV;
+										break;
+									case (Speccy.BASIC_CHRARRAY):
+										actiontype = GeneralUtils.EXPORT_TYPE_CSV;
+										break;
+									case (Speccy.BASIC_CODE):
+										System.out.println("CODE: "+entry.GetFileSize());
+										if (entry.GetFileSize() == 0x1b00) {
+											actiontype = GeneralUtils.EXPORT_TYPE_PNG;
+										} else {
+											actiontype = GeneralUtils.EXPORT_TYPE_HEX;
+										}
+										break;
+									default:
+										actiontype = GeneralUtils.EXPORT_TYPE_HEX;
+									}
+									
+									
+									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(), entry.GetFileData().length,
+											sd.BasicType, sd.LineStart, sd.VarStart, sd.LoadAddress, sd.VarName+"",
+											actiontype);								
+								} else if (exporttype==HDDEditor.DRAG_RAW) {
+									GeneralUtils.WriteBlockToDisk(entry.GetFileData(), f);									
+								} else {
+									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
+									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(), entry.GetFileData().length,
+											sd.BasicType, sd.LineStart, sd.VarStart, sd.LoadAddress, sd.VarName+"",
+											GeneralUtils.EXPORT_TYPE_HEX);								
+								}
+								File f1 = new File(f.getParent(), entry.GetFilename());
+								f.renameTo(f1);
+								f.delete();
+								f1.deleteOnExit();
+								tempfiles[i] = f1;
+								i++;
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+
+				public void dragSetData(DragSourceEvent event) {
+					// Provide the data of the requested type.
+					if (FileTransfer.getInstance().isSupportedType(event.dataType)) {
+						if (tempfiles != null && tempfiles.length > 0) {
+							String data[] = new String[tempfiles.length];
+							for (int i=0;i<tempfiles.length;i++) {
+								File fle = tempfiles[i];
+								data[i] = fle.getAbsolutePath();
+							}
+							event.data = data;
+						}
+					}
+				}
+
+				public void dragFinished(DragSourceEvent event) {
+					if (event.detail == DND.DROP_MOVE) {
+
+					}
+				}
+			}); 
 			/***********************************************************************************/
 
 			PopulateDirectory();
@@ -320,6 +416,9 @@ public class PlusThreePartPage extends GenericPage {
 		}
 	}
 
+	/**
+	 * Populate the directory listing.
+	 */
 	private void PopulateDirectory() {
 		DirectoryListing.clearAll();
 		DirectoryListing.removeAll();
