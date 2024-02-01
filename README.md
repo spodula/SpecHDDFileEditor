@@ -20,6 +20,7 @@ Features:
 * * View and extract numeric and character arrays
 * Edit files as binary (No higher level edit levels yet)
 * Edit System partition details, unmap/remap drives, Default drive,default paper and ink colours.
+* Drag and drop files to and from directories to different instances or Dos folders.
 
 File system documentation:
 * HDF files: https://sinclair.wiki.zxnet.co.uk/wiki/HDF_format
