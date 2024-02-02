@@ -342,8 +342,6 @@ public class AddFilesToPlus3Partition {
 
 			@Override
 			public void focusGained(FocusEvent arg0) {
-				// TODO Auto-generated method stub
-				
 			}
 		});
 		
