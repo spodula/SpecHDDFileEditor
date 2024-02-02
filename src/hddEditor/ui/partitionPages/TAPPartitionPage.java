@@ -35,7 +35,6 @@ import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.LINEAR.TAPFile;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.TAPPartition;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.tap.TapDirectoryEntry;
 import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;

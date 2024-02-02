@@ -53,7 +53,6 @@ import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.MGTDosPartition;
 import hddEditor.libs.partitions.TrDosPartition;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
 import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;

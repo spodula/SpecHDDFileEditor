@@ -36,7 +36,6 @@ import hddEditor.libs.disks.LINEAR.MDFMicrodriveFile;
 import hddEditor.libs.disks.LINEAR.MicrodriveSector;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.SinclairMicrodrivePartition;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.mdf.MicrodriveDirectoryEntry;
 import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;

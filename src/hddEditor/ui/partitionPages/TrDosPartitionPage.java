@@ -34,7 +34,6 @@ import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.TrDosPartition;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
 import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;
