@@ -8,6 +8,9 @@ public class CPM {
 	 * @return
 	 */
 	public static String FixFullName(String s) {
+		if (s.trim().isBlank()) {
+			s = "UNNAMED";
+		}
 		String fname = s.toUpperCase();
 		String filename = "";
 		String extension = "";

@@ -1,4 +1,6 @@
 package hddEditor.ui.partitionPages.dialogs.drop;
+//TODO: Rename files when dropping/imported
+
 /**
  * Extra bits required to drop to a +3DOS partition
  * Mostly additions to allow dropping +3DOS files with headers
