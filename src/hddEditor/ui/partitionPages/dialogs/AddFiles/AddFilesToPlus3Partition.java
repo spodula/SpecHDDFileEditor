@@ -64,6 +64,7 @@ public class AddFilesToPlus3Partition {
 	private Label ImageLabel = null;
 	private Button IsBWCheck = null;
 	private Text StartAddress = null;
+	private Text Filename = null;
 
 	/*
 	 * Current disk.
@@ -315,8 +316,37 @@ public class AddFilesToPlus3Partition {
 		Font font = new Font(shell.getDisplay(), new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 		l.setFont(font);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-		gd.horizontalSpan = 4;
+		gd.horizontalSpan = 2;
 		l.setLayoutData(gd);
+		
+		l = new Label(shell, SWT.LEFT);
+		l.setText("Filename:");
+		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.horizontalSpan = 1;
+		l.setLayoutData(gd);
+		
+		Filename = new Text(shell, SWT.LEFT);
+		Filename.setText("_________");
+		Filename.addFocusListener(new FocusListener() {
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				TableItem SelectedFiles[] = DirectoryListing.getSelection();
+				if (SelectedFiles != null && SelectedFiles.length > 0) {
+					NewFileListItem details = (NewFileListItem) SelectedFiles[0].getData();
+					if (details != null) {
+						details.filename = CPM.FixFullName(Filename.getText());
+						SelectedFiles[0].setText(1, details.filename);
+					}
+				}
+			}
+
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 
 		l = new Label(shell, SWT.LEFT);
 		l.setText("BASIC files:");
@@ -446,6 +476,7 @@ public class AddFilesToPlus3Partition {
 
 		shell.pack();
 		IntensityLabel.setText("Cutoff: 50%");
+		Filename.setText("");
 	}
 
 	/**
@@ -1012,6 +1043,7 @@ public class AddFilesToPlus3Partition {
 			 */
 			TableItem SelectedFile = DirectoryListing.getSelection()[0];
 			NewFileListItem details = (NewFileListItem) SelectedFile.getData();
+			Filename.setText(details.filename);
 			/*
 			 * Remove the old components
 			 */

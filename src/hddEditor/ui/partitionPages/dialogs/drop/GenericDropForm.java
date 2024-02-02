@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.dialogs.drop;
+
 /**
  * Drag and drop form. Contains most of the common elements for items 
  * dropped from an external source.
@@ -99,6 +100,7 @@ public class GenericDropForm {
 	protected Text StartAddress = null;
 	protected Label filenameLabel = null;
 	protected Combo SelectedFileType = null;
+	protected Text diskFilename = null;
 
 	protected NewFileListItem details = null;
 
@@ -218,8 +220,8 @@ public class GenericDropForm {
 		TableColumn tc3 = new TableColumn(DirectoryListing, SWT.LEFT);
 		TableColumn tc4 = new TableColumn(DirectoryListing, SWT.LEFT);
 		TableColumn tc5 = new TableColumn(DirectoryListing, SWT.LEFT);
-		tc1.setText("Filename");
-		tc2.setText("+3 Filename");
+		tc1.setText("External Filename");
+		tc2.setText("Partition Filename");
 		tc3.setText("Type");
 		tc4.setText("Length");
 		tc5.setText("Flags");
@@ -247,8 +249,34 @@ public class GenericDropForm {
 		Font font = new Font(shell.getDisplay(), new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 		filenameLabel.setFont(font);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-		gd.horizontalSpan = 3;
+		gd.horizontalSpan = 1;
 		filenameLabel.setLayoutData(gd);
+
+		Label l = new Label(shell, SWT.LEFT);
+		l.setText("Disk filename:");
+		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.horizontalSpan = 1;
+		l.setLayoutData(gd);
+
+		diskFilename = new Text(shell, SWT.LEFT);
+		diskFilename.setText("________.___");
+		diskFilename.addFocusListener(new FocusListener() {
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				TableItem SelectedFiles[] = DirectoryListing.getSelection();
+				if (SelectedFiles != null && SelectedFiles.length > 0) {
+					NewFileListItem details = (NewFileListItem) SelectedFiles[0].getData();
+					if (details != null) {
+						details.filename = UniqueifyName(diskFilename.getText());
+					}
+					UpdateFlagsFromDetails();
+				}
+			}
+
+			@Override
+			public void focusGained(FocusEvent arg0) {
+			}
+		});
 
 		SelectedFileType = new Combo(shell, SWT.DROP_DOWN);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -275,7 +303,7 @@ public class GenericDropForm {
 			}
 		});
 
-		Label l = new Label(shell, SWT.LEFT);
+		l = new Label(shell, SWT.LEFT);
 		l.setText("BASIC files:");
 		l.setFont(font);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -444,9 +472,9 @@ public class GenericDropForm {
 		shell.pack();
 	}
 
-
 	/**
-	 * Re-render the image after the image slider is moved or the bw/colour button checked.
+	 * Re-render the image after the image slider is moved or the bw/colour button
+	 * checked.
 	 */
 	protected void ReRenderImage() {
 		// If selected file is an image and is selected...
@@ -607,10 +635,12 @@ public class GenericDropForm {
 			IsBWCheck.setSelection(details.IsBlackWhite);
 			intensitySlider.setSelection(details.Intensity);
 			StartAddress.setText(String.format("%d", details.LoadAddress));
+			diskFilename.setText(details.filename);
 			FileTypeChanged();
 			EnableDisableModifiers();
 			shell.pack();
-		}	}
+		}
+	}
 
 	/**
 	 * Render the data as a generic text file.
@@ -632,9 +662,9 @@ public class GenericDropForm {
 	}
 
 	/**
-	 * This gets the actual file data to be added to the disk.
-	 * Normally you don't have to override this, however its provided
-	 * so files like +3DOS and Microdrive files can remove the header.
+	 * This gets the actual file data to be added to the disk. Normally you don't
+	 * have to override this, however its provided so files like +3DOS and
+	 * Microdrive files can remove the header.
 	 * 
 	 * @param details
 	 * @return
@@ -1053,7 +1083,7 @@ public class GenericDropForm {
 		System.out.println("UniqueifyName is not implemented!");
 		return name;
 	}
-	
+
 	/**
 	 * Add one file.
 	 * 
@@ -1067,8 +1097,7 @@ public class GenericDropForm {
 			CurrentPartition.AddBasicFile(details.filename, data, details.StartLine, data.length);
 			break;
 		case FILETYPE_BASIC_ENC:
-			CurrentPartition.AddBasicFile(details.filename, details.data, details.StartLine,
-					details.data.length);
+			CurrentPartition.AddBasicFile(details.filename, details.data, details.StartLine, details.data.length);
 			break;
 		case FILETYPE_CODE:
 			CurrentPartition.AddCodeFile(details.filename, details.LoadAddress, details.data);
@@ -1077,16 +1106,14 @@ public class GenericDropForm {
 			CurrentPartition.AddCodeFile(details.filename, details.LoadAddress, details.data);
 			break;
 		case FILETYPE_CHRARRAY_TEXT:
-			byte chrdata[] = SpeccyFileEncoders.EncodeCharacterArray(details.OriginalFilename.getAbsoluteFile(),
-					512);
+			byte chrdata[] = SpeccyFileEncoders.EncodeCharacterArray(details.OriginalFilename.getAbsoluteFile(), 512);
 			CurrentPartition.AddCharArray(details.filename, chrdata, "");
 			break;
 		case FILETYPE_CHRARRAY_ENC:
 			CurrentPartition.AddCharArray(details.filename, details.data, "");
 			break;
 		case FILETYPE_NUMARRAY_TEXT:
-			byte numdata[] = SpeccyFileEncoders.EncodeNumericArray(details.OriginalFilename.getAbsoluteFile(),
-					512);
+			byte numdata[] = SpeccyFileEncoders.EncodeNumericArray(details.OriginalFilename.getAbsoluteFile(), 512);
 			CurrentPartition.AddNumericArray(details.filename, numdata, "");
 			break;
 		case FILETYPE_NUMARRAY_ENC:
@@ -1102,18 +1129,18 @@ public class GenericDropForm {
 	}
 
 	/**
-	 * Add the files. This is the generic method.  Override it to add additional file types.
+	 * Add the files. This is the generic method. Override it to add additional file
+	 * types.
 	 */
 	protected void DoAddFiles() {
 		TableItem files[] = DirectoryListing.getItems();
 		for (TableItem file : files) {
 			NewFileListItem details = (NewFileListItem) file.getData();
 			try {
-				SaveFileWithDetails(details);					
+				SaveFileWithDetails(details);
 			} catch (IOException e) {
 			}
 		}
 	}
-
 
 }

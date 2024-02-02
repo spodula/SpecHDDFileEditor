@@ -11,6 +11,8 @@ import javax.imageio.ImageIO;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
@@ -55,6 +57,8 @@ public class AddFilesToTrDosPartition {
 	private Label ImageLabel = null;
 	private Button IsBWCheck = null;
 	private Text GenericFileType = null;
+	private Text Filename = null;
+
 
 	/*
 	 * Current disk.
@@ -288,8 +292,34 @@ public class AddFilesToTrDosPartition {
 		Font font = new Font(shell.getDisplay(), new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 		l.setFont(font);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-		gd.horizontalSpan = 4;
+		gd.horizontalSpan = 2;
 		l.setLayoutData(gd);
+		
+		l = new Label(shell, SWT.LEFT);
+		l.setText("Filename:");
+		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.horizontalSpan = 1;
+		l.setLayoutData(gd);
+		
+		Filename = new Text(shell, SWT.LEFT);
+		Filename.setText("________.____");
+		Filename.addFocusListener(new FocusListener() {
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				TableItem SelectedFiles[] = DirectoryListing.getSelection();
+				if (SelectedFiles != null && SelectedFiles.length > 0) {
+					NewFileListItem details = (NewFileListItem) SelectedFiles[0].getData();
+					if (details != null) {
+						details.filename = Filename.getText();
+						SelectedFiles[0].setText(1, details.filename);
+					}
+				}
+			}
+
+			@Override
+			public void focusGained(FocusEvent arg0) {
+			}
+		});
 
 		l = new Label(shell, SWT.LEFT);
 		l.setText("BASIC files:");
@@ -558,6 +588,7 @@ public class AddFilesToTrDosPartition {
 			 */
 			TableItem SelectedFile = DirectoryListing.getSelection()[0];
 			NewFileListItem details = (NewFileListItem) SelectedFile.getData();
+			Filename.setText(details.filename);
 			/*
 			 * Remove the old components
 			 */
