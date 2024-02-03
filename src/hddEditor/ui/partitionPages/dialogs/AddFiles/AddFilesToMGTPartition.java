@@ -1,12 +1,8 @@
 package hddEditor.ui.partitionPages.dialogs.AddFiles;
+//TODO: Try to find out why loading wont remember last locations.
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.imageio.ImageIO;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -25,7 +21,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -35,9 +30,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import hddEditor.libs.CPM;
 import hddEditor.libs.MGT;
-import hddEditor.libs.SpeccyFileEncoders;
 import hddEditor.libs.partitions.MGTDosPartition;
 import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
 
