@@ -1,5 +1,4 @@
 package hddEditor.ui.partitionPages;
-//TODO: Subclass some of the Partition page stuff.
 
 import java.io.File;
 

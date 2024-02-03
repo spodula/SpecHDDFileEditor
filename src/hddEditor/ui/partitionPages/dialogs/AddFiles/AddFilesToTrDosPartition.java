@@ -43,28 +43,17 @@ import hddEditor.libs.TRDOS;
 import hddEditor.libs.partitions.TrDosPartition;
 import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
 
-public class AddFilesToTrDosPartition {
-	private Display display = null;
-	private Shell shell = null;
+public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 
 	/*
 	 * The important components on the form.
 	 */
-	private Table DirectoryListing = null;
-	private Slider intensitySlider = null;
-	private Text StartLine = null;
-	private Composite MainPage = null;
-	private Label ImageLabel = null;
-	private Button IsBWCheck = null;
 	private Text GenericFileType = null;
-	private Text Filename = null;
-
 
 	/*
-	 * Current disk.
+	 * Unlike all other types, for TR-DOS partitions, the
+	 * file types are stored as characters rather than integers.
 	 */
-	private TrDosPartition CurrentPartition = null;
-
 	private final static char FILETYPE_BASIC = 'B';
 	private final static char FILETYPE_NUMARRAY = 'D';
 	private final static char FILETYPE_CHRARRAY = 'E';
@@ -72,49 +61,9 @@ public class AddFilesToTrDosPartition {
 	private final static char FILETYPE_STREAM = '#';
 	private final static char FILETYPE_SCREEN = 'S';
 
-	/*
-	 * This class is used to store the details the files we want to add.
-	 */
-	public class NewFileListItem {
-		// Original filename.
-		public File OriginalFilename = null;
-		// Filename as converted to TR-DOS.
-		public String filename = null;
-		// File type as defined above.
-		public char FileType = FILETYPE_BASIC;
-		// If the file is an image file, this contains the original image. Used so the
-		// user can edit it.
-		public BufferedImage OriginalImage = null;
-		// Intensity
-		public int Intensity = 0;
-		// BW
-		public boolean IsBlackWhite = false;
-		// Raw file data.
-		public byte[] data = null;
-		// BASIC line
-		public int line = 32768;
-
-	}
-
-	/**
-	 * 
-	 */
-	public void close() {
-		shell.close();
-		if (!shell.isDisposed()) {
-			shell.dispose();
-		}
-	}
-
-	/**
-	 * Dispose of any dialogs openned by this partition
-	 */
-	protected void DisposeSubDialogs() {
-
-	}
 
 	public AddFilesToTrDosPartition(Display display) {
-		this.display = display;
+		super(display);
 	}
 
 	public void Show(String Title, TrDosPartition partition) {
@@ -123,14 +72,7 @@ public class AddFilesToTrDosPartition {
 		loop();
 	}
 
-	public void loop() {
-		shell.open();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
-				display.sleep();
-		}
-		shell.dispose();
-	}
+
 
 	private void Createform(String title) {
 		shell = new Shell(display);
@@ -310,7 +252,7 @@ public class AddFilesToTrDosPartition {
 				if (SelectedFiles != null && SelectedFiles.length > 0) {
 					NewFileListItem details = (NewFileListItem) SelectedFiles[0].getData();
 					if (details != null) {
-						details.filename = Filename.getText();
+						details.filename = UniqueifyName(Filename.getText());
 						SelectedFiles[0].setText(1, details.filename);
 					}
 				}
@@ -439,7 +381,8 @@ public class AddFilesToTrDosPartition {
 	 * @param s
 	 * @return
 	 */
-	private String UniqueifyName(String s) {
+	@Override
+	protected String UniqueifyName(String s) {
 		String result = s;
 
 		/*
@@ -467,7 +410,7 @@ public class AddFilesToTrDosPartition {
 		/*
 		 * Add in the files on the disk..
 		 */
-		for (TrdDirectoryEntry d : CurrentPartition.DirectoryEntries) {
+		for (TrdDirectoryEntry d : ((TrDosPartition) CurrentPartition).DirectoryEntries) {
 			String fname = d.GetFilename();
 			currentlist.add(fname);
 		}
@@ -493,34 +436,7 @@ public class AddFilesToTrDosPartition {
 		return (result);
 	}
 
-	protected void ReRenderImage() {
-		// If selected file is an image and is selected...
-		if (ImageLabel != null) {
-			if (DirectoryListing.getSelectionCount() > 0) {
-				// Get the image details.
-				TableItem SelectedFile = DirectoryListing.getSelection()[0];
-				NewFileListItem details = (NewFileListItem) SelectedFile.getData();
-				// Render the image
-				byte buffer[] = SpeccyFileEncoders.ScaleImage(shell.getDisplay(), intensitySlider.getSelection(), details.OriginalImage,
-						IsBWCheck.getSelection());
-				// write it back to the buffer and the listbox.
-				details.data = buffer;
-				details.Intensity = intensitySlider.getSelection();
-				details.IsBlackWhite = IsBWCheck.getSelection();
-				SelectedFile.setData(details);
-
-				// Now, re-render to the displayed image
-				ImageData image = Speccy.GetImageFromFileArray(buffer, 0x00);
-				Image img = new Image(MainPage.getDisplay(), image);
-
-				ImageLabel.setImage(img);
-				MainPage.pack();
-				shell.pack();
-			}
-		}
-
-	}
-
+	@Override
 	protected void DoAddImageFiles() {
 		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
 		fd.setText("Open Image file");
@@ -563,7 +479,7 @@ public class AddFilesToTrDosPartition {
 					NewFileListItem listitem = new NewFileListItem();
 					listitem.OriginalFilename = filedets;
 					listitem.filename = DosFileName;
-					listitem.FileType = FILETYPE_SCREEN;
+					listitem.cFileType = FILETYPE_SCREEN;
 					listitem.data = buffer;
 					listitem.OriginalImage = RawImage;
 					listitem.Intensity = bwslider;
@@ -601,7 +517,7 @@ public class AddFilesToTrDosPartition {
 			/*
 			 * Get the file type details.
 			 */
-			char treatAs = details.FileType;
+			char treatAs = details.cFileType;
 			byte data[] = details.data;
 
 			/*
@@ -618,7 +534,7 @@ public class AddFilesToTrDosPartition {
 				RenderNumArray(data);
 				break;
 			case FILETYPE_CODE:
-				RenderCode(data);
+				RenderCode(details);
 				break;
 			case FILETYPE_SCREEN:
 				RenderScreen(data, details);
@@ -631,107 +547,6 @@ public class AddFilesToTrDosPartition {
 			final Point newSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);  
 			shell.setSize(newSize);
 		}
-	}
-
-	/**
-	 * Render the currently selected file as a screen.
-	 * 
-	 * @param data
-	 */
-	private void RenderScreen(byte data[], NewFileListItem details) {
-		ImageData image = Speccy.GetImageFromFileArray(data, 0x00);
-		Image img = new Image(MainPage.getDisplay(), image);
-		ImageLabel = new Label(MainPage, SWT.NONE);
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.minimumHeight = 192;
-		gd.minimumWidth = 256;
-		gd.horizontalSpan = 2;
-		ImageLabel.setLayoutData(gd);
-		ImageLabel.setImage(img);
-		IsBWCheck.setSelection(details.IsBlackWhite);
-		intensitySlider.setSelection(details.Intensity);
-	}
-
-	/**
-	 * 
-	 * @param data
-	 */
-	private void RenderCode(byte[] data) {
-		int AddressLength = String.format("%X", data.length - 1).length();
-
-		Table HexTable = new Table(MainPage, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
-		HexTable.setLinesVisible(true);
-
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-		gd.horizontalSpan = 4;
-		gd.heightHint = 400;
-		HexTable.setLayoutData(gd);
-
-		TableColumn tc1 = new TableColumn(HexTable, SWT.LEFT);
-		tc1.setText("Address");
-		tc1.setWidth(80);
-		for (int i = 0; i < 16; i++) {
-			TableColumn tcx = new TableColumn(HexTable, SWT.LEFT);
-			tcx.setText(String.format("%02X", i));
-			tcx.setWidth(30);
-		}
-		TableColumn tc2 = new TableColumn(HexTable, SWT.LEFT);
-		tc2.setText("Ascii");
-		tc2.setWidth(160);
-
-		HexTable.setHeaderVisible(true);
-
-		int ptr = 0;
-		int numrows = data.length / 16;
-		if (data.length % 16 != 0) {
-			numrows++;
-		}
-		int Address = 0;
-
-		Font mono = new Font(MainPage.getDisplay(), "Monospace", 10, SWT.NONE);
-		for (int rownum = 0; rownum < numrows; rownum++) {
-			TableItem Row = new TableItem(HexTable, SWT.NONE);
-
-			String asciiLine = "";
-			String content[] = new String[18];
-			String addr = String.format("%X", Address);
-			Address = Address + 16;
-			while (addr.length() < AddressLength) {
-				addr = "0" + addr;
-			}
-			content[0] = addr;
-			for (int i = 1; i < 17; i++) {
-				byte b = 0;
-				if (ptr < data.length) {
-					b = data[ptr++];
-					content[i] = String.format("%02X", (b & 0xff));
-				} else {
-					content[i] = "--";
-				}
-				if (b >= 32 && b <= 127) {
-					asciiLine = asciiLine + (char) b;
-				} else {
-					asciiLine = asciiLine + ".";
-				}
-			}
-			content[17] = asciiLine;
-			Row.setText(content);
-			Row.setFont(mono);
-		}
-	}
-
-	private void RenderBasic(byte data[], NewFileListItem details) {
-		StringBuilder sb = new StringBuilder();
-		Speccy.DecodeBasicFromLoadedFile(data, sb, data.length, false, false);
-
-		Text t = new Text(MainPage, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
-		GridData gd = new GridData(GridData.FILL_BOTH);
-		gd.horizontalSpan = 4;
-		gd.verticalSpan = 6;
-		gd.minimumHeight = 198;
-		gd.minimumWidth = 500;
-		t.setLayoutData(gd);
-		t.setText(sb.toString());
 	}
 
 	protected void DoAddCodeFiles() {
@@ -782,7 +597,7 @@ public class AddFilesToTrDosPartition {
 				NewFileListItem listitem = new NewFileListItem();
 				listitem.OriginalFilename = filedets;
 				listitem.filename = DosFileName;
-				listitem.FileType = FILETYPE_CODE;
+				listitem.cFileType = FILETYPE_CODE;
 				listitem.data = buffer;
 
 				/*
@@ -795,6 +610,7 @@ public class AddFilesToTrDosPartition {
 
 	}
 
+	@Override
 	protected void DoAddCharacterFiles() {
 		int filelimit = 16384;
 		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
@@ -828,7 +644,7 @@ public class AddFilesToTrDosPartition {
 					NewFileListItem listitem = new NewFileListItem();
 					listitem.OriginalFilename = filedets;
 					listitem.filename = DosFileName;
-					listitem.FileType = FILETYPE_CHRARRAY;
+					listitem.cFileType = FILETYPE_CHRARRAY;
 					listitem.data = ArrayAsBytes;
 
 					/*
@@ -844,6 +660,7 @@ public class AddFilesToTrDosPartition {
 
 	}
 
+	@Override
 	protected void DoAddNumericArrays() {
 		int filelimit = 16384;
 		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
@@ -878,7 +695,7 @@ public class AddFilesToTrDosPartition {
 					NewFileListItem listitem = new NewFileListItem();
 					listitem.OriginalFilename = filedets;
 					listitem.filename = DosFileName;
-					listitem.FileType = FILETYPE_NUMARRAY;
+					listitem.cFileType = FILETYPE_NUMARRAY;
 					listitem.data = ArrayAsBytes;
 
 					/*
@@ -893,6 +710,7 @@ public class AddFilesToTrDosPartition {
 		}
 	}
 	
+	@Override
 	protected void DoAddBinaryBasicFiles() {
 		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
 		fd.setText("Open");
@@ -938,7 +756,7 @@ public class AddFilesToTrDosPartition {
 				NewFileListItem listitem = new NewFileListItem();
 				listitem.OriginalFilename = filedets;
 				listitem.filename = DosFileName;
-				listitem.FileType = FILETYPE_BASIC;
+				listitem.cFileType = FILETYPE_BASIC;
 				listitem.data = buffer;
 				listitem.line = Integer.valueOf(StartLine.getText());
 
@@ -951,6 +769,7 @@ public class AddFilesToTrDosPartition {
 		}
 	}
 
+	@Override
 	protected void DoAddTextBasicFiles() {
 		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
 		fd.setText("Open");
@@ -983,7 +802,7 @@ public class AddFilesToTrDosPartition {
 				NewFileListItem listitem = new NewFileListItem();
 				listitem.OriginalFilename = filedets;
 				listitem.filename = values[1];
-				listitem.FileType = FILETYPE_BASIC;
+				listitem.cFileType = FILETYPE_BASIC;
 				listitem.data = data;
 				listitem.line = Integer.valueOf(StartLine.getText());
 
@@ -1003,7 +822,7 @@ public class AddFilesToTrDosPartition {
 			NewFileListItem details = (NewFileListItem) file.getData();
 			try {
 				// Default variable name for arrays
-				switch (details.FileType) {
+				switch (details.cFileType) {
 				case FILETYPE_BASIC:
 					CurrentPartition.AddBasicFile(details.filename, details.data, details.line, details.data.length);
 					break;
@@ -1033,170 +852,4 @@ public class AddFilesToTrDosPartition {
 			}
 		}
 	}
-
-	/**
-	 * Render Character array
-	 * 
-	 * @param data
-	 */
-	private void RenderChrArray(byte data[]) {
-		int location = 0;
-
-		// Number of dimensions
-		int numDimensions = data[location++] & 0xff;
-
-		// LOad the dimension sizes into an array
-		int Dimsizes[] = new int[numDimensions];
-		for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
-			int dimsize = data[location++] & 0xff;
-			dimsize = dimsize + (data[location++] & 0xff) * 0x100;
-			Dimsizes[dimnum] = dimsize;
-		}
-
-		String s = "DIM A$(";
-		for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
-			if (dimnum > 0)
-				s = s + ",";
-			s = s + String.valueOf(Dimsizes[dimnum]);
-		}
-		s = s + ")\n";
-
-		Text ArrayEdit = new Text(MainPage, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.horizontalSpan = 4;
-		gd.verticalSpan = 6;
-		gd.minimumHeight = 198;
-		gd.minimumWidth = 500;
-		ArrayEdit.setLayoutData(gd);
-
-		// count of what dimensions have been processed.
-		int DimCounts[] = new int[numDimensions];
-		for (int dimnum = 0; dimnum < numDimensions; dimnum++)
-			DimCounts[dimnum] = 0;
-
-		StringBuilder sb = new StringBuilder();
-		sb.append(s);
-
-		boolean complete = false;
-		while (!complete) {
-			for (int cc = 0; cc < Dimsizes[Dimsizes.length - 1]; cc++) {
-
-				if (cc != 0) {
-					sb.append(",");
-				}
-				String chr = Speccy.tokens[data[location++] & 0xff];
-				chr = chr.replace("&amp;", "&");
-				chr = chr.replace("&gt;", ">");
-				chr = chr.replace("&lt;", "<");
-
-				sb.append(chr);
-			}
-			sb.append("\r\n");
-			int diminc = Dimsizes.length - 2;
-			boolean doneInc = false;
-			while (!doneInc) {
-				if (diminc == -1) {
-					doneInc = true;
-					complete = true;
-				} else {
-					int x = DimCounts[diminc];
-					x++;
-					if (x == Dimsizes[diminc]) {
-						DimCounts[diminc] = 0;
-						diminc--;
-					} else {
-						DimCounts[diminc] = x;
-						doneInc = true;
-					}
-				}
-			}
-		}
-		ArrayEdit.setText(sb.toString());
-	}
-
-	/**
-	 * Render numeric array
-	 * 
-	 * @param data
-	 */
-	private void RenderNumArray(byte data[]) {
-		int location = 0;
-
-		// Number of dimensions
-		int numDimensions = data[location++] & 0xff;
-
-		// Load the dimension sizes into an array
-		int Dimsizes[] = new int[numDimensions];
-		for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
-			int dimsize = data[location++] & 0xff;
-			dimsize = dimsize + (data[location++] & 0xff) * 0x100;
-			Dimsizes[dimnum] = dimsize;
-		}
-
-		String s = "DIM A(";
-		for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
-			if (dimnum > 0)
-				s = s + ",";
-			s = s + String.valueOf(Dimsizes[dimnum]);
-		}
-		s = s + ")\n";
-
-		Text ArrayEdit = new Text(MainPage, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.horizontalSpan = 4;
-		gd.verticalSpan = 6;
-		gd.minimumHeight = 198;
-		gd.minimumWidth = 500;
-		ArrayEdit.setLayoutData(gd);
-
-		// count of what dimensions have been processed.
-		int DimCounts[] = new int[numDimensions];
-		for (int dimnum = 0; dimnum < numDimensions; dimnum++)
-			DimCounts[dimnum] = 0;
-
-		StringBuilder sb = new StringBuilder();
-		sb.append(s);
-
-		boolean complete = false;
-		while (!complete) {
-			for (int cc = 0; cc < Dimsizes[Dimsizes.length - 1]; cc++) {
-
-				if (cc != 0) {
-					sb.append(",");
-				}
-				double x = Speccy.GetNumberAtByte(data, location);
-				// special case anything thats an exact integer because it makes the arrays look
-				// less messy when displayed.
-				if (x != Math.rint(x)) {
-					sb.append(x);
-					sb.append(",");
-				} else {
-					sb.append((int) x);
-				}
-				location = location + 5;
-			}
-			sb.append("\r\n");
-			int diminc = Dimsizes.length - 2;
-			boolean doneInc = false;
-			while (!doneInc) {
-				if (diminc == -1) {
-					doneInc = true;
-					complete = true;
-				} else {
-					int x = DimCounts[diminc];
-					x++;
-					if (x == Dimsizes[diminc]) {
-						DimCounts[diminc] = 0;
-						diminc--;
-					} else {
-						DimCounts[diminc] = x;
-						doneInc = true;
-					}
-				}
-			}
-
-		}
-		ArrayEdit.setText(sb.toString());
-	}
-
 }
