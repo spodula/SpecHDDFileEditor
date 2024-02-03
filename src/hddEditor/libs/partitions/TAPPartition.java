@@ -375,6 +375,9 @@ public class TAPPartition extends IDEDosPartition {
 						}
 					}
 					tfn = tfn.trim();
+					if (tfn.isBlank()) {
+						tfn = "Unnamed";
+					}
 					if (tfn.charAt(tfn.length()-1) == '.') {
 						tfn = tfn.substring(0,tfn.length()-1);
 					}
