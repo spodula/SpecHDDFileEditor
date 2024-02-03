@@ -43,7 +43,7 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 	protected NewFileListItem IdentifyFileType(File f) {
 		NewFileListItem nfli = super.IdentifyFileType(f);
 		nfli.fileheader = new Plus3DosFileHeader(nfli.data);
-		if (nfli.fileheader.ChecksumValid) {
+		if (nfli.fileheader.IsPlusThreeDosFile) {
 			nfli.FileType = FILETYPE_PLUS3DOS;
 		} else {
 			nfli.fileheader = null;
@@ -115,7 +115,7 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 		if (details != null) {
 			if (details.fileheader == null) {
 				Plus3DosFileHeader pfd = new Plus3DosFileHeader(details.data);
-				if (pfd.ChecksumValid) {
+				if (pfd.IsPlusThreeDosFile) {
 					details.fileheader = pfd;
 				}
 			}
