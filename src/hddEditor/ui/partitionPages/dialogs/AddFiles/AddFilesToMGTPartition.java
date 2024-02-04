@@ -81,22 +81,8 @@ public class AddFilesToMGTPartition  extends GenericAddPageDialog {
 
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
+
 		Button Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("MGT/+D Files with header");
-		Btn.setLayoutData(gd);
-		Btn.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				DoAddMGTHeaderedFiles();
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				widgetSelected(arg0);
-			}
-		});
-
-		Btn = new Button(shell, SWT.PUSH);
 		Btn.setText("Select Text BASIC file");
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
@@ -386,15 +372,6 @@ public class AddFilesToMGTPartition  extends GenericAddPageDialog {
 		shell.pack();
 		IntensityLabel.setText("Cutoff: 50%");
 	}
-
-	/**
-	 * Select files to be added. The files should have the 128 byte Spectrum +3DOS
-	 * header.
-	 */
-	protected void DoAddMGTHeaderedFiles() {
-		//TODO: implement DoAddMGTHeaderedFiles
-	}
-
 
 	/**
 	 * Add the selected files to the partition and return This is used when OK is
