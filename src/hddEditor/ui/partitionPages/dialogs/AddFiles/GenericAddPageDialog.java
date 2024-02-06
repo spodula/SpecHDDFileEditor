@@ -36,6 +36,9 @@ public class GenericAddPageDialog {
 
 	protected IDEDosPartition CurrentPartition;
 
+	protected FileDialog fd;
+
+	
 	protected final static int FILETYPE_BASIC = 0;
 	protected final static int FILETYPE_NUMARRAY = 1;
 	protected final static int FILETYPE_CHRARRAY = 2;
@@ -98,6 +101,7 @@ public class GenericAddPageDialog {
 	 */
 	public void loop() {
 		shell.open();
+		fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
 				display.sleep();
@@ -449,7 +453,6 @@ public class GenericAddPageDialog {
 	 */
 	protected void DoAddCharacterFiles() {
 		int filelimit = 16384;
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
 		fd.setText("Open CSV file");
 		String[] filterExt = { "*" };
 		fd.setFilterExtensions(filterExt);
@@ -501,7 +504,6 @@ public class GenericAddPageDialog {
 	 */
 	protected void DoAddNumericArrays() {
 		int filelimit = 16384;
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
 		fd.setText("Open CSV file");
 		String[] filterExt = { "*" };
 		fd.setFilterExtensions(filterExt);
@@ -554,7 +556,6 @@ public class GenericAddPageDialog {
 	 * ImageIO supports (PNG, GIF, JPEG, BMP, WEBMP)
 	 */
 	protected void DoAddImageFiles() {
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
 		fd.setText("Open Image file");
 		String[] filterExt = { "*" };
 		fd.setFilterExtensions(filterExt);
@@ -620,8 +621,6 @@ public class GenericAddPageDialog {
 	 * Add BINARY file(s) as a CODE file.
 	 */
 	protected void DoAddBinaryFiles() {
-
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
 		fd.setText("Open CODE file");
 		String[] filterExt = { "*" };
 		fd.setFilterExtensions(filterExt);
@@ -686,7 +685,6 @@ public class GenericAddPageDialog {
 	 * Add a text file as a BASIC file.
 	 */
 	protected void DoAddTextBasicFiles() {
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
 		fd.setText("Open");
 		String[] filterExt = { "*" };
 		fd.setFilterExtensions(filterExt);
@@ -735,7 +733,6 @@ public class GenericAddPageDialog {
 	 * Add pre-converted basic files.
 	 */
 	protected void DoAddBinaryBasicFiles() {
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
 		fd.setText("Open");
 		String[] filterExt = { "*" };
 		fd.setFilterExtensions(filterExt);

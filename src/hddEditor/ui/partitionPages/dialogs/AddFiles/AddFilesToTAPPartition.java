@@ -33,8 +33,6 @@ import hddEditor.libs.partitions.TAPPartition;
 import hddEditor.libs.partitions.tap.TapDirectoryEntry;
 
 public class AddFilesToTAPPartition extends GenericAddPageDialog {
-	private Display display = null;
-	private Shell shell = null;
 
 	/*
 	 * The important components on the form.
