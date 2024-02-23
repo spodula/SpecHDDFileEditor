@@ -1,14 +1,14 @@
 package hddEditor.ui.partitionPages.dialogs.drop;
 /**
- * Extra bits for TAP files (And MDF files and TRD files)
+ * Extra bits for TAP/TZX files (And MDF files and TRD files)
  */
 
 
 import org.eclipse.swt.widgets.Display;
 
-public class DropFilesToTapPartition extends GenericDropForm {
+public class DropFilesToTapePartition extends GenericDropForm {
 
-	public DropFilesToTapPartition(Display display) {
+	public DropFilesToTapePartition(Display display) {
 		super(display);
 	}
 	

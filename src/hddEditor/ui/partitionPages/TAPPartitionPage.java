@@ -42,7 +42,7 @@ import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
 import hddEditor.ui.partitionPages.dialogs.TapFileEditDialog;
 import hddEditor.ui.partitionPages.dialogs.AddFiles.AddFilesToTAPPartition;
-import hddEditor.ui.partitionPages.dialogs.drop.DropFilesToTapPartition;
+import hddEditor.ui.partitionPages.dialogs.drop.DropFilesToTapePartition;
 
 public class TAPPartitionPage extends GenericPage {
 	Table DirectoryListing = null;
@@ -97,7 +97,7 @@ public class TAPPartitionPage extends GenericPage {
 			tc3.setWidth(150);
 			tc4.setWidth(100);
 			DirectoryListing.setHeaderVisible(true);
-			
+
 			/***********************************************************************************/
 
 			// Create the drop target
@@ -137,7 +137,7 @@ public class TAPPartitionPage extends GenericPage {
 				}
 			});
 			/***********************************************************************************/
-			DragSource source = new DragSource(DirectoryListing, DND.DROP_MOVE | DND.DROP_COPY );
+			DragSource source = new DragSource(DirectoryListing, DND.DROP_MOVE | DND.DROP_COPY);
 			source.setTransfer(new Transfer[] { FileTransfer.getInstance() });
 			source.addDragListener(new DragSourceListener() {
 				File tempfiles[];
@@ -152,10 +152,10 @@ public class TAPPartitionPage extends GenericPage {
 							try {
 								File f = File.createTempFile("YYYY", "xxx");
 								int exporttype = RootPage.dragindex;
-								
+
 								FileEntry entry = (FileEntry) item.getData();
-								System.out.println("Exporttype:" +exporttype);
-								if (exporttype==HDDEditor.DRAG_TYPE) {
+								System.out.println("Exporttype:" + exporttype);
+								if (exporttype == HDDEditor.DRAG_TYPE) {
 									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
 									int actiontype = GeneralUtils.EXPORT_TYPE_HEX;
 									switch (sd.BasicType) {
@@ -169,7 +169,7 @@ public class TAPPartitionPage extends GenericPage {
 										actiontype = GeneralUtils.EXPORT_TYPE_CSV;
 										break;
 									case (Speccy.BASIC_CODE):
-										System.out.println("CODE: "+entry.GetFileSize());
+										System.out.println("CODE: " + entry.GetFileSize());
 										if (entry.GetFileSize() == 0x1b00) {
 											actiontype = GeneralUtils.EXPORT_TYPE_PNG;
 										} else {
@@ -179,18 +179,17 @@ public class TAPPartitionPage extends GenericPage {
 									default:
 										actiontype = GeneralUtils.EXPORT_TYPE_HEX;
 									}
-									
-									
-									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(), entry.GetFileData().length,
-											sd.BasicType, sd.LineStart, sd.VarStart, sd.LoadAddress, sd.VarName+"",
-											actiontype);								
-								} else if (exporttype==HDDEditor.DRAG_RAW) {
-									GeneralUtils.WriteBlockToDisk(entry.GetFileData(), f);									
+
+									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(),
+											entry.GetFileData().length, sd.BasicType, sd.LineStart, sd.VarStart,
+											sd.LoadAddress, sd.VarName + "", actiontype);
+								} else if (exporttype == HDDEditor.DRAG_RAW) {
+									GeneralUtils.WriteBlockToDisk(entry.GetFileData(), f);
 								} else {
 									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
-									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(), entry.GetFileData().length,
-											sd.BasicType, sd.LineStart, sd.VarStart, sd.LoadAddress, sd.VarName+"",
-											GeneralUtils.EXPORT_TYPE_HEX);								
+									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(),
+											entry.GetFileData().length, sd.BasicType, sd.LineStart, sd.VarStart,
+											sd.LoadAddress, sd.VarName + "", GeneralUtils.EXPORT_TYPE_HEX);
 								}
 								File f1 = new File(f.getParent(), entry.GetFilename());
 								f.renameTo(f1);
@@ -210,7 +209,7 @@ public class TAPPartitionPage extends GenericPage {
 					if (FileTransfer.getInstance().isSupportedType(event.dataType)) {
 						if (tempfiles != null && tempfiles.length > 0) {
 							String data[] = new String[tempfiles.length];
-							for (int i=0;i<tempfiles.length;i++) {
+							for (int i = 0; i < tempfiles.length; i++) {
 								File fle = tempfiles[i];
 								data[i] = fle.getAbsolutePath();
 							}
@@ -224,7 +223,7 @@ public class TAPPartitionPage extends GenericPage {
 
 					}
 				}
-			}); 
+			});
 			/***********************************************************************************/
 
 			UpdateDirectoryEntryList();
@@ -358,7 +357,7 @@ public class TAPPartitionPage extends GenericPage {
 			fFiles[i++] = new File(file);
 		}
 
-		DropFilesToTapPartition DropFilesDialog = new DropFilesToTapPartition(ParentComp.getDisplay());
+		DropFilesToTapePartition DropFilesDialog = new DropFilesToTapePartition(ParentComp.getDisplay());
 		DropFilesDialog.Show("Add files", partition, fFiles);
 		DropFilesDialog = null;
 		if (!ParentComp.isDisposed()) {
@@ -536,16 +535,15 @@ public class TAPPartitionPage extends GenericPage {
 		}
 	}
 
-	
 	/**
 	 * Move the selected files down the list.
 	 */
 	protected void DoMoveDown() {
-		TAPPartition tapp = (TAPPartition)partition; 
+		TAPPartition tapp = (TAPPartition) partition;
 		if (DirectoryListing.getSelectionCount() > 0) {
 			TableItem Selected[] = DirectoryListing.getSelection();
-			for (int idx = Selected.length-1;idx > -1;idx--) {
-				TapDirectoryEntry SelItm = (TapDirectoryEntry)Selected[idx].getData();
+			for (int idx = Selected.length - 1; idx > -1; idx--) {
+				TapDirectoryEntry SelItm = (TapDirectoryEntry) Selected[idx].getData();
 				try {
 					tapp.MoveDirectoryEntryDown(SelItm);
 				} catch (IOException e) {
@@ -553,18 +551,18 @@ public class TAPPartitionPage extends GenericPage {
 				}
 			}
 			AddComponents();
-		}		
+		}
 	}
 
 	/**
 	 * Move the selected files up the list.
 	 */
 	protected void DoMoveUp() {
-		TAPPartition tapp = (TAPPartition)partition; 
+		TAPPartition tapp = (TAPPartition) partition;
 		if (DirectoryListing.getSelectionCount() > 0) {
 			TableItem Selected[] = DirectoryListing.getSelection();
-			for (TableItem sel:Selected) {
-				TapDirectoryEntry SelItm = (TapDirectoryEntry)sel.getData();
+			for (TableItem sel : Selected) {
+				TapDirectoryEntry SelItm = (TapDirectoryEntry) sel.getData();
 				try {
 					tapp.MoveDirectoryEntryUp(SelItm);
 				} catch (IOException e) {
@@ -572,8 +570,7 @@ public class TAPPartitionPage extends GenericPage {
 				}
 			}
 			AddComponents();
-		}		
+		}
 	}
-
 
 }

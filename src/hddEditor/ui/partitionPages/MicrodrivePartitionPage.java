@@ -44,7 +44,7 @@ import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.MicrodriveFileEditDialog;
 import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
 import hddEditor.ui.partitionPages.dialogs.AddFiles.AddFilesToMDRPartition;
-import hddEditor.ui.partitionPages.dialogs.drop.DropFilesToTapPartition;
+import hddEditor.ui.partitionPages.dialogs.drop.DropFilesToTapePartition;
 
 public class MicrodrivePartitionPage extends GenericPage {
 	Table DirectoryListing = null;
@@ -364,7 +364,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 			fFiles[i++] = new File(file);
 		}
 
-		DropFilesToTapPartition DropFilesDialog = new DropFilesToTapPartition(ParentComp.getDisplay());
+		DropFilesToTapePartition DropFilesDialog = new DropFilesToTapePartition(ParentComp.getDisplay());
 		DropFilesDialog.Show("Add files", partition, fFiles);
 		DropFilesDialog = null;
 		if (!ParentComp.isDisposed()) {

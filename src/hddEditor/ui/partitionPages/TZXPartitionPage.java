@@ -1,22 +1,6 @@
 package hddEditor.ui.partitionPages;
-/*
- * MGT technical information
- * https://k1.spdns.de/Vintage/Sinclair/82/Peripherals/Disc%20Interfaces/DiSCiPLE%20%26%20Plus%20D%20(MGT%2C%20Datel)/disciple-tech_v8.pdf
- */
 
 import java.io.File;
-//TODO: Support more MGT file types:
-/*
-  o ZX microdrive (6)
-  o Opentype (10)
-  o UNIDOS Subdirectory (12)
-  o UNIDOS create?(13)
-  o SAM types 16-20, 22,23
-  o Masterdos subdirectory (21)
-  o EDOS (23-26)
-  o HDOS (28-31)
-  o MGT - Support defrag
-*/
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -24,7 +8,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
 import org.eclipse.swt.dnd.DragSourceEvent;
@@ -46,40 +29,51 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
 import hddEditor.libs.GeneralUtils;
-import hddEditor.libs.MGT;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
+import hddEditor.libs.disks.LINEAR.TZXFile;
 import hddEditor.libs.partitions.IDEDosPartition;
-import hddEditor.libs.partitions.MGTDosPartition;
-import hddEditor.libs.partitions.TrDosPartition;
-import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
+import hddEditor.libs.partitions.TZXPartition;
+import hddEditor.libs.partitions.tzx.TzxDirectoryEntry;
 import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;
-import hddEditor.ui.partitionPages.dialogs.AddressNote;
 import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
-import hddEditor.ui.partitionPages.dialogs.MGTDosFileEditDialog;
 import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
-import hddEditor.ui.partitionPages.dialogs.AddFiles.AddFilesToMGTPartition;
+import hddEditor.ui.partitionPages.dialogs.TzxFileEditDialog;
+import hddEditor.ui.partitionPages.dialogs.AddFiles.AddFilesToTZXPartition;
 import hddEditor.ui.partitionPages.dialogs.drop.DropFilesToTapePartition;
 
-public class MGTDosPartitionPage extends GenericPage {
+public class TZXPartitionPage extends GenericPage {
 	Table DirectoryListing = null;
-	MGTDosFileEditDialog SpecFileEditDialog = null;
-	AddFilesToMGTPartition AddFilesDialog = null;
-
-	RenameFileDialog RenFileDialog = null;
 	HexEditDialog HxEditDialog = null;
+	RenameFileDialog RenFileDialog = null;
+	TzxFileEditDialog SpecFileEditDialog = null;
+	AddFilesToTZXPartition AddFilesDialog = null;
 
-	public MGTDosPartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition) {
+	/**
+	 * 
+	 * 
+	 * @param root
+	 * @param parent
+	 * @param partition
+	 */
+	public TZXPartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition) {
 		super(root, parent, partition);
 		AddComponents();
 	}
 
+	/**
+	 * 
+	 */
 	private void AddComponents() {
 		if (ParentComp != null) {
 			RemoveComponents();
-			super.AddBasicDetails();
+			TZXPartition tzx = (TZXPartition) partition;
+			label("TZX file", 4);
+			label("Blocks: " + tzx.DirectoryEntries.length, 1);
+			label("", 1);
+			label("", 1);
 
 			// directory listing
 			DirectoryListing = new Table(ParentComp, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
@@ -94,17 +88,14 @@ public class MGTDosPartitionPage extends GenericPage {
 			TableColumn tc2 = new TableColumn(DirectoryListing, SWT.LEFT);
 			TableColumn tc3 = new TableColumn(DirectoryListing, SWT.LEFT);
 			TableColumn tc4 = new TableColumn(DirectoryListing, SWT.LEFT);
-			TableColumn tc5 = new TableColumn(DirectoryListing, SWT.LEFT);
-			tc1.setText("Fileame");
+			tc1.setText("Block");
 			tc2.setText("Type");
-			tc3.setText("Start");
-			tc4.setText("Length (reported)");
-			tc5.setText("Length (Sectors)");
+			tc3.setText("Length");
+			tc4.setText("Notes");
 			tc1.setWidth(150);
 			tc2.setWidth(150);
 			tc3.setWidth(150);
-			tc4.setWidth(150);
-			tc5.setWidth(100);
+			tc4.setWidth(100);
 			DirectoryListing.setHeaderVisible(true);
 
 			/***********************************************************************************/
@@ -146,7 +137,7 @@ public class MGTDosPartitionPage extends GenericPage {
 				}
 			});
 			/***********************************************************************************/
-			DragSource source = new DragSource(DirectoryListing, DND.DROP_MOVE | DND.DROP_COPY );
+			DragSource source = new DragSource(DirectoryListing, DND.DROP_MOVE | DND.DROP_COPY);
 			source.setTransfer(new Transfer[] { FileTransfer.getInstance() });
 			source.addDragListener(new DragSourceListener() {
 				File tempfiles[];
@@ -161,11 +152,10 @@ public class MGTDosPartitionPage extends GenericPage {
 							try {
 								File f = File.createTempFile("YYYY", "xxx");
 								int exporttype = RootPage.dragindex;
-								
-								
+
 								FileEntry entry = (FileEntry) item.getData();
-								System.out.println("Exporttype:" +exporttype);
-								if (exporttype==HDDEditor.DRAG_TYPE) {
+								System.out.println("Exporttype:" + exporttype);
+								if (exporttype == HDDEditor.DRAG_TYPE) {
 									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
 									int actiontype = GeneralUtils.EXPORT_TYPE_HEX;
 									switch (sd.BasicType) {
@@ -179,7 +169,7 @@ public class MGTDosPartitionPage extends GenericPage {
 										actiontype = GeneralUtils.EXPORT_TYPE_CSV;
 										break;
 									case (Speccy.BASIC_CODE):
-										System.out.println("CODE: "+entry.GetFileSize());
+										System.out.println("CODE: " + entry.GetFileSize());
 										if (entry.GetFileSize() == 0x1b00) {
 											actiontype = GeneralUtils.EXPORT_TYPE_PNG;
 										} else {
@@ -189,18 +179,17 @@ public class MGTDosPartitionPage extends GenericPage {
 									default:
 										actiontype = GeneralUtils.EXPORT_TYPE_HEX;
 									}
-									
-									
-									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(), entry.GetFileData().length,
-											sd.BasicType, sd.LineStart, sd.VarStart, sd.LoadAddress, sd.VarName+"",
-											actiontype);								
-								} else if (exporttype==HDDEditor.DRAG_RAW) {
-									GeneralUtils.WriteBlockToDisk(entry.GetFileData(), f);									
+
+									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(),
+											entry.GetFileData().length, sd.BasicType, sd.LineStart, sd.VarStart,
+											sd.LoadAddress, sd.VarName + "", actiontype);
+								} else if (exporttype == HDDEditor.DRAG_RAW) {
+									GeneralUtils.WriteBlockToDisk(entry.GetFileData(), f);
 								} else {
 									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
-									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(), entry.GetFileData().length,
-											sd.BasicType, sd.LineStart, sd.VarStart, sd.LoadAddress, sd.VarName+"",
-											GeneralUtils.EXPORT_TYPE_HEX);								
+									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(),
+											entry.GetFileData().length, sd.BasicType, sd.LineStart, sd.VarStart,
+											sd.LoadAddress, sd.VarName + "", GeneralUtils.EXPORT_TYPE_HEX);
 								}
 								File f1 = new File(f.getParent(), entry.GetFilename());
 								f.renameTo(f1);
@@ -220,7 +209,7 @@ public class MGTDosPartitionPage extends GenericPage {
 					if (FileTransfer.getInstance().isSupportedType(event.dataType)) {
 						if (tempfiles != null && tempfiles.length > 0) {
 							String data[] = new String[tempfiles.length];
-							for (int i=0;i<tempfiles.length;i++) {
+							for (int i = 0; i < tempfiles.length; i++) {
 								File fle = tempfiles[i];
 								data[i] = fle.getAbsolutePath();
 							}
@@ -234,10 +223,13 @@ public class MGTDosPartitionPage extends GenericPage {
 
 					}
 				}
-			}); 
+			});
 			/***********************************************************************************/
-			
+
 			UpdateDirectoryEntryList();
+
+			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.widthHint = 200;
 
 			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.widthHint = 200;
@@ -248,22 +240,7 @@ public class MGTDosPartitionPage extends GenericPage {
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
-					DoFileProperties();
-				}
-
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
-
-			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Edit Raw file");
-			Btn.setLayoutData(gd);
-			Btn.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					DoEditRawFile();
+					DoEditFile();
 				}
 
 				@Override
@@ -316,7 +293,6 @@ public class MGTDosPartitionPage extends GenericPage {
 					widgetSelected(arg0);
 				}
 			});
-
 			Btn = new Button(ParentComp, SWT.PUSH);
 			Btn.setText("Rename file");
 			Btn.setLayoutData(gd);
@@ -331,14 +307,14 @@ public class MGTDosPartitionPage extends GenericPage {
 					widgetSelected(arg0);
 				}
 			});
-
+			ParentComp.pack();
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Defrag disk");
+			Btn.setText("Move file up");
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
-					DoDefragDisk();
+					DoMoveUp();
 				}
 
 				@Override
@@ -346,13 +322,28 @@ public class MGTDosPartitionPage extends GenericPage {
 					widgetSelected(arg0);
 				}
 			});
-			ParentComp.getShell().pack();
-			((ScrolledComposite) ParentComp.getParent())
-					.setMinSize(ParentComp.computeSize(ParentComp.getParent().getClientArea().width + 1, SWT.DEFAULT));
-		}
+			Btn = new Button(ParentComp, SWT.PUSH);
+			Btn.setText("Move file Down");
+			Btn.setLayoutData(gd);
+			Btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					DoMoveDown();
+				}
 
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+			ParentComp.pack();
+		}
 	}
-	
+
+	/**
+	 * 
+	 * @param filenames
+	 */
 	protected void DoDropFile(String[] filenames) {
 		File fFiles[] = new File[filenames.length];
 		int i = 0;
@@ -378,20 +369,105 @@ public class MGTDosPartitionPage extends GenericPage {
 		}
 	}
 
-	protected void DoDefragDisk() {
-		// TODO MGT: Defrag disk
+	/**
+	 * Update the directory listing
+	 */
+	private void UpdateDirectoryEntryList() {
+		if (!DirectoryListing.isDisposed()) {
+			DirectoryListing.removeAll();
+			TZXPartition tzx = (TZXPartition) partition;
+			for (TzxDirectoryEntry entry : tzx.DirectoryEntries) {
+				TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
+				String content[] = new String[5];
 
+				content[0] = entry.GetFilename();
+				content[1] = entry.GetFileTypeString();
+				content[2] = String.valueOf(entry.GetFileSize());
+
+				String notes = "";
+				SpeccyBasicDetails spd = entry.GetSpeccyBasicDetails();
+				if (spd.BasicType != -1) {
+					notes = spd.GetSpecificDetails().replace("\n", ",");
+				}
+
+				content[3] = notes.trim();
+				item2.setText(content);
+				item2.setData(entry);
+			}
+		}
 	}
 
+	/**
+	 * Implementation of DoEditFile
+	 */
+	protected void DoEditFile() {
+		TableItem itms[] = DirectoryListing.getSelection();
+		if ((itms != null) && (itms.length != 0)) {
+			TzxDirectoryEntry entry = (TzxDirectoryEntry) itms[0].getData();
+			SpecFileEditDialog = new TzxFileEditDialog(ParentComp.getDisplay());
+
+			byte data[];
+			try {
+				data = entry.GetFileRawData();
+
+				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
+					TZXFile tap = (TZXFile) partition.CurrentDisk;
+					if (entry.HeaderBlock != null) {
+						byte headerData[] = entry.HeaderBlock.data;
+						headerData[11] = (byte) (data.length & 0xff);
+						headerData[12] = (byte) ((data.length / 0x100) & 0xff);
+						//TODO: TZXPartitionpage - UpdateBlockData
+						entry.HeaderBlock.UpdateBlockData(headerData);
+					}
+
+					entry.DataBlock.UpdateBlockData(data);
+					tap.RewriteFile();
+					tap.ParseTZXFile();
+					((TZXPartition) partition).LoadPartitionSpecificInformation();
+					// refresh the screen.
+					AddComponents();
+				}
+				SpecFileEditDialog = null;
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		} 
+	}
+
+	/**
+	 * Force any dialogs that are still open to close. This avoids exceptions on
+	 * exit.
+	 */
+	protected void CloseDialogs() {
+		if (SpecFileEditDialog != null) {
+			SpecFileEditDialog.close();
+		}
+
+		if (HxEditDialog != null) {
+			HxEditDialog.close();
+		}
+		if (RenFileDialog != null) {
+			RenFileDialog.close();
+		}
+
+		if (AddFilesDialog != null) {
+			AddFilesDialog.close();
+		}
+	}
+
+	/**
+	 * Rename the selected file.
+	 * 
+	 */
 	protected void DoRenameFile() {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
-			MGTDirectoryEntry entry = (MGTDirectoryEntry) itms[0].getData();
+			TzxDirectoryEntry entry = (TzxDirectoryEntry) itms[0].getData();
 			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay());
 			if (RenFileDialog.Show(entry.GetFilename())) {
 				try {
-					MGTDosPartition fbc = (MGTDosPartition) partition;
-					fbc.RenameFile(entry.GetFilename(), RenFileDialog.NewName);
+					TZXPartition smp = (TZXPartition) partition;
+					smp.RenameFile(entry, RenFileDialog.NewName);
 
 					// refresh the screen.
 					UpdateDirectoryEntryList();
@@ -407,6 +483,10 @@ public class MGTDosPartitionPage extends GenericPage {
 		}
 	}
 
+	/**
+	 * Extract all files on this cartridge to a given folder
+	 * 
+	 */
 	protected void DoExtractAllFiles() {
 		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay());
 		try {
@@ -416,136 +496,85 @@ public class MGTDosPartitionPage extends GenericPage {
 		}
 	}
 
+	/**
+	 * Delete the selected file(s).
+	 * 
+	 */
+	protected void DoDeleteFile() {
+		TableItem itms[] = DirectoryListing.getSelection();
+		if ((itms != null) && (itms.length != 0)) {
+			TzxDirectoryEntry entry = (TzxDirectoryEntry) itms[0].getData();
+			try {
+				String filename = entry.GetFilename();
+				if (itms.length > 1) {
+					filename = "the selected files";
+				}
+				MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
+				messageBox.setMessage("Are you sure you want to delete " + filename + " ?");
+				messageBox.setText("Are you sure you want to delete " + filename + " ?");
+
+				if (messageBox.open() == SWT.OK) {
+					TZXPartition TZX = (TZXPartition) partition;
+					for (TableItem itm : itms) {
+						entry = (TzxDirectoryEntry) itm.getData();
+						TZX.DeleteFile(entry, false);
+					}
+					AddComponents();
+				}
+			} catch (IOException e) {
+				ErrorBox("Error deleting file: " + e.getMessage());
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * Show the Add files screen.
+	 */
 	protected void DoAddFiles() {
-		AddFilesDialog = new AddFilesToMGTPartition(ParentComp.getDisplay());
-		AddFilesDialog.Show("Add files", (MGTDosPartition) partition);
+		AddFilesDialog = new AddFilesToTZXPartition(ParentComp.getDisplay());
+		AddFilesDialog.Show("Add files", (TZXPartition) partition);
 		AddFilesDialog = null;
 		if (!ParentComp.isDisposed()) {
 			AddComponents();
 		}
 	}
 
-	protected void DoDeleteFile() {
-		TableItem itms[] = DirectoryListing.getSelection();
-		if ((itms != null) && (itms.length != 0)) {
-			MGTDirectoryEntry entry = (MGTDirectoryEntry) itms[0].getData();
-			String filename = entry.GetFilename();
-			if (itms.length > 1) {
-				filename = "the selected files";
-			}
-			MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
-			messageBox.setMessage("Are you sure you want to delete " + filename + " ?");
-			messageBox.setText("Are you sure you want to delete " + filename + " ?");
-
-			int response = messageBox.open();
-			if (response == SWT.YES) {
-				TrDosPartition fbc = (TrDosPartition) partition;
+	/**
+	 * Move the selected files down the list.
+	 */
+	protected void DoMoveDown() {
+		TZXPartition tapp = (TZXPartition) partition;
+		if (DirectoryListing.getSelectionCount() > 0) {
+			TableItem Selected[] = DirectoryListing.getSelection();
+			for (int idx = Selected.length - 1; idx > -1; idx--) {
+				TzxDirectoryEntry SelItm = (TzxDirectoryEntry) Selected[idx].getData();
 				try {
-					for (TableItem itm : itms) {
-						entry = (MGTDirectoryEntry) itm.getData();
-						String fn = entry.GetFilename();
-						if (entry.GetFileType() != ' ') {
-							filename = filename + "." + entry.GetFileType();
-						}
-						fbc.DeleteFile(fn);
-					}
-					UpdateDirectoryEntryList();
+					tapp.MoveDirectoryEntryDown(SelItm);
 				} catch (IOException e) {
-					ErrorBox("IO Error deleting file." + e.getMessage());
 					e.printStackTrace();
 				}
 			}
-		}
-	}
-
-	protected void DoEditRawFile() {
-		TableItem itms[] = DirectoryListing.getSelection();
-		if ((itms != null) && (itms.length != 0)) {
-			MGTDirectoryEntry entry = (MGTDirectoryEntry) itms[0].getData();
-			// Create the hex edit dialog and start it.
-			HxEditDialog = new HexEditDialog(ParentComp.getDisplay());
-
-			byte data[];
-			try {
-				data = entry.GetFileData();
-
-				AddressNote NewAddressNote = new AddressNote(0, data.length, 0, "File: " + entry.GetFilename());
-				AddressNote ANArray[] = { NewAddressNote };
-
-				boolean WriteBackData = HxEditDialog.Show(data, "Editing " + entry.GetFilename(), ANArray);
-				if (WriteBackData) {
-					MGTDosPartition mbc = (MGTDosPartition) partition;
-					mbc.UpdateFile(entry, data);
-				}
-			} catch (IOException e) {
-				ErrorBox("Error editing partition: " + e.getMessage());
-				e.printStackTrace();
-			}
-			HxEditDialog = null;
-		}
-	}
-
-	protected void DoFileProperties() {
-		TableItem itms[] = DirectoryListing.getSelection();
-		if ((itms != null) && (itms.length != 0)) {
-			MGTDirectoryEntry entry = (MGTDirectoryEntry) itms[0].getData();
-			try {
-				SpecFileEditDialog = new MGTDosFileEditDialog(ParentComp.getDisplay());
-
-				byte[] data = entry.GetFileData();
-				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
-					// entry.SetDeleted(true);
-
-					// refresh the screen.
-					AddComponents();
-				}
-				SpecFileEditDialog = null;
-			} catch (IOException e) {
-				ErrorBox("Error reading partition: " + e.getMessage());
-				e.printStackTrace();
-			}
+			AddComponents();
 		}
 	}
 
 	/**
-	 * Update the directory listing
+	 * Move the selected files up the list.
 	 */
-	private void UpdateDirectoryEntryList() {
-		if (!DirectoryListing.isDisposed()) {
-			DirectoryListing.removeAll();
-			MGTDosPartition mdp = (MGTDosPartition) partition;
-			for (MGTDirectoryEntry entry : mdp.DirectoryEntries) {
-				if (entry.GetFileType() != MGT.MGTFT_ERASED) {
-					TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
-					String content[] = new String[5];
-					content[0] = entry.GetFilename();
-					content[1] = entry.GetFileType() + " (" + entry.GetFileTypeString() + ")";
-					content[2] = "Ch:" + entry.GetStartTrack() + " S:" + entry.GetStartSector();
-					content[3] = String.valueOf(entry.GetFileSize());
-					content[4] = String.valueOf(entry.GetRawFileSize());
-					item2.setText(content);
-					item2.setData(entry);
+	protected void DoMoveUp() {
+		TZXPartition tapp = (TZXPartition) partition;
+		if (DirectoryListing.getSelectionCount() > 0) {
+			TableItem Selected[] = DirectoryListing.getSelection();
+			for (TableItem sel : Selected) {
+				TzxDirectoryEntry SelItm = (TzxDirectoryEntry) sel.getData();
+				try {
+					tapp.MoveDirectoryEntryUp(SelItm);
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
 			}
-		}
-	}
-
-	/**
-	 * Force any dialogs that are still open to close. This avoids exceptions on
-	 * exit.
-	 */
-	protected void CloseDialogs() {
-		if (SpecFileEditDialog != null) {
-			SpecFileEditDialog.close();
-		}
-		if (RenFileDialog != null) {
-			RenFileDialog.close();
-		}
-		if (HxEditDialog != null) {
-			HxEditDialog.close();
-		}
-		if (AddFilesDialog != null) {
-			AddFilesDialog.close();
+			AddComponents();
 		}
 	}
 

@@ -1,6 +1,5 @@
 package hddEditor.ui;
 //TODO: viewer for sprites
-//TODO: support for TZX file
 
 import java.io.File;
 import java.io.IOException;

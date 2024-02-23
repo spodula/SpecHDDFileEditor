@@ -46,6 +46,7 @@ import hddEditor.ui.partitionPages.MicrodrivePartitionPage;
 import hddEditor.ui.partitionPages.PlusThreePartPage;
 import hddEditor.ui.partitionPages.SystemPartPage;
 import hddEditor.ui.partitionPages.TAPPartitionPage;
+import hddEditor.ui.partitionPages.TZXPartitionPage;
 import hddEditor.ui.partitionPages.TrDosPartitionPage;
 
 public class HDDEditor {
@@ -508,6 +509,9 @@ public class HDDEditor {
 			break;
 		case PLUSIDEDOS.PARTITION_TAPE_TAP:
 			new TAPPartitionPage(this, MainPage, part);
+			break;
+		case PLUSIDEDOS.PARTITION_TAPE_TZX:
+			new TZXPartitionPage(this, MainPage, part);
 			break;
 		case PLUSIDEDOS.PARTITION_DISK_PLUSD:
 			new MGTDosPartitionPage(this, MainPage, part);

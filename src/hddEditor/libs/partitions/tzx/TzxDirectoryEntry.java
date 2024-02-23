@@ -1,23 +1,17 @@
-package hddEditor.libs.partitions.tap;
-/**
- * Implemention of one TAP Directory entry. 
- * This contains a header and data block or just a data block for headerless files.
- * 
- */
+package hddEditor.libs.partitions.tzx;
 
 import java.io.IOException;
 
 import hddEditor.libs.disks.ExtendedSpeccyBasicDetails;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
-import hddEditor.libs.disks.LINEAR.tapblocks.TAPBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.TZXBlock;
 
-
-public class TapDirectoryEntry implements FileEntry {
-	//Header block if appropriate
-	public TAPBlock HeaderBlock = null;
-	//Data block.
-	public TAPBlock DataBlock = null;
+public class TzxDirectoryEntry implements FileEntry {
+	// Header block if appropriate
+	public TZXBlock HeaderBlock = null;
+	// Data block.
+	public TZXBlock DataBlock = null;
 
 	/**
 	 * Constructor
@@ -25,18 +19,18 @@ public class TapDirectoryEntry implements FileEntry {
 	 * @param Data
 	 * @param header
 	 */
-	public TapDirectoryEntry(TAPBlock Data, TAPBlock header) {
+	public TzxDirectoryEntry(TZXBlock Data, TZXBlock header) {
 		HeaderBlock = header;
 		DataBlock = Data;
 	}
 
 	@Override
 	/**
-	 * Get the filename. For Headerless files, this defaults to 
-	 * 	Block<blocknum> otherwise the name from the header.
+	 * Get the filename. For Headerless files, this defaults to Block<blocknum>
+	 * otherwise the name from the header.
 	 */
 	public String GetFilename() {
-		String name = "Block" + DataBlock.blocknum;
+		String name = "Block" + DataBlock.BlockNumber;
 		if (HeaderBlock != null) {
 			name = HeaderBlock.DecodeHeader().filename;
 		}
@@ -45,15 +39,14 @@ public class TapDirectoryEntry implements FileEntry {
 
 	@Override
 	/**
-	 * Set the filename.
-	 * This is only works for blocks with headers.
+	 * Set the filename. This is only works for blocks with headers.
 	 */
 	public void SetFilename(String filename) throws IOException {
-		if (HeaderBlock!= null) {
+		if (HeaderBlock != null) {
 			byte data[] = HeaderBlock.data;
-			filename = filename+"             ";
-			for(int i=0;i<10;i++) {
-				data[i+1] = (byte) (filename.charAt(i) & 0xff);
+			filename = filename + "             ";
+			for (int i = 0; i < 10; i++) {
+				data[i + 1] = (byte) (filename.charAt(i) & 0xff);
 			}
 			HeaderBlock.data = data;
 		}
@@ -124,7 +117,11 @@ public class TapDirectoryEntry implements FileEntry {
 				return (epd.filelength);
 			}
 		}
-		return DataBlock.data.length;
+		if (DataBlock.data!=null) {		
+			return DataBlock.data.length;
+		} else {
+			return 0;
+		}
 	}
 
 	@Override
@@ -140,21 +137,26 @@ public class TapDirectoryEntry implements FileEntry {
 				return ("File with bad header");
 			}
 		} else {
-			return ("Headerless #"+DataBlock.flagbyte);
+			String s = DataBlock.BlockDesc;
+			return (s);
 		}
 	}
 
 	@Override
 	/**
-	 * Get the speccy basic details object for this file.
-	 * Also a dummy one for headerless file.
+	 * Get the speccy basic details object for this file. Also a dummy one for
+	 * headerless file.
 	 */
 	public SpeccyBasicDetails GetSpeccyBasicDetails() {
 		if (HeaderBlock != null) {
 			return (HeaderBlock.DecodeHeader());
 		} else {
-			return (new ExtendedSpeccyBasicDetails(-1, DataBlock.data.length, 32768, 32768, 'A',
-					"Headerless block #" + DataBlock.blocknum, DataBlock.data.length));
+			int length = 0;
+			if (DataBlock.data != null) {
+				length = DataBlock.data.length;
+			}
+			return (new ExtendedSpeccyBasicDetails(-1, length, 32768, 32768, 'A',
+					"Headerless block #" + DataBlock.BlockNumber, length));
 		}
 	}
 

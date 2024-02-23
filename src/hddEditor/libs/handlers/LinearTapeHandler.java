@@ -8,6 +8,7 @@ import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.SinclairMicrodrivePartition;
 import hddEditor.libs.partitions.SystemPartition;
 import hddEditor.libs.partitions.TAPPartition;
+import hddEditor.libs.partitions.TZXPartition;
 
 public class LinearTapeHandler extends OSHandler {
 	public LinearTapeHandler(Disk disk) throws IOException {
@@ -54,6 +55,19 @@ public class LinearTapeHandler extends OSHandler {
 			SystemPart.partitions = new IDEDosPartition[2];
 			SystemPart.partitions[0] = SystemPart;
 			SystemPart.partitions[1] = tap;
+		} else if (cn.endsWith("TZXFile")) {
+			rawData = PLUSIDEDOS.GetSystemPartition(CurrentDisk.GetNumCylinders(), CurrentDisk.GetNumHeads(),
+					CurrentDisk.GetNumSectors(),CurrentDisk.GetSectorSize() , false);
+	
+			TZXPartition tzx = new TZXPartition(1, CurrentDisk, rawData, 1, false);
+			tzx.SetPartType(PLUSIDEDOS.PARTITION_TAPE_TZX);
+			tzx.SetName("TZX file");
+			tzx.SetStartCyl(0);
+			tzx.SetStartHead(0);
+			tzx.SetEndCyl(0);
+			SystemPart.partitions = new IDEDosPartition[2];
+			SystemPart.partitions[0] = SystemPart;
+			SystemPart.partitions[1] = tzx;
 		}
 	}
 }

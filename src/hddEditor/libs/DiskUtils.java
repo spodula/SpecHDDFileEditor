@@ -13,6 +13,7 @@ import hddEditor.libs.disks.HDD.IDEDosDisk;
 import hddEditor.libs.disks.HDD.RS_IDEDosDisk;
 import hddEditor.libs.disks.LINEAR.MDFMicrodriveFile;
 import hddEditor.libs.disks.LINEAR.TAPFile;
+import hddEditor.libs.disks.LINEAR.TZXFile;
 import hddEditor.libs.handlers.IDEDosHandler;
 import hddEditor.libs.handlers.LinearTapeHandler;
 import hddEditor.libs.handlers.NonPartitionedDiskHandler;
@@ -46,6 +47,8 @@ public class DiskUtils {
 				result = new MDFMicrodriveFile(file);
 			} else if (new TAPFile().IsMyFileType(file)) {
 				result = new TAPFile(file);
+			} else if (new TZXFile().IsMyFileType(file)) {
+				result = new TZXFile(file);
 			} else {
 				throw new IOException("Error decoding file, File " + file.getAbsolutePath() + " is not a supported file type.");
 			}

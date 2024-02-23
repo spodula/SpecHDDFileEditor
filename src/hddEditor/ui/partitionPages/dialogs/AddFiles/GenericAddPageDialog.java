@@ -38,7 +38,10 @@ public class GenericAddPageDialog {
 
 	protected FileDialog fd;
 
-	
+	/*
+	 * File types. 0-3 are the standard basic types. 
+	 * Any after that are placeholders for special processing.
+	 */
 	protected final static int FILETYPE_BASIC = 0;
 	protected final static int FILETYPE_NUMARRAY = 1;
 	protected final static int FILETYPE_CHRARRAY = 2;
@@ -120,7 +123,7 @@ public class GenericAddPageDialog {
 	}
 
 	/**
-	 * Dispose of any dialogs openned by this partition
+	 * Dispose of any dialogs opened by this partition
 	 */
 	protected void DisposeSubDialogs() {
 

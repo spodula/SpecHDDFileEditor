@@ -12,16 +12,16 @@ import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
-import hddEditor.libs.disks.LINEAR.TAPFile;
-import hddEditor.libs.disks.LINEAR.tapblocks.TAPBlock;
-import hddEditor.libs.partitions.tap.TapDirectoryEntry;
+import hddEditor.libs.disks.LINEAR.TZXFile;
+import hddEditor.libs.disks.LINEAR.tzxblocks.TZXBlock;
+import hddEditor.libs.partitions.tzx.TzxDirectoryEntry;
 
-public class TAPPartition extends IDEDosPartition {
+public class TZXPartition extends IDEDosPartition {
 	// Parsed directory entries.
-	public TapDirectoryEntry DirectoryEntries[];
+	public TzxDirectoryEntry DirectoryEntries[];
 
 	/**
-	 * Constructor for a TAP partition.
+	 * Constructor for a TZX partition.
 	 * 
 	 * @param DirentLocation
 	 * @param RawDisk
@@ -29,7 +29,7 @@ public class TAPPartition extends IDEDosPartition {
 	 * @param DirentNum
 	 * @param Initialise
 	 */
-	public TAPPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise) {
+	public TZXPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise) {
 		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise);
 	}
 
@@ -48,7 +48,7 @@ public class TAPPartition extends IDEDosPartition {
 	@Override
 	public void LoadPartitionSpecificInformation() {
 		RawPartition = new byte[0x40];
-		TAPFile tf = (TAPFile) CurrentDisk;
+		TZXFile tf = (TZXFile) CurrentDisk;
 
 		SetPartType(PLUSIDEDOS.PARTITION_TAPE_TAP);
 		SetStartCyl(0);
@@ -57,38 +57,46 @@ public class TAPPartition extends IDEDosPartition {
 		SetEndHead(0);
 		SetEndSector((long) tf.Blocks.length);
 
-		ArrayList<TapDirectoryEntry> dirents = new ArrayList<TapDirectoryEntry>();
+		ArrayList<TzxDirectoryEntry> dirents = new ArrayList<TzxDirectoryEntry>();
 
-		TAPBlock lastblock = null;
-		for (TAPBlock tb : tf.Blocks) {
-			if (tb.flagbyte == 0x00 && tb.data.length == 17) {
-				if (lastblock != null) {
-					// create orphan header block.
-					TapDirectoryEntry tde = new TapDirectoryEntry(lastblock, null);
-					dirents.add(tde);
-				}
-				lastblock = tb;
-			} else {
-				if (lastblock != null) {
-					// create merged block
-					TapDirectoryEntry tde = new TapDirectoryEntry(tb, lastblock);
-					dirents.add(tde);
+		TZXBlock lastblock = null;
+		for (TZXBlock tb : tf.Blocks) {
+			System.out.println("Processing block " + tb.BlockNumber);
 
-					lastblock = null;
+			if (tb.data != null) {
+				if (tb.data.length == 17) {
+					if (lastblock != null) {
+						// create orphan header block.
+						TzxDirectoryEntry tde = new TzxDirectoryEntry(lastblock, null);
+						dirents.add(tde);
+					}
+					lastblock = tb;
 				} else {
-					// create orphan data block
-					TapDirectoryEntry tde = new TapDirectoryEntry(tb, null);
-					dirents.add(tde);
+					if (lastblock != null) {
+						// create merged block
+						TzxDirectoryEntry tde = new TzxDirectoryEntry(tb, lastblock);
+						dirents.add(tde);
+
+						lastblock = null;
+					} else {
+						// create orphan data block
+						TzxDirectoryEntry tde = new TzxDirectoryEntry(tb, null);
+						dirents.add(tde);
+					}
 				}
+			} else {
+				// create orphan header block.
+				TzxDirectoryEntry tde = new TzxDirectoryEntry(tb, null);
+				dirents.add(tde);				
 			}
 		}
 		if (lastblock != null) {
 			// create orphan header block.
-			TapDirectoryEntry tde = new TapDirectoryEntry(lastblock, null);
+			TzxDirectoryEntry tde = new TzxDirectoryEntry(lastblock, null);
 			dirents.add(tde);
 		}
 
-		DirectoryEntries = dirents.toArray(new TapDirectoryEntry[0]);
+		DirectoryEntries = dirents.toArray(new TzxDirectoryEntry[0]);
 	}
 
 	/**
@@ -96,8 +104,8 @@ public class TAPPartition extends IDEDosPartition {
 	 */
 	@Override
 	public String toString() {
-		TAPFile mdf = (TAPFile) CurrentDisk;
-		String result = "Filename: " + mdf.GetFilename();
+		TZXFile mdf = (TZXFile) CurrentDisk;
+		String result = "==================================\nFilename: " + mdf.GetFilename();
 		result = result + "\nNumSectors: " + mdf.GetNumSectors();
 
 		result = result + "\n\nBlocks: ";
@@ -106,8 +114,8 @@ public class TAPPartition extends IDEDosPartition {
 //		}
 		result = result + "\n\nDirectory entries: ";
 		int i = 0;
-		for (TapDirectoryEntry entry : DirectoryEntries) {
-			result = result + "\n#" + i + ": " + entry.GetFilename() + ": " + entry.GetFileTypeString();
+		for (TzxDirectoryEntry entry : DirectoryEntries) {
+			result = result + "\n#" + i + ": " + entry.GetFilename().trim() + ": " + entry.GetFileTypeString();
 			i++;
 		}
 
@@ -121,9 +129,9 @@ public class TAPPartition extends IDEDosPartition {
 	 * @param filename
 	 * @return
 	 */
-	public TAPBlock GetFileByName(String filename) {
-		TAPFile mdf = (TAPFile) CurrentDisk;
-		TAPBlock result = null;
+	public TZXBlock TZXBlock(String filename) {
+		TZXFile mdf = (TZXFile) CurrentDisk;
+		TZXBlock result = null;
 		filename = filename.trim().toUpperCase();
 		boolean foundfile = false;
 
@@ -137,8 +145,8 @@ public class TAPPartition extends IDEDosPartition {
 			}
 		}
 		if (!foundfile) {
-			for (TAPBlock file : mdf.Blocks) {
-				if (file.data.length == 17 && file.flagbyte == 0x00) {
+			for (TZXBlock file : mdf.Blocks) {
+				if (file.data.length == 17) {
 					byte dfn[] = new byte[10];
 					System.arraycopy(file.data, 1, dfn, 0, 10);
 					String tapeFileName = new String(dfn).trim();
@@ -163,7 +171,7 @@ public class TAPPartition extends IDEDosPartition {
 	 * @param param2
 	 * @throws IOException
 	 */
-	public void AddSpeccyHeader(TAPFile tap, String filename, int filetype, int filelength, int param1, int param2)
+	public void AddSpeccyHeader(TZXFile tzx, String filename, int filetype, int filelength, int param1, int param2)
 			throws IOException {
 		byte data[] = new byte[17];
 		data[0] = (byte) (filetype & 0xff);
@@ -180,7 +188,7 @@ public class TAPPartition extends IDEDosPartition {
 		data[15] = (byte) (param2 & 0xff);
 		data[16] = (byte) ((param2 / 0x100) & 0xff);
 
-		tap.AddBlock(data, Speccy.TAPE_HEADER);
+		tzx.AddStandardBlock(data, Speccy.TAPE_HEADER, false);
 	}
 
 	/**
@@ -194,10 +202,10 @@ public class TAPPartition extends IDEDosPartition {
 	 */
 	@Override
 	public void AddCodeFile(String filename, int loadAddress, byte[] CodeFile) throws IOException {
-		TAPFile tap = (TAPFile) CurrentDisk;
-		AddSpeccyHeader(tap, filename, Speccy.BASIC_CODE, CodeFile.length, loadAddress, 32768);
+		TZXFile tzx = (TZXFile) CurrentDisk;
+		AddSpeccyHeader(tzx, filename, Speccy.BASIC_CODE, CodeFile.length, loadAddress, 32768);
 
-		tap.AddBlock(CodeFile, Speccy.TAPE_DATA);
+		tzx.AddStandardBlock(CodeFile, Speccy.TAPE_DATA, true);
 		LoadPartitionSpecificInformation();
 	}
 
@@ -213,10 +221,10 @@ public class TAPPartition extends IDEDosPartition {
 	 */
 	@Override
 	public void AddBasicFile(String filename, byte[] EncodedBASICFile, int line, int varsStart) throws IOException {
-		TAPFile tap = (TAPFile) CurrentDisk;
-		AddSpeccyHeader(tap, filename, Speccy.BASIC_BASIC, EncodedBASICFile.length, line, varsStart);
+		TZXFile tzx = (TZXFile) CurrentDisk;
+		AddSpeccyHeader(tzx, filename, Speccy.BASIC_BASIC, EncodedBASICFile.length, line, varsStart);
 
-		tap.AddBlock(EncodedBASICFile, Speccy.TAPE_DATA);
+		tzx.AddStandardBlock(EncodedBASICFile, Speccy.TAPE_DATA, true);
 		LoadPartitionSpecificInformation();
 	}
 
@@ -232,10 +240,10 @@ public class TAPPartition extends IDEDosPartition {
 	@Override
 	public void AddCharArray(String filename, byte[] EncodedArray, String varname) throws IOException {
 		int encodedVarName = ((((varname + "A").charAt(0) & 0xff) - 0x60 + 0xC0) & 0xff);
-		TAPFile tap = (TAPFile) CurrentDisk;
+		TZXFile tzx = (TZXFile) CurrentDisk;
 
-		AddSpeccyHeader(tap, filename, Speccy.BASIC_CHRARRAY, EncodedArray.length, encodedVarName * 0x100, 0);
-		tap.AddBlock(EncodedArray, Speccy.TAPE_DATA);
+		AddSpeccyHeader(tzx, filename, Speccy.BASIC_CHRARRAY, EncodedArray.length, encodedVarName * 0x100, 0);
+		tzx.AddStandardBlock(EncodedArray, Speccy.TAPE_DATA, true);
 		LoadPartitionSpecificInformation();
 	}
 
@@ -251,10 +259,10 @@ public class TAPPartition extends IDEDosPartition {
 	@Override
 	public void AddNumericArray(String filename, byte[] EncodedArray, String varname) throws IOException {
 		int encodedVarName = ((((varname + "A").charAt(0) & 0xff) - 0x60 + 0x80) & 0xff);
-		TAPFile tap = (TAPFile) CurrentDisk;
+		TZXFile tzx = (TZXFile) CurrentDisk;
 
-		AddSpeccyHeader(tap, filename, Speccy.BASIC_NUMARRAY, EncodedArray.length, encodedVarName * 0x100, 0);
-		tap.AddBlock(EncodedArray, Speccy.TAPE_DATA);
+		AddSpeccyHeader(tzx, filename, Speccy.BASIC_NUMARRAY, EncodedArray.length, encodedVarName * 0x100, 0);
+		tzx.AddStandardBlock(EncodedArray, Speccy.TAPE_DATA, true);
 		LoadPartitionSpecificInformation();
 	}
 
@@ -289,9 +297,9 @@ public class TAPPartition extends IDEDosPartition {
 	 * @param newName
 	 * @throws IOException
 	 */
-	public void RenameFile(TapDirectoryEntry file, String newName) throws IOException {
+	public void RenameFile(TzxDirectoryEntry file, String newName) throws IOException {
 		file.SetFilename(newName);
-		((TAPFile) CurrentDisk).RewriteFile();
+		((TZXFile) CurrentDisk).RewriteFile();
 		LoadPartitionSpecificInformation();
 	}
 
@@ -303,7 +311,7 @@ public class TAPPartition extends IDEDosPartition {
 	 */
 	@Override
 	public byte[] GetAllDataInPartition() throws IOException {
-		return (((TAPFile) CurrentDisk).GetAllData());
+		return (((TZXFile) CurrentDisk).GetAllData());
 	}
 
 	@Override
@@ -313,7 +321,7 @@ public class TAPPartition extends IDEDosPartition {
 	 * @throws IOException
 	 */
 	public void SetAllDataInPartition(byte[] data) throws IOException {
-		((TAPFile) CurrentDisk).SetAllData(data);
+		((TZXFile) CurrentDisk).SetAllData(data);
 	}
 
 	/**
@@ -323,7 +331,7 @@ public class TAPPartition extends IDEDosPartition {
 	 */
 	@Override
 	public long GetSizeK() {
-		return (((TAPFile) CurrentDisk).GetFileSize() / 1024);
+		return (((TZXFile) CurrentDisk).GetFileSize() / 1024);
 	}
 
 	/**
@@ -357,7 +365,7 @@ public class TAPPartition extends IDEDosPartition {
 			try {
 				SysConfig.write("<speccy>\n".toCharArray());
 				int entrynum = 0;
-				for (TapDirectoryEntry entry : DirectoryEntries) {
+				for (TzxDirectoryEntry entry : DirectoryEntries) {
 					if (progress != null) {
 						if (progress.Callback(DirectoryEntries.length, entrynum++, "File: " + entry.GetFilename())) {
 							break;
@@ -480,7 +488,7 @@ public class TAPPartition extends IDEDosPartition {
 	public void DeleteFile(String wildcard) throws IOException {
 		// find the file in the list
 		wildcard = wildcard.trim();
-		for (TapDirectoryEntry tde : DirectoryEntries) {
+		for (TzxDirectoryEntry tde : DirectoryEntries) {
 			if (tde.DoesMatch(wildcard)) {
 				DeleteFile(tde, false);
 			}
@@ -497,12 +505,12 @@ public class TAPPartition extends IDEDosPartition {
 	 * @param DontUpdate
 	 * @throws IOException
 	 */
-	public void DeleteFile(TapDirectoryEntry entry, boolean DontUpdate) throws IOException {
+	public void DeleteFile(TzxDirectoryEntry entry, boolean DontUpdate) throws IOException {
 		if (entry.HeaderBlock != null) {
-			((TAPFile) CurrentDisk).DeleteBlock(entry.HeaderBlock);
+			((TZXFile) CurrentDisk).DeleteBlock(entry.HeaderBlock);
 		}
 		if (entry.DataBlock != null) {
-			((TAPFile) CurrentDisk).DeleteBlock(entry.DataBlock);
+			((TZXFile) CurrentDisk).DeleteBlock(entry.DataBlock);
 		}
 
 		if (!DontUpdate) {
@@ -516,13 +524,13 @@ public class TAPPartition extends IDEDosPartition {
 	 * @param entry
 	 * @throws IOException
 	 */
-	public void MoveDirectoryEntryUp(TapDirectoryEntry entry) throws IOException {
-		TAPFile tap = (TAPFile) CurrentDisk;
+	public void MoveDirectoryEntryUp(TzxDirectoryEntry entry) throws IOException {
+		TZXFile tzx = (TZXFile) CurrentDisk;
 		if (entry.HeaderBlock != null) {
-			tap.MoveBlockUp(entry.HeaderBlock, (entry.DataBlock == null));
+			tzx.MoveBlockUp(entry.HeaderBlock, (entry.DataBlock == null));
 		}
 		if (entry.DataBlock != null) {
-			tap.MoveBlockUp(entry.DataBlock, true);
+			tzx.MoveBlockUp(entry.DataBlock, true);
 		}
 		LoadPartitionSpecificInformation();
 	}
@@ -533,13 +541,13 @@ public class TAPPartition extends IDEDosPartition {
 	 * @param entry
 	 * @throws IOException
 	 */
-	public void MoveDirectoryEntryDown(TapDirectoryEntry entry) throws IOException {
-		TAPFile tap = (TAPFile) CurrentDisk;
+	public void MoveDirectoryEntryDown(TzxDirectoryEntry entry) throws IOException {
+		TZXFile tzx = (TZXFile) CurrentDisk;
 		if (entry.DataBlock != null) {
-			tap.MoveBlockDown(entry.DataBlock, (entry.HeaderBlock == null));
+			tzx.MoveBlockDown(entry.DataBlock, (entry.HeaderBlock == null));
 		}
 		if (entry.HeaderBlock != null) {
-			tap.MoveBlockDown(entry.HeaderBlock, true);
+			tzx.MoveBlockDown(entry.HeaderBlock, true);
 		}
 		LoadPartitionSpecificInformation();
 	}
@@ -550,16 +558,19 @@ public class TAPPartition extends IDEDosPartition {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		TAPFile tdf;
+		TZXFile tzx;
 		try {
-			tdf = new TAPFile(new File("/home/graham/x.tap"));
+			tzx = new TZXFile(new File("/home/graham/x.tzx"));
 
-			TAPPartition trp = new TAPPartition(0, tdf, new byte[64], 1, false);
-			System.out.println(trp);
+			TZXPartition tzp = new TZXPartition(0, tzx, new byte[64], 1, false);
+//			System.out.println(tzp);
+			byte data[] = new byte[555];
+			tzp.AddCodeFile("CODEY.TST", 32000, data);
+
 			// trp.MoveDirectoryEntryUp(trp.DirectoryEntries[0]);
-//			System.out.println(trp);
+//			System.out.println(tzp);
 			// trp.MoveDirectoryEntryDown(trp.DirectoryEntries[0]);
-//			System.out.println(trp);
+			System.out.println(tzp);
 
 		} catch (IOException | BadDiskFileException e) {
 			e.printStackTrace();

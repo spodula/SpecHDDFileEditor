@@ -25,6 +25,10 @@ import org.eclipse.swt.graphics.PaletteData;
 import hddEditor.libs.ASMLib.DecodedASM;
 
 public class Speccy {
+	//TAPE block types
+	public static int TAPE_HEADER = 0x00;
+	public static int TAPE_DATA = 0xff;
+	
 	// Spectrum colours
 	public static int COLOUR_BLACK = 0;
 	public static int COLOUR_BLUE = 1;
