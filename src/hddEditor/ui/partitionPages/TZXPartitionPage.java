@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages;
+//TODO: TZX- 
 
 import java.io.File;
 import java.io.IOException;
@@ -416,7 +417,6 @@ public class TZXPartitionPage extends GenericPage {
 						byte headerData[] = entry.HeaderBlock.data;
 						headerData[11] = (byte) (data.length & 0xff);
 						headerData[12] = (byte) ((data.length / 0x100) & 0xff);
-						//TODO: TZXPartitionpage - UpdateBlockData
 						entry.HeaderBlock.UpdateBlockData(headerData);
 					}
 

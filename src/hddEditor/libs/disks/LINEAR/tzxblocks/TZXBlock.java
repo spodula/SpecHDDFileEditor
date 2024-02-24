@@ -106,4 +106,18 @@ public class TZXBlock {
 		System.out.println("Update BlockData not supported for "+getClass().getName());
 	}
 
+	/**
+	 * 
+	 * @param data
+	 * @param index
+	 * @return
+	 */
+	public int GetDblByte(byte[] data, int index) {
+		int d1 = (data[index] & 0xff);
+		int d2 = (data[index+1] & 0xff);
+		
+		return (d1+ (d2*0x100));
+	}
+
+
 }

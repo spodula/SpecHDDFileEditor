@@ -14,23 +14,23 @@ public class TurboSpeedDataBlock extends TZXBlock {
 	public int PilotPulses = 0;
 	public int UsedBitsInFinal = 0;
 	public int Pause = 0;
-	
+		
 	public TurboSpeedDataBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_TURBOSPEED_DATABLOCK;
 		BlockDesc = "Turbo speed data block";
 		byte header[] = new byte[0x12];
 		fs.read(header);
-		Pilot = ((int) header[0] & 0xff) + (((int) header[1] & 0xff) * 0x100);
-		Sync1 = ((int) header[2] & 0xff) + (((int) header[3] & 0xff) * 0x100);
-		Sync2 = ((int) header[4] & 0xff) + (((int) header[5] & 0xff) * 0x100);
-		Zero = ((int) header[6] & 0xff) + (((int) header[7] & 0xff) * 0x100);
-		One = ((int) header[8] & 0xff) + (((int) header[9] & 0xff) * 0x100);
-		PilotPulses = ((int) header[0x0A] & 0xff) + (((int) header[0x0b] & 0xff) * 0x100);
+		Pilot = GetDblByte(header,0);
+		Sync1 = GetDblByte(header,2);
+		Sync2 = GetDblByte(header,4);
+		Zero = GetDblByte(header,6);
+		One = GetDblByte(header,8);
+		PilotPulses = GetDblByte(header,0x0A);
 		UsedBitsInFinal = ((int) header[0x0C] & 0xff);
-		Pause = ((int) header[0x0D] & 0xff) + (((int) header[0x0E] & 0xff) * 0x100);
+		Pause = GetDblByte(header,0x0D);
 
 		int blockLength = ((int) header[0x0F] & 0xff) + (((int) header[0x10] & 0xff) * 0x100)
-				+ (((int) header[0x11] & 0xff) * 0x100);
+				+ (((int) header[0x11] & 0xff) * 0x10000);
 
 		blockdata = new byte[blockLength];
 		fs.read(blockdata);

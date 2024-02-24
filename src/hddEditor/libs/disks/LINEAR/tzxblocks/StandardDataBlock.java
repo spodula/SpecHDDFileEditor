@@ -71,11 +71,12 @@ public class StandardDataBlock extends TZXBlock {
 		BlockDesc = "Standard speed data block";
 		byte blockpause[] = new byte[2];
 		fs.read(blockpause);
-		blockpauseMS = ((int) blockpause[0] & 0xff) + (((int) blockpause[1] & 0xff) * 0x100);
+		blockpauseMS = GetDblByte(blockpause,0);
 
 		byte len[] = new byte[2];
 		fs.read(len);
-		int blockLength = ((int) len[0] & 0xff) + (((int) len[1] & 0xff) * 0x100);
+		int blockLength = GetDblByte(len,0);
+		
 		blockdata = new byte[blockLength];
 		fs.read(blockdata);
 
