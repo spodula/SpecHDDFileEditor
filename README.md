@@ -1,5 +1,5 @@
 # SpecHDDFileEditor
-This is a java based editor for either Realsoft HDF files or Raw disk Image files in both 8 and 16 bit versions as well as amstrad DSK, TR-DOS files, TAP, TZX (limited) and MDR files.
+This is a java based editor for either Realsoft HDF files or Raw disk Image files in both 8 and 16 bit versions as well as amstrad DSK, TR-DOS files, TAP, TZX (limited), MGT(speccy types only) and MDR files.
 
 Features:
 * Open and create Raw Disk image files OR HDF files in both 8 or 16 bit variants. 
@@ -29,6 +29,7 @@ File system documentation:
 * TR-DOS filesystem: https://sinclair.wiki.zxnet.co.uk/wiki/TR-DOS_filesystem
 * MDR file: These are just Raw files with a Microdrive filesystem in them. Details of the filesystem are at  https://sinclair.wiki.zxnet.co.uk/wiki/ZX_Interface_1
 * TAP file: https://sinclair.wiki.zxnet.co.uk/wiki/TAP_format
+* MGT file: https://sinclair.wiki.zxnet.co.uk/wiki/MGT_filesystem
 * TZX file: https://k1.spdns.de/Develop/Projects/zasm/Info/TZX%20format.html
 
 Requires at least Java 11 (I use OpenJDK 18 on Linux.)
