@@ -1,6 +1,8 @@
 # SpecHDDFileEditor
 This is a java based editor for either Realsoft HDF files or Raw disk Image files in both 8 and 16 bit versions as well as amstrad DSK, TR-DOS files, TAP, TZX (limited), MGT(speccy types only) and MDR files.
 
+Limitations on supported file types: https://github.com/spodula/SpecHDDFileEditor/wiki/File-support
+
 Features:
 * Open and create Raw Disk image files OR HDF files in both 8 or 16 bit variants. 
 * Open, read and write DSK and TRD files
