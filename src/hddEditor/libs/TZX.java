@@ -47,4 +47,32 @@ public class TZX {
 		int i=(checksum & 0xff);
 		return(i);
 	}
+	
+	public static String hwInfo[] = {"Runs (may use special HW)", "Runs (Uses Special HW)","Runs (Doesnt use Special Hw)","Doesnt run"};
+	public static String hwType[] = {"Computer","Ext Storage","Rom/Ram","Sound","Joystick","Mouse","Other controller","Serial","Parallel","Printer","Modem","Digitiser","Network","Keypad","AD/DA converter","EPROM Programmer","Graphic"};
+	
+	public static String hwTypeComputer[] = {"ZX Spectrum 16k","ZX Spectrum 48k, Plus","ZX Spectrum 48k ISSUE 1","ZX Spectrum 128k +(Sinclair)","ZX Spectrum 128k +2 (grey case)","ZX Spectrum 128k +2A, +3","Timex Sinclair TC-2048","Timex Sinclair TS-2068","Pentagon 128","Sam Coupe","Didaktik M","Didaktik Gama","ZX-80","ZX-81","ZX Spectrum 128k, Spanish version","ZX Spectrum, Arabic version","Microdigital TK 90-X","Microdigital TK 95","Byte","Elwro 800-3","ZS Scorpion 256","Amstrad CPC 464","Amstrad CPC 664","Amstrad CPC 6128","Amstrad CPC 464+","Amstrad CPC 6128+","Jupiter ACE","Enterprise","Commodore 64","Commodore 128","Inves Spectrum+","Profi","GrandRomMax","Kay 1024","Ice Felix HC 91","Ice Felix HC 2000","Amaterske RADIO Mistrum","Quorum 128","MicroART ATM","MicroART ATM Turbo 2","Chrome","ZX Badaloc","TS-1500","Lambda","TK-65","ZX-97"};
+	public static String hwTypeExtStorage[] = {"ZX Microdrive","Opus Discovery","MGT Disciple","MGT Plus-D","Rotronics Wafadrive","TR-DOS (BetaDisk)","Byte Drive","Watsford","FIZ","Radofin","Didaktik disk drives","BS-DOS (MB-02)","ZX Spectrum +3 disk drive","JLO (Oliger) disk interface","Timex FDD3000","Zebra disk drive","Ramex Millenia","Larken","Kempston disk interface","Sandy","ZX Spectrum +3e hard disk","ZXATASP","DivIDE","ZXCF"};
+	public static String hwTypeRomRam[] = {"Sam Ram","Multiface ONE","Multiface 128k","Multiface +3","MultiPrint","MB-02 ROM/RAM expansion","SoftROM","1k","16k","48k","Memory in 8-16k used"};
+	public static String hwTypeSound[] = {"Classic AY hardware (compatible with 128k ZXs)","Fuller Box AY sound hardware","Currah microSpeech","SpecDrum","AY ACB stereo (A+C=left","AY ABC stereo (A+B=left","RAM Music Machine","Covox","General Sound","Intec Electronics Digital Interface B8001","Zon-X AY","QuickSilva AY","Jupiter ACE"};
+	public static String hwTypeJoysticks[] = {"Kempston","Cursor, Protek, AGF","Sinclair 2 Left (12345)","Sinclair 1 Right (67890)","Fuller"};
+	public static String hwTypeMouse[] = {"AMX mouse","Kempston mouse"};
+	public static String hwTypeOtherControl[] = {"Trickstick","ZX Light gun","Zebra Graphics tablet","Defender light gun"};
+	public static String hwTypeSerial[] = {"ZX Interface 1","ZX Spectrum 128"};
+	public static String hwTypeParallel[] = {"Kempston S","Kempston E","ZX Spectrum +3","Tasman","DK'Tronics","Hilderbay","INES Printerface","ZX LPrint Interface 3","MultiPrint","Opus Discovery","Standard 8255 chip with ports 31 63 95"};
+	public static String hwTypePrinters[] = {"ZX Printer/Alphacom 32","Generic printer","Epson compatible"};
+	public static String hwTypeModems[] = {"Prism VTX 5000","TS 2050 or Westridge 2050"};
+	public static String hwTypeDigitiser[] = {"RD Digital tracer","DK'tronics light pen","British Micrograph pad","Romantic Robot Videoface"};
+	public static String hwTypeNetwork[] = {"ZX Interface 1"};
+	public static String hwTypeKeypad[] = {"Keypad for ZX Spectrum 128"};
+	public static String hwTypeADDA[] = {"Harley systems ADC 8.2","Blackboard electronics"};
+	public static String hwTypeEPROMMER[] = {"Orme Electronics"};
+	public static String hwTypeGRAPHICS[] = {"WRX Hi-res","G007","Memotech","Lambda Colour"};
+	
+	public static String HwInfoMatrix[][] = { hwTypeComputer, hwTypeExtStorage, hwTypeRomRam,hwTypeSound,hwTypeJoysticks,
+			hwTypeMouse,hwTypeOtherControl, hwTypeSerial,hwTypeParallel,hwTypePrinters,hwTypeModems,hwTypeDigitiser,hwTypeNetwork,
+			hwTypeKeypad,hwTypeADDA,hwTypeEPROMMER,hwTypeGRAPHICS};
+
+	
+	
 }

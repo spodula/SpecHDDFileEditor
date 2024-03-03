@@ -35,6 +35,7 @@ import hddEditor.libs.disks.LINEAR.tzxblocks.FourtyEightkStopBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GlueBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GroupEndBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GroupStartBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.HardwareInfoBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.JumpToBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.LoopEndBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.LoopStartBlock;
@@ -173,6 +174,9 @@ public class TZXFile implements Disk {
 			break;
 		case 0x32:
 			block = new ArchiveInfoBlock(fs);
+			break;
+		case 0x33:
+			block = new HardwareInfoBlock(fs);
 			break;
 		case 0x5A:
 			block = new GlueBlock(fs);
@@ -524,6 +528,7 @@ public class TZXFile implements Disk {
 		// Close, forcing flush
 		NewFile.close();
 		NewFile = null;
+		
 		// Load the newly created file.
 		this.file = file;
 		inFile = new RandomAccessFile(file, "rw");
