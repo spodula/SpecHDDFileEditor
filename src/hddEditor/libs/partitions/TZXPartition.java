@@ -59,36 +59,42 @@ public class TZXPartition extends IDEDosPartition {
 
 		ArrayList<TzxDirectoryEntry> dirents = new ArrayList<TzxDirectoryEntry>();
 
+		int blocknum = 0;
 		TZXBlock lastblock = null;
 		for (TZXBlock tb : tf.Blocks) {
-			System.out.println("Processing block " + tb.BlockNumber);
+			if (tb != null) {
+				System.out.println("Processing block " + tb.BlockNumber);
 
-			if (tb.data != null) {
-				if (tb.data.length == 17) {
-					if (lastblock != null) {
-						// create orphan header block.
-						TzxDirectoryEntry tde = new TzxDirectoryEntry(lastblock, null);
-						dirents.add(tde);
-					}
-					lastblock = tb;
-				} else {
-					if (lastblock != null) {
-						// create merged block
-						TzxDirectoryEntry tde = new TzxDirectoryEntry(tb, lastblock);
-						dirents.add(tde);
-
-						lastblock = null;
+				if (tb.data != null) {
+					if (tb.data.length == 17) {
+						if (lastblock != null) {
+							// create orphan header block.
+							TzxDirectoryEntry tde = new TzxDirectoryEntry(lastblock, null);
+							dirents.add(tde);
+						}
+						lastblock = tb;
 					} else {
-						// create orphan data block
-						TzxDirectoryEntry tde = new TzxDirectoryEntry(tb, null);
-						dirents.add(tde);
+						if (lastblock != null) {
+							// create merged block
+							TzxDirectoryEntry tde = new TzxDirectoryEntry(tb, lastblock);
+							dirents.add(tde);
+
+							lastblock = null;
+						} else {
+							// create orphan data block
+							TzxDirectoryEntry tde = new TzxDirectoryEntry(tb, null);
+							dirents.add(tde);
+						}
 					}
+				} else {
+					// create orphan header block.
+					TzxDirectoryEntry tde = new TzxDirectoryEntry(tb, null);
+					dirents.add(tde);
 				}
 			} else {
-				// create orphan header block.
-				TzxDirectoryEntry tde = new TzxDirectoryEntry(tb, null);
-				dirents.add(tde);				
+				System.out.println("ERROR (BUG): TZX block is null: Block:" + blocknum);
 			}
+			blocknum++;
 		}
 		if (lastblock != null) {
 			// create orphan header block.
