@@ -52,7 +52,7 @@ public class ArchiveInfoBlock extends TZXBlock {
 		fs.read(data);
 
 		rawdata = new byte[msglength+3];
-		rawdata[0] = 0x32;
+		rawdata[0] = (byte)blocktype;
 		rawdata[1] = bl[0];
 		rawdata[2] = bl[1];
 		rawdata[3] = bl[2];
