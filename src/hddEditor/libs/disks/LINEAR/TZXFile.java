@@ -1,27 +1,12 @@
 package hddEditor.libs.disks.LINEAR;
 
-/**
- * Unsupported:
- * ID 18 //CSW recording                  *EE
- * ID 19 //Generalised data block         *EE
- * ID 26 // CALL Sequence
- * ID 28 // Select block      
- * id 33 // Hardware type                
- * id 35 // Custom info block (Some types are depreciated)
- * 
- * Depreciated unsupported
- * 
- * ID 16 //C64 ROM type data
- * ID 17 //C64 Turbo type data
- * ID 34 //Emulation info
- * id 40 //Snapshot blocks
- */
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.util.Vector;
 
@@ -45,6 +30,7 @@ import hddEditor.libs.disks.LINEAR.tzxblocks.PulseSequence;
 import hddEditor.libs.disks.LINEAR.tzxblocks.PureDataBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.PureToneBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.ReturnFromSequenceBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.SelectBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.SetSignalLevelBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.StandardDataBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.TZXBlock;
@@ -110,7 +96,6 @@ public class TZXFile implements Disk {
 		this.file = null;
 	}
 
-	
 	/**
 	 * 
 	 * @param i
@@ -159,6 +144,9 @@ public class TZXFile implements Disk {
 			break;
 		case 0x27:
 			block = new ReturnFromSequenceBlock(fs);
+			break;
+		case 0x28:
+			block = new SelectBlock(fs);
 			break;
 		case 0x2A:
 			block = new FourtyEightkStopBlock(fs);
@@ -528,7 +516,7 @@ public class TZXFile implements Disk {
 		// Close, forcing flush
 		NewFile.close();
 		NewFile = null;
-		
+
 		// Load the newly created file.
 		this.file = file;
 		inFile = new RandomAccessFile(file, "rw");
@@ -551,10 +539,11 @@ public class TZXFile implements Disk {
 	 * Test harness
 	 * 
 	 * @param args
+	 * @throws IOException 
 	 */
 	public static void main(String[] args) {
 		try {
-			String filename = "/home/graham/x.tzx";
+			String filename = args[0];
 
 			TZXFile mdt = new TZXFile(new File(filename));
 			if (mdt.IsMyFileType(new File(filename))) {
@@ -575,5 +564,34 @@ public class TZXFile implements Disk {
 			e.printStackTrace();
 		}
 	}
+
+
+		/*		PrintWriter pr = new PrintWriter(new FileWriter("tzx.log"));
+		try {
+
+			File folder = new File("/media/CB4B-457D/Antique computers/Sinclair ZX Spectrum/Games/[TZX]");
+			File contents[] = folder.listFiles();
+			for (File f : contents) {
+				if (f.getName().endsWith(".tzx")) {
+					pr.println("=============================================");
+					pr.println(f.getName());
+					pr.println("=============================================");
+					System.out.println(f.getName());
+					try {
+						TZXFile mdt = new TZXFile(f);
+						pr.println(mdt);
+						mdt.close();
+						mdt = null;
+					} catch (IOException | BadDiskFileException | NullPointerException
+							| ArrayIndexOutOfBoundsException e) {
+						pr.println(e.getMessage());
+						e.printStackTrace();
+					}
+				}
+			}
+		} finally {
+			pr.close();
+		} */
+
 
 }

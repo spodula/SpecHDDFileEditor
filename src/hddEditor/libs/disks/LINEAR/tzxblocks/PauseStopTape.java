@@ -6,7 +6,7 @@ import java.io.RandomAccessFile;
 import hddEditor.libs.TZX;
 
 public class PauseStopTape extends TZXBlock {
-	int PauseDuration = 0;
+	public int PauseDuration = 0;
 	
 	public PauseStopTape(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_PAUSE;

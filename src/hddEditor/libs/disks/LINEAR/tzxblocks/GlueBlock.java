@@ -6,9 +6,9 @@ import java.io.RandomAccessFile;
 import hddEditor.libs.TZX;
 
 public class GlueBlock extends TZXBlock {
-	String XTAPE = "";
-	int Major;
-	int Minor;
+	public String XTAPE = "";
+	public int Major;
+	public int Minor;
 	
 	public GlueBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_GLUE;

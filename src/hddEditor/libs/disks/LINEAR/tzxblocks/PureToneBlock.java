@@ -14,8 +14,8 @@ public class PureToneBlock extends TZXBlock {
 		BlockDesc = "Pure tone";
 		byte dat[] = new byte[4];
 		fs.read(dat);
-		PulseLen = ((int)dat[0] & 0xff) + (((int)dat[1] & 0xff) * 0x100);
-		Pulses = ((int)dat[2] & 0xff) + (((int)dat[3] & 0xff) * 0x100);
+		PulseLen = GetDblByte(dat, 0);
+		Pulses = GetDblByte(dat, 2);
 		
 		rawdata = new byte[5];
 		rawdata[0] = (byte)blocktype;

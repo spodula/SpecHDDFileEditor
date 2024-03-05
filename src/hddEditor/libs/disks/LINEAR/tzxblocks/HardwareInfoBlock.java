@@ -6,11 +6,12 @@ import java.io.RandomAccessFile;
 import hddEditor.libs.TZX;
 
 public class HardwareInfoBlock  extends TZXBlock {
+	public HardwareInfoEntry Entries[];
 	
 	/**
 	 * This class is mainly storage and decoding of the individual hardware types.
 	 */
-	class HardwareInfoEntry {
+	public class HardwareInfoEntry {
 		byte rawdata[] = new byte[3];
 		
 		public HardwareInfoEntry(byte data[]) {
@@ -27,7 +28,7 @@ public class HardwareInfoBlock  extends TZXBlock {
 			if (rawdata[2] < TZX.hwInfo.length) {
 				return TZX.hwInfo[rawdata[2]];
 			} else {
-				return "Unset";
+				return "Invalid value";
 			}
 		}
 		
@@ -39,7 +40,7 @@ public class HardwareInfoBlock  extends TZXBlock {
 			if (rawdata[0] < TZX.hwType.length) {
 				return TZX.hwType[rawdata[0]];
 			} else {
-				return "Unset";
+				return "Invalid value";
 			}	
 		}
 		/**
@@ -56,7 +57,7 @@ public class HardwareInfoBlock  extends TZXBlock {
 				}
 				return "Undefined hardware type";
 			} else {
-				return "Invalid";
+				return "Invalid value";
 			}	
 		}
 		
@@ -67,10 +68,7 @@ public class HardwareInfoBlock  extends TZXBlock {
 		}
 		
 	}
-	
-	
-	HardwareInfoEntry Entries[];
-	
+		
 	public HardwareInfoBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_HARDWARETYPE;
 		BlockDesc = "Hardware Info block";

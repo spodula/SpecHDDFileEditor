@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import hddEditor.libs.TZX;
 
 public class ArchiveInfoBlock extends TZXBlock {
-	class TextEntry {
-		int id;
-		int length;
-		String text;
+	public class TextEntry {
+		public int id;
+		public int length;
+		public String text;
 
 		public TextEntry(byte data[], int offset) {
 			id = data[offset];

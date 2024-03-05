@@ -51,7 +51,7 @@ import hddEditor.ui.partitionPages.TrDosPartitionPage;
 
 public class HDDEditor {
 	public static String[] SUPPORTEDFILETYPES = { "*", "*.img", "*.hdf", "*.mgt", "*.trd", "*.scl", "*.mdr", "*.mgt",
-			"*.tap" };
+			"*.tap" ,"*.tzx"};
 
 	public Disk CurrentDisk = null;
 	public OSHandler CurrentHandler = null;

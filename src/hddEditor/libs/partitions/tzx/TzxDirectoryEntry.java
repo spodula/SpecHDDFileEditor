@@ -103,6 +103,10 @@ public class TzxDirectoryEntry implements FileEntry {
 	 * Get the raw file size.
 	 */
 	public int GetRawFileSize() {
+		if (DataBlock.data == null) {
+			return(0);
+		}
+		
 		return DataBlock.data.length;
 	}
 
@@ -141,6 +145,50 @@ public class TzxDirectoryEntry implements FileEntry {
 			return (s);
 		}
 	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public int GetTZXFileType() {
+		if (DataBlock!=null) {
+			return(DataBlock.blocktype);
+		} else if (HeaderBlock!=null) {
+			return(HeaderBlock.blocktype);
+		}
+		return(0);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public String GetTZXBlockString() {
+		if (DataBlock!=null && HeaderBlock!=null) {
+			return("Block "+HeaderBlock.BlockNumber+"/"+DataBlock.BlockNumber);
+		} else if (DataBlock!=null) {
+			return("Block "+DataBlock.BlockNumber);
+		} else if (HeaderBlock!=null) {
+			return("Block "+HeaderBlock.BlockNumber);
+		} else {
+			return("Invalid block");
+		}		
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public byte[] GetTZXBlockData() {
+		if (DataBlock!=null) {
+			return(DataBlock.data);
+		} else if (HeaderBlock!=null) {
+			return(HeaderBlock.data);
+		} else {
+			return(new byte[0]);
+		}		
+	}
+	
 
 	@Override
 	/**

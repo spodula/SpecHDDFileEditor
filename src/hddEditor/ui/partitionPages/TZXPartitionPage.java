@@ -431,7 +431,7 @@ public class TZXPartitionPage extends GenericPage {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-		} 
+		}
 	}
 
 	/**
