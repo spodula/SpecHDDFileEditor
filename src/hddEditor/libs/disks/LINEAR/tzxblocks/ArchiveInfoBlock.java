@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import hddEditor.libs.TZX;
 
 public class ArchiveInfoBlock extends TZXBlock {
+	public TextEntry list[] = null;
+
 	public class TextEntry {
 		public int id;
 		public int length;
@@ -38,8 +40,6 @@ public class ArchiveInfoBlock extends TZXBlock {
 		}
 		
 	}
-	
-	public TextEntry list[] = null;
 	
 	public ArchiveInfoBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_ARCHIVEINFO;

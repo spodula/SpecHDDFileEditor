@@ -3,7 +3,6 @@ package hddEditor.ui.partitionPages.FileRenderers.RawRender;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 public class TextRenderer implements Renderer {

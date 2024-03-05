@@ -1,14 +1,11 @@
 package hddEditor.ui.partitionPages.dialogs;
+
 //TODO: TZX: NOTES should have text descriptions if non-data blocks
 /**
- * BLocks remaining to do:
+ * TODO: TZX BLocks remaining to do:
  * TZX_DIRECTRECORDING
  * TZX_CSWRECORDING
  * TZX_GENERAL
- * TZX_CALLSEQ
- * TZX_SELECTBLOCK
- * TZX_SETSIGNALLEVEL;
- * TZX_MESSAGEBLOCK
  * TZX_CUSTOMINFO
  */
 
@@ -29,16 +26,19 @@ import hddEditor.libs.Speccy;
 import hddEditor.libs.TZX;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.LINEAR.tzxblocks.ArchiveInfoBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.CallSequenceBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.ArchiveInfoBlock.TextEntry;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GlueBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.HardwareInfoBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.HardwareInfoBlock.HardwareInfoEntry;
 import hddEditor.libs.disks.LINEAR.tzxblocks.JumpToBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.LoopStartBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.MessageBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.PauseStopTape;
 import hddEditor.libs.disks.LINEAR.tzxblocks.PulseSequence;
 import hddEditor.libs.disks.LINEAR.tzxblocks.PureToneBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.SelectBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.SetSignalLevelBlock;
 import hddEditor.libs.partitions.tzx.TzxDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
@@ -105,13 +105,14 @@ public class TzxFileEditDialog {
 	}
 
 	private String GetFileType() {
-		if ((ThisEntry.GetTZXFileType() != TZX.TZX_STANDARDSPEED_DATABLOCK) && (ThisEntry.GetTZXFileType() != TZX.TZX_TURBOSPEED_DATABLOCK)) {
-			return(TZX.GetDataBlockTypeForID(ThisEntry.GetTZXFileType())+" Block");
+		if ((ThisEntry.GetTZXFileType() != TZX.TZX_STANDARDSPEED_DATABLOCK)
+				&& (ThisEntry.GetTZXFileType() != TZX.TZX_TURBOSPEED_DATABLOCK)) {
+			return (TZX.GetDataBlockTypeForID(ThisEntry.GetTZXFileType()) + " Block");
 		}
-		
-		return(ThisEntry.GetSpeccyBasicDetails().BasicTypeString()+" File");
+
+		return (ThisEntry.GetSpeccyBasicDetails().BasicTypeString() + " File");
 	}
-	
+
 	/**
 	 * Create the form
 	 */
@@ -124,19 +125,18 @@ public class TzxFileEditDialog {
 		gridLayout.marginLeft = 20;
 		gridLayout.marginRight = 20;
 		shell.setLayout(gridLayout);
-		
 
 		Label lbl = label(GetFileType(), 4);
 		FontData fontData = lbl.getFont().getFontData()[0];
 		Font boldFont = new Font(display, new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 		lbl.setFont(boldFont);
 
-		if (ThisEntry.GetRawFileSize()==0) {
+		if (ThisEntry.GetRawFileSize() == 0) {
 			label(String.format("Length : No data"), 2);
 		} else {
 			label(String.format("Length : %d bytes (%X)", ThisEntry.GetRawFileSize(), ThisEntry.GetRawFileSize()), 2);
 		}
-		
+
 		MainPage1 = new ScrolledComposite(shell, SWT.V_SCROLL);
 		MainPage1.setExpandHorizontal(true);
 		MainPage1.setExpandVertical(true);
@@ -174,87 +174,115 @@ public class TzxFileEditDialog {
 		 * Render the page.
 		 */
 		CodeRenderer CR;
-		int TzxFileType = ThisEntry.GetTZXFileType(); 
-		if (TzxFileType == TZX.TZX_GROUPEND || TzxFileType == TZX.TZX_LOOPEND || TzxFileType == TZX.TZX_RETSEQ || TzxFileType == TZX.TZX_STOP48) {
-			//Cant render this, so just exit.
+		int TzxFileType = ThisEntry.GetTZXFileType();
+		if (TzxFileType == TZX.TZX_GROUPEND || TzxFileType == TZX.TZX_LOOPEND || TzxFileType == TZX.TZX_RETSEQ
+				|| TzxFileType == TZX.TZX_STOP48) {
+			// Cant render this, so just exit.
 		} else if ((TzxFileType == TZX.TZX_TEXTDESC) || (TzxFileType == TZX.TZX_GROUPSTART)) {
 			TextDescRenderer tdr = new TextDescRenderer();
 			tdr.RenderText(MainPage, ThisEntry.GetTZXBlockData(), null, ThisEntry.GetTZXBlockString());
 		} else if ((TzxFileType == TZX.TZX_PURETONE)) {
 			PureToneBlock ptb = (PureToneBlock) ThisEntry.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			sdr.RenderTexts(MainPage, new String[] {"Pulse length","Pulse count"}, new String[] {String.valueOf(ptb.PulseLen)+" Tstates", String.valueOf(ptb.Pulses)}); 
+			sdr.RenderTexts(MainPage, new String[] { "Pulse length", "Pulse count" },
+					new String[] { String.valueOf(ptb.PulseLen) + " Tstates", String.valueOf(ptb.Pulses) });
 		} else if ((TzxFileType == TZX.TZX_LOOPSTART)) {
 			LoopStartBlock lsb = (LoopStartBlock) ThisEntry.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			sdr.RenderTexts(MainPage, new String[] {"Repetitions"}, new String[] {String.valueOf(lsb.Repeat)}); 
+			sdr.RenderTexts(MainPage, new String[] { "Repetitions" }, new String[] { String.valueOf(lsb.Repeat) });
 		} else if ((TzxFileType == TZX.TZX_JUMP)) {
 			JumpToBlock jtb = (JumpToBlock) ThisEntry.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			sdr.RenderTexts(MainPage, new String[] {"Relative jump", "Actual target"}, new String[] {String.valueOf(jtb.Disp),String.valueOf(jtb.Disp+jtb.BlockNumber)}); 
+			sdr.RenderTexts(MainPage, new String[] { "Relative jump", "Actual target" },
+					new String[] { String.valueOf(jtb.Disp), String.valueOf(jtb.Disp + jtb.BlockNumber) });
+		} else if ((TzxFileType == TZX.TZX_MESSAGEBLOCK)) {
+			MessageBlock mb = (MessageBlock) ThisEntry.DataBlock;
+			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
+			sdr.RenderTexts(MainPage, new String[] { "Time delay", "Message"},
+					new String[] { String.valueOf(mb.time), mb.BlockNotes });		
 		} else if ((TzxFileType == TZX.TZX_GLUE)) {
 			GlueBlock gb = (GlueBlock) ThisEntry.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			sdr.RenderTexts(MainPage, new String[] {"XTAPE", "Major","Minor"}, new String[] {gb.XTAPE, String.valueOf(gb.Major),String.valueOf(gb.Minor)}); 
+			sdr.RenderTexts(MainPage, new String[] { "XTAPE", "Major", "Minor" },
+					new String[] { gb.XTAPE, String.valueOf(gb.Major), String.valueOf(gb.Minor) });
 		} else if ((TzxFileType == TZX.TZX_PAUSE)) {
 			PauseStopTape pst = (PauseStopTape) ThisEntry.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			String s= "Stop tape";
-			if (pst.PauseDuration!=0) {
-				s = pst.PauseDuration+"ms";
+			String s = "Stop tape";
+			if (pst.PauseDuration != 0) {
+				s = pst.PauseDuration + "ms";
 			}
-			sdr.RenderTexts(MainPage, new String[] {"Pause"}, new String[] {s}); 
+			sdr.RenderTexts(MainPage, new String[] { "Pause" }, new String[] { s });
+		} else if ((TzxFileType == TZX.TZX_SETSIGNALLEVEL)) {
+			SetSignalLevelBlock ssl = (SetSignalLevelBlock) ThisEntry.DataBlock;
+			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
+			String level = "High (1)";
+			if (ssl.SignalLevel == 0) {
+				level = "Low (0)";
+			}
+			sdr.RenderTexts(MainPage, new String[] { "Signal level" }, new String[] { level });
 		} else if ((TzxFileType == TZX.TZX_ARCHIVEINFO)) {
 			ArchiveInfoBlock aab = (ArchiveInfoBlock) ThisEntry.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
 			String labels[] = new String[aab.list.length];
 			String content[] = new String[aab.list.length];
-			
+
 			int ptr = 0;
-			for(TextEntry t:aab.list) {
+			for (TextEntry t : aab.list) {
 				labels[ptr] = t.IdByteAsString();
 				content[ptr] = t.text;
 				ptr++;
 			}
-			sdr.RenderTexts(MainPage, labels, content); 
-			
+			sdr.RenderTexts(MainPage, labels, content);
+		} else if ((TzxFileType == TZX.TZX_CALLSEQ)) {
+			CallSequenceBlock csb = (CallSequenceBlock) ThisEntry.DataBlock;
+			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
+			String labels[] = new String[csb.Blocks.length];
+			String content[] = new String[csb.Blocks.length];
+
+			int ptr = 0;
+			for (int t : csb.Blocks) {
+				labels[ptr] = "Call #" + ptr;
+				content[ptr] = String.valueOf(t);
+				ptr++;
+			}
+			sdr.RenderTexts(MainPage, labels, content);
+
 		} else if ((TzxFileType == TZX.TZX_HARDWARETYPE)) {
 			HardwareInfoBlock hwb = (HardwareInfoBlock) ThisEntry.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			
-			
+
 			String labels[] = new String[hwb.Entries.length];
 			String content[] = new String[hwb.Entries.length];
-			
+
 			int ptr = 0;
-			for(HardwareInfoEntry t:hwb.Entries) {
-				labels[ptr] = t.getHardwareType()+" - "+t.GetHardwareInfo();
+			for (HardwareInfoEntry t : hwb.Entries) {
+				labels[ptr] = t.getHardwareType() + " - " + t.GetHardwareInfo();
 				content[ptr] = t.GetHWInfo();
 				ptr++;
 			}
-			sdr.RenderTexts(MainPage, labels, content); 
+			sdr.RenderTexts(MainPage, labels, content);
 		} else if ((TzxFileType == TZX.TZX_PULSESEQ)) {
-			PulseSequence psb = (PulseSequence) ThisEntry.DataBlock; 
+			PulseSequence psb = (PulseSequence) ThisEntry.DataBlock;
 			String labels[] = new String[psb.Pulses];
 			String data[] = new String[psb.Pulses];
-			for (int cnt=0;cnt<psb.Pulses;cnt++) {
-				labels[cnt] = "Pulse number "+cnt;
-				data[cnt] = psb.PulseLen[cnt]+" T states";
+			for (int cnt = 0; cnt < psb.Pulses; cnt++) {
+				labels[cnt] = "Pulse number " + cnt;
+				data[cnt] = psb.PulseLen[cnt] + " T states";
 			}
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			sdr.RenderTexts(MainPage, labels, data); 
+			sdr.RenderTexts(MainPage, labels, data);
 		} else if ((TzxFileType == TZX.TZX_SELECTBLOCK)) {
-			SelectBlock sb = (SelectBlock) ThisEntry.DataBlock; 
+			SelectBlock sb = (SelectBlock) ThisEntry.DataBlock;
 			String labels[] = new String[sb.Entries.length];
 			String data[] = new String[sb.Entries.length];
-			for (int cnt=0;cnt<sb.Entries.length;cnt++) {
-				labels[cnt] = "Offset "+sb.Entries[cnt].relOffset;
+			for (int cnt = 0; cnt < sb.Entries.length; cnt++) {
+				labels[cnt] = "Offset " + sb.Entries[cnt].relOffset;
 				data[cnt] = sb.Entries[cnt].text;
 			}
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			sdr.RenderTexts(MainPage, labels, data); 
-			
-			
+			sdr.RenderTexts(MainPage, labels, data);
+
 		} else {
 			SpeccyBasicDetails sbd = ThisEntry.GetSpeccyBasicDetails();
 			switch (sbd.BasicType) {

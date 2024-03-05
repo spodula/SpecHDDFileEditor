@@ -6,7 +6,7 @@ import java.io.RandomAccessFile;
 import hddEditor.libs.TZX;
 
 public class SetSignalLevelBlock extends TZXBlock {
-	int SignalLevel = 0;
+	public int SignalLevel = 0;
 	
 	public SetSignalLevelBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_SETSIGNALLEVEL;

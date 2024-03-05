@@ -1,13 +1,12 @@
 package hddEditor.libs;
 /**
- * Details of Raw supported/unsupported. (Note, actually displaying them is different.
+ * Details of Raw supported/unsupported. (Note, actually displaying them is different).
  * 
  * Unsupported:
  * ID 18 //CSW recording                  *EE
- * ID 19 //Generalised data block         *EE
- * ID 26 // CALL Sequence
- * id 35 // Custom info block (Some types are depreciated)
- * 
+ * ID 19 //Generalised data block         *Eg  Zoids - The Battle Begins (1985)(Martech Games)[a2].tzx Zaxxon (1985)(U.S. Gold)[a].tzx
+ * id 35 // Custom info block (Some types are depreciated) eg Zanthrax (1989)(Crash).tzx Zakladi Slovenije (1986)(Matej Kurent)(sl).tzx
+ *  
  * Depreciated unsupported
  * 
  * ID 16 //C64 ROM type data
@@ -18,6 +17,7 @@ package hddEditor.libs;
  * Depreciated supported
  * id 33 // Hardware type                
  *
+ *TODO: Yogi Bear (1987)(Alternative Software)[re-release].tzx causes exception
  */
 
 /**

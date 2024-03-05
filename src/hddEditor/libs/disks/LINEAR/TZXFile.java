@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.util.Vector;
 
@@ -15,6 +13,7 @@ import hddEditor.libs.TZX;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
 import hddEditor.libs.disks.LINEAR.tzxblocks.ArchiveInfoBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.CallSequenceBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.DirectRecordingBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.FourtyEightkStopBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GlueBlock;
@@ -141,6 +140,9 @@ public class TZXFile implements Disk {
 			break;
 		case 0x25:
 			block = new LoopEndBlock(fs);
+			break;
+		case 0x26:
+			block = new CallSequenceBlock(fs);
 			break;
 		case 0x27:
 			block = new ReturnFromSequenceBlock(fs);

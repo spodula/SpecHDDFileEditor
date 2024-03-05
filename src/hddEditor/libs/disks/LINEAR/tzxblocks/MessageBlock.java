@@ -6,6 +6,8 @@ import java.io.RandomAccessFile;
 import hddEditor.libs.TZX;
 
 public class MessageBlock extends TZXBlock {
+	public int time;
+	
 	public MessageBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_MESSAGEBLOCK;
 		BlockDesc = "Message block";
@@ -24,8 +26,8 @@ public class MessageBlock extends TZXBlock {
 		rawdata[2] = ml[0];
 		System.arraycopy(data, 0, rawdata, 3, msglength);
 		blockdata = data;
-
 		
+		time = (tSecs[0] & 0xff);
 	}
 	
 	@Override
