@@ -2,16 +2,11 @@ package hddEditor.ui.partitionPages.dialogs;
 
 //TODO: TZX: NOTES should have text descriptions if non-data blocks
 /**
- * TODO: TZX BLocks remaining to do:
- * TZX_DIRECTRECORDING
- * TZX_CSWRECORDING
- * TZX_GENERAL
  * 
  * Depreciated unsupported
  * 
  * ID 16 //C64 ROM type data
  * ID 17 //C64 Turbo type data
- * ID 34 //Emulation info
  * id 40 //Snapshot blocks
  * 
  */
@@ -231,7 +226,6 @@ public class TzxFileEditDialog {
 			sdr.RenderTexts(MainPage, new String[] { "Signal level" }, new String[] { level });
 		} else if ((TzxFileType == TZX.TZX_CUSTOMINFO)) {
 			CustomInfoBlock cib = (CustomInfoBlock) ThisEntry.DataBlock;
-			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
 			CR = new CodeRenderer();
 			CR.RenderCode(MainPage, cib.data, null, cib.ID, cib.data.length, 0);
 			

@@ -15,7 +15,6 @@ package hddEditor.libs;
  * Depreciated supported
  * id 33 // Hardware type                
  *
- *TODO: Yogi Bear (1987)(Alternative Software)[re-release].tzx causes exception
  */
 
 /**
@@ -48,6 +47,7 @@ public class TZX {
 	public static final int TZX_MESSAGEBLOCK = 0x31;
 	public static final int TZX_ARCHIVEINFO = 0x32;
 	public static final int TZX_HARDWARETYPE = 0x33;
+	public static final int TZX_EMULATIONINFO = 0x34;
 	public static final int TZX_CUSTOMINFO = 0x35;
 	public static final int TZX_GLUE = 0x5A;
 
@@ -77,6 +77,7 @@ public class TZX {
 			new intdesc(TZX_STOP48, "Stop if 48k"), new intdesc(TZX_SETSIGNALLEVEL, "Set signal level"),
 			new intdesc(TZX_TEXTDESC, "Text description"), new intdesc(TZX_MESSAGEBLOCK, "Message block"),
 			new intdesc(TZX_ARCHIVEINFO, "Archive information block"),
+			new intdesc(TZX_EMULATIONINFO, "Emulation information block"),
 			new intdesc(TZX_HARDWARETYPE, "Hardware type block"), new intdesc(TZX_CUSTOMINFO, "Custom info block"),
 			new intdesc(TZX_GLUE, "Glue block") };
 

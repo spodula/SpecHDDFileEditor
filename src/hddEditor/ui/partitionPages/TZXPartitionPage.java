@@ -1,5 +1,4 @@
 package hddEditor.ui.partitionPages;
-//TODO: TZX- 
 
 import java.io.File;
 import java.io.IOException;

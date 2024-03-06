@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
@@ -19,6 +18,7 @@ import hddEditor.libs.disks.LINEAR.tzxblocks.CSWRecordingBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.CallSequenceBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.CustomInfoBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.DirectRecordingBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.EmulationInfoBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.FourtyEightkStopBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GeneralizedDataBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GlueBlock;
@@ -212,16 +212,21 @@ public class TZXFile implements Disk {
 		case TZX.TZX_CUSTOMINFO:
 			block = new CustomInfoBlock(fs);
 			break;
+		case TZX.TZX_EMULATIONINFO:
+			block = new EmulationInfoBlock(fs);
+			break;
 		case TZX.TZX_GLUE:
 			block = new GlueBlock(fs);
 			break;
 		default:
-			Message("UNSUPPORTED DATA BLOCK TYPE " + Integer.toHexString(BlockID));
+			Message("UNSUPPORTED DATA BLOCK TYPE " + Integer.toHexString(BlockID) + " block:"+BlockNum);
 			break;
 		}
 		if (block != null) {
 			block.BlockNumber = BlockNum;
 		}
+//		System.out.println(block.getClass().getName());
+		
 		return (block);
 
 	}
@@ -589,8 +594,9 @@ public class TZXFile implements Disk {
 	 */
 	public static void main(String[] args) throws IOException {
 
+		 
 		 try {
-			String filename = "/media/graham/CB4B-457D/Antique computers/Sinclair ZX Spectrum/Games/[TZX]/Leviathan (1987)(English Software)[128K].tzx";
+			String filename = "/media/graham/CB4B-457D/Antique computers/Sinclair ZX Spectrum/Games/[TZX]/Yogi Bear (1987)(Alternative Software)[re-release].tzx";
 
 			TZXFile mdt = new TZXFile(new File(filename));
 			if (mdt.IsMyFileType(new File(filename))) {
@@ -602,9 +608,9 @@ public class TZXFile implements Disk {
 
 		} catch (IOException | BadDiskFileException e) {
 			e.printStackTrace();
-		}   
+		}     
 
-		/*
+	/*	
 		  PrintWriter pr; pr = new PrintWriter(new FileWriter("tzx.log")); try { File
 		  folder = new
 		  File("/media/graham/CB4B-457D/Antique computers/Sinclair ZX Spectrum/Games/[TZX]"
