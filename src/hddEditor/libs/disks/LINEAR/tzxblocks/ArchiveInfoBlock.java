@@ -47,7 +47,7 @@ public class ArchiveInfoBlock extends TZXBlock {
 		byte bl[] = new byte[3];
 		fs.read(bl);
 		
-		int msglength = ((int) bl[0] & 0xff) + (((int) bl[1] & 0xff) * 0x100);
+		int msglength = GetDblByte(bl, 0);
 		data = new byte[msglength-1];
 		fs.read(data);
 
