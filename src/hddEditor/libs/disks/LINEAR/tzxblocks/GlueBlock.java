@@ -13,12 +13,12 @@ public class GlueBlock extends TZXBlock {
 	public GlueBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_GLUE;
 		BlockDesc = "Glue block";
-		byte header[] = new byte[9];
-		fs.read(header);
+		data = new byte[9];
+		fs.read(data);
 		
-		XTAPE = new String(header).substring(0,7);
-		Major = header[7] & 0xff;
-		Minor = header[8] & 0xff;
+		XTAPE = new String(data).substring(0,7);
+		Major = data[7] & 0xff;
+		Minor = data[8] & 0xff;
 		
 		
 		rawdata = new byte[0x0A];
