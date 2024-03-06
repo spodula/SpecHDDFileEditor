@@ -19,7 +19,7 @@ public class CustomInfoBlock extends TZXBlock {
 		
 		byte CustInfoLen[] = new byte[4];
 		fs.read(CustInfoLen);
-		int CustomInfoLength = GetDblByte(CustInfoLen, 0) + (0x10000 * GetDblByte(CustInfoLen, 2));
+		int CustomInfoLength = GetDWORD(CustInfoLen,0);
 		
 		data = new byte[CustomInfoLength];
 		fs.read(data);

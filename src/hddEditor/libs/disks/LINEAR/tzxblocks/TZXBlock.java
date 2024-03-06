@@ -107,6 +107,8 @@ public class TZXBlock {
 	}
 
 	/**
+	 * Return a WORD from the given byte array,
+	 * TZX is LSB first.
 	 * 
 	 * @param data
 	 * @param index
@@ -119,5 +121,20 @@ public class TZXBlock {
 		return (d1+ (d2*0x100));
 	}
 
+	/**
+	 * return a DWORD from the given byte array
+	 * TZX is LSB first
+	 * 
+	 * @param data
+	 * @param index
+	 * @return
+	 */
+	public int GetDWORD(byte[] data, int index) {
+		int w1 = GetDblByte(data, index); 
+		int w2 = GetDblByte(data, index+2);
+		
+		return(w1+(w2*0x10000));
+	}
+	
 
 }
