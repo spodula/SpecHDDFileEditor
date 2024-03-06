@@ -3,9 +3,7 @@ package hddEditor.libs;
  * Details of Raw supported/unsupported. (Note, actually displaying them is different).
  * 
  * Unsupported:
- * ID 18 //CSW recording                  *EE
  * ID 19 //Generalised data block         *Eg  Zoids - The Battle Begins (1985)(Martech Games)[a2].tzx Zaxxon (1985)(U.S. Gold)[a].tzx
- * id 35 // Custom info block (Some types are depreciated) eg Zanthrax (1989)(Crash).tzx Zakladi Slovenije (1986)(Matej Kurent)(sl).tzx
  *  
  * Depreciated unsupported
  * 

@@ -13,7 +13,9 @@ import hddEditor.libs.TZX;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
 import hddEditor.libs.disks.LINEAR.tzxblocks.ArchiveInfoBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.CSWRecordingBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.CallSequenceBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.CustomInfoBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.DirectRecordingBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.FourtyEightkStopBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GlueBlock;
@@ -105,70 +107,76 @@ public class TZXFile implements Disk {
 	private TZXBlock DecodeDatablock(int BlockID, RandomAccessFile fs, int BlockNum) throws IOException {
 		TZXBlock block = null;
 		switch (BlockID) {
-		case 0x10:
+		case TZX.TZX_STANDARDSPEED_DATABLOCK:
 			block = new StandardDataBlock(fs);
 			break;
-		case 0x11:
+		case TZX.TZX_TURBOSPEED_DATABLOCK:
 			block = new TurboSpeedDataBlock(fs);
 			break;
-		case 0x12:
+		case TZX.TZX_PURETONE:
 			block = new PureToneBlock(fs);
 			break;
-		case 0x13:
+		case TZX.TZX_PULSESEQ:
 			block = new PulseSequence(fs);
 			break;
-		case 0x14:
+		case TZX.TZX_PUREDATA:
 			block = new PureDataBlock(fs);
 			break;
-		case 0x15:
+		case TZX.TZX_DIRECTRECORDING:
 			block = new DirectRecordingBlock(fs);
 			break;
-		case 0x20:
+		case TZX.TZX_CSWRECORDING:
+			block = new CSWRecordingBlock(fs);
+			break;
+		case TZX.TZX_PAUSE:
 			block = new PauseStopTape(fs);
 			break;
-		case 0x21:
+		case TZX.TZX_GROUPSTART:
 			block = new GroupStartBlock(fs);
 			break;
-		case 0x22:
+		case TZX.TZX_GROUPEND:
 			block = new GroupEndBlock(fs);
 			break;
-		case 0x23:
+		case TZX.TZX_JUMP:
 			block = new JumpToBlock(fs);
 			break;
-		case 0x24:
+		case TZX.TZX_LOOPSTART:
 			block = new LoopStartBlock(fs);
 			break;
-		case 0x25:
+		case TZX.TZX_LOOPEND:
 			block = new LoopEndBlock(fs);
 			break;
-		case 0x26:
+		case TZX.TZX_CALLSEQ:
 			block = new CallSequenceBlock(fs);
 			break;
-		case 0x27:
+		case TZX.TZX_RETSEQ:
 			block = new ReturnFromSequenceBlock(fs);
 			break;
-		case 0x28:
+		case TZX.TZX_SELECTBLOCK:
 			block = new SelectBlock(fs);
 			break;
-		case 0x2A:
+		case TZX.TZX_STOP48:
 			block = new FourtyEightkStopBlock(fs);
 			break;
-		case 0x2B:
+		case TZX.TZX_SETSIGNALLEVEL:
 			block = new SetSignalLevelBlock(fs);
 			break;
-		case 0x30:
+		case TZX.TZX_TEXTDESC:
 			block = new TextDescriptionBlock(fs);
 			break;
-		case 0x31:
+		case TZX.TZX_MESSAGEBLOCK:
 			block = new MessageBlock(fs);
 			break;
-		case 0x32:
+		case TZX.TZX_ARCHIVEINFO:
 			block = new ArchiveInfoBlock(fs);
 			break;
-		case 0x33:
+		case TZX.TZX_HARDWARETYPE:
 			block = new HardwareInfoBlock(fs);
 			break;
-		case 0x5A:
+		case TZX.TZX_CUSTOMINFO:
+			block = new CustomInfoBlock(fs);
+			break;
+		case TZX.TZX_GLUE:
 			block = new GlueBlock(fs);
 			break;
 		default:
@@ -541,7 +549,7 @@ public class TZXFile implements Disk {
 	 * Test harness
 	 * 
 	 * @param args
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static void main(String[] args) {
 		try {
@@ -567,33 +575,21 @@ public class TZXFile implements Disk {
 		}
 	}
 
-
-		/*		PrintWriter pr = new PrintWriter(new FileWriter("tzx.log"));
-		try {
-
-			File folder = new File("/media/CB4B-457D/Antique computers/Sinclair ZX Spectrum/Games/[TZX]");
-			File contents[] = folder.listFiles();
-			for (File f : contents) {
-				if (f.getName().endsWith(".tzx")) {
-					pr.println("=============================================");
-					pr.println(f.getName());
-					pr.println("=============================================");
-					System.out.println(f.getName());
-					try {
-						TZXFile mdt = new TZXFile(f);
-						pr.println(mdt);
-						mdt.close();
-						mdt = null;
-					} catch (IOException | BadDiskFileException | NullPointerException
-							| ArrayIndexOutOfBoundsException e) {
-						pr.println(e.getMessage());
-						e.printStackTrace();
-					}
-				}
-			}
-		} finally {
-			pr.close();
-		} */
-
+	/*
+	 * PrintWriter pr = new PrintWriter(new FileWriter("tzx.log")); try {
+	 * 
+	 * File folder = new
+	 * File("/media/CB4B-457D/Antique computers/Sinclair ZX Spectrum/Games/[TZX]");
+	 * File contents[] = folder.listFiles(); for (File f : contents) { if
+	 * (f.getName().endsWith(".tzx")) {
+	 * pr.println("=============================================");
+	 * pr.println(f.getName());
+	 * pr.println("=============================================");
+	 * System.out.println(f.getName()); try { TZXFile mdt = new TZXFile(f);
+	 * pr.println(mdt); mdt.close(); mdt = null; } catch (IOException |
+	 * BadDiskFileException | NullPointerException | ArrayIndexOutOfBoundsException
+	 * e) { pr.println(e.getMessage()); e.printStackTrace(); } } } } finally {
+	 * pr.close(); }
+	 */
 
 }
