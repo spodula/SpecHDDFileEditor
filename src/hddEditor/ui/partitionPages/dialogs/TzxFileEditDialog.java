@@ -6,7 +6,14 @@ package hddEditor.ui.partitionPages.dialogs;
  * TZX_DIRECTRECORDING
  * TZX_CSWRECORDING
  * TZX_GENERAL
- * TZX_CUSTOMINFO
+ * 
+ * Depreciated unsupported
+ * 
+ * ID 16 //C64 ROM type data
+ * ID 17 //C64 Turbo type data
+ * ID 34 //Emulation info
+ * id 40 //Snapshot blocks
+ * 
  */
 
 import org.eclipse.swt.SWT;
@@ -27,6 +34,7 @@ import hddEditor.libs.TZX;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.LINEAR.tzxblocks.ArchiveInfoBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.CallSequenceBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.CustomInfoBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.ArchiveInfoBlock.TextEntry;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GlueBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.HardwareInfoBlock;
@@ -221,6 +229,12 @@ public class TzxFileEditDialog {
 				level = "Low (0)";
 			}
 			sdr.RenderTexts(MainPage, new String[] { "Signal level" }, new String[] { level });
+		} else if ((TzxFileType == TZX.TZX_CUSTOMINFO)) {
+			CustomInfoBlock cib = (CustomInfoBlock) ThisEntry.DataBlock;
+			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
+			CR = new CodeRenderer();
+			CR.RenderCode(MainPage, cib.data, null, cib.ID, cib.data.length, 0);
+			
 		} else if ((TzxFileType == TZX.TZX_ARCHIVEINFO)) {
 			ArchiveInfoBlock aab = (ArchiveInfoBlock) ThisEntry.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();

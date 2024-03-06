@@ -1,4 +1,5 @@
 package hddEditor.libs.disks.LINEAR.tzxblocks;
+
 /**
  * Wrapper for TZX blocks at standard speed. (Almost always written by the Speccy Rom)
  * 
@@ -36,15 +37,18 @@ import hddEditor.libs.TZX;
 
 public class StandardDataBlock extends TZXBlock {
 	int blockpauseMS = 0;
+	boolean IsBad;
 
 	/**
 	 * Constructor for when we are initialising from Data. (Usually new blocks)
+	 * 
 	 * @param d
 	 * @param pausems
 	 */
 	public StandardDataBlock(byte d[], int pausems) {
 		blocktype = TZX.TZX_STANDARDSPEED_DATABLOCK;
 		BlockDesc = "Standard speed data block";
+		IsBad = false;
 
 		blockdata = d;
 		rawdata = new byte[d.length + 5];
@@ -56,8 +60,8 @@ public class StandardDataBlock extends TZXBlock {
 		System.arraycopy(d, 0, rawdata, 5, d.length);
 
 		UpdateDataFromBlockData();
-		System.out.println("rawdata: "+rawdata.length+" Blockdata: "+blockdata.length+" data:"+data.length);
-		
+		System.out.println("rawdata: " + rawdata.length + " Blockdata: " + blockdata.length + " data:" + data.length);
+
 	}
 
 	/**
@@ -69,14 +73,16 @@ public class StandardDataBlock extends TZXBlock {
 	public StandardDataBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_STANDARDSPEED_DATABLOCK;
 		BlockDesc = "Standard speed data block";
+		IsBad = false;
+
 		byte blockpause[] = new byte[2];
 		fs.read(blockpause);
-		blockpauseMS = GetDblByte(blockpause,0);
+		blockpauseMS = GetDblByte(blockpause, 0);
 
 		byte len[] = new byte[2];
 		fs.read(len);
-		int blockLength = GetDblByte(len,0);
-		
+		int blockLength = GetDblByte(len, 0);
+
 		blockdata = new byte[blockLength];
 		fs.read(blockdata);
 
@@ -88,16 +94,25 @@ public class StandardDataBlock extends TZXBlock {
 		rawdata[4] = len[1];
 		System.arraycopy(blockdata, 0, rawdata, 5, blockLength);
 
-		UpdateDataFromBlockData();
+		if (blockdata.length==0) {
+			data = new byte[0];
+			IsBad = true;
+		} else {
+			UpdateDataFromBlockData();
+		}
 	}
 
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype) + " Pause " + blockpauseMS + " - BASIC Length:"
-				+ data.length+" raw length:"+blockdata.length+" TZX Block length:"+rawdata.length;
+		String result = String.format("%s (%02X)", BlockDesc, blocktype) + " Pause " + blockpauseMS; 
+		if (!IsBad) {
+			result = result + " - BASIC Length:"
+				+ data.length + " raw length:" + blockdata.length + " TZX Block length:" + rawdata.length;
+		} else {
+			result = result + " BAD BLOCK. No Data";
+		}
 		return (result);
 	}
-	
 
 	/**
 	 * 
@@ -105,25 +120,25 @@ public class StandardDataBlock extends TZXBlock {
 	 */
 	@Override
 	public void UpdateBlockData(byte[] newdata) {
-		if (data!=null) {
-			//does this block contain raw data
-			if (data.length == blockdata.length) { //Yes
+		if (data != null) {
+			// does this block contain raw data
+			if (data.length == blockdata.length) { // Yes
 				blockdata = newdata;
-			} else { //add in Speccy checksum and type
+			} else { // add in Speccy checksum and type
 				byte SpecBlockType = blockdata[0];
-				blockdata = new byte[newdata.length+2];
+				blockdata = new byte[newdata.length + 2];
 				blockdata[0] = SpecBlockType;
-				System.arraycopy(newdata, 0, blockdata, 1, newdata.length );
+				System.arraycopy(newdata, 0, blockdata, 1, newdata.length);
 			}
 		} else {
-			//add raw speccy data
+			// add raw speccy data
 			blockdata = newdata;
 		}
 		data = newdata;
 		byte pausemsH = rawdata[1];
 		byte pausemsL = rawdata[2];
-		
-		//Now update the raw block
+
+		// Now update the raw block
 		rawdata = new byte[blockdata.length + 5];
 		rawdata[0] = TZX.TZX_STANDARDSPEED_DATABLOCK;
 		rawdata[1] = pausemsH;

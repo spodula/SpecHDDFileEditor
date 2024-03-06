@@ -81,7 +81,6 @@ public class SelectBlock extends TZXBlock {
 				byte txt[] = new byte[desctextlen];
 				System.arraycopy(data, dataPtr, txt, 0, desctextlen);
 				String desctext = new String(txt);
-				System.out.println(desctext);
 				dataPtr = dataPtr + desctextlen;
 				Entries[entPtr++] = new SelectItem(reloffset, desctextlen, desctext);
 			}
@@ -93,7 +92,7 @@ public class SelectBlock extends TZXBlock {
 
 	@Override
 	public String toString() {
-		String result = "Select block: ";
+		String result = String.format("%s (%02X) ", BlockDesc, blocktype);
 		for (SelectItem e : Entries) {
 			result = result + System.lineSeparator() + " " + e;
 		}

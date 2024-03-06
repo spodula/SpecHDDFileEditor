@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.util.Vector;
 
@@ -18,6 +20,7 @@ import hddEditor.libs.disks.LINEAR.tzxblocks.CallSequenceBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.CustomInfoBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.DirectRecordingBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.FourtyEightkStopBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.GeneralizedDataBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GlueBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GroupEndBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GroupStartBlock;
@@ -39,6 +42,7 @@ import hddEditor.libs.disks.LINEAR.tzxblocks.TextDescriptionBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.TurboSpeedDataBlock;
 
 public class TZXFile implements Disk {
+	PrintWriter MessagePR;
 	// File opened.
 	protected RandomAccessFile inFile;
 	// filename of the currently open file
@@ -73,6 +77,18 @@ public class TZXFile implements Disk {
 	}
 
 	/**
+	 * 
+	 * @param s
+	 */
+	private void Message(String s) {
+		if (MessagePR != null) {
+			MessagePR.println(s);
+		} else {
+			System.out.println(s);
+		}
+	}
+
+	/**
 	 * Constructor, load a TAP file.
 	 * 
 	 * @param filename
@@ -80,12 +96,29 @@ public class TZXFile implements Disk {
 	 * @throws BadDiskFileException
 	 */
 	public TZXFile(File file) throws IOException, BadDiskFileException {
+		MessagePR = null;
 		if (!file.exists()) {
 			throw new BadDiskFileException("File " + file.getAbsolutePath() + " does not exist.");
 		}
 		inFile = new RandomAccessFile(file, "rw");
 		this.file = file;
 		ParseTZXFile();
+	}
+
+	public TZXFile(File file, PrintWriter pr) throws IOException, BadDiskFileException {
+		MessagePR = pr;
+		if (!file.exists()) {
+			throw new BadDiskFileException("File " + file.getAbsolutePath() + " does not exist.");
+		}
+		inFile = new RandomAccessFile(file, "rw");
+		this.file = file;
+		try {
+			ParseTZXFile();
+		} catch (Exception E) {
+			Message("ERROR!=============");
+			Message(E.getMessage());
+			E.printStackTrace(pr);
+		}
 	}
 
 	/**
@@ -127,6 +160,9 @@ public class TZXFile implements Disk {
 			break;
 		case TZX.TZX_CSWRECORDING:
 			block = new CSWRecordingBlock(fs);
+			break;
+		case TZX.TZX_GENERAL:
+			block = new GeneralizedDataBlock(fs);
 			break;
 		case TZX.TZX_PAUSE:
 			block = new PauseStopTape(fs);
@@ -180,7 +216,7 @@ public class TZXFile implements Disk {
 			block = new GlueBlock(fs);
 			break;
 		default:
-			System.err.println("UNSUPPORTED DATA BLOCK TYPE " + Integer.toHexString(BlockID));
+			Message("UNSUPPORTED DATA BLOCK TYPE " + Integer.toHexString(BlockID));
 			break;
 		}
 		if (block != null) {
@@ -400,7 +436,7 @@ public class TZXFile implements Disk {
 		// Calculate the rom loader checkum
 		int checksum = TZX.CalculateChecksumForBlock(newdata);
 		newdata[newdata.length - 1] = (byte) (checksum & 0xff);
-		System.out.println("Calculated cs of " + (newdata[newdata.length - 1] & 0xff));
+//		System.out.println("Calculated cs of " + (newdata[newdata.length - 1] & 0xff));
 
 		// Add the new block to the list
 		AddRawBlock(newdata, 0x10, RewriteFile);
@@ -551,45 +587,39 @@ public class TZXFile implements Disk {
 	 * @param args
 	 * @throws IOException
 	 */
-	public static void main(String[] args) {
-		try {
-			String filename = args[0];
+	public static void main(String[] args) throws IOException {
+
+		 try {
+			String filename = "/media/graham/CB4B-457D/Antique computers/Sinclair ZX Spectrum/Games/[TZX]/Leviathan (1987)(English Software)[128K].tzx";
 
 			TZXFile mdt = new TZXFile(new File(filename));
 			if (mdt.IsMyFileType(new File(filename))) {
 				System.out.println("File is a valid TZX file.");
 				System.out.println(mdt);
-//				mdt.MoveBlockDown(mdt.Blocks[0],true);
-//				System.out.println(mdt);
-//				mdt.MoveBlockUp(mdt.Blocks[1],true);
-//				System.out.println(mdt);
-
-				// mdt.RewriteFile();
-
 			} else {
 				System.out.println("File is not a valid tzx file.");
 			}
 
 		} catch (IOException | BadDiskFileException e) {
 			e.printStackTrace();
-		}
-	}
+		}   
 
-	/*
-	 * PrintWriter pr = new PrintWriter(new FileWriter("tzx.log")); try {
-	 * 
-	 * File folder = new
-	 * File("/media/CB4B-457D/Antique computers/Sinclair ZX Spectrum/Games/[TZX]");
-	 * File contents[] = folder.listFiles(); for (File f : contents) { if
-	 * (f.getName().endsWith(".tzx")) {
-	 * pr.println("=============================================");
-	 * pr.println(f.getName());
-	 * pr.println("=============================================");
-	 * System.out.println(f.getName()); try { TZXFile mdt = new TZXFile(f);
-	 * pr.println(mdt); mdt.close(); mdt = null; } catch (IOException |
-	 * BadDiskFileException | NullPointerException | ArrayIndexOutOfBoundsException
-	 * e) { pr.println(e.getMessage()); e.printStackTrace(); } } } } finally {
-	 * pr.close(); }
-	 */
+		/*
+		  PrintWriter pr; pr = new PrintWriter(new FileWriter("tzx.log")); try { File
+		  folder = new
+		  File("/media/graham/CB4B-457D/Antique computers/Sinclair ZX Spectrum/Games/[TZX]"
+		  ); File contents[] = folder.listFiles(); for (File f : contents) { if
+		  (f.getName().endsWith(".tzx")) {
+		  pr.println("=============================================");
+		  pr.println(f.getName());
+		  pr.println("=============================================");
+		  System.out.println(f.getName()); try { TZXFile mdt = new TZXFile(f, pr);
+		  pr.println(mdt); mdt.close(); mdt = null; } catch (IOException |
+		  BadDiskFileException | NullPointerException | ArrayIndexOutOfBoundsException
+		  e) { pr.println(e.getMessage()); e.printStackTrace(); } } } } finally {
+		  pr.close(); }
+		 */
+
+	}
 
 }

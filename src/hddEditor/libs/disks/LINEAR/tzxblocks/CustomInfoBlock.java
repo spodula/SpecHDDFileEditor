@@ -31,15 +31,12 @@ public class CustomInfoBlock extends TZXBlock {
 		
 		rawdata = new byte[blockdata.length+1];
 		rawdata[0] = (byte)(blocktype & 0xff);
-		System.arraycopy(blockdata, 0, rawdata, 1, blockdata.length);
-		
-		System.out.println(String.format("%02X %02X %02X %02X" , CustInfoLen[0],CustInfoLen[1],CustInfoLen[2],CustInfoLen[3]));
-		
+		System.arraycopy(blockdata, 0, rawdata, 1, blockdata.length);		
 	}
 	
 	@Override
 	public String toString() {
-		String result = "ID: "+ID+" Len:"+data.length+" First 10 bytes:";
+		String result = String.format("%s (%02X)", BlockDesc, blocktype) + " ID: "+ID+" Len:"+data.length+" First 10 bytes:";
 		int x=10;
 		if (data.length < 10)
 			x = data.length;

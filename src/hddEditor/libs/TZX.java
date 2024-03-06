@@ -1,6 +1,6 @@
 package hddEditor.libs;
 /**
- * Details of Raw supported/unsupported. (Note, actually displaying them is different).
+ * Details of Raw supported/unsupported. (Note, actually displaying them is different). The list of these is in TzxFileEditDialog
  * 
  * Unsupported:
  * ID 19 //Generalised data block         *Eg  Zoids - The Battle Begins (1985)(Martech Games)[a2].tzx Zaxxon (1985)(U.S. Gold)[a].tzx
@@ -61,6 +61,9 @@ public class TZX {
 		}
 	}
 
+	/**
+	 * Array of ID and descriptions for the TZX datablock types
+	 */
 	public intdesc TZXTypes[] = { new intdesc(TZX_STANDARDSPEED_DATABLOCK, "Standard speed datablock"),
 			new intdesc(TZX_TURBOSPEED_DATABLOCK, "Turbo speed datablock"),
 			new intdesc(TZX_PURETONE, "Pure tone datablock"), new intdesc(TZX_PULSESEQ, "Pulse sequence"),
@@ -75,24 +78,37 @@ public class TZX {
 			new intdesc(TZX_TEXTDESC, "Text description"), new intdesc(TZX_MESSAGEBLOCK, "Message block"),
 			new intdesc(TZX_ARCHIVEINFO, "Archive information block"),
 			new intdesc(TZX_HARDWARETYPE, "Hardware type block"), new intdesc(TZX_CUSTOMINFO, "Custom info block"),
-			new intdesc(TZX_GLUE, "Glue block")
-	};
-	
+			new intdesc(TZX_GLUE, "Glue block") };
+
+	/**
+	 * Textual description of the TZX data block type.
+	 * 
+	 * @param id
+	 * @return
+	 */
 	public static String GetDataBlockTypeForID(int id) {
 		TZX t = new TZX();
-		for(intdesc x:t.TZXTypes) {
+		for (intdesc x : t.TZXTypes) {
 			if (x.value == id) {
-				return(x.description);
+				return (x.description);
 			}
 		}
-		return("Unknown block");
+		return ("Unknown block");
 	}
-	
 
 	// Default time in MS for the delay between blocks
 	public static int DEFAULT_STD_DELAY = 954;
 
-	// Calculate the checksum for the given datablock.
+	/**
+	 * Calculate the checksum for the given datablock.
+	 * 
+	 * This probably wants moving to the Speccy object as its common to all ROM and
+	 * ROM-based loading routines
+	 * 
+	 * @param block
+	 * @return
+	 */
+
 	public static int CalculateChecksumForBlock(byte block[]) {
 		int checksum = 0;
 		if (block.length > 0) {
@@ -104,6 +120,9 @@ public class TZX {
 		return (i);
 	}
 
+	/**
+	 * Big static array for the contents of TZX_HARDWARETYPE.
+	 */
 	public static String hwInfo[] = { "Runs (may use special HW)", "Runs (Uses Special HW)",
 			"Runs (Doesnt use Special Hw)", "Doesnt run" };
 	public static String hwType[] = { "Computer", "Ext Storage", "Rom/Ram", "Sound", "Joystick", "Mouse",

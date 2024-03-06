@@ -70,10 +70,10 @@ public class TZXBlock {
 			checksum = TZX.CalculateChecksumForBlock(blockdata);
 		}
 		int chsum = (blockdata[blockdata.length - 1] & 0xff);
-		if (chsum != checksum) {
-			System.out.println("Checksum error for block:" + BlockNumber + ". Expecting " + chsum + " got " + checksum
-					+ " for block length of " + blockdata.length);
-		}
+//		if (chsum != checksum) {
+//			System.out.println("Checksum error for block:" + BlockNumber + ". Expecting " + chsum + " got " + checksum
+//					+ " for block length of " + blockdata.length);
+//		}
 
 		return (chsum == checksum);
 	}
