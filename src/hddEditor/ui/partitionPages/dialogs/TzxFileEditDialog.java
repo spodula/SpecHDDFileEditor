@@ -1,6 +1,5 @@
 package hddEditor.ui.partitionPages.dialogs;
 
-//TODO: TZX: NOTES should have text descriptions if non-data blocks
 /**
  * 
  * Depreciated unsupported

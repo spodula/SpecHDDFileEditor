@@ -88,14 +88,17 @@ public class TZXPartitionPage extends GenericPage {
 			TableColumn tc2 = new TableColumn(DirectoryListing, SWT.LEFT);
 			TableColumn tc3 = new TableColumn(DirectoryListing, SWT.LEFT);
 			TableColumn tc4 = new TableColumn(DirectoryListing, SWT.LEFT);
-			tc1.setText("Block");
-			tc2.setText("Type");
-			tc3.setText("Length");
-			tc4.setText("Notes");
+			TableColumn tc5 = new TableColumn(DirectoryListing, SWT.FILL);
+			tc1.setText("Name");
+			tc2.setText("Blocks");
+			tc3.setText("Type");
+			tc4.setText("Length");
+			tc5.setText("Notes");
 			tc1.setWidth(150);
-			tc2.setWidth(150);
+			tc2.setWidth(60);
 			tc3.setWidth(150);
 			tc4.setWidth(100);
+			tc5.setWidth(100);
 			DirectoryListing.setHeaderVisible(true);
 
 			/***********************************************************************************/
@@ -381,16 +384,36 @@ public class TZXPartitionPage extends GenericPage {
 				String content[] = new String[5];
 
 				content[0] = entry.GetFilename();
-				content[1] = entry.GetFileTypeString();
-				content[2] = String.valueOf(entry.GetFileSize());
+				String blocknum="";
+				if (entry.HeaderBlock!=null) {
+					blocknum = String.valueOf(entry.HeaderBlock.BlockNumber);
+				}
+				if (entry.DataBlock !=null) {
+					if (!blocknum.isBlank()) {
+						blocknum = blocknum+", ";						
+					}
+					
+					blocknum = blocknum +String.valueOf(entry.DataBlock.BlockNumber);
+				}
+				content[1]= blocknum;
+				
+				content[2] = entry.GetFileTypeString();
+				content[3] = String.valueOf(entry.GetFileSize());
 
 				String notes = "";
 				SpeccyBasicDetails spd = entry.GetSpeccyBasicDetails();
 				if (spd.BasicType != -1) {
 					notes = spd.GetSpecificDetails().replace("\n", ",");
+				} else {
+					notes = entry.DataBlock.toString();
+					int i = notes.indexOf(')');
+					if (i>4) {
+						notes = notes.substring(i+1).trim();
+					}
+					
 				}
 
-				content[3] = notes.trim();
+				content[4] = notes.trim();
 				item2.setText(content);
 				item2.setData(entry);
 			}
