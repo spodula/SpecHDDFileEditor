@@ -28,7 +28,14 @@ public class JumpToBlock extends TZXBlock {
 	
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype)+" Disp: "+Disp;
+		String s = String.valueOf(Disp);
+		if (Disp>0) {
+			s = "+"+s;
+		}
+		String target = String.valueOf(Disp+BlockNumber);
+		
+		
+		String result = String.format("%s (%02X)", BlockDesc, blocktype)+" Disp: "+s+" (Block"+target+")";
 		return(result);
 	}
 }
