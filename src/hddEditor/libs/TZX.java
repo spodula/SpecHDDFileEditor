@@ -49,6 +49,7 @@ public class TZX {
 	public static final int TZX_HARDWARETYPE = 0x33;
 	public static final int TZX_EMULATIONINFO = 0x34;
 	public static final int TZX_CUSTOMINFO = 0x35;
+	public static final int TZX_SNAPSHOT = 0x40;
 	public static final int TZX_GLUE = 0x5A;
 
 	public class intdesc {

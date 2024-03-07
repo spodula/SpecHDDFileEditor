@@ -36,6 +36,7 @@ import hddEditor.libs.disks.LINEAR.tzxblocks.PureToneBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.ReturnFromSequenceBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.SelectBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.SetSignalLevelBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.SnapshotBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.StandardDataBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.TZXBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.TextDescriptionBlock;
@@ -214,6 +215,9 @@ public class TZXFile implements Disk {
 			break;
 		case TZX.TZX_EMULATIONINFO:
 			block = new EmulationInfoBlock(fs);
+			break;
+		case TZX.TZX_SNAPSHOT:
+			block = new SnapshotBlock(fs);
 			break;
 		case TZX.TZX_GLUE:
 			block = new GlueBlock(fs);

@@ -20,8 +20,6 @@ public class SetSignalLevelBlock extends TZXBlock {
 		rawdata[0] = (byte)blocktype;
 		System.arraycopy(data, 0, rawdata, 1, 4);
 		blockdata = data;
-
-		
 	}
 	
 	@Override

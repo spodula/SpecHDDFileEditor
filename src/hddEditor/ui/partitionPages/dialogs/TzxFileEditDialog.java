@@ -6,8 +6,6 @@ package hddEditor.ui.partitionPages.dialogs;
  * 
  * ID 16 //C64 ROM type data
  * ID 17 //C64 Turbo type data
- * id 40 //Snapshot blocks
- * 
  */
 
 import org.eclipse.swt.SWT;
@@ -41,6 +39,7 @@ import hddEditor.libs.disks.LINEAR.tzxblocks.PulseSequence;
 import hddEditor.libs.disks.LINEAR.tzxblocks.PureToneBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.SelectBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.SetSignalLevelBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.SnapshotBlock;
 import hddEditor.libs.partitions.tzx.TzxDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
@@ -227,7 +226,16 @@ public class TzxFileEditDialog {
 			CustomInfoBlock cib = (CustomInfoBlock) ThisEntry.DataBlock;
 			CR = new CodeRenderer();
 			CR.RenderCode(MainPage, cib.data, null, cib.ID, cib.data.length, 0);
-			
+		} else if ((TzxFileType == TZX.TZX_SNAPSHOT)) {
+			SnapshotBlock sb = (SnapshotBlock) ThisEntry.DataBlock;
+			CR = new CodeRenderer();
+			String filename = "Block"+sb.BlockNumber+" File of type: ";
+			if(sb.SnapShotType==1) {
+				filename = filename +".SNA";
+			} else {
+				filename = filename +".Z80";
+			}
+			CR.RenderCode(MainPage, sb.data, null, filename, sb.data.length, 0);
 		} else if ((TzxFileType == TZX.TZX_ARCHIVEINFO)) {
 			ArchiveInfoBlock aab = (ArchiveInfoBlock) ThisEntry.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
