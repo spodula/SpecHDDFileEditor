@@ -1,13 +1,5 @@
 package hddEditor.ui.partitionPages.dialogs;
 
-/**
- * 
- * Depreciated unsupported
- * 
- * ID 16 //C64 ROM type data
- * ID 17 //C64 Turbo type data
- */
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlEvent;

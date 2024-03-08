@@ -14,6 +14,8 @@ import hddEditor.libs.TZX;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
 import hddEditor.libs.disks.LINEAR.tzxblocks.ArchiveInfoBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.C64RomBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.C64TurboTapeBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.CSWRecordingBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.CallSequenceBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.CustomInfoBlock;
@@ -21,6 +23,7 @@ import hddEditor.libs.disks.LINEAR.tzxblocks.DirectRecordingBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.EmulationInfoBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.FourtyEightkStopBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GeneralizedDataBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.GenericUnknownBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GlueBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GroupEndBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.GroupStartBlock;
@@ -159,6 +162,12 @@ public class TZXFile implements Disk {
 		case TZX.TZX_DIRECTRECORDING:
 			block = new DirectRecordingBlock(fs);
 			break;
+		case TZX.TZX_C64ROMBLOCK:
+			block = new C64RomBlock(fs);
+			break;
+		case TZX.TZX_C64TURBOBLOCK:
+			block = new C64TurboTapeBlock(fs);
+			break;
 		case TZX.TZX_CSWRECORDING:
 			block = new CSWRecordingBlock(fs);
 			break;
@@ -223,14 +232,13 @@ public class TZXFile implements Disk {
 			block = new GlueBlock(fs);
 			break;
 		default:
+			block = new GenericUnknownBlock(fs, BlockID, "Unknown/unsupported");
 			Message("UNSUPPORTED DATA BLOCK TYPE " + Integer.toHexString(BlockID) + " block:"+BlockNum);
 			break;
 		}
 		if (block != null) {
 			block.BlockNumber = BlockNum;
 		}
-//		System.out.println(block.getClass().getName());
-		
 		return (block);
 
 	}

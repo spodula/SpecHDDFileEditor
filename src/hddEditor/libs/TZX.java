@@ -30,6 +30,8 @@ public class TZX {
 	public static final int TZX_PULSESEQ = 0x13;
 	public static final int TZX_PUREDATA = 0x14;
 	public static final int TZX_DIRECTRECORDING = 0x15;
+	public static final int TZX_C64ROMBLOCK = 0x16;
+	public static final int TZX_C64TURBOBLOCK = 0x17;
 	public static final int TZX_CSWRECORDING = 0x18;
 	public static final int TZX_GENERAL = 0x19;
 	public static final int TZX_PAUSE = 0x20;
