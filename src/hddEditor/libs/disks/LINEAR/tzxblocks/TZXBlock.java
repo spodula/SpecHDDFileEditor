@@ -135,6 +135,12 @@ public class TZXBlock {
 		
 		return(w1+(w2*0x10000));
 	}
+
 	
+	@Override
+	public String toString() {
+		String result = String.format("%s (%02X)", BlockDesc, blocktype)+" Content length:"+data.length;
+		return(result);
+	}
 
 }

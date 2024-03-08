@@ -24,7 +24,7 @@ public class LoopStartBlock extends TZXBlock {
 	
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype)+" Repeat: "+Repeat;
+		String result = super.toString() + " Repeat: "+Repeat;
 		return(result);
 	}
 }

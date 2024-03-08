@@ -36,7 +36,7 @@ public class CustomInfoBlock extends TZXBlock {
 	
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype) + " ID: "+ID+" Len:"+data.length+" First 10 bytes:";
+		String result = super.toString()+ " ID: "+ID+" Len:"+data.length+" First 10 bytes:";
 		int x=10;
 		if (data.length < 10)
 			x = data.length;

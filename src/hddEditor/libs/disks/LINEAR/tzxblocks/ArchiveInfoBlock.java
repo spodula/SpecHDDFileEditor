@@ -75,7 +75,7 @@ public class ArchiveInfoBlock extends TZXBlock {
 	
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype)+"  "+list.length+" entries\n";
+		String result = super.toString()+"  "+list.length+" entries\n";
 		for(TextEntry te:list) {
 			result = result + "  "+te.IdByteAsString()+": "+te.text+"\n";
 		}

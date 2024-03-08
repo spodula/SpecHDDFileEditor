@@ -37,7 +37,7 @@ public class PureDataBlock extends TZXBlock {
 
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype) + "Zero: "+ZeroLenTStates+" Tstates, One:"+OneLenTStates+" TStates, Pause " + BlockPause + "ms Length:"
+		String result = super.toString() + "Zero: "+ZeroLenTStates+" Tstates, One:"+OneLenTStates+" TStates, Pause " + BlockPause + "ms Length:"
 				+ data.length;
 		return (result);
 	}

@@ -26,7 +26,7 @@ public class GroupStartBlock extends TZXBlock {
 	
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype)+" Name:"+BlockNotes;
+		String result = super.toString() + " Name:"+BlockNotes;
 		return(result);
 	}
 }

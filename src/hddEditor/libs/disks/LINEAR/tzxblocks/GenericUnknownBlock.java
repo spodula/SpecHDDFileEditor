@@ -29,10 +29,5 @@ public class GenericUnknownBlock  extends TZXBlock {
 		rawdata[0] = (byte) (blocktype & 0xff);
 		System.arraycopy(blockdata, 0, rawdata, 1, blockdata.length);
 	}
-	
-	@Override
-	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype)+" Content length:"+data.length+" entries\n";
-		return(result);
-	}
+
 }

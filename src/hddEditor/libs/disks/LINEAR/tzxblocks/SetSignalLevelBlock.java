@@ -24,7 +24,7 @@ public class SetSignalLevelBlock extends TZXBlock {
 	
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype)+" Level: "+SignalLevel;
+		String result = super.toString() + " Level: "+SignalLevel;
 		return(result);
 	}
 }

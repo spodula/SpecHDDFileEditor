@@ -14,10 +14,4 @@ public class ReturnFromSequenceBlock extends TZXBlock {
 		blockdata = data;
 
 	}
-	
-	@Override
-	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype);
-		return(result);
-	}
 }

@@ -80,7 +80,7 @@ public class TurboSpeedDataBlock extends TZXBlock {
 
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype) + " Length:" + data.length + " Pilot:" + Pilot
+		String result = super.toString() + " Length:" + data.length + " Pilot:" + Pilot
 				+ " Sync1:" + Sync1 + " Sync2:" + Sync2 + " Zero:" + Zero + " One:" + One + " PilotPulses:"
 				+ PilotPulses + " UsedBitsInFinal:" + UsedBitsInFinal + " Pause:" + Pause;
 

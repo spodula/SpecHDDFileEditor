@@ -37,7 +37,7 @@ public class PulseSequence extends TZXBlock {
 	
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype)+" Pulses: "+Pulses;
+		String result = super.toString() + " Pulses: "+Pulses;
 		return(result);
 	}
 }

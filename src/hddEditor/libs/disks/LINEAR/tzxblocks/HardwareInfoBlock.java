@@ -100,7 +100,7 @@ public class HardwareInfoBlock  extends TZXBlock {
 	
 	@Override
 	public String toString() {
-		String result = "Hardware info block: ";
+		String result = super.toString()+" ";
 		for (HardwareInfoEntry e:Entries) {
 			result = result +System.lineSeparator()+" "+e;
 		}

@@ -92,7 +92,7 @@ public class SelectBlock extends TZXBlock {
 
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X) ", BlockDesc, blocktype);
+		String result = super.toString()+" ";
 		for (SelectItem e : Entries) {
 			result = result + System.lineSeparator() + e;
 		}

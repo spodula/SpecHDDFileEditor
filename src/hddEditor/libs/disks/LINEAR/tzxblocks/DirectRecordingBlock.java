@@ -37,7 +37,7 @@ public class DirectRecordingBlock extends TZXBlock {
 
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype) + "SampleTStates: "+SampleTStates+" Tstates,  Pause " + BlockPause + "ms Length:"
+		String result = super.toString() + "SampleTStates: "+SampleTStates+" Tstates,  Pause " + BlockPause + "ms Length:"
 				+ data.length;
 		return (result);
 	}

@@ -44,7 +44,7 @@ public class SnapshotBlock extends TZXBlock {
 		if (SnapShotType==0x01) {
 			sType = "SNA";
 		}
-		String result = String.format("%s (%02X)", BlockDesc, blocktype)+" Type:"+sType;
+		String result = super.toString()+" Type:"+sType;
 		return(result);
 	}
 	

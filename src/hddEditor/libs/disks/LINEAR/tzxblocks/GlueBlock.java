@@ -30,7 +30,7 @@ public class GlueBlock extends TZXBlock {
 	
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype)+" XTAPE:"+XTAPE+" V"+Major+"."+Minor;
+		String result = super.toString()+" XTAPE:"+XTAPE+" V"+Major+"."+Minor;
 		return(result);
 	}
 }

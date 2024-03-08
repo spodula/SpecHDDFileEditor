@@ -35,7 +35,7 @@ public class JumpToBlock extends TZXBlock {
 		String target = String.valueOf(Disp+BlockNumber);
 		
 		
-		String result = String.format("%s (%02X)", BlockDesc, blocktype)+" Disp: "+s+" (Block"+target+")";
+		String result = super.toString() + " Disp: "+s+" (Block"+target+")";
 		return(result);
 	}
 }

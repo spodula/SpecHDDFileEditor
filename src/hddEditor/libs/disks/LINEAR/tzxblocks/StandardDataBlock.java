@@ -104,7 +104,7 @@ public class StandardDataBlock extends TZXBlock {
 
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype) + " Pause " + blockpauseMS; 
+		String result = super.toString() + " Pause " + blockpauseMS; 
 		if (!IsBad) {
 			result = result + " - BASIC Length:"
 				+ data.length + " raw length:" + blockdata.length + " TZX Block length:" + rawdata.length;

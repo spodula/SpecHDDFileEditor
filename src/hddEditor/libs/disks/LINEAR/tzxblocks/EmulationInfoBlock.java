@@ -35,7 +35,7 @@ public class EmulationInfoBlock extends TZXBlock {
 	
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X) ", BlockDesc, blocktype);
+		String result = super.toString();
 		result = result +" Screen Refresh delay:"+refreshdelay+" Interrupt freq:"+interruptfreq+"Hz";
 		
 		int bit = 0x01;

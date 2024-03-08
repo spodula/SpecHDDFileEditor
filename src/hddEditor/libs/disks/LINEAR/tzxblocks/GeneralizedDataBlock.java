@@ -52,7 +52,7 @@ public class GeneralizedDataBlock  extends TZXBlock {
 	 * 
 	 */
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype) +" Pause: "+blockpause+" Pilot/sync symbols used: "+TOTP+" Data symbols used:"+TOTD;
+		String result = super.toString()+" Pause: "+blockpause+" Pilot/sync symbols used: "+TOTP+" Data symbols used:"+TOTD;
 		return(result);
 	}
 	

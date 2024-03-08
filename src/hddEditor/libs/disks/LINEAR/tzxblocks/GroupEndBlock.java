@@ -12,12 +12,5 @@ public class GroupEndBlock extends TZXBlock {
 		rawdata = new byte[1];
 		rawdata[0] = (byte)blocktype;
 		blockdata = data;
-
-	}
-	
-	@Override
-	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype);
-		return(result);
-	}
+	}	
 }

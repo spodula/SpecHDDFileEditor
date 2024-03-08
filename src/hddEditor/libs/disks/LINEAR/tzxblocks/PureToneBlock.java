@@ -25,7 +25,7 @@ public class PureToneBlock extends TZXBlock {
 	
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype)+" Pulse duration:"+PulseLen+" T states, Pulses: "+Pulses;
+		String result = super.toString() + " Pulse duration:"+PulseLen+" T states, Pulses: "+Pulses;
 		return(result);
 	}
 }

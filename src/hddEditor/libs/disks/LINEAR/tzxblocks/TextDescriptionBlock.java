@@ -25,7 +25,7 @@ public class TextDescriptionBlock extends TZXBlock {
 	
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype)+" Message:"+BlockNotes;
+		String result = super.toString() + " Message:"+BlockNotes;
 		return(result);
 	}
 }

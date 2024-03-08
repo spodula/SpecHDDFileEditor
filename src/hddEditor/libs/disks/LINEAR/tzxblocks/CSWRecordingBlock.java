@@ -47,7 +47,7 @@ public class CSWRecordingBlock extends TZXBlock {
 			cType = "Z-RLE";
 		}
 
-		String result = "Pause:" + BlockPause + " SampleRate:" + SampleRate + " CompressionType:" + cType + "("
+		String result = super.toString()+ " Pause:" + BlockPause + " SampleRate:" + SampleRate + " CompressionType:" + cType + "("
 				+ CompressionType + ") Pulses:" + StoredPulses;
 		return (result);
 	}
