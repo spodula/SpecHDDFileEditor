@@ -233,7 +233,7 @@ public class TZXFile implements Disk {
 			break;
 		default:
 			block = new GenericUnknownBlock(fs, BlockID);
-			Message("UNSUPPORTED DATA BLOCK TYPE " + Integer.toHexString(BlockID) + " block:"+BlockNum);
+			Message("UNSUPPORTED DATA BLOCK TYPE " + Integer.toHexString(BlockID) + " block:" + BlockNum);
 			break;
 		}
 		if (block != null) {
@@ -566,7 +566,7 @@ public class TZXFile implements Disk {
 	public void CreateEmptyTapeFile(File file) throws IOException {
 		FileOutputStream NewFile = new FileOutputStream(file);
 
-		byte header[] = new byte[] { 'Z', 'X', 'T', 'A', 'P', 'E', '!', 0x1A, 0x01, 0x01 };
+		byte header[] = new byte[] { 'Z', 'X', 'T', 'a', 'p', 'e', '!', 0x1A, 0x01, 0x01 };
 		NewFile.write(header);
 
 		String msg = "Created with SpecHDDFileEditor";
@@ -606,8 +606,7 @@ public class TZXFile implements Disk {
 	 */
 	public static void main(String[] args) throws IOException {
 
-		 
-		 try {
+		try {
 			String filename = "/media/graham/CB4B-457D/Antique computers/Sinclair ZX Spectrum/Games/[TZX]/Yogi Bear (1987)(Alternative Software)[re-release].tzx";
 
 			TZXFile mdt = new TZXFile(new File(filename));
@@ -620,22 +619,22 @@ public class TZXFile implements Disk {
 
 		} catch (IOException | BadDiskFileException e) {
 			e.printStackTrace();
-		}     
+		}
 
-	/*	
-		  PrintWriter pr; pr = new PrintWriter(new FileWriter("tzx.log")); try { File
-		  folder = new
-		  File("/media/graham/CB4B-457D/Antique computers/Sinclair ZX Spectrum/Games/[TZX]"
-		  ); File contents[] = folder.listFiles(); for (File f : contents) { if
-		  (f.getName().endsWith(".tzx")) {
-		  pr.println("=============================================");
-		  pr.println(f.getName());
-		  pr.println("=============================================");
-		  System.out.println(f.getName()); try { TZXFile mdt = new TZXFile(f, pr);
-		  pr.println(mdt); mdt.close(); mdt = null; } catch (IOException |
-		  BadDiskFileException | NullPointerException | ArrayIndexOutOfBoundsException
-		  e) { pr.println(e.getMessage()); e.printStackTrace(); } } } } finally {
-		  pr.close(); }
+		/*
+		 * PrintWriter pr; pr = new PrintWriter(new FileWriter("tzx.log")); try { File
+		 * folder = new
+		 * File("/media/graham/CB4B-457D/Antique computers/Sinclair ZX Spectrum/Games/[TZX]"
+		 * ); File contents[] = folder.listFiles(); for (File f : contents) { if
+		 * (f.getName().endsWith(".tzx")) {
+		 * pr.println("=============================================");
+		 * pr.println(f.getName());
+		 * pr.println("=============================================");
+		 * System.out.println(f.getName()); try { TZXFile mdt = new TZXFile(f, pr);
+		 * pr.println(mdt); mdt.close(); mdt = null; } catch (IOException |
+		 * BadDiskFileException | NullPointerException | ArrayIndexOutOfBoundsException
+		 * e) { pr.println(e.getMessage()); e.printStackTrace(); } } } } finally {
+		 * pr.close(); }
 		 */
 
 	}

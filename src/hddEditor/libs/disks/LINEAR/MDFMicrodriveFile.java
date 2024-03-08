@@ -310,9 +310,7 @@ public class MDFMicrodriveFile implements Disk {
 			MicrodriveSector msh = new MicrodriveSector(FileData, 0);
 			if (msh.IsSectorChecksumValid()) {
 				return (true);
-			} else {
-				System.out.println("MDRfile: Not a valid microdrive file: Bad sector checksum");
-			}
+			} 
 		} finally {
 			inFile.close();
 			inFile = null;

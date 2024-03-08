@@ -20,6 +20,7 @@ import hddEditor.libs.disks.FDD.SCLDiskFile;
 import hddEditor.libs.disks.FDD.TrDosDiskFile;
 import hddEditor.libs.disks.LINEAR.MDFMicrodriveFile;
 import hddEditor.libs.disks.LINEAR.TAPFile;
+import hddEditor.libs.disks.LINEAR.TZXFile;
 
 public class FileNewFDDForm {
 	// Form components
@@ -118,7 +119,7 @@ public class FileNewFDDForm {
 		lbl.setText("Target file type:");
 
 		TargetFileType = new Combo(shell, SWT.CHECK);
-		String entries[] = { "Amstrad +3 DSK file", "128K Microdrive cart", "TR-DOS file (TRD/SCL)","TAP file" };
+		String entries[] = { "Amstrad +3 DSK file", "128K Microdrive cart", "TR-DOS file (TRD/SCL)","TAP file","TZX file" };
 		TargetFileType.setItems(entries);
 		TargetFileType.setText(entries[0]);
 		TargetFileType.addSelectionListener(new SelectionListener() {
@@ -264,6 +265,7 @@ public class FileNewFDDForm {
 		boolean IsTRDOSDisk = Filetype.contains("TR-DOS");
 		boolean IsMicrodriveCart = Filetype.contains("MICRODRIVE");
 		boolean IsTAPFile = Filetype.contains("TAP");
+		boolean IsTZXFile = Filetype.contains("TZX");
 
 		boolean createResult = false;
 		if (IsAmstradDisk) {
@@ -290,6 +292,8 @@ public class FileNewFDDForm {
 			createResult = CreateMDFFile(Filename, Label);
 		} else if (IsTAPFile) {
 			createResult = CreateTAPFile(Filename);
+		} else if (IsTZXFile) {
+			createResult = CreateTZXFile(Filename);
 		}
 
 		if (createResult) {
@@ -319,7 +323,7 @@ public class FileNewFDDForm {
 	}
 
 	/**
-	 * Create a blank TAP file cart
+	 * Create a blank TAP file.
 	 * 
 	 * @param filename
 	 * @return
@@ -332,6 +336,26 @@ public class FileNewFDDForm {
 			result = true;
 		} catch (Exception E) {
 			System.out.println("Error creating tape:" + E.getMessage());
+			E.printStackTrace();
+		}
+
+		return (result);
+	}
+
+	/**
+	 * Create a blank TZX file.
+	 * 
+	 * @param filename
+	 * @return
+	 */
+	private boolean CreateTZXFile(String filename) {
+		boolean result = false;
+		try {
+			TZXFile tzx = new TZXFile();
+			tzx.CreateEmptyTapeFile(new File(filename));
+			result = true;
+		} catch (Exception E) {
+			System.out.println("Error creating TZX tape:" + E.getMessage());
 			E.printStackTrace();
 		}
 

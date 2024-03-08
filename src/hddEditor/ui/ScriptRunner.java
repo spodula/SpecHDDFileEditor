@@ -191,6 +191,11 @@ public class ScriptRunner {
 					FNFDD.DoCreateFile(params[1], "TAP", params[1], false, "", false);
 					hdi.LoadFile(params[1]);
 					System.out.println(">Tape " + params[1] + " created and loaded.");
+				} else if (disktype.startsWith("TZX")) {
+					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display);
+					FNFDD.DoCreateFile(params[1], "TZX", params[1], false, "", false);
+					hdi.LoadFile(params[1]);
+					System.out.println(">TZX " + params[1] + " created and loaded.");
 				} else if (disktype.startsWith("TRD")) {
 					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display);
 					String TRDOSFormat = params[1] + " TRACKS " + params[2] + " HEADS";
