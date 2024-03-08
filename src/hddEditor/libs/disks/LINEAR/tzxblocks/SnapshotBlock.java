@@ -15,7 +15,6 @@ public class SnapshotBlock extends TZXBlock {
 	
 	public SnapshotBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_SNAPSHOT;
-		BlockDesc = "Snapshot block";
 		
 		byte Header[] = new byte[0x04];
 		fs.read(Header);

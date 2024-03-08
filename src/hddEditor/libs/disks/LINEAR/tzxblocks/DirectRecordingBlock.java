@@ -12,7 +12,6 @@ public class DirectRecordingBlock extends TZXBlock {
 
 	public DirectRecordingBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_DIRECTRECORDING;
-		BlockDesc = "Direct Recordingblock";
 
 		byte Header[] = new byte[0x08];
 		fs.read(Header);

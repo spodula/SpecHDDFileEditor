@@ -13,7 +13,6 @@ public class PureDataBlock extends TZXBlock {
 
 	public PureDataBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_PUREDATA;
-		BlockDesc = "Pure data block";
 
 		byte Header[] = new byte[0x0A];
 		fs.read(Header);

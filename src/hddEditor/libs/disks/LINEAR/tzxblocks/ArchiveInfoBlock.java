@@ -23,7 +23,7 @@ public class ArchiveInfoBlock extends TZXBlock {
 		}
 		
 		public String IdByteAsString() {
-			String result = "<undefined>";
+			String result = "<undefined> ("+id+")";
 			switch (id) {
 			case 0:	result = "Full title"; break;
 			case 1:	result = "Software house/publisher"; break;
@@ -33,8 +33,8 @@ public class ArchiveInfoBlock extends TZXBlock {
 			case 5:	result = "Game/Utility type"; break;
 			case 6:	result = "Price"; break;
 			case 7:	result = "Protection scheme/Loader"; break;
-			case 8:	result = "Comments"; break;
-			case 255:	result = ""; break;
+			case 8:	result = "Origin"; break;
+			case 255: result = "Comments"; break;
 			}
 			return(result);
 		}
@@ -43,7 +43,6 @@ public class ArchiveInfoBlock extends TZXBlock {
 	
 	public ArchiveInfoBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_ARCHIVEINFO;
-		BlockDesc = "Archive Info block";
 		byte bl[] = new byte[3];
 		fs.read(bl);
 		

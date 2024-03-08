@@ -232,7 +232,7 @@ public class TZXFile implements Disk {
 			block = new GlueBlock(fs);
 			break;
 		default:
-			block = new GenericUnknownBlock(fs, BlockID, "Unknown/unsupported");
+			block = new GenericUnknownBlock(fs, BlockID);
 			Message("UNSUPPORTED DATA BLOCK TYPE " + Integer.toHexString(BlockID) + " block:"+BlockNum);
 			break;
 		}

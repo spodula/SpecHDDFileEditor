@@ -18,12 +18,17 @@ public class PauseStopTape extends TZXBlock {
 		rawdata[1] = data[0];
 		rawdata[2] = data[1];
 		
-		BlockDesc = "Stop the tape";
-		
-		if (PauseDuration > 0) {
-			BlockDesc = "Pause ("+PauseDuration+")";
-		}	
 		blockdata = data;
-
 	}
+	@Override
+	public String toString() {
+		String result = "";
+		if (PauseDuration==0) {
+			result = result + String.format("Stop tape (%02X)", blocktype);
+		} else {
+			result = result + String.format("Pause (%02X) ", blocktype) + PauseDuration+"ms";			
+		}
+		return(result);
+	}
+	
 }

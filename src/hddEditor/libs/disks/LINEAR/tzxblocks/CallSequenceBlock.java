@@ -10,7 +10,6 @@ public class CallSequenceBlock extends TZXBlock {
 	
 	public CallSequenceBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_CALLSEQ;
-		BlockDesc = "Call sequence block";
 		
 		byte bl[] = new byte[2];
 		fs.read(bl);

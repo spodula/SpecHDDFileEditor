@@ -10,7 +10,6 @@ public class JumpToBlock extends TZXBlock {
 	
 	public JumpToBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_JUMP;
-		BlockDesc = "Jump to";
 		data = new byte[2];
 		fs.read(data);
 		Disp = GetDblByte(data, 0);

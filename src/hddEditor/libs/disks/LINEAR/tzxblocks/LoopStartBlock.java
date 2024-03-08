@@ -10,7 +10,6 @@ public class LoopStartBlock extends TZXBlock {
 	
 	public LoopStartBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_LOOPSTART;
-		BlockDesc = "Loop start";
 		data = new byte[2];
 		fs.read(data);
 		Repeat = GetDblByte(data, 0);

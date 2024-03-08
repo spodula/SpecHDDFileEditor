@@ -8,7 +8,6 @@ import hddEditor.libs.TZX;
 public class TextDescriptionBlock extends TZXBlock {
 	public TextDescriptionBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_TEXTDESC;
-		BlockDesc = "Text Description block";
 		byte ml[] = new byte[1];
 		fs.read(ml);
 		int msglength = (int) (ml[0] & 0xff);

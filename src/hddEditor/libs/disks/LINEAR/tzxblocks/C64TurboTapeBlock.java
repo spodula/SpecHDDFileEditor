@@ -11,7 +11,7 @@ import hddEditor.libs.TZX;
 public class C64TurboTapeBlock extends GenericUnknownBlock {
 	
 	public C64TurboTapeBlock(RandomAccessFile fs) throws IOException {
-		super(fs,TZX.TZX_C64TURBOBLOCK, "C64 Turbo block");		
+		super(fs,TZX.TZX_C64TURBOBLOCK);		
 	}
 
 }

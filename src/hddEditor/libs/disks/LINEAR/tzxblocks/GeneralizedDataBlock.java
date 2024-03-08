@@ -22,7 +22,6 @@ public class GeneralizedDataBlock  extends TZXBlock {
 	
 	public GeneralizedDataBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_GENERAL;
-		BlockDesc = "Generalized data block";
 		
 		byte Header[] = new byte[0x12];
 		fs.read(Header);

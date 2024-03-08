@@ -11,7 +11,6 @@ public class CustomInfoBlock extends TZXBlock {
 	
 	public CustomInfoBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_CUSTOMINFO;
-		BlockDesc = "Custom Info";
 		
 		byte IDstring[] = new byte[0x10];
 		fs.read(IDstring);

@@ -8,7 +8,6 @@ import hddEditor.libs.TZX;
 public class GroupStartBlock extends TZXBlock {
 	public GroupStartBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_GROUPSTART;
-		BlockDesc = "Group Start";
 		byte ml[] = new byte[1];
 		fs.read(ml);
 		int msglength = (int)(ml[0] & 0xff);

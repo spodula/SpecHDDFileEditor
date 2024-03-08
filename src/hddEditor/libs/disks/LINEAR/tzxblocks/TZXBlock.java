@@ -31,7 +31,9 @@ public class TZXBlock {
 	public int blocktype = 0;
 
 	// Block textual description
-	public String BlockDesc = "";
+	public String getBlockDesc() {
+		return(TZX.GetDataBlockTypeForID(blocktype));
+	}
 
 	// if the block contains text (Archiveinfo, messageblock, ect), the contents as
 	// text.
@@ -47,9 +49,9 @@ public class TZXBlock {
 		ExtendedSpeccyBasicDetails result = null;
 		if (data.length == 17 && ValidChecksum()) {
 			int type = data[0] & 0xff;
-			int filelen = (data[11] & 0xff) + ((data[12] & 0xff) * 0x100);
-			int param1 = (data[13] & 0xff) + ((data[14] & 0xff) * 0x100);
-			int param2 = (data[15] & 0xff) + ((data[16] & 0xff) * 0x100);
+			int filelen = GetDblByte(data, 11);
+			int param1 = GetDblByte(data, 13);
+			int param2 = GetDblByte(data, 15);
 			byte filename[] = new byte[10];
 			System.arraycopy(data, 1, filename, 0, 10);
 
@@ -70,10 +72,6 @@ public class TZXBlock {
 			checksum = TZX.CalculateChecksumForBlock(blockdata);
 		}
 		int chsum = (blockdata[blockdata.length - 1] & 0xff);
-//		if (chsum != checksum) {
-//			System.out.println("Checksum error for block:" + BlockNumber + ". Expecting " + chsum + " got " + checksum
-//					+ " for block length of " + blockdata.length);
-//		}
 
 		return (chsum == checksum);
 	}
@@ -139,7 +137,7 @@ public class TZXBlock {
 	
 	@Override
 	public String toString() {
-		String result = String.format("%s (%02X)", BlockDesc, blocktype)+" Content length:"+data.length;
+		String result = String.format("%s (%02X)", getBlockDesc(), blocktype)+" Content length:"+data.length;
 		return(result);
 	}
 

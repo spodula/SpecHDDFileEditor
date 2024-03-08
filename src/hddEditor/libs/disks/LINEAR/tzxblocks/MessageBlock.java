@@ -10,7 +10,6 @@ public class MessageBlock extends TZXBlock {
 	
 	public MessageBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_MESSAGEBLOCK;
-		BlockDesc = "Message block";
 		byte tSecs[] = new byte[1];
 		fs.read(tSecs);
 		byte ml[] = new byte[1];

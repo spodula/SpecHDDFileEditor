@@ -12,7 +12,6 @@ public class GlueBlock extends TZXBlock {
 	
 	public GlueBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_GLUE;
-		BlockDesc = "Glue block";
 		data = new byte[9];
 		fs.read(data);
 		

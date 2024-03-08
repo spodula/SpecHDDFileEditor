@@ -17,7 +17,6 @@ public class TurboSpeedDataBlock extends TZXBlock {
 		
 	public TurboSpeedDataBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_TURBOSPEED_DATABLOCK;
-		BlockDesc = "Turbo speed data block";
 		byte header[] = new byte[0x12];
 		fs.read(header);
 		Pilot = GetDblByte(header,0);

@@ -71,7 +71,6 @@ public class HardwareInfoBlock  extends TZXBlock {
 		
 	public HardwareInfoBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_HARDWARETYPE;
-		BlockDesc = "Hardware Info block";
 		
 		//read number of entries
 		byte bl[] = new byte[1];

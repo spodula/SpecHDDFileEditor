@@ -13,7 +13,6 @@ public class EmulationInfoBlock extends TZXBlock {
 	
 	public EmulationInfoBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_EMULATIONINFO;
-		BlockDesc = "Emulation info";
 		// read block
 		data = new byte[0x08];
 		fs.read(data);

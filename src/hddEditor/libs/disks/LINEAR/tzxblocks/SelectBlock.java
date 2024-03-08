@@ -46,7 +46,6 @@ public class SelectBlock extends TZXBlock {
 	 */
 	public SelectBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_SELECTBLOCK;
-		BlockDesc = "SELECT block";
 
 		// read block size
 		byte bl[] = new byte[2];

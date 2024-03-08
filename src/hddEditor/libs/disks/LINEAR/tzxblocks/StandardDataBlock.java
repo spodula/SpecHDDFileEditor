@@ -47,7 +47,6 @@ public class StandardDataBlock extends TZXBlock {
 	 */
 	public StandardDataBlock(byte d[], int pausems) {
 		blocktype = TZX.TZX_STANDARDSPEED_DATABLOCK;
-		BlockDesc = "Standard speed data block";
 		IsBad = false;
 
 		blockdata = d;
@@ -70,7 +69,6 @@ public class StandardDataBlock extends TZXBlock {
 	 */
 	public StandardDataBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_STANDARDSPEED_DATABLOCK;
-		BlockDesc = "Standard speed data block";
 		IsBad = false;
 
 		byte blockpause[] = new byte[2];

@@ -13,7 +13,6 @@ public class CSWRecordingBlock extends TZXBlock {
 
 	public CSWRecordingBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_CSWRECORDING;
-		BlockDesc = "CSW Recording";
 		byte blocklen[] = new byte[4];
 		fs.read(blocklen);
 		int BlockLen = GetDWORD(blocklen, 0);

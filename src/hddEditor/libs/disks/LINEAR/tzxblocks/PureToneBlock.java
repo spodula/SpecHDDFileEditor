@@ -11,7 +11,6 @@ public class PureToneBlock extends TZXBlock {
 	
 	public PureToneBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_PURETONE;
-		BlockDesc = "Pure tone";
 		data = new byte[4];
 		fs.read(data);
 		PulseLen = GetDblByte(data, 0);

@@ -141,7 +141,7 @@ public class TzxDirectoryEntry implements FileEntry {
 				return ("File with bad header");
 			}
 		} else {
-			String s = DataBlock.BlockDesc;
+			String s = DataBlock.getBlockDesc();
 			return (s);
 		}
 	}

@@ -11,7 +11,6 @@ public class PulseSequence extends TZXBlock {
 	
 	public PulseSequence(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_PULSESEQ;
-		BlockDesc = "Pulse Sequence";
 		byte dat[] = new byte[1];
 		fs.read(dat);
 		Pulses = ((int)dat[0] & 0xff);

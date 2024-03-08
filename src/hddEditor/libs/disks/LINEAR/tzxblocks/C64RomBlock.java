@@ -11,7 +11,7 @@ import hddEditor.libs.TZX;
 public class C64RomBlock  extends GenericUnknownBlock {
 	
 	public C64RomBlock(RandomAccessFile fs) throws IOException {
-		super(fs,TZX.TZX_C64ROMBLOCK, "C64 Rom block");		
+		super(fs,TZX.TZX_C64ROMBLOCK);		
 	}
 
 }

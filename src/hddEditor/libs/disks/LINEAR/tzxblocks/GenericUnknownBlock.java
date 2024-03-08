@@ -9,9 +9,8 @@ import java.io.RandomAccessFile;
 
 public class GenericUnknownBlock  extends TZXBlock {
 	
-	public GenericUnknownBlock(RandomAccessFile fs, int bType, String bDesc) throws IOException {
+	public GenericUnknownBlock(RandomAccessFile fs, int bType) throws IOException {
 		blocktype = bType;
-		BlockDesc = bDesc;		
 		
 		byte rawBlockSize[] = new byte[4];
 		fs.read(rawBlockSize);
