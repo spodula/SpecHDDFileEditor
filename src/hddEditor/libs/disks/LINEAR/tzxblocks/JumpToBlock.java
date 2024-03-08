@@ -11,9 +11,9 @@ public class JumpToBlock extends TZXBlock {
 	public JumpToBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_JUMP;
 		BlockDesc = "Jump to";
-		byte dat[] = new byte[2];
-		fs.read(dat);
-		Disp = GetDblByte(dat, 0);
+		data = new byte[2];
+		fs.read(data);
+		Disp = GetDblByte(data, 0);
 		
 		if (Disp > 0x8000) {
 			Disp = Disp - 0x10000;
@@ -21,9 +21,9 @@ public class JumpToBlock extends TZXBlock {
 		
 		rawdata = new byte[3];
 		rawdata[0] = (byte)blocktype;
-		System.arraycopy(dat, 0, rawdata, 1, 2);
+		System.arraycopy(data, 0, rawdata, 1, 2);
+		
 		blockdata = data;
-
 	}
 	
 	@Override
