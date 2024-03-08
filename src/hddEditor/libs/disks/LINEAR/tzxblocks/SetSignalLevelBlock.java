@@ -11,7 +11,7 @@ public class SetSignalLevelBlock extends TZXBlock {
 	public SetSignalLevelBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_SETSIGNALLEVEL;
 		BlockDesc = "Set Signal level";
-		byte data[] = new byte[5];
+		data = new byte[5];
 		fs.read(data);
 		
 		SignalLevel = data[0x04];

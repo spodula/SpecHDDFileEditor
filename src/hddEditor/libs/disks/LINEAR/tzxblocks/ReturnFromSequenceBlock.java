@@ -11,6 +11,8 @@ public class ReturnFromSequenceBlock extends TZXBlock {
 		BlockDesc = "Return from sequence";
 		rawdata = new byte[1];
 		rawdata[0] = (byte)blocktype;
+		
+		data = new byte[0];
 		blockdata = data;
 
 	}

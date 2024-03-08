@@ -9,12 +9,12 @@ public class FourtyEightkStopBlock extends TZXBlock {
 	public FourtyEightkStopBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_STOP48;
 		BlockDesc = "Stop if 48K mode";
-		byte uselessdata[] = new byte[4];
-		fs.read(uselessdata);
+		data = new byte[4];
+		fs.read(data);
 		
 		rawdata = new byte[5];
 		rawdata[0] = (byte)blocktype;
-		System.arraycopy(uselessdata, 0, rawdata, 1, 4);
+		System.arraycopy(data, 0, rawdata, 1, 4);
 		
 		blockdata = data;
 

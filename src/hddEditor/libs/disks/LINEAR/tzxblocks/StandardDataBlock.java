@@ -60,8 +60,6 @@ public class StandardDataBlock extends TZXBlock {
 		System.arraycopy(d, 0, rawdata, 5, d.length);
 
 		UpdateDataFromBlockData();
-		System.out.println("rawdata: " + rawdata.length + " Blockdata: " + blockdata.length + " data:" + data.length);
-
 	}
 
 	/**

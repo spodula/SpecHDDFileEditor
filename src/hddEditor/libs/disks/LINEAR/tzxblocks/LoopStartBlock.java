@@ -11,13 +11,13 @@ public class LoopStartBlock extends TZXBlock {
 	public LoopStartBlock(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_LOOPSTART;
 		BlockDesc = "Loop start";
-		byte dat[] = new byte[2];
-		fs.read(dat);
-		Repeat = ((int)dat[0] & 0xff) + (((int)dat[1] & 0xff) * 0x100);
+		data = new byte[2];
+		fs.read(data);
+		Repeat = GetDblByte(data, 0);
 		
 		rawdata = new byte[3];
 		rawdata[0] = (byte)blocktype;
-		System.arraycopy(dat, 0, rawdata, 1, 2);
+		System.arraycopy(data, 0, rawdata, 1, 2);
 		blockdata = data;
 
 	}

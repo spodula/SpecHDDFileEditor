@@ -11,7 +11,7 @@ public class LoopEndBlock extends TZXBlock {
 		BlockDesc = "Loop End";
 		rawdata = new byte[1];
 		rawdata[0] = (byte)blocktype;
+		data = new byte[0];
 		blockdata = data;
-
 	}
 }

@@ -10,13 +10,13 @@ public class PauseStopTape extends TZXBlock {
 	
 	public PauseStopTape(RandomAccessFile fs) throws IOException {
 		blocktype = TZX.TZX_PAUSE;
-		byte duration[] = new byte[2];
-		fs.read(duration);
-		PauseDuration = (duration[0] & 0xff) + ((duration[1] & 0xff) * 0x100);
+		data = new byte[2];
+		fs.read(data);
+		PauseDuration = GetDblByte(data, 0);
 		rawdata = new byte[3];
 		rawdata[0] = (byte)blocktype;
-		rawdata[1] = duration[0];
-		rawdata[2] = duration[1];
+		rawdata[1] = data[0];
+		rawdata[2] = data[1];
 		
 		BlockDesc = "Stop the tape";
 		
