@@ -1,4 +1,4 @@
-package hddEditor.ui.partitionPages.dialogs;
+package hddEditor.ui.partitionPages.dialogs.edit;
 
 /**
  * FIle edit dialog for the +3DOS partition page

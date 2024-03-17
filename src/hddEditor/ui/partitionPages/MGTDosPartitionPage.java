@@ -58,10 +58,10 @@ import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
-import hddEditor.ui.partitionPages.dialogs.MGTDosFileEditDialog;
 import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
 import hddEditor.ui.partitionPages.dialogs.AddFiles.AddFilesToMGTPartition;
 import hddEditor.ui.partitionPages.dialogs.drop.DropFilesToTapePartition;
+import hddEditor.ui.partitionPages.dialogs.edit.MGTDosFileEditDialog;
 
 public class MGTDosPartitionPage extends GenericPage {
 	Table DirectoryListing = null;

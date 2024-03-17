@@ -41,10 +41,10 @@ import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
-import hddEditor.ui.partitionPages.dialogs.MicrodriveFileEditDialog;
 import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
 import hddEditor.ui.partitionPages.dialogs.AddFiles.AddFilesToMDRPartition;
 import hddEditor.ui.partitionPages.dialogs.drop.DropFilesToTapePartition;
+import hddEditor.ui.partitionPages.dialogs.edit.MicrodriveFileEditDialog;
 
 public class MicrodrivePartitionPage extends GenericPage {
 	Table DirectoryListing = null;

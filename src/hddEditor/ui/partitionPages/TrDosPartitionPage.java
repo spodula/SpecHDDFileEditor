@@ -40,9 +40,9 @@ import hddEditor.ui.HDDEditor;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
-import hddEditor.ui.partitionPages.dialogs.TrDosFileEditDialog;
 import hddEditor.ui.partitionPages.dialogs.AddFiles.AddFilesToTrDosPartition;
 import hddEditor.ui.partitionPages.dialogs.drop.DropFilesToTapePartition;
+import hddEditor.ui.partitionPages.dialogs.edit.TrDosFileEditDialog;
 
 public class TrDosPartitionPage extends GenericPage {
 	Table DirectoryListing = null;

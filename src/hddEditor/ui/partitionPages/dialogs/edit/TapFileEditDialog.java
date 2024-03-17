@@ -1,4 +1,4 @@
-package hddEditor.ui.partitionPages.dialogs; 
+package hddEditor.ui.partitionPages.dialogs.edit;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -13,13 +13,15 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
+import hddEditor.libs.Speccy;
+import hddEditor.libs.disks.SpeccyBasicDetails;
+import hddEditor.libs.partitions.tap.TapDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 
-public class TrDosFileEditDialog {
+public class TapFileEditDialog {
 	// Title of the page
 	private String Title = "";
 
@@ -29,8 +31,7 @@ public class TrDosFileEditDialog {
 
 	// Composite we are parented to
 	private Composite MainPage = null;
-	private ScrolledComposite MainPage1 = null; 
-	
+	private ScrolledComposite MainPage1 = null;
 	// Result
 	private boolean result = false;
 
@@ -38,7 +39,7 @@ public class TrDosFileEditDialog {
 	public byte[] data = new byte[0];
 
 	// Directory entry of the file being displayed
-	private TrdDirectoryEntry ThisEntry = null;
+	private TapDirectoryEntry ThisEntry = null;
 
 	/*
 	 * Set modified text in the title
@@ -51,24 +52,11 @@ public class TrDosFileEditDialog {
 		shell.setText(s);
 	}
 
-	/**
-	 * Constructor
-	 * 
-	 * @param display
-	 */
-	public TrDosFileEditDialog(Display display) {
+	public TapFileEditDialog(Display display) {
 		this.display = display;
 	}
 
-	/**
-	 * Show the form
-	 * 
-	 * @param data
-	 * @param title
-	 * @param entry
-	 * @return
-	 */
-	public boolean Show(byte[] data, String title, TrdDirectoryEntry entry) {
+	public boolean Show(byte[] data, String title, TapDirectoryEntry entry) {
 		this.result = false;
 		this.ThisEntry = entry;
 		this.Title = title;
@@ -103,77 +91,93 @@ public class TrDosFileEditDialog {
 		gridLayout.marginRight = 20;
 		shell.setLayout(gridLayout);
 
-		Label lbl = new Label(shell, SWT.NONE);
+		Label lbl = label(ThisEntry.GetSpeccyBasicDetails().BasicTypeString() + " file", 4);
 		FontData fontData = lbl.getFont().getFontData()[0];
 		Font boldFont = new Font(display, new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
-		lbl.setText(String.format("CPM Length: %d bytes (%X)", data.length, data.length));
 		lbl.setFont(boldFont);
 
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-		gd.horizontalSpan = 4;
-		lbl.setLayoutData(gd);
+		label(String.format("Length : %d bytes (%X)", ThisEntry.GetRawFileSize(), ThisEntry.GetRawFileSize()), 2);
 
 		MainPage1 = new ScrolledComposite(shell, SWT.V_SCROLL);
 		MainPage1.setExpandHorizontal(true);
 		MainPage1.setExpandVertical(true);
 		MainPage1.setAlwaysShowScrollBars(true);
-		gd = new GridData(GridData.FILL_BOTH);
+		GridData gd = new GridData(GridData.FILL_BOTH);
 		gd.horizontalSpan = 4;
 		MainPage1.setLayoutData(gd);
-		
+
 		MainPage = new Composite(MainPage1, SWT.NONE);
 		MainPage1.setContent(MainPage);
-		
+
 		gridLayout = new GridLayout();
 		gridLayout.numColumns = 4;
 		gridLayout.makeColumnsEqualWidth = true;
 		MainPage.setLayout(gridLayout);
-		
+
 		MainPage1.addControlListener(new ControlListener() {
-			
+
 			@Override
 			public void controlResized(ControlEvent arg0) {
 				MainPage1.setMinSize(MainPage.computeSize(MainPage1.getClientArea().width, SWT.DEFAULT));
 			}
-			
+
 			@Override
 			public void controlMoved(ControlEvent arg0) {
 			}
 		});
 
 		RenderAppropriatePage();
-
 		shell.pack();
 	}
 
-	/**
-	 * Render the correct page for the file.
-	 */
 	private void RenderAppropriatePage() {
-		try {
-			char ftype = ThisEntry.GetFileType();
-			if (ftype == 'B') {
-				BasicRenderer CurrentRenderer = new BasicRenderer();
-				CurrentRenderer.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), ThisEntry.GetFileSize(), 
-						ThisEntry.GetVar2(), ThisEntry.startline);
-			} else if (ftype != 'D') {
-				CodeRenderer CurrentRenderer = new CodeRenderer();
-				CurrentRenderer.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length,
-						ThisEntry.GetVar1());
-			} else if (ThisEntry.IsCharArray()) {
-				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
-				CurrentRenderer.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A");
-			} else {
-				NumericArrayRenderer CurrentRenderer = new NumericArrayRenderer();
-				CurrentRenderer.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A");
-			}
-		} catch (Exception E) {
-			System.out.println("Error Showing " + ThisEntry.GetFilename() + ": " + E.getMessage());
+		/**
+		 * Render the page.
+		 */
+		CodeRenderer CR;
+		SpeccyBasicDetails sbd = ThisEntry.GetSpeccyBasicDetails();
+		switch (sbd.BasicType) {
+		case Speccy.BASIC_BASIC:
+			BasicRenderer BR = new BasicRenderer();
+			BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.VarStart, sbd.LineStart);
+			break;
+		case Speccy.BASIC_CODE:
+			CR = new CodeRenderer();
+			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress);
+			break;
+		case Speccy.BASIC_NUMARRAY:
+			NumericArrayRenderer NR = new NumericArrayRenderer();
+			NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A");
+			break;
+		case Speccy.BASIC_CHRARRAY:
+			CharArrayRenderer CAR = new CharArrayRenderer();
+			CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A");
+		default:
+			CR = new CodeRenderer();
+			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, 0x0000);
 		}
 	}
 
 	/**
-	 * CLose the form.
+	 * Create a generic label with the given text and span.
+	 * 
+	 * @param text
+	 * @param span
+	 * @return
+	 */
+	public Label label(String text, int span) {
+		Label label = new Label(shell, SWT.SHADOW_NONE);
+		label.setText(text);
+		if (span > 1) {
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.horizontalSpan = 4;
+			label.setLayoutData(gd);
+		}
+		return (label);
+	}
+
+	/**
+	 * Close dialog
 	 */
 	public void close() {
 		shell.close();

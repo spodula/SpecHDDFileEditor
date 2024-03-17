@@ -1,4 +1,4 @@
-package hddEditor.ui.partitionPages.dialogs;
+package hddEditor.ui.partitionPages.dialogs.edit;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;

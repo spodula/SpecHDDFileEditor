@@ -40,9 +40,9 @@ import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;
 import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
-import hddEditor.ui.partitionPages.dialogs.TapFileEditDialog;
 import hddEditor.ui.partitionPages.dialogs.AddFiles.AddFilesToTAPPartition;
 import hddEditor.ui.partitionPages.dialogs.drop.DropFilesToTapePartition;
+import hddEditor.ui.partitionPages.dialogs.edit.TapFileEditDialog;
 
 public class TAPPartitionPage extends GenericPage {
 	Table DirectoryListing = null;

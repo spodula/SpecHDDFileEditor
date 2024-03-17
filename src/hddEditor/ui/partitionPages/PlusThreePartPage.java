@@ -51,9 +51,9 @@ import hddEditor.ui.HDDEditor;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
-import hddEditor.ui.partitionPages.dialogs.SpectrumFileEditDialog;
 import hddEditor.ui.partitionPages.dialogs.AddFiles.AddFilesToPlus3Partition;
 import hddEditor.ui.partitionPages.dialogs.drop.DropFilestoPlus3Partition;
+import hddEditor.ui.partitionPages.dialogs.edit.SpectrumFileEditDialog;
 
 public class PlusThreePartPage extends GenericPage {
 	Table DirectoryListing;
