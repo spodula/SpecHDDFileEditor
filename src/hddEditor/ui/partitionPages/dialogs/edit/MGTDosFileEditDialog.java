@@ -1,4 +1,7 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
+/**
+ * Implementation of the Edit file page for an MGT file.
+ */
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -23,72 +26,14 @@ import hddEditor.ui.partitionPages.FileRenderers.MGT128kSnapshotRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.MGTExecuteRenderer;
 
-public class MGTDosFileEditDialog {
-	// Title of the page
-	private String Title = "";
-
-	// Form details
-	private Shell shell;
-	private Display display;
-
-	// Composite we are parented to
-	private Composite MainPage = null;
-	private ScrolledComposite MainPage1 = null; 
-	
-	// Result
-	private boolean result = false;
-
-	// Data for the file
-	public byte[] data = new byte[0];
-
-	// Directory entry of the file being displayed
-	private MGTDirectoryEntry ThisEntry = null;
+public class MGTDosFileEditDialog extends EditFileDialog {
 
 	public MGTDosFileEditDialog(Display display) {
-		this.display = display;
+		super(display);
 	}
-
-	public void close() {
-		shell.close();
-		if (!shell.isDisposed()) {
-			shell.dispose();
-		}
-	}
-
-	/*
-	 * Set modified text in the title
-	 */
-	private void SetModified(boolean Modified) {
-		String s = Title;
-		if (Modified) {
-			s = s + " (Modified)";
-		}
-		shell.setText(s);
-	}
-
-	/**
-	 * Loop and wait
-	 */
-	public void loop() {
-		shell.open();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
-				display.sleep();
-		}
-	}
-
-	public boolean Show(byte[] data, String title, MGTDirectoryEntry entry) {
-		this.result = false;
-		this.ThisEntry = entry;
-		this.Title = title;
-		this.data = data;
-		Createform();
-		SetModified(false);
-		loop();
-		return (result);
-	}
-
-	private void Createform() {
+	
+	@Override
+	protected void Createform() {
 		shell = new Shell(display);
 		shell.setSize(900, 810);
 		GridLayout gridLayout = new GridLayout();
@@ -143,36 +88,37 @@ public class MGTDosFileEditDialog {
 
 	private void RenderAppropriatePage() {
 		try {
-			int ftype = ThisEntry.GetFileType();
+			MGTDirectoryEntry mEnt = (MGTDirectoryEntry)ThisEntry;
+			int ftype = mEnt.GetFileType();
 			if (ftype == MGT.MGTFT_ZXBASIC) {
 				BasicRenderer CurrentRenderer = new BasicRenderer();
-				CurrentRenderer.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), ThisEntry.GetFileSize(),
-						ThisEntry.GetSpeccyBasicDetails().VarStart, ThisEntry.GetSpeccyBasicDetails().LineStart);
+				CurrentRenderer.RenderBasic(MainPage, data, null, mEnt.GetFilename(), mEnt.GetFileSize(),
+						mEnt.GetSpeccyBasicDetails().VarStart, mEnt.GetSpeccyBasicDetails().LineStart);
 			} else if (ftype == MGT.MGTFT_ZXNUMARRAY) {
 				NumericArrayRenderer CurrentRenderer = new NumericArrayRenderer();
-				CurrentRenderer.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(),
-						"" + ThisEntry.GetSpeccyBasicDetails().VarName);
+				CurrentRenderer.RenderNumericArray(MainPage, data, null, mEnt.GetFilename(),
+						"" + mEnt.GetSpeccyBasicDetails().VarName);
 			} else if (ftype == MGT.MGTFT_ZXSTRARRAY) {
 				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
-				CurrentRenderer.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(),
-						"" + ThisEntry.GetSpeccyBasicDetails().VarName);
+				CurrentRenderer.RenderCharArray(MainPage, data, null, mEnt.GetFilename(),
+						"" + mEnt.GetSpeccyBasicDetails().VarName);
 			} else if (ftype == MGT.MGTFT_ZX48SNA) {
 				MGT48kSnapshotRenderer CurrentRenderer = new MGT48kSnapshotRenderer();
-				CurrentRenderer.RenderSnapshot(MainPage, data, ThisEntry.GetFilename(), ThisEntry);
+				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt);
 			} else if (ftype == MGT.MGTFT_ZX128SNA) {
 				MGT128kSnapshotRenderer CurrentRenderer = new MGT128kSnapshotRenderer();
-				CurrentRenderer.RenderSnapshot(MainPage, data, ThisEntry.GetFilename(), ThisEntry);
+				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt);
 				
 			} else if (ftype == MGT.MGTFT_ZXEXE) {
 				MGTExecuteRenderer CurrentRenderer = new MGTExecuteRenderer();
-				CurrentRenderer.Render(MainPage, data, ThisEntry.GetFilename());
+				CurrentRenderer.Render(MainPage, data, mEnt.GetFilename());
 			} else {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
-				CurrentRenderer.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length,
-						ThisEntry.GetVar1());
+				CurrentRenderer.RenderCode(MainPage, data, null, mEnt.GetFilename(), data.length,
+						mEnt.GetVar1());
 			}
 		} catch (Exception E) {
-			System.out.println("Error Showing " + ThisEntry.GetFilename() + ": " + E.getMessage());
+			System.out.println("Error Showing " + ThisEntry.GetFilename()+ ": " + E.getMessage());
 		}
 	}
 

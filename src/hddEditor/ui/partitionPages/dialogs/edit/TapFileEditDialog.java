@@ -1,5 +1,7 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
-
+/**
+ * Implementation of the Edit file page for an TAP file.
+ */
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlEvent;
@@ -15,73 +17,21 @@ import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.SpeccyBasicDetails;
-import hddEditor.libs.partitions.tap.TapDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 
-public class TapFileEditDialog {
-	// Title of the page
-	private String Title = "";
-
-	// Form details
-	private Shell shell;
-	private Display display;
-
-	// Composite we are parented to
-	private Composite MainPage = null;
-	private ScrolledComposite MainPage1 = null;
-	// Result
-	private boolean result = false;
-
-	// Data for the file
-	public byte[] data = new byte[0];
-
-	// Directory entry of the file being displayed
-	private TapDirectoryEntry ThisEntry = null;
-
-	/*
-	 * Set modified text in the title
-	 */
-	private void SetModified(boolean Modified) {
-		String s = Title;
-		if (Modified) {
-			s = s + " (Modified)";
-		}
-		shell.setText(s);
-	}
-
+public class TapFileEditDialog extends EditFileDialog {
 	public TapFileEditDialog(Display display) {
-		this.display = display;
-	}
-
-	public boolean Show(byte[] data, String title, TapDirectoryEntry entry) {
-		this.result = false;
-		this.ThisEntry = entry;
-		this.Title = title;
-		this.data = data;
-		Createform();
-		SetModified(false);
-		loop();
-		return (result);
-	}
-
-	/**
-	 * Loop and wait
-	 */
-	public void loop() {
-		shell.open();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
-				display.sleep();
-		}
+		super(display);
 	}
 
 	/**
 	 * Create the form
-	 */
-	private void Createform() {
+	 */	
+	@Override
+	protected void Createform() {
 		shell = new Shell(display);
 		shell.setSize(900, 810);
 		GridLayout gridLayout = new GridLayout();
@@ -158,32 +108,5 @@ public class TapFileEditDialog {
 		}
 	}
 
-	/**
-	 * Create a generic label with the given text and span.
-	 * 
-	 * @param text
-	 * @param span
-	 * @return
-	 */
-	public Label label(String text, int span) {
-		Label label = new Label(shell, SWT.SHADOW_NONE);
-		label.setText(text);
-		if (span > 1) {
-			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-			gd.horizontalSpan = 4;
-			label.setLayoutData(gd);
-		}
-		return (label);
-	}
-
-	/**
-	 * Close dialog
-	 */
-	public void close() {
-		shell.close();
-		if (!shell.isDisposed()) {
-			shell.dispose();
-		}
-	}
-
 }
+

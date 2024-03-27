@@ -26,84 +26,25 @@ import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 
-public class SpectrumFileEditDialog {
-	// Title of the page
-	private String Title = "";
-
-	// Form details
-	private Shell shell;
-	private Display display;
-
-	// Composite we are parented to
-	private Composite MainPage = null;
-	private ScrolledComposite MainPage1 = null; 
-	// Result
-	private boolean result = false;
-
-	// Data for the file
-	public byte[] data = new byte[0];
-
-	// Directory entry of the file being displayed
-	private DirectoryEntry ThisEntry = null;
-
+public class Plus3DosFileEditDialog extends EditFileDialog {
 	// size of the data as as +3 Basic sees it (With +3Header)
 	// This is used to trim off excess records before rendering.
 	private int Plus3Size = 0;
-
-	/*
-	 * Set modified text in the title
-	 */
-	private void SetModified(boolean Modified) {
-		String s = Title;
-		if (Modified) {
-			s = s + " (Modified)";
-		}
-		shell.setText(s);
-	}
 
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public SpectrumFileEditDialog(Display display) {
-		this.display = display;
-	}
-
-	/**
-	 * Show the form
-	 * 
-	 * @param data
-	 * @param title
-	 * @param entry
-	 * @return
-	 */
-	public boolean Show(byte[] data, String title, DirectoryEntry entry) {
-		this.result = false;
-		this.ThisEntry = entry;
-		this.Title = title;
-		this.data = data;
-		Createform();
-		SetModified(false);
-		loop();
-		return (result);
-	}
-
-	/**
-	 * Loop and wait
-	 */
-	public void loop() {
-		shell.open();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
-				display.sleep();
-		}
+	public Plus3DosFileEditDialog(Display display) {
+		super(display);
 	}
 
 	/**
 	 * Create the form
 	 */
-	private void Createform() {
+	@Override
+	protected void Createform() {
 		shell = new Shell(display);
 		shell.setSize(970, 810);
 		GridLayout gridLayout = new GridLayout();
@@ -126,7 +67,7 @@ public class SpectrumFileEditDialog {
 		
 		String logblocks = "";
 		int BlockCount = 0;
-		for (Dirent dirent : ThisEntry.dirents) {
+		for (Dirent dirent : ((DirectoryEntry)ThisEntry).dirents) {
 			for (int blockNum : dirent.getBlocks()) {
 				logblocks = logblocks + ", " + blockNum;
 				BlockCount++;
@@ -192,7 +133,7 @@ public class SpectrumFileEditDialog {
 	 * Render the correct page for the file.
 	 */
 	private void RenderAppropriatePage() {
-		Plus3DosFileHeader p3d = ThisEntry.GetPlus3DosHeader();
+		Plus3DosFileHeader p3d = ((DirectoryEntry)ThisEntry).GetPlus3DosHeader();
 
 		byte header[] = null;
 		byte newdata[] = data;
@@ -235,22 +176,6 @@ public class SpectrumFileEditDialog {
 			CharArrayRenderer CR = new CharArrayRenderer();
 			CR.RenderCharArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.VarName);
 		}
-		MainPage.layout();
-		MainPage.pack();
-		MainPage.setSize(MainPage.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		MainPage.layout();		
-		MainPage1.pack();
-		MainPage1.setSize(MainPage1.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-	}
 
-	/**
-	 * CLose the form.
-	 */
-	public void close() {
-		if (!shell.isDisposed()) {
-			shell.close();
-			shell.dispose();
-		}
 	}
-
 }

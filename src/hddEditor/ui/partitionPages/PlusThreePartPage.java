@@ -53,7 +53,7 @@ import hddEditor.ui.partitionPages.dialogs.HexEditDialog;
 import hddEditor.ui.partitionPages.dialogs.RenameFileDialog;
 import hddEditor.ui.partitionPages.dialogs.AddFiles.AddFilesToPlus3Partition;
 import hddEditor.ui.partitionPages.dialogs.drop.DropFilestoPlus3Partition;
-import hddEditor.ui.partitionPages.dialogs.edit.SpectrumFileEditDialog;
+import hddEditor.ui.partitionPages.dialogs.edit.Plus3DosFileEditDialog;
 
 public class PlusThreePartPage extends GenericPage {
 	Table DirectoryListing;
@@ -61,7 +61,7 @@ public class PlusThreePartPage extends GenericPage {
 	/*
 	 * Dialog pointers so we can forcibly close them if necessary.
 	 */
-	SpectrumFileEditDialog SpecFileEditDialog = null;
+	Plus3DosFileEditDialog SpecFileEditDialog = null;
 	RenameFileDialog RenFileDialog = null;
 	HexEditDialog HxEditDialog = null;
 	AddFilesToPlus3Partition AddFilesDialog = null;
@@ -462,7 +462,7 @@ public class PlusThreePartPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 			DirectoryEntry entry = (DirectoryEntry) itms[0].getData();
 			try {
-				SpecFileEditDialog = new SpectrumFileEditDialog(ParentComp.getDisplay());
+				SpecFileEditDialog = new Plus3DosFileEditDialog(ParentComp.getDisplay());
 
 				byte[] data = entry.GetFileRawData();
 

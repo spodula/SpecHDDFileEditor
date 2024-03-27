@@ -1,4 +1,7 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
+/**
+ * Implementation of the file edit page for a Microdrive file.
+ */
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -24,67 +27,17 @@ import hddEditor.ui.partitionPages.FileRenderers.FileRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 
 
-public class MicrodriveFileEditDialog {     
-	// Title of the page
-	private String Title = "";
-	
-	// Form details
-	private Shell shell;
-	private Display display;
+public class MicrodriveFileEditDialog extends EditFileDialog {     
 
-	// Composite we are parented to
-	private Composite MainPage = null;
-	private ScrolledComposite MainPage1 = null; 	
-	// Result
-	private boolean result = false;
-
-	// Data for the file
-	public byte[] data = new byte[0];
-
-	// Directory entry of the file being displayed
-	private MicrodriveDirectoryEntry ThisEntry = null;
-	
-	/*
-	 * Set modified text in the title
-	 */
-	private void SetModified(boolean Modified) {
-		String s = Title;
-		if (Modified) {
-			s = s + " (Modified)";
-		}
-		shell.setText(s);
-	}
-	
 	public MicrodriveFileEditDialog(Display display) {
-		this.display = display;
-	}
-
-	public boolean Show(byte[] data, String title, MicrodriveDirectoryEntry entry) {
-		this.result = false;
-		this.ThisEntry = entry;
-		this.Title = title;
-		this.data = data;
-		Createform();
-		SetModified(false);
-		loop();
-		return (result);
-	}
-	
-	/**
-	 * Loop and wait
-	 */
-	public void loop() {
-		shell.open();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
-				display.sleep();
-		}
+		super(display);
 	}
 
 	/**
 	 * Create the form
 	 */
-	private void Createform() {
+	@Override
+	protected void Createform() {
 		shell = new Shell(display);
 		shell.setSize(900, 810);
 		GridLayout gridLayout = new GridLayout();
@@ -93,6 +46,8 @@ public class MicrodriveFileEditDialog {
 		gridLayout.marginLeft = 20;
 		gridLayout.marginRight = 20;
 		shell.setLayout(gridLayout);
+		
+		MicrodriveDirectoryEntry mde = (MicrodriveDirectoryEntry)ThisEntry;
 
 		Label lbl = label(ThisEntry.GetSpeccyBasicDetails().BasicTypeString()+" file",4);
 		FontData fontData = lbl.getFont().getFontData()[0];
@@ -103,14 +58,14 @@ public class MicrodriveFileEditDialog {
 		label(String.format("Length without Header: %d bytes (%X)", ThisEntry.GetFileSize(), ThisEntry.GetFileSize()),2);
 
 		String logblocks = "";
-		for (MicrodriveSector mds : ThisEntry.sectors) {
+		for (MicrodriveSector mds : mde.sectors) {
 			logblocks = logblocks + ", " + mds.GetSectorNumber();
 		}
 		if (logblocks.length() > 2) {
 			logblocks = logblocks.substring(2);
 		}
 		
-		label("Used sectors: " + ThisEntry.sectors.length + " (" + logblocks + ")",2);
+		label("Used sectors: " + mde.sectors.length + " (" + logblocks + ")",2);
 		
 		MainPage1 = new ScrolledComposite(shell, SWT.V_SCROLL);
 		MainPage1.setExpandHorizontal(true);
@@ -158,7 +113,7 @@ public class MicrodriveFileEditDialog {
 			break;
 		case Speccy.BASIC_CODE:
 				CodeRenderer CR = new CodeRenderer();
-				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, ThisEntry.GetVar2());
+				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, ((MicrodriveDirectoryEntry)ThisEntry).GetVar2());
 				break;
 		case Speccy.BASIC_NUMARRAY:
 				NumericArrayRenderer NR = new NumericArrayRenderer();
@@ -171,34 +126,6 @@ public class MicrodriveFileEditDialog {
 				FileRenderer FR = new FileRenderer();
 				FR.Render(MainPage, data, ThisEntry.GetFilename());
 				
-		}
-	}
-
-	/**
-	 * Create a generic label with the given text and span.
-	 * 
-	 * @param text
-	 * @param span
-	 * @return
-	 */
-	public Label label(String text, int span) {
-		Label label = new Label(shell, SWT.SHADOW_NONE);
-		label.setText(text);
-		if (span>1) {
-			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-			gd.horizontalSpan = 4;
-			label.setLayoutData(gd);
-		}
-		return(label);
-	}
-	
-	/**
-	 * Close dialog
-	 */
-	public void close() {
-		shell.close();
-		if (!shell.isDisposed()) {
-			shell.dispose();
 		}
 	}
 

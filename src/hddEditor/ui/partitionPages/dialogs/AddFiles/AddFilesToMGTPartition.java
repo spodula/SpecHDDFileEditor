@@ -1,5 +1,6 @@
 package hddEditor.ui.partitionPages.dialogs.AddFiles;
 //TODO: Try to find out why loading wont remember last locations.
+//TODO: actually allow editing of files.
 
 import java.util.ArrayList;
 

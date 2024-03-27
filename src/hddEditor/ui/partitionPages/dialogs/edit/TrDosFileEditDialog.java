@@ -1,4 +1,7 @@
 package hddEditor.ui.partitionPages.dialogs.edit; 
+/**
+ * Implementation of the Edit file page for a TR-DOS file.
+ */
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -13,43 +16,17 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 
-public class TrDosFileEditDialog {
-	// Title of the page
-	private String Title = "";
-
-	// Form details
-	private Shell shell;
-	private Display display;
-
-	// Composite we are parented to
-	private Composite MainPage = null;
-	private ScrolledComposite MainPage1 = null; 
-	
-	// Result
-	private boolean result = false;
-
-	// Data for the file
-	public byte[] data = new byte[0];
-
+public class TrDosFileEditDialog extends EditFileDialog {
 	// Directory entry of the file being displayed
-	private TrdDirectoryEntry ThisEntry = null;
-
-	/*
-	 * Set modified text in the title
-	 */
-	private void SetModified(boolean Modified) {
-		String s = Title;
-		if (Modified) {
-			s = s + " (Modified)";
-		}
-		shell.setText(s);
-	}
+	//private TrdDirectoryEntry ThisEntry = null;
+	private FileEntry ThisEntry = null;
 
 	/**
 	 * Constructor
@@ -57,43 +34,14 @@ public class TrDosFileEditDialog {
 	 * @param display
 	 */
 	public TrDosFileEditDialog(Display display) {
-		this.display = display;
-	}
-
-	/**
-	 * Show the form
-	 * 
-	 * @param data
-	 * @param title
-	 * @param entry
-	 * @return
-	 */
-	public boolean Show(byte[] data, String title, TrdDirectoryEntry entry) {
-		this.result = false;
-		this.ThisEntry = entry;
-		this.Title = title;
-		this.data = data;
-		Createform();
-		SetModified(false);
-		loop();
-		return (result);
-	}
-
-	/**
-	 * Loop and wait
-	 */
-	public void loop() {
-		shell.open();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
-				display.sleep();
-		}
+		super(display);
 	}
 
 	/**
 	 * Create the form
 	 */
-	private void Createform() {
+	@Override
+	protected void Createform() {
 		shell = new Shell(display);
 		shell.setSize(900, 810);
 		GridLayout gridLayout = new GridLayout();
@@ -151,16 +99,17 @@ public class TrDosFileEditDialog {
 	 */
 	private void RenderAppropriatePage() {
 		try {
-			char ftype = ThisEntry.GetFileType();
+			TrdDirectoryEntry trde = (TrdDirectoryEntry)ThisEntry; 
+			char ftype = trde.GetFileType();
 			if (ftype == 'B') {
 				BasicRenderer CurrentRenderer = new BasicRenderer();
 				CurrentRenderer.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), ThisEntry.GetFileSize(), 
-						ThisEntry.GetVar2(), ThisEntry.startline);
+						trde.GetVar2(), trde.startline);
 			} else if (ftype != 'D') {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
 				CurrentRenderer.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length,
-						ThisEntry.GetVar1());
-			} else if (ThisEntry.IsCharArray()) {
+						trde.GetVar1());
+			} else if (trde.IsCharArray()) {
 				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
 				CurrentRenderer.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A");
 			} else {
@@ -171,15 +120,4 @@ public class TrDosFileEditDialog {
 			System.out.println("Error Showing " + ThisEntry.GetFilename() + ": " + E.getMessage());
 		}
 	}
-
-	/**
-	 * CLose the form.
-	 */
-	public void close() {
-		shell.close();
-		if (!shell.isDisposed()) {
-			shell.dispose();
-		}
-	}
-
 }
