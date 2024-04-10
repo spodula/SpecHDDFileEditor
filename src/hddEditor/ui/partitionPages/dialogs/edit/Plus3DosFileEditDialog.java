@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
+//TODO: detect source file change
 
 /**
  * FIle edit dialog for the +3DOS partition page
@@ -82,15 +83,14 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 		lbl.setLayoutData(gd); 
 
 		Plus3DosFileHeader p3d = new Plus3DosFileHeader(data);
+		lbl = new Label(shell, SWT.NONE);
+		lbl.setFont(boldFont);
+
 		if (p3d.IsPlusThreeDosFile) {
-			lbl = new Label(shell, SWT.NONE);
 			lbl.setText(String.format("+3DOS Length: %d bytes (%X)", p3d.fileSize, p3d.fileSize));
-			lbl.setFont(boldFont);
 			Plus3Size = p3d.fileSize + 0x80;
 		} else {
-			lbl = new Label(shell, SWT.NONE);
 			lbl.setText("Not a +3DOS file (Or header corrupt)");
-			lbl.setFont(boldFont);
 			Plus3Size = data.length;   
 		}
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -176,6 +176,5 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 			CharArrayRenderer CR = new CharArrayRenderer();
 			CR.RenderCharArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.VarName);
 		}
-
 	}
 }

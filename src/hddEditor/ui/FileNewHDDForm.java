@@ -26,6 +26,8 @@ import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.HDFUtils;
 import hddEditor.libs.PLUSIDEDOS;
+import hddEditor.libs.disks.HDD.RS_IDEDosDisk;
+import hddEditor.libs.disks.HDD.RawHDDFile;
 import hddEditor.ui.partitionPages.dialogs.ProgesssForm;
 
 public class FileNewHDDForm {
@@ -288,7 +290,6 @@ public class FileNewHDDForm {
 			}
 	}
 
-	// TODO: Move DoCreateFile from FileNewHDDForm to appropriate disk objects.
 	/**
 	 * Actually create the file.DoCreateFile NOTE: Most of this wants moving to the Disk
 	 * objects.
@@ -300,7 +301,6 @@ public class FileNewHDDForm {
 	 */
 	public boolean DoCreateFile(boolean IsTargetHDF, boolean IsTarget8Bit, String targFile, int cyl, int head,
 			int spt) {
-		result = null;
 		boolean SuccessfullyCreated = false;
 		ProgesssForm pf = new ProgesssForm(display);
 		try {
@@ -310,79 +310,11 @@ public class FileNewHDDForm {
 				s = "16-bit";
 			}
 			if (IsTargetHDF) {
-				s = s + " Ramsoft HDF file";
+				RS_IDEDosDisk rs = new RS_IDEDosDisk();
+				SuccessfullyCreated= rs.CreateBlankHDFDisk(new File(targFile), cyl, head, spt, IsTarget8Bit, pf); 
 			} else {
-				s = s + " Raw disk image";
-			}
-			pf.Show("Creating file...", "Creating " + s + " \"" + new File(targFile).getName() + "\"");
-			try {
-				int sectorSz = 512;
-				if (IsTarget8Bit) {
-					sectorSz = 256;
-				}
-
-				FileOutputStream TargetFile = new FileOutputStream(targFile);
-				try {
-					// For HDF files, write the HDF header
-					if (IsTargetHDF) {
-						HDFUtils.WriteHDFFileHeader(TargetFile, IsTarget8Bit, cyl, head, spt);
-					}
-					// Write out an IDEDOS header
-					byte SysPart[] = PLUSIDEDOS.GetSystemPartition(cyl, head, spt, sectorSz,
-							IsTarget8Bit && !IsTargetHDF);
-					TargetFile.write(SysPart);
-
-					// Write out the free space header
-					byte FsPart[] = PLUSIDEDOS.GetFreeSpacePartition(0, 1, cyl, 1, sectorSz,
-							IsTarget8Bit && !IsTargetHDF, head, spt);
-					TargetFile.write(FsPart);
-
-					/*
-					 * Write a blank file for the rest.
-					 */
-					int NumLogicalSectors = (cyl * head * spt) - spt + 1;
-
-					byte oneSector[] = new byte[512];
-					if (IsTarget8Bit && IsTargetHDF) {
-						// for raw files, still want to write 512 byte sectors even if only half is
-						// used.
-						oneSector = new byte[256];
-					}
-					pf.SetMax(NumLogicalSectors);
-					display.readAndDispatch();
-
-					boolean ActionCancelled = false;
-					for (int i = 0; (i < NumLogicalSectors) && !ActionCancelled; i++) {
-						TargetFile.write(oneSector);
-						if (i % 2000 == 0) {
-							pf.SetValue(i);
-						}
-						ActionCancelled = pf.IsCancelled();
-					}
-
-					System.out.println();
-					if (ActionCancelled) {
-						System.out.println("Cancelled");
-						pf.setMessage("Cancelled - Flushing work already done...");
-						result = null;
-					} else {
-						result = targFile;
-						SuccessfullyCreated = true;
-					}
-				} finally {
-					TargetFile.close();
-				}
-				System.out.println("Creation finished.");
-			} catch (FileNotFoundException e) {
-				System.out.println("Cannot open file " + targFile + " for writing.");
-				System.out.println(e.getMessage());
-				result = null;
-				e.printStackTrace();
-			} catch (IOException e) {
-				System.out.println("Cannot write to file file " + targFile);
-				System.out.println(e.getMessage());
-				result = null;
-				e.printStackTrace();
+				RawHDDFile rs = new RawHDDFile();
+				SuccessfullyCreated = rs.CreateBlankRawDisk(new File(targFile), cyl, head, spt, IsTarget8Bit, pf);
 			}
 		} finally {
 			pf.close();

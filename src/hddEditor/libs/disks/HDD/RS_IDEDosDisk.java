@@ -24,10 +24,14 @@ import java.io.File;
  */
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.HDFUtils;
+import hddEditor.libs.PLUSIDEDOS;
+import hddEditor.ui.partitionPages.dialogs.ProgesssForm;
 
 public class RS_IDEDosDisk extends RS_IDEFile {
 	public static final String IDEDOSHEADER = "PLUSIDEDOS";
@@ -47,8 +51,7 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 	public RS_IDEDosDisk() {
 		super();
 	}
-	
-	
+
 	/**
 	 * Extract the disk parameters from the IDEDOS partition. Including disk size,
 	 * 8/16 bit access and sector size.
@@ -190,6 +193,101 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 		}
 
 		return (result);
+	}
+
+	/**
+	 * Create a blank Hard disk file with a system partition
+	 * 
+	 * @param file	- File to create
+	 * @param cyl	- Cylinders
+	 * @param head	- Heads
+	 * @param spt	- Sectors per track
+	 * @param IsTarget8Bit - 8 or 16 bit file type
+	 * @param pf	- Progress 
+	 * @return TRUE if creation successful 
+	 */
+	public boolean CreateBlankHDFDisk(File file, int cyl, int head, int spt, boolean IsTarget8Bit, ProgesssForm pf) {
+		try {
+			boolean result = false;
+			System.out.println("Openning " + file.getName() + " for writing...");
+			String s = "8-bit";
+			if (!IsTarget8Bit) {
+				s = "16-bit";
+			}
+
+			pf.Show("Creating file...", "Creating "+s+" Ramsoft HDF file \"" + file.getName() + "\"");
+			try {
+				int sectorSz = 512;
+				if (IsTarget8Bit) {
+					sectorSz = 256;
+				}
+
+				FileOutputStream TargetFile = new FileOutputStream(file);
+				try {
+					HDFUtils.WriteHDFFileHeader(TargetFile, IsTarget8Bit, cyl, head, spt);
+
+					// Write out an IDEDOS header
+					byte SysPart[] = PLUSIDEDOS.GetSystemPartition(cyl, head, spt, sectorSz,
+							false);
+					TargetFile.write(SysPart);
+
+					// Write out the free space header
+					byte FsPart[] = PLUSIDEDOS.GetFreeSpacePartition(0, 1, cyl, 1, sectorSz,
+							false, head, spt);
+					TargetFile.write(FsPart);
+
+					/*
+					 * Write a blank file for the rest.
+					 */
+					int NumLogicalSectors = (cyl * head * spt) - spt + 1;
+
+					byte oneSector[] = new byte[512];
+					if (IsTarget8Bit) {
+						// for raw files, still want to write 512 byte sectors even if only half is
+						// used.
+						oneSector = new byte[256];
+					}
+					pf.SetMax(NumLogicalSectors);
+
+					boolean ActionCancelled = false;
+					for (int i = 0; (i < NumLogicalSectors) && !ActionCancelled; i++) {
+						TargetFile.write(oneSector);
+						if (i % 2000 == 0) {
+							pf.SetValue(i);
+						}
+						ActionCancelled = pf.IsCancelled();
+					}
+
+					System.out.println();
+					if (ActionCancelled) {
+						System.out.println("Cancelled");
+						pf.setMessage("Cancelled - Flushing work already done...");
+						result = false;
+					} else {
+						result = true;
+					}
+				} finally {
+					TargetFile.close();
+				}
+				System.out.println("Creation finished.");
+				result = true;
+			} catch (FileNotFoundException e) {
+				System.out.println("Cannot open file " + file.getName() + " for writing.");
+				System.out.println(e.getMessage());
+				result = false;
+				e.printStackTrace();
+			} catch (IOException e) {
+				System.out.println("Cannot write to file file " + file.getName());
+				System.out.println(e.getMessage());
+				result = false;
+				e.printStackTrace();
+			}
+			return (result);
+		} catch (Exception E) {
+			System.out.println(E.getMessage());
+			E.printStackTrace();
+			return (false);
+		}
 	}
 
 }
