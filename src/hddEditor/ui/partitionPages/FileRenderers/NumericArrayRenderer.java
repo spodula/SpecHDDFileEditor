@@ -28,13 +28,18 @@ public class NumericArrayRenderer extends FileRenderer {
 	@Override
 	public void Render(Composite mainPage, byte data[], String Filename) {
 		Plus3DosFileHeader p3d = new Plus3DosFileHeader(data);
+		String Varname ="A";
+		byte header[] = null;
+		byte newdata[] = data;
+		if (p3d.IsPlusThreeDosFile && p3d.ChecksumValid) {
+			Varname = p3d.VarName;
+			newdata = new byte[data.length - 0x80];
+			header = new byte[0x80];
+			System.arraycopy(data, 0, header, 0, 0x80);
+			System.arraycopy(data, 0x80, newdata, 0, newdata.length);
+		} 
 
-		byte newdata[] = new byte[data.length - 0x80];
-		byte header[] = new byte[0x80];
-		System.arraycopy(data, 0, header, 0, 0x80);
-		System.arraycopy(data, 0x80, newdata, 0, newdata.length);
-
-		RenderNumericArray(mainPage, newdata, header, Filename, p3d.VarName);
+		RenderNumericArray(mainPage, newdata, header, Filename, Varname);
 	}
 
 	/**
