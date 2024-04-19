@@ -5,9 +5,6 @@ package hddEditor.ui;
  */
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -24,8 +21,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import hddEditor.libs.HDFUtils;
-import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.disks.HDD.RS_IDEDosDisk;
 import hddEditor.libs.disks.HDD.RawHDDFile;
 import hddEditor.ui.partitionPages.dialogs.ProgesssForm;
@@ -304,11 +299,16 @@ public class FileNewHDDForm {
 		boolean SuccessfullyCreated = false;
 		ProgesssForm pf = new ProgesssForm(display);
 		try {
-			System.out.println("Openning " + targFile + " for writing...");
-			String s = "8-bit";
+			String bitstring = "8-bit";
 			if (!IsTarget8Bit) {
-				s = "16-bit";
+				bitstring = "16-bit";
 			}
+			String hdfstring = "Raw file";
+			if (IsTargetHDF) {
+				hdfstring = "HDF file";
+			}
+			
+			System.out.println("Openning " + targFile + " for writing... as "+bitstring+" "+hdfstring);
 			if (IsTargetHDF) {
 				RS_IDEDosDisk rs = new RS_IDEDosDisk();
 				SuccessfullyCreated= rs.CreateBlankHDFDisk(new File(targFile), cyl, head, spt, IsTarget8Bit, pf); 

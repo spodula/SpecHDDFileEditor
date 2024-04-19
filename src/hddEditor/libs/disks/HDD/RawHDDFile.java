@@ -17,7 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import hddEditor.libs.GeneralUtils;
-import hddEditor.libs.HDFUtils;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.ui.partitionPages.dialogs.ProgesssForm;
 
