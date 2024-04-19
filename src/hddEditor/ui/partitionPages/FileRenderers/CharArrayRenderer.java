@@ -25,6 +25,7 @@ public class CharArrayRenderer extends FileRenderer {
 	 */
 	@Override
 	public void Render(Composite mainPage, byte data[], String Filename) {
+		super.Render(mainPage, data, Filename);
 		Plus3DosFileHeader p3d = new Plus3DosFileHeader(data);
 		String Varname ="A";
 		byte header[] = null;
@@ -51,10 +52,6 @@ public class CharArrayRenderer extends FileRenderer {
 	 * @param varname  - variable name
 	 */
 	public void RenderCharArray(Composite mainPage, byte data[], byte header[], String Filename, String varname) {
-		this.filename = Filename;
-		this.MainPage = mainPage;
-		this.data = data;
-
 		Label lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("Character array: ");
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);

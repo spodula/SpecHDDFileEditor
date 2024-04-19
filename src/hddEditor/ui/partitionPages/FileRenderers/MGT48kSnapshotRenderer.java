@@ -43,9 +43,8 @@ public class MGT48kSnapshotRenderer extends FileRenderer {
 	MGT48kRenderer renderer = null;
 
 	public void RenderSnapshot(Composite mainPage, byte data[], String Filename, MGTDirectoryEntry entry ) {
-		this.filename = Filename;
-		this.MainPage = mainPage;
-		this.data = data;
+		super.Render(mainPage, data, Filename);
+
 		
 		renderer = new MGT48kRenderer();
 		renderer.Render(mainPage, data, entry);

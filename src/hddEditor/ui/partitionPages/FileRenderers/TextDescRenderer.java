@@ -14,9 +14,8 @@ public class TextDescRenderer extends FileRenderer {
 	private TextRenderer tr = null;
 	
 	public void RenderText(Composite mainPage, byte data[], byte header[], String Filename) {	
-		this.filename = Filename;
-		this.MainPage = mainPage;
-		this.data = data;
+		super.Render(mainPage, data, Filename);
+
 
 		Label lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("Text: ");

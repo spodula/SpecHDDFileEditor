@@ -9,10 +9,8 @@ public class MGT128kSnapshotRenderer extends FileRenderer {
 	MGT128KRenderer renderer = null;
 
 	public void RenderSnapshot(Composite mainPage, byte data[], String Filename, MGTDirectoryEntry entry ) {
-		this.filename = Filename;
-		this.MainPage = mainPage;
-		this.data = data;
-		
+		super.Render(mainPage, data, Filename);
+
 		renderer = new MGT128KRenderer();
 		renderer.Render(mainPage, data, entry);
 	}	

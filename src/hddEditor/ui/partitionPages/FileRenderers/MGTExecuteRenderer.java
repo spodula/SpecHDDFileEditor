@@ -30,9 +30,8 @@ public class MGTExecuteRenderer extends FileRenderer {
 
 	public void RenderCode(Composite mainPage, byte data[], byte header [], String Filename, int fileSize,
 			int loadAddr) {
-		this.filename = Filename;
-		this.MainPage = mainPage;
-		this.data = data;
+		super.Render(mainPage, data, Filename);
+
 		Renderers = new Vector<Renderer>();
 		Label lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("CODE file: ");

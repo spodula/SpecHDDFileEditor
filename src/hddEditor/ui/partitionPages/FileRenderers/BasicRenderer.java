@@ -43,9 +43,7 @@ public class BasicRenderer extends FileRenderer {
 	 */
 	public void RenderBasic(Composite mainPage, byte data[], byte header[], String Filename, int filelength,
 			int VariablesOffset, int Startline) {
-		this.filename = Filename;
-		this.MainPage = mainPage;
-		this.data = data;
+		super.Render(mainPage, data, Filename);
 
 		Label lbl = new Label(this.MainPage, SWT.NONE);
 		lbl.setText("BASIC program: ");

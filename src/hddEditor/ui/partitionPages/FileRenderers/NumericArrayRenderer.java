@@ -52,9 +52,8 @@ public class NumericArrayRenderer extends FileRenderer {
 	 * @param varname - Variable name.
 	 */
 	public void RenderNumericArray(Composite mainPage, byte data[], byte header[], String Filename, String varname) {
-		this.filename = Filename;
-		this.MainPage = mainPage;
-		this.data = data;
+		super.Render(mainPage, data, Filename);
+
 
 		Label lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("Numeric array: ");
