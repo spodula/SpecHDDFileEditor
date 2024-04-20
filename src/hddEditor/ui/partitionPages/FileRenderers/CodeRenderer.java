@@ -31,6 +31,7 @@ import hddEditor.ui.partitionPages.FileRenderers.RawRender.SPRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.BinaryRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.RamDump;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.ScreenRenderer;
+import hddEditor.ui.partitionPages.FileRenderers.RawRender.SpriteRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.TextRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.Z80SnapshotRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.AssemblyRenderer;
@@ -42,7 +43,7 @@ public class CodeRenderer extends FileRenderer {
 	private Vector<Renderer> Renderers = null;
 
 	// Rendering options
-	private String[] CODETYPES = { "Binary", "Screen", "Assembly", "SNA file", "Z80 file","48k Ram Dump", ".SP file","ASCII Text" };
+	private String[] CODETYPES = { "Binary", "Screen", "Assembly", "SNA file", "Z80 file","48k Ram Dump", ".SP file","ASCII Text","Sprite" };
 
 	/**
 	 * 
@@ -285,6 +286,10 @@ public class CodeRenderer extends FileRenderer {
 				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a , new int [0], filename);
 			} else if (s.equals(CODETYPES[7])) {
 				TextRenderer renderer = new TextRenderer();
+				Renderers.add(renderer);
+				renderer.Render(MainPage, data, filename);
+			} else if (s.equals(CODETYPES[8])) {
+				SpriteRenderer renderer = new SpriteRenderer();
 				Renderers.add(renderer);
 				renderer.Render(MainPage, data, filename);
 			} else {

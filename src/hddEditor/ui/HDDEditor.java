@@ -1,4 +1,5 @@
 package hddEditor.ui;
+
 /**
  * Main UI.
  */
@@ -51,7 +52,9 @@ import hddEditor.ui.partitionPages.TrDosPartitionPage;
 
 public class HDDEditor {
 	public static String[] SUPPORTEDFILETYPES = { "*", "*.img", "*.hdf", "*.mgt", "*.trd", "*.scl", "*.mdr", "*.mgt",
-			"*.tap" ,"*.tzx"};
+			"*.tap", "*.tzx" };
+
+	public static int DISKCHECKPERIOD = 2000;
 
 	public Disk CurrentDisk = null;
 	public OSHandler CurrentHandler = null;
@@ -81,13 +84,18 @@ public class HDDEditor {
 
 	private String helpcontext = "Main";
 
+	//Items for the drag menu.
 	public int dragindex = 0;
-	String dragtypes[] = { "TYPE","RAW","HEX" };
-	
-	public static int DRAG_TYPE = 0;
-	public static int DRAG_RAW = 1;
-	public static int DRAG_HEX = 2;
-	
+	String dragtypes[] = { "TYPE", "RAW", "HEX" };
+
+	//Drag target types for when dragging off the form.
+	public static int DRAG_TYPE = 0;   //Basic->text, code->hex, screens->PNG, arrays->csv
+	public static int DRAG_RAW = 1;    //Raw data exactly as on disk.
+	public static int DRAG_HEX = 2;    //Always hex dump
+
+	//Used to stop the file change check pestering the user when the have cancelled the dialog
+	public boolean DontAskReload = false;
+
 	/**
 	 * Make the menus
 	 */
@@ -144,7 +152,7 @@ public class HDDEditor {
 				fd.setText("Open a media file...");
 				fd.setFilterExtensions(HDDEditor.SUPPORTEDFILETYPES);
 
-				if (CurrentDisk!=null && CurrentDisk.IsOpen()) {
+				if (CurrentDisk != null && CurrentDisk.IsOpen()) {
 					File f = new File(CurrentDisk.GetFilename());
 					fd.setFilterPath(f.getPath());
 				}
@@ -153,6 +161,20 @@ public class HDDEditor {
 				if (selected != null) {
 					LoadFile(selected);
 				}
+			}
+		});
+
+		MenuItem fileReLoadItem = new MenuItem(fileMenu, SWT.PUSH);
+		fileReLoadItem.setText("&Reload");
+		fileReLoadItem.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				widgetDefaultSelected(arg0);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				ReloadCurrentFile();
 			}
 		});
 
@@ -197,20 +219,20 @@ public class HDDEditor {
 				if (CurrentDisk != null) {
 					CurrentDisk.close();
 				}
+
 				shell.close();
 			}
 		});
 
 		MenuItem OptMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
 		OptMenuHeader.setText("&Drag out default");
-		
+
 		Menu OptMenu = new Menu(shell, SWT.DROP_DOWN);
 		OptMenuHeader.setMenu(OptMenu);
 
-
-		for(int i=0; i<dragtypes.length;i++) {
+		for (int i = 0; i < dragtypes.length; i++) {
 			MenuItem DefaultDragTypeItem = new MenuItem(OptMenu, SWT.RADIO);
-			DefaultDragTypeItem.setText("&Drag out default: "+dragtypes[i]);
+			DefaultDragTypeItem.setText("&Drag out default: " + dragtypes[i]);
 			DefaultDragTypeItem.setData(i);
 			DefaultDragTypeItem.addSelectionListener(new SelectionListener() {
 				@Override
@@ -224,15 +246,15 @@ public class HDDEditor {
 					widgetSelected(arg0);
 				}
 			});
-			if (i==0) {
+			if (i == 0) {
 				DefaultDragTypeItem.setSelection(true);
 			}
-			
+
 		}
-		
+
 		MenuItem helpMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
 		helpMenuHeader.setText("&Help");
-		
+
 		Menu helpMenu = new Menu(shell, SWT.DROP_DOWN);
 		helpMenuHeader.setMenu(helpMenu);
 
@@ -251,6 +273,22 @@ public class HDDEditor {
 		});
 
 		shell.setMenuBar(menuBar);
+	}
+
+	/**
+	 * Re-load the currently loaded file preserving the selected partition.
+	 */
+	protected void ReloadCurrentFile() {
+		if (CurrentDisk != null && CurrentDisk.IsOpen()) {
+			// get current partition
+			String currentPartName = PartitionDropdown.getText();
+			// reload file
+			LoadFile(CurrentDisk.GetFilename());
+			// set partition
+			PartitionDropdown.setText(currentPartName);
+			ComboChanged();
+			DontAskReload=false;
+		}
 	}
 
 	/**
@@ -347,6 +385,10 @@ public class HDDEditor {
 				event.doit = true;
 			}
 		});
+
+		DiskCheckTask dct = new DiskCheckTask();
+		dct.rootpage = this;
+		Display.getDefault().timerExec(DISKCHECKPERIOD, dct);
 	}
 
 	/**
@@ -357,7 +399,7 @@ public class HDDEditor {
 		while (!shell.isDisposed()) {
 			try {
 				if (!display.readAndDispatch())
-				display.sleep();
+					display.sleep();
 			} catch (Exception E) {
 				E.printStackTrace();
 			}
@@ -567,10 +609,24 @@ public class HDDEditor {
 		fileImportForm = new FileImportForm(display, CurrentHandler);
 		try {
 			fileImportForm.Show(current);
-			//force a refresh
+			// force a refresh
 			ComboChanged();
 		} finally {
 			fileImportForm = null;
 		}
 	}
+
+	public void OnDiskOutOfDate() {
+		if (!DontAskReload) {
+			MessageBox messageBox = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+			messageBox.setMessage("Current file has been updated on disk");
+			messageBox.setText("The current file has been updated on disk. \nReload?");
+			if (messageBox.open() == SWT.YES) {
+				ReloadCurrentFile();
+			} else {
+				DontAskReload = true;
+			}
+		}
+	}
+
 }

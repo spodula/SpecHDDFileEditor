@@ -18,6 +18,7 @@ public class TAPFile implements Disk {
 	// Storage for the Tape blocks
 	public TAPBlock Blocks[];
 
+	public long LastModified;
 	/**
 	 * Constructor, load a TAP file.
 	 * 
@@ -262,6 +263,7 @@ public class TAPFile implements Disk {
 
 		}
 		Blocks = TapBlocks.toArray(new TAPBlock[0]);
+		UpdateLastModified();
 	}
 
 	/**
@@ -287,6 +289,7 @@ public class TAPFile implements Disk {
 	public byte[] SetAllData(byte FileData[]) throws IOException {
 		inFile.seek(0);
 		inFile.read(FileData);
+		UpdateLastModified();
 		return (FileData);
 	}
 
@@ -317,6 +320,7 @@ public class TAPFile implements Disk {
 			filelen = filelen + data.length;
 		}
 		inFile.setLength(filelen);
+		UpdateLastModified();
 	}
 
 	/**
@@ -467,4 +471,24 @@ public class TAPFile implements Disk {
 		}
 	}
 
+	/**
+	 * Return if the disk is out of sync with the one on disk.
+	 */
+	@Override
+	public boolean DiskOutOfDate() {
+		if (inFile!=null) {
+			return(LastModified < file.lastModified()); 
+		}
+		return false;
+	}
+
+	/**
+	 * Update the last modified flag.
+	 */
+	@Override
+	public void UpdateLastModified() {
+		if (inFile!=null) {
+			LastModified = file.lastModified(); 
+		}
+	}
 }

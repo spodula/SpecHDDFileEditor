@@ -257,6 +257,8 @@ public class TrDosDiskFile extends FloppyDisk {
 				FirstSector = Track.minsectorID;
 			}
 		}
+		UpdateLastModified();
+
 	}
 
 	/**
@@ -272,6 +274,7 @@ public class TrDosDiskFile extends FloppyDisk {
 			System.out.println("Failed writing sector...."+e.getMessage());
 			e.printStackTrace();
 		}
+		UpdateLastModified();
 	}
 
 	/**

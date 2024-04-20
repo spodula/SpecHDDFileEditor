@@ -103,6 +103,7 @@ public class AMSDiskFile extends FloppyDisk {
 		inFile = null;
 		file = null;
 		IsValid = false;
+		LastModified = 0;
 		SetNumCylinders(0);
 	}
 
@@ -377,6 +378,7 @@ public class AMSDiskFile extends FloppyDisk {
 				FirstSector = Track.minsectorID;
 			}
 		}
+		UpdateLastModified();
 	}
 
 	/**
@@ -392,6 +394,7 @@ public class AMSDiskFile extends FloppyDisk {
 			System.out.println("Failed writing sector...." + e.getMessage());
 			e.printStackTrace();
 		}
+		UpdateLastModified();
 	}
 
 	/**

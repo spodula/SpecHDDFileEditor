@@ -33,6 +33,19 @@ public interface Disk {
 	public void SetNumSectors(int sz);
 
 	/**
+	 * Is the loaded disk out of date compared to the one on disk?
+	 * @return TRUE if disk doesnt match loaded disk
+	 */
+	public boolean DiskOutOfDate();
+
+	/**
+	 * Update any internal last modified flags.
+	 */
+	public void UpdateLastModified();
+	
+	
+	
+	/**
 	 * Get the number of logical sectors by the disks size. 
 	 * 
 	 * @return

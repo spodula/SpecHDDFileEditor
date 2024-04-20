@@ -27,6 +27,8 @@ public class FloppyDisk implements Disk {
 	// Tracks in the file.
 	public TrackInfo diskTracks[];
 
+	public long LastModified;
+	
 	/**
 	 * 
 	 * @param filename
@@ -37,6 +39,7 @@ public class FloppyDisk implements Disk {
 		inFile = new RandomAccessFile(file, "rw");
 		this.file = file;
 		FileSize = file.length();
+		LastModified = file.lastModified();
 	}
 
 	/**
@@ -197,7 +200,7 @@ public class FloppyDisk implements Disk {
 				} else {
 					result = result + String.format("Track: %02d/%d: ", ti.tracknum, ti.side);
 					for (Sector sect : ti.Sectors) {
-						result = result + String.format("%X(%d) ",sect.sectorID,sect.ActualSize);
+						result = result + String.format("%X(%d) ", sect.sectorID, sect.ActualSize);
 					}
 					result = result + "\n";
 				}
@@ -206,9 +209,10 @@ public class FloppyDisk implements Disk {
 
 		return (result);
 	}
-	
+
 	/**
 	 * Get a sector from the track/sector list.
+	 * 
 	 * @param c
 	 * @param h
 	 * @param s
@@ -216,21 +220,41 @@ public class FloppyDisk implements Disk {
 	 */
 	protected Sector GetSectorByCHS(int c, int h, int s) {
 		Sector result = null;
-		for(TrackInfo trk:diskTracks) {
+		for (TrackInfo trk : diskTracks) {
 			if ((trk.tracknum == c) && (trk.side == h)) {
-				for(Sector sect:trk.Sectors) {
+				for (Sector sect : trk.Sectors) {
 					if (sect.sectorID == s) {
 						result = sect;
 					}
 				}
 			}
 		}
-		if (result==null) {
-			System.out.println("Unable to find sector: Cyl:"+c+" Head:"+h+" Sector: "+s);
+		if (result == null) {
+			System.out.println("Unable to find sector: Cyl:" + c + " Head:" + h + " Sector: " + s);
 		}
-		return(result);
+		return (result);
 	}
-	
 
 	
+	/**
+	 * Return if the disk is out of sync with the one on disk.
+	 */
+	@Override
+	public boolean DiskOutOfDate() {
+		if (inFile!=null) {
+			return(LastModified < file.lastModified()); 
+		}
+		return false;
+	}
+
+	/**
+	 * Update the last modified flag.
+	 */
+	@Override
+	public void UpdateLastModified() {
+		if (inFile!=null) {
+			LastModified = file.lastModified(); 
+		}
+	}
+
 }

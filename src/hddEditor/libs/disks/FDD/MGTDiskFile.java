@@ -211,6 +211,7 @@ public class MGTDiskFile extends FloppyDisk {
 			System.out.println("Failed writing sector...." + e.getMessage());
 			e.printStackTrace();
 		}
+		UpdateLastModified();
 	}
 
 	/**
@@ -266,6 +267,7 @@ public class MGTDiskFile extends FloppyDisk {
 			}
 			NumSectors--;
 		}
+		UpdateLastModified();
 	}
 
 	/**

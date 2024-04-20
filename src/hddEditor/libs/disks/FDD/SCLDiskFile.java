@@ -339,6 +339,7 @@ public class SCLDiskFile extends FloppyDisk {
 				FirstSector = Track.minsectorID;
 			}
 		}
+		UpdateLastModified();
 	}
 
 	/**

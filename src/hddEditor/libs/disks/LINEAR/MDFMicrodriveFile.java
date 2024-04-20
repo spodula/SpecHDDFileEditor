@@ -16,8 +16,10 @@ public class MDFMicrodriveFile implements Disk {
 	public File file;
 	// disk size in bytes
 	public long FileSize;
-
+	//Microdrive sector list
 	public MicrodriveSector Sectors[];
+	//last time modified on disk
+	long LastModified;
 
 	public MDFMicrodriveFile(File file) throws IOException, BadDiskFileException {
 		inFile = new RandomAccessFile(file, "rw");
@@ -48,6 +50,7 @@ public class MDFMicrodriveFile implements Disk {
 		}
 
 		Sectors = MdSectors.toArray(new MicrodriveSector[0]);
+		UpdateLastModified();
 	}
 
 	@Override
@@ -254,6 +257,7 @@ public class MDFMicrodriveFile implements Disk {
 
 			}
 		}
+		UpdateLastModified();
 	}
 
 	/**
@@ -393,4 +397,25 @@ public class MDFMicrodriveFile implements Disk {
 		ParseMDFFile();
 	}
 
+	/**
+	 * Return if the disk is out of sync with the one on disk.
+	 */
+	@Override
+	public boolean DiskOutOfDate() {
+		if (inFile!=null) {
+			return(LastModified < file.lastModified()); 
+		}
+		return false;
+	}
+
+	/**
+	 * Update the last modified flag.
+	 */
+	@Override
+	public void UpdateLastModified() {
+		if (inFile!=null) {
+			LastModified = file.lastModified(); 
+		}
+	}
+	
 }

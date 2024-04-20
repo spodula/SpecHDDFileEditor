@@ -38,6 +38,8 @@ public class RawHDDFile implements HardDisk {
 	// Simple one sector cache
 	private byte[] cache;
 	private long cachedSector = -1;
+	
+	long LastModified;
 
 	/**
 	 * Get and set the filename
@@ -111,6 +113,7 @@ public class RawHDDFile implements HardDisk {
 		inFile = new RandomAccessFile(file, "rw");
 		this.file = file;
 		FileSize = file.length();
+		UpdateLastModified();
 	}
 
 	/**
@@ -209,6 +212,7 @@ public class RawHDDFile implements HardDisk {
 
 		inFile.seek(location);
 		inFile.read(result);
+		UpdateLastModified();
 	}
 
 	/**
@@ -272,6 +276,8 @@ public class RawHDDFile implements HardDisk {
 		inFile.setLength(newsize);
 
 		SetNumCylinders(NewCyls);
+		UpdateLastModified();
+
 	}
 
 	/**
@@ -360,6 +366,27 @@ public class RawHDDFile implements HardDisk {
 			System.out.println(E.getMessage());
 			E.printStackTrace();
 			return (false);
+		}
+	}
+	
+	/**
+	 * Return if the disk is out of sync with the one on disk.
+	 */
+	@Override
+	public boolean DiskOutOfDate() {
+		if (inFile!=null) {
+			return(LastModified < file.lastModified()); 
+		}
+		return false;
+	}
+
+	/**
+	 * Update the last modified flag.
+	 */
+	@Override
+	public void UpdateLastModified() {
+		if (inFile!=null) {
+			LastModified = file.lastModified(); 
 		}
 	}
 

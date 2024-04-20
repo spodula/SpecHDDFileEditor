@@ -159,6 +159,7 @@ public class RS_IDEDosDisk extends RS_IDEFile {
 			byte[] doubledData = DoubleSector(result);
 			super.SetLogicalBlockFromSector(SectorNum * 2, doubledData);
 		}
+		UpdateLastModified();
 	}
 
 	/**
