@@ -213,7 +213,6 @@ public class RamDump implements Renderer {
 			byte scr[] = new byte[6912];
 			System.arraycopy(rawdata, 0, scr, 0, Math.min(6912, rawdata.length));
 			GeneralUtils.WriteBlockToDisk(scr, RootFile.getAbsoluteFile() + ".scr");
-
 			
 			// Each ram bank.
 			int ptr = 0;
@@ -263,12 +262,6 @@ public class RamDump implements Renderer {
 			ImageLoader saver = new ImageLoader();
 			saver.data = new ImageData[] { image };
 			saver.save(RootFile.getAbsoluteFile() + ".image", SWT.IMAGE_PNG);
-
-			// save any basic
-			int EndOfAnyBasic = 0x1b00;
-			if (IYReg == 0x5c3a) {
-				EndOfAnyBasic = SaveBasicFile(RootFile);
-			}
 		}
 	}
 
