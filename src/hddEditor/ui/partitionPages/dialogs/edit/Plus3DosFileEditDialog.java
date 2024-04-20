@@ -61,13 +61,13 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 		lbl.setText(String.format("CPM Length: %d bytes (%X)", data.length, data.length));
 		lbl.setFont(boldFont);
 		lbl = new Label(shell, SWT.NONE);
-		GridData gd = new GridData(SWT.FILL, SWT.TOP , true, false);
+		GridData gd = new GridData(SWT.FILL, SWT.TOP, true, false);
 		gd.horizontalSpan = 2;
 		lbl.setLayoutData(gd);
-		
+
 		String logblocks = "";
 		int BlockCount = 0;
-		for (Dirent dirent : ((DirectoryEntry)ThisEntry).dirents) {
+		for (Dirent dirent : ((DirectoryEntry) ThisEntry).dirents) {
 			for (int blockNum : dirent.getBlocks()) {
 				logblocks = logblocks + ", " + blockNum;
 				BlockCount++;
@@ -79,7 +79,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 		lbl.setText("Logical blocks: " + BlockCount + " (" + logblocks + ")");
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 2;
-		lbl.setLayoutData(gd); 
+		lbl.setLayoutData(gd);
 
 		Plus3DosFileHeader p3d = new Plus3DosFileHeader(data);
 		lbl = new Label(shell, SWT.NONE);
@@ -90,7 +90,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 			Plus3Size = p3d.fileSize + 0x80;
 		} else {
 			lbl.setText("Not a +3DOS file (Or header corrupt)");
-			Plus3Size = data.length;   
+			Plus3Size = data.length;
 		}
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 4;
@@ -104,27 +104,26 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 		gd.horizontalSpan = 4;
 		MainPage1.setLayoutData(gd);
 
-		
 		MainPage = new Composite(MainPage1, SWT.NONE);
 		MainPage1.setContent(MainPage);
-		
+
 		gridLayout = new GridLayout();
 		gridLayout.numColumns = 4;
 		gridLayout.makeColumnsEqualWidth = true;
 		MainPage.setLayout(gridLayout);
-		
+
 		MainPage1.addControlListener(new ControlListener() {
-			
+
 			@Override
 			public void controlResized(ControlEvent arg0) {
 				MainPage1.setMinSize(MainPage.computeSize(MainPage1.getClientArea().width, SWT.DEFAULT));
 			}
-			
+
 			@Override
 			public void controlMoved(ControlEvent arg0) {
 			}
 		});
-				
+
 		RenderAppropriatePage();
 	}
 
@@ -132,7 +131,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 	 * Render the correct page for the file.
 	 */
 	private void RenderAppropriatePage() {
-		Plus3DosFileHeader p3d = ((DirectoryEntry)ThisEntry).GetPlus3DosHeader();
+		Plus3DosFileHeader p3d = ((DirectoryEntry) ThisEntry).GetPlus3DosHeader();
 
 		byte header[] = null;
 		byte newdata[] = data;
@@ -163,8 +162,8 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 			CR.RenderCode(MainPage, newdata, null, ThisEntry.GetFilename(), newdata.length, 0x0000);
 		} else if (p3d.filetype == Speccy.BASIC_BASIC) {
 			BasicRenderer BR = new BasicRenderer();
-			BR.RenderBasic(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.filelength, 
-					p3d.VariablesOffset, p3d.line);
+			BR.RenderBasic(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.filelength, p3d.VariablesOffset,
+					p3d.line);
 		} else if (p3d.filetype == Speccy.BASIC_CODE) {
 			CodeRenderer CR = new CodeRenderer();
 			CR.RenderCode(MainPage, newdata, header, ThisEntry.GetFilename(), newdata.length, p3d.loadAddr);

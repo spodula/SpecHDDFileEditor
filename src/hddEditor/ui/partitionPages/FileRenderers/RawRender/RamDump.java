@@ -209,6 +209,12 @@ public class RamDump implements Renderer {
 			System.arraycopy(rawdata, 0, ram, 0, Math.min(49152, rawdata.length));
 			GeneralUtils.WriteBlockToDisk(ram, RootFile.getAbsoluteFile() + ".ramdump");
 
+			//save the raw scr file.
+			byte scr[] = new byte[6912];
+			System.arraycopy(rawdata, 0, scr, 0, Math.min(6912, rawdata.length));
+			GeneralUtils.WriteBlockToDisk(scr, RootFile.getAbsoluteFile() + ".scr");
+
+			
 			// Each ram bank.
 			int ptr = 0;
 			for (int page : i128BankOrder) {
@@ -246,7 +252,13 @@ public class RamDump implements Renderer {
 			// save the snapshot
 			GeneralUtils.WriteBlockToDisk(ram, RootFile.getAbsoluteFile() + ".ramdump");
 
-			// save the screen
+			//save the raw scr file.
+			byte scr[] = new byte[6912];
+			System.arraycopy(rawdata, 0, scr, 0, Math.min(6912, rawdata.length));
+			GeneralUtils.WriteBlockToDisk(scr, RootFile.getAbsoluteFile() + ".scr");
+			
+			
+			// save the screen as a PNG
 			ImageData image = Speccy.GetImageFromFileArray(ram, 0);
 			ImageLoader saver = new ImageLoader();
 			saver.data = new ImageData[] { image };
@@ -257,99 +269,6 @@ public class RamDump implements Renderer {
 			if (IYReg == 0x5c3a) {
 				EndOfAnyBasic = SaveBasicFile(RootFile);
 			}
-			// save any code.
-
-			/*
-			 * Make a file map. This groups together bytes until a gap of 400 zeroes, after
-			 * which we consider it a new file. So we end up with an array with the file
-			 * number.
-			 */
-			int files[] = new int[49152];
-			for (int i = 0; i < files.length; i++) {
-				files[i] = 0;
-			}
-
-			int filenum = 0;
-			boolean InFileRun = false;
-			int ZeroRunCount = 0;
-			int ZeroRunStart = 0;
-			for (int i = EndOfAnyBasic; i < files.length; i++) {
-				byte byt = ram[i];
-				if (!InFileRun) {
-					if (byt != 0) {
-						InFileRun = true;
-						filenum++;
-						files[i] = filenum;
-						ZeroRunCount = 0;
-						ZeroRunStart = 0;
-					}
-				} else {
-					if (byt != 0) {
-						files[i] = filenum;
-						ZeroRunCount = 0;
-					} else {
-						files[i] = filenum;
-						ZeroRunCount++;
-						if (ZeroRunCount > 400) {
-							InFileRun = false;
-							for (int x = ZeroRunStart; x < i; x++) {
-								files[i] = 0;
-							}
-						}
-					}
-				}
-			}
-
-			for (int i = 0; i < files.length; i++) {
-				if ((i % 64) == 0) {
-					System.out.print("\n" + String.format("%04X", i) + ": ");
-				}
-				System.out.print(files[i]);
-			}
-			System.out.println();
-
-			// Now output each file.
-			StringBuffer sb = new StringBuffer();
-			int StartOfRun = 0;
-			int CurrentFile = 0;
-			for (int Ptr = 0; Ptr < files.length; Ptr++) {
-				int fNum = files[Ptr];
-				if (CurrentFile != fNum) {
-					if (CurrentFile != 0) {
-						String newfilename = RootFile.getAbsoluteFile() + "." + Integer.toHexString(StartOfRun + 16384)
-								+ "-" + Integer.toHexString(Ptr + 16384) + ".code";
-						sb.append("File: " + newfilename + System.lineSeparator());
-						sb.append("  Start: " + (StartOfRun + 16384) + System.lineSeparator());
-						sb.append("  End: " + (Ptr + 16384) + System.lineSeparator());
-						sb.append("  Length: " + (Ptr - StartOfRun) + System.lineSeparator());
-
-						byte block[] = new byte[Ptr - StartOfRun];
-						System.arraycopy(ram, StartOfRun, block, 0, block.length);
-						GeneralUtils.WriteBlockToDisk(block, newfilename);
-					}
-					CurrentFile = fNum;
-					StartOfRun = Ptr;
-				}
-			}
-			// output the last file.
-			if (CurrentFile != 0) {
-				int Ptr = 0xC000;
-				String newfilename = RootFile.getAbsoluteFile() + "." + Integer.toHexString(StartOfRun + 16384) + "-"
-						+ Integer.toHexString(Ptr + 16384) + ".code";
-				sb.append("File: " + newfilename + System.lineSeparator());
-				sb.append("  Start: " + (StartOfRun + 16384) + System.lineSeparator());
-				sb.append("  End: " + (Ptr + 16384) + System.lineSeparator());
-				sb.append("  Length: " + (Ptr - StartOfRun) + System.lineSeparator());
-
-				byte block[] = new byte[Ptr - StartOfRun];
-				System.arraycopy(ram, StartOfRun, block, 0, block.length);
-				GeneralUtils.WriteBlockToDisk(block, newfilename);
-			}
-
-			if (sb.length() == 0) {
-				sb.append("No codeblocks found.");
-			}
-			GeneralUtils.WriteBlockToDisk(sb.toString().getBytes(), RootFile.getAbsoluteFile() + ".Codeblocks");
 		}
 	}
 
