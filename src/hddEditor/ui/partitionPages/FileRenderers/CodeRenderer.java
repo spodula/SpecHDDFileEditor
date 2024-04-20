@@ -291,7 +291,7 @@ public class CodeRenderer extends FileRenderer {
 			} else if (s.equals(CODETYPES[8])) {
 				SpriteRenderer renderer = new SpriteRenderer();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, filename);
+				renderer.Render(MainPage, data, 400, loadAddr);
 			} else {
 				BinaryRenderer renderer = new BinaryRenderer();
 				Renderers.add(renderer);
