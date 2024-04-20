@@ -1,5 +1,4 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
-//TODO: detect source file change
 
 /**
  * FIle edit dialog for the +3DOS partition page
