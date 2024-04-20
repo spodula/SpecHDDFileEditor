@@ -383,7 +383,6 @@ public class FileExportAllPartitionsForm {
 						&& ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_UNKNOWN
 						&& ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_BAD)) {
 
-					long start = System.currentTimeMillis();
 					pep.SetMax2(ThisDisk.GetFileList().length);
 					int filenum = 0;
 					for (FileEntry file : ThisDisk.GetFileList()) {
@@ -558,9 +557,6 @@ public class FileExportAllPartitionsForm {
 						}
 
 					}
-
-					long finish = System.currentTimeMillis();
-					System.out.println(String.valueOf(finish - start) + "ms");
 				}
 			} finally {
 				pep.close();
