@@ -1,4 +1,7 @@
 package hddEditor.libs.disks.HDD;
+/**
+ * Generic type for hard disks.
+ */
 
 import java.io.IOException;
 

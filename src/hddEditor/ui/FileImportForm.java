@@ -1,5 +1,4 @@
 package hddEditor.ui;
-//TODO: viewer for sprites
 
 import java.io.File;
 import java.io.IOException;
