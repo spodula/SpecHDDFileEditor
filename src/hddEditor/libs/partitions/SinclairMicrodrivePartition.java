@@ -32,6 +32,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	public SinclairMicrodrivePartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum,
 			boolean Initialise) throws IOException {
 		super(DirentLocation, RawDisk, RawPartition, DirentNum, false);
+		CanExport = true;
 	}
 
 	/**

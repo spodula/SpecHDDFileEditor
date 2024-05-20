@@ -48,6 +48,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 	public PLUS3DOSPartition(int tag, Disk disk, byte[] RawPartition, int DirentNum, boolean Initialise)
 			throws IOException {
 		super(tag, disk, RawPartition, DirentNum, Initialise);
+		CanExport = true;
 	}
 
 	/**

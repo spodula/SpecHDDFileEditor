@@ -23,8 +23,10 @@ public class MGTDosPartition extends IDEDosPartition {
 	private int BAM_UNUSED = -1;
 	private int BAM_DIRECTORY = -2;
 
+
 	public MGTDosPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise) {
 		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise);
+		CanExport = true;
 		IsValid = false;
 		try {
 			PopulateParameters();

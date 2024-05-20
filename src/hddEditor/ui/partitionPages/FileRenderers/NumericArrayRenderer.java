@@ -1,5 +1,7 @@
 package hddEditor.ui.partitionPages.FileRenderers;
 
+import java.io.File;
+
 /**
  * Render a numeric array
  */
@@ -226,7 +228,7 @@ public class NumericArrayRenderer extends FileRenderer {
 		fd.setFilterExtensions(filterExt);
 		String selected = fd.open();
 		if (selected != null) {
-			Speccy.DoSaveNumericArrayAsText(data, selected, varname);
+			Speccy.DoSaveNumericArrayAsText(new File(selected), data, varname);
 		}
 	}
 

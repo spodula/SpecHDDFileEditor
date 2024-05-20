@@ -67,6 +67,7 @@ public class CPMPartition extends IDEDosPartition {
 	 */
 	public CPMPartition(int tag, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise) {
 		super(tag, RawDisk, RawPartition, DirentNum, Initialise);
+		CanExport = true;
 	}
 
 	/**

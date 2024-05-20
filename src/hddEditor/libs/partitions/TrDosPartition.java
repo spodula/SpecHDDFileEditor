@@ -51,6 +51,7 @@ public class TrDosPartition extends IDEDosPartition {
 	public TrDosPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise) {
 		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise);
 		IsValid = false;
+		CanExport = true;
 		try {
 			PopulateParameters();
 			LoadDirectoryEntries();

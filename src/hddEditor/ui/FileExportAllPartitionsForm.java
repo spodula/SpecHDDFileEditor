@@ -610,7 +610,7 @@ public class FileExportAllPartitionsForm {
 					&& ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_UNKNOWN
 					&& ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_BAD) {
 				try {
-					long start = System.currentTimeMillis();
+//					long start = System.currentTimeMillis();
 					ThisDisk.ExtractPartitiontoFolderAdvanced(directory, BasicType, CodeType, ArrayType, ScreenType,
 							UnknownType, SwapType, new ProgressCallback() {
 								int lastmax = 0;
@@ -627,8 +627,8 @@ public class FileExportAllPartitionsForm {
 								}
 							}, IncludeDeleted.getSelection());
 
-					long finish = System.currentTimeMillis();
-					System.out.println(String.valueOf(finish - start) + "ms");
+//					long finish = System.currentTimeMillis();
+//					System.out.println(String.valueOf(finish - start) + "ms");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -673,22 +673,21 @@ public class FileExportAllPartitionsForm {
 				pep.setMessage1("Exporting partition " + partition.GetName() + " ("
 						+ PLUSIDEDOS.GetTypeAsString(partition.GetPartType()) + ")");
 				pep.SetValue1(PartNum++);
-				if (partition.GetPartType() != PLUSIDEDOS.PARTITION_FREE
-						&& partition.GetPartType() != PLUSIDEDOS.PARTITION_UNUSED
-						&& partition.GetPartType() != PLUSIDEDOS.PARTITION_UNKNOWN
-						&& partition.GetPartType() != PLUSIDEDOS.PARTITION_BAD) {
+				if (!partition.CanExport) {
+					System.out.print("Skipping partition " + partition.GetName());
+				} else {
 
 					String strDirName = partition.GetName().replace("+", "Plus");
 					strDirName = strDirName.replace("/", "").replace("*", "");
 
 					File BaseFolder = new File(directory, strDirName);
-					System.out.print("Extracting partition" + BaseFolder + " - ");
+					System.out.print("Extracting partition " + BaseFolder + " - ");
 
 					if (!BaseFolder.exists()) {
 						BaseFolder.mkdir();
 					}
 					try {
-						long start = System.currentTimeMillis();
+//						long start = System.currentTimeMillis();
 						partition.ExtractPartitiontoFolderAdvanced(BaseFolder, BasicType, CodeType, ArrayType,
 								ScreenType, UnknownType, SwapType, new ProgressCallback() {
 									int lastmax = 0;
@@ -705,8 +704,8 @@ public class FileExportAllPartitionsForm {
 									}
 								}, IncludeDeleted.getSelection());
 
-						long finish = System.currentTimeMillis();
-						System.out.println(String.valueOf(finish - start) + "ms");
+//						long finish = System.currentTimeMillis();
+//						System.out.println(String.valueOf(finish - start) + "ms");
 					} catch (IOException e) {
 						e.printStackTrace();
 					}

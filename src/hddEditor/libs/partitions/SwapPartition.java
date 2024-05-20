@@ -39,6 +39,7 @@ public class SwapPartition extends IDEDosPartition {
 	 */
 	public SwapPartition(int tag, Disk disk, byte[] RawPartition, int DirentNum, boolean Initialise) {
 		super(tag, disk, RawPartition, DirentNum, Initialise);
+		CanExport = true;
 	}
 
 	/**

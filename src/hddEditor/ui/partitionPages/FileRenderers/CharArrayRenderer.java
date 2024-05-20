@@ -1,4 +1,6 @@
 package hddEditor.ui.partitionPages.FileRenderers;
+import java.io.File;
+
 //Fixed bug with rendering.
 /**
  * Render a character array
@@ -219,7 +221,7 @@ public class CharArrayRenderer extends FileRenderer {
 		fd.setFilterExtensions(filterExt);
 		String selected = fd.open();
 		if (selected != null) {
-			Speccy.DoSaveCharArrayAsText(data, selected, varname);
+			Speccy.DoSaveCharArrayAsText(new File(selected), data, varname);
 		}
 	}
 }

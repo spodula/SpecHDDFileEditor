@@ -43,6 +43,8 @@ public class NonCPMDiskImagePartition extends IDEDosPartition {
 	 */
 	public NonCPMDiskImagePartition(int tag, Disk disk, byte[] RawPartition,int DirentNum, boolean Initialise) {
 		super(tag, disk, RawPartition,DirentNum, Initialise);
+		CanExport = false;
+
 	}
 	
 	/**

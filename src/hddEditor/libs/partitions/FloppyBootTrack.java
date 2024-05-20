@@ -1,4 +1,5 @@
 package hddEditor.libs.partitions;
+//TODO: implement export for floppy boot track
 
 import java.io.IOException;
 
@@ -39,6 +40,7 @@ public class FloppyBootTrack extends IDEDosPartition {
 		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise);
 		SetName("Floppy disk boot track.");
 		GetXDPBDetails();
+		CanExport = false;
 	}	
 	
 	public void GetXDPBDetails() {

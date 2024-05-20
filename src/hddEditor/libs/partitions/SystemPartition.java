@@ -204,6 +204,7 @@ public class SystemPartition extends IDEDosPartition {
 	 */
 	public SystemPartition(int DirentLocation, Disk disk, byte[] RawPartition, int DirentNum, boolean Initialise) {
 		super(DirentLocation, disk, RawPartition, DirentNum, Initialise);
+		CanExport = true;
 	}
 
 	/**

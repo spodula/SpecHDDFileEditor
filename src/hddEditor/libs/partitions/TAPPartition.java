@@ -31,6 +31,7 @@ public class TAPPartition extends IDEDosPartition {
 	 */
 	public TAPPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise) {
 		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise);
+		CanExport = true;
 	}
 
 	/**

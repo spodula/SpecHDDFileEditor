@@ -42,6 +42,8 @@ public class IDEDosPartition {
 
 	public byte RawPartition[] = null;
 
+	public boolean CanExport = false;
+	
 	/**
 	 * Update and set the Partition name
 	 * 
@@ -292,6 +294,7 @@ public class IDEDosPartition {
 	 * @param RawPartition
 	 */
 	public IDEDosPartition(int DirentLocation, Disk RawDisk, byte RawPartition[], int DirentNum, boolean Initialise) {
+		CanExport = false;
 		CurrentDisk = RawDisk;
 		this.DirentLocation = DirentLocation;
 		this.DirentNum = DirentNum;

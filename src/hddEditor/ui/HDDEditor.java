@@ -1,4 +1,5 @@
 package hddEditor.ui;
+//TODO: add sort by filename, filesize, type
 
 /**
  * Main UI.

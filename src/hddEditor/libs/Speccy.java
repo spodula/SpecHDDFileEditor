@@ -25,10 +25,10 @@ import org.eclipse.swt.graphics.PaletteData;
 import hddEditor.libs.ASMLib.DecodedASM;
 
 public class Speccy {
-	//TAPE block types
+	// TAPE block types
 	public static int TAPE_HEADER = 0x00;
 	public static int TAPE_DATA = 0xff;
-	
+
 	// Spectrum colours
 	public static int COLOUR_BLACK = 0;
 	public static int COLOUR_BLUE = 1;
@@ -149,7 +149,7 @@ public class Speccy {
 			// 60
 			"&", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o",
 			// 70
-			"p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "{", "|", "}", "~", ""+ (char) 0x24B8, // (C)
+			"p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "{", "|", "}", "~", "" + (char) 0x24B8, // (C)
 			// 80
 			// block characters:
 			// BA
@@ -1422,12 +1422,12 @@ public class Speccy {
 	 * @param varname  - Variable name
 	 * @throws IOException
 	 */
-	public static void DoSaveNumericArrayAsText(byte[] data, String filename, String varname) {
+	public static void DoSaveNumericArrayAsText(File targetFilename, byte[] data, String varname) {
 		try {
 			FileOutputStream file;
-			file = new FileOutputStream(filename);
+			file = new FileOutputStream(targetFilename);
 			try {
-				file.write(("File: " + filename + System.lineSeparator()).getBytes());
+				file.write(("File: " + targetFilename.getName() + System.lineSeparator()).getBytes());
 				int location = 0x80; // skip header
 
 				// Number of dimensions
@@ -1499,7 +1499,7 @@ public class Speccy {
 				file.close();
 			}
 		} catch (Exception e) {
-			System.out.println("Error exporting: " + filename + " " + e.getMessage());
+			System.out.println("Error exporting: " + targetFilename.getName() + " " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -1512,12 +1512,12 @@ public class Speccy {
 	 * @param p3d
 	 * @throws IOException
 	 */
-	public static void DoSaveCharArrayAsText(byte[] data, String filename, String varname) {
+	public static void DoSaveCharArrayAsText(File targetFilename, byte[] data, String varname) {
 		FileOutputStream file;
 		try {
-			file = new FileOutputStream(filename);
+			file = new FileOutputStream(targetFilename);
 			try {
-				file.write(("File: " + filename + System.lineSeparator()).getBytes());
+				file.write(("File: " + targetFilename.getName() + System.lineSeparator()).getBytes());
 				int location = 0x80; // skip header
 
 				// Number of dimensions
@@ -1581,7 +1581,7 @@ public class Speccy {
 				file.close();
 			}
 		} catch (Exception e) {
-			System.out.println("Error exporting: " + filename + " " + e.getMessage());
+			System.out.println("Error exporting: " + targetFilename.getName() + " " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -1637,15 +1637,16 @@ public class Speccy {
 	public static void SaveFileToDisk(File targetFilename, byte[] data, int filelength, int speccyFileType,
 			int basicLine, int basicVarsOffset, int codeLoadAddress, String arrayVarName, boolean codeAsHex)
 			throws IOException {
+
 		switch (speccyFileType) {
 		case BASIC_BASIC:
 			SaveBasicFile(targetFilename, data, basicLine, basicVarsOffset, filelength);
 			break;
 		case BASIC_NUMARRAY:
-			DoSaveNumericArrayAsText(data, targetFilename.getAbsolutePath(), arrayVarName);
+			DoSaveNumericArrayAsText(targetFilename, data, arrayVarName);
 			break;
 		case BASIC_CHRARRAY:
-			DoSaveCharArrayAsText(data, targetFilename.getAbsolutePath(), arrayVarName);
+			DoSaveCharArrayAsText(targetFilename, data, arrayVarName);
 			break;
 		case BASIC_CODE:
 			SaveCodeFile(targetFilename, data, codeLoadAddress, filelength, codeAsHex);
@@ -1761,16 +1762,24 @@ public class Speccy {
 		/*
 		 * output the variables in a seperate file.
 		 */
-		if (basicVarsOffset < filelength) {
-			byte variables[] = new byte[filelength - basicVarsOffset];
+		if (basicVarsOffset <= filelength) {
+			int varlen = filelength - basicVarsOffset;
+			byte variables[] = new byte[varlen];
 			try {
-				System.arraycopy(data, basicVarsOffset, variables, 0, variables.length);
-				StringBuilder sb = new StringBuilder();
-				DecodeVariablesFromLoadedFile(variables, sb, 0, variables.length);
+				if (data.length - basicVarsOffset < varlen) {
+					System.out.println("---------------------------------------------------------");
+					System.out.println("Error extracting variables for BASIC file " + targetFilename.getName());
+					System.out.println("Error: program Data does not contain enough space for variables. Ignoring");
+				} else {
 
-				// Now for the variables area.
-				if (!sb.toString().startsWith("End of variables")) {
-					GeneralUtils.WriteBlockToDisk(sb.toString().getBytes(), targetFilename + ".variables");
+					System.arraycopy(data, basicVarsOffset, variables, 0, varlen);
+					StringBuilder sb = new StringBuilder();
+					DecodeVariablesFromLoadedFile(variables, sb, 0, varlen);
+
+					// Now for the variables area.
+					if (!sb.toString().startsWith("End of variables")) {
+						GeneralUtils.WriteBlockToDisk(sb.toString().getBytes(), targetFilename + ".variables");
+					}
 				}
 			} catch (Exception E) {
 				System.out.println("---------------------------------------------------------");
@@ -1822,9 +1831,9 @@ public class Speccy {
 			break;
 		case GeneralUtils.EXPORT_TYPE_CSV:
 			if (speccyFileType == BASIC_NUMARRAY) {
-				DoSaveNumericArrayAsText(entrydata, targetFilename.getAbsolutePath(), arrayVarName);
+				DoSaveNumericArrayAsText(targetFilename, entrydata, arrayVarName);
 			} else {
-				DoSaveCharArrayAsText(entrydata, targetFilename.getAbsolutePath(), arrayVarName);
+				DoSaveCharArrayAsText(targetFilename, entrydata, arrayVarName);
 			}
 			break;
 		case GeneralUtils.EXPORT_TYPE_PNG:
