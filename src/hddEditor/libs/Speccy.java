@@ -1762,7 +1762,7 @@ public class Speccy {
 		/*
 		 * output the variables in a seperate file.
 		 */
-		if (basicVarsOffset <= filelength) {
+		if (basicVarsOffset < filelength) {
 			int varlen = filelength - basicVarsOffset;
 			byte variables[] = new byte[varlen];
 			try {
