@@ -1,6 +1,12 @@
 package hddEditor.libs.partitions;
+/**
+ * Implementation of a partition representing the boot track
+ * for a CPM or CPM-like disk. Particularly the Amstrad variant.
+ */
+
 //TODO: implement export for floppy boot track
 
+import java.io.File;
 import java.io.IOException;
 
 import hddEditor.libs.disks.Disk;
@@ -169,5 +175,11 @@ public class FloppyBootTrack extends IDEDosPartition {
 		return null;
 	}
 
+	@Override
+	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted)
+			throws IOException {
+	}
+	
 	
 }
