@@ -1,4 +1,7 @@
 package hddEditor.ui;
+/**
+ * Import files from another supported file type to the current partition.
+ */
 
 import java.io.File;
 import java.io.IOException;
@@ -35,18 +38,32 @@ public class FileImportForm {
 	private Display display = null;
 	private Shell shell = null;
 
+	//Source file to import
 	private Label Sourcefile = null;
-
-	private Combo SourcePartition = null;
+	
+	//Button to set this
 	private Button SelectSourceFileBtn = null;
+
+	//Source partition within the file.
+	private Combo SourcePartition = null;
+	
+	//Close and import buttons
 	private Button CloseBtn = null;
 	private Button ImportBtn = null;
+	
+	//table of files to import
 	private Table SourceList = null;
 
+	//Source disk
 	private Disk CurrentSourceDisk = null;
+	
+	//Source Handler
 	private OSHandler CurrentSourceHandler = null;
+	
+	//Target handler
 	private OSHandler CurrentTargetHandler;
 
+	//Target partition
 	private Combo TargetPartition = null;
 
 	/**
@@ -139,6 +156,60 @@ public class FileImportForm {
 				DoPopulateFileList();
 			}
 		});
+		
+		Button btn = new Button(shell, SWT.BORDER);
+		btn.setText("Select all");
+		btn.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				if (SourceList!=null) {
+					for (TableItem itm: SourceList.getItems()) {
+						itm.setChecked(true);
+					}
+				}
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				widgetSelected(arg0);
+			}
+		});
+		
+		btn = new Button(shell, SWT.BORDER);
+		btn.setText("Select None");
+		btn.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				if (SourceList!=null) {
+					for (TableItem itm: SourceList.getItems()) {
+						itm.setChecked(false);
+					}
+				}
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				widgetSelected(arg0);
+			}
+		});
+		
+		btn = new Button(shell, SWT.BORDER);
+		btn.setText("Invert selection");
+		btn.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				if (SourceList!=null) {
+					for (TableItem itm: SourceList.getItems()) {
+						itm.setChecked(!itm.getChecked());
+					}
+				}
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				widgetSelected(arg0);
+			}
+		});
+		
+		lbl = new Label(shell, SWT.NONE);
+		
 
 		SourceList = new Table(shell, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.SINGLE);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
