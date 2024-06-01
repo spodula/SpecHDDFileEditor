@@ -402,7 +402,7 @@ public class CPMPartition extends IDEDosPartition {
 		}
 		RecalculateDirectoryListing();
 		int validdirents = 0;
-		int invalidDirents = 0;
+//		int invalidDirents = 0;
 		for (DirectoryEntry d : DirectoryEntries) {
 			boolean valid = d.IsComplete();
 			if (d.dirents[0].GetUserNumber() > 16 && d.dirents[0].GetUserNumber() != 0xe5) {
@@ -420,10 +420,10 @@ public class CPMPartition extends IDEDosPartition {
 			if (valid) {
 				validdirents++;
 			} else {
-				invalidDirents++;
+	//			invalidDirents++;
 			}
 		}
-		IsValid = ((validdirents > 1) && (invalidDirents < validdirents)) || ((invalidDirents == 0));
+		IsValid = ((validdirents > 1)); // && (invalidDirents < validdirents)) || ((invalidDirents == 0));
 	}
 
 	/**
@@ -747,10 +747,10 @@ public class CPMPartition extends IDEDosPartition {
 	 */
 	@Override
 	public String UniqueifyFileNameIfRequired(String filename) {
-		//Initial correction for CPM entries
+		// Initial correction for CPM entries
 		filename = CPM.FixFullName(filename);
-		
-		//Split prefix and suffix
+
+		// Split prefix and suffix
 		String prefix = CPM.FixFullName(filename);
 		if (prefix.indexOf(".") > -1) {
 			prefix = prefix.substring(0, prefix.indexOf("."));

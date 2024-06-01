@@ -3,12 +3,16 @@ package hddEditor.libs.partitions;
  * Implementation of a partition representing the boot track
  * for a CPM or CPM-like disk. Particularly the Amstrad variant.
  */
-
-//TODO: implement export for floppy boot track
+//TODO: Need to better handle copy-protected +3 DISKS. 
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
+import hddEditor.libs.ASMLib;
+import hddEditor.libs.Speccy;
+import hddEditor.libs.ASMLib.DecodedASM;
+import hddEditor.libs.CPM;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.FDD.FloppyDisk;
@@ -16,6 +20,7 @@ import hddEditor.libs.disks.FDD.Sector;
 import hddEditor.libs.disks.FDD.TrackInfo;
 
 public class FloppyBootTrack extends IDEDosPartition {
+
 	public int disktype = 0; // 0=SS SD 3= DSDD
 	public int numsectors = 0; // Sectors per track (9)
 	public int sectorPow = 0; // Sector size represented by its (power of 2)+7, (usually 2 meaning 512 bytes)
@@ -46,7 +51,7 @@ public class FloppyBootTrack extends IDEDosPartition {
 		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise);
 		SetName("Floppy disk boot track.");
 		GetXDPBDetails();
-		CanExport = false;
+		CanExport = true;
 	}	
 	
 	public void GetXDPBDetails() {
@@ -175,10 +180,163 @@ public class FloppyBootTrack extends IDEDosPartition {
 		return null;
 	}
 
+	private void wl(FileWriter f, String s) throws IOException {
+		f.write(s);
+		f.write(System.lineSeparator());
+	}
+
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
 			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted)
 			throws IOException {
+		
+		try {
+			FileWriter SysConfig = new FileWriter(new File(folder, "boot.info"));
+			if (progress != null) {
+				progress.Callback(1, 0, "Floppy boot track...");
+			}
+			byte data[] = GetAllDataInPartition();
+			FloppyDisk Disk = (FloppyDisk) CurrentDisk;
+			try {
+
+				String ChecksumStatus = "Not bootable";
+				int cs = (checksum + fiddleByte) & 0xff;
+				if (cs == 3) {
+					ChecksumStatus = "Bootable +3 disk";
+				} else if (cs == 1) {
+					ChecksumStatus = "Bootable PCW9512 disk";
+				} else if (cs == 255) {
+					ChecksumStatus = "Bootable PCW8256 disk";
+				}
+				
+				wl(SysConfig,"Format: " + diskformat + " (" + disktype + ")");
+				wl(SysConfig,"Sectors: " + numsectors);
+				wl(SysConfig,"Sector size: " + sectorSize + " (" + sectorPow + ")");
+				wl(SysConfig,"Reserved Tracks: " + reservedTracks);
+				
+				wl(SysConfig,"Block size: " + blockSize + " (" + blockPow + ")");
+				wl(SysConfig,"Directory blocks: " + dirBlocks);
+				wl(SysConfig,"R/W Gap: " + rwGapLength);
+				wl(SysConfig,"Format Gap: " + fmtGapLength);
+				
+				wl(SysConfig,"Checksum+fb: " + cs);
+				wl(SysConfig,"Bootable?: " + ChecksumStatus);
+				wl(SysConfig,"Max CPM Blocks: " + maxblocks);
+				wl(SysConfig,"Reserved blocks: " + reservedblocks);
+				
+				wl(SysConfig,"Max Dirents: " + maxDirEnts);
+				wl(SysConfig,"Bytes per block ID: " + BlockIDWidth);
+				wl(SysConfig,"Disk size: " + diskSize + "k");
+				wl(SysConfig,"Sector range: " + Disk.diskTracks[0].minsectorID + "-" + Disk.diskTracks[0].maxsectorID);
+				
+				wl(SysConfig,"Identification type: "+Identifiedby);
+				
+				wl(SysConfig,"\n\nBoot sector code:");
+				
+				ASMLib asm = new ASMLib();
+				int loadedaddress = 0xfe00;
+				int realaddress = 0x0000;
+				int asmData[] = new int[5];
+				try {
+					while (realaddress < data.length) {
+						String chrdata = "";
+						for (int i = 0; i < 5; i++) {
+							int d = 0;
+							if (realaddress + i < data.length) {
+								d = (int) data[realaddress + i] & 0xff;
+							}
+							asmData[i] = d;
+
+							if ((d > 0x1F) && (d < 0x7f)) {
+								chrdata = chrdata + (char) d;
+							} else {
+								chrdata = chrdata + "?";
+							}
+						}
+						
+						int decLen=0;
+						String decStr="";
+						if (loadedaddress < 0xfe10) {
+							if (loadedaddress < 0xfe0a) {
+								decLen = 1;
+								String dc[] = CPM.datadesc[loadedaddress-0xfe00].split(";");
+								
+								decStr = dc[0];
+								decStr = String.format(decStr, asmData[0] & 0xff);
+								chrdata = "; "+dc[1].trim();
+							} else if (loadedaddress < 0xfe0f) {
+								decLen = 5;
+								decStr = "defb ";
+								String s = "";
+								for(int i:asmData) {
+									s = s + ", "+String.valueOf(i);
+								}
+								decStr = decStr +s.substring(2);
+								chrdata = "; Reserved";
+							} else {
+								decLen = 1;
+								decStr = String.format("defb %d", asmData[0] & 0xff);
+								chrdata = "; Checksum";
+							}
+						} else {
+							// decode instruction
+							DecodedASM Instruction = asm.decode(asmData, loadedaddress);
+							decLen = Instruction.length;
+							decStr = Instruction.instruction;
+						}
+						// output it. - First, assemble a list of hex bytes, but pad out to 12 chars
+						// (4x3)
+						String hex = "";
+						for (int j = 0; j < decLen; j++) {
+							hex = hex + String.format("%02X", asmData[j]) + " ";
+						}
+						
+						String dta[] = new String[4];
+						dta[0] = String.format("%04X", loadedaddress);
+						dta[1] = hex;
+						dta[2] = decStr;
+						if (loadedaddress < 0xfe10) {
+							dta[3] = chrdata;
+						} else {
+							dta[3] = chrdata.substring(0, decLen);
+						}
+
+						char dt[] = new char[250];
+						for(int i=0;i<250;i++) {
+							dt[i]=' ';
+						}
+						System.arraycopy(dta[0].toCharArray(), 0, dt, 0, dta[0].length());
+						System.arraycopy(dta[1].toCharArray(), 0, dt, 6, dta[1].length());
+						System.arraycopy(dta[2].toCharArray(), 0, dt, 22, dta[2].length());
+						System.arraycopy(dta[3].toCharArray(), 0, dt, 42, Math.min(dta[3].length(),200));
+						
+						if (loadedaddress == 0xfe10) {
+							wl(SysConfig,"");
+						}
+						
+						wl(SysConfig,new String(dt).trim());
+
+						realaddress = realaddress + decLen;
+						loadedaddress = loadedaddress + decLen;
+
+					} // while
+				} catch (Exception E) {
+					System.out.println("Error at: " + realaddress + "(" + loadedaddress + ")");
+					System.out.println(E.getMessage());
+					E.printStackTrace();
+				}
+
+			} finally {
+				SysConfig.close();
+			}
+			
+			Speccy.SaveFileToDiskAdvanced(new File(folder,"boot.data"), data, data, BasicAction, CodeAction, ArrayAction, ScreenAction,
+					MiscAction, null, SwapAction);
+		} catch (IOException e) {
+			System.out.println("Error extracting bootsector: " + e.getMessage());
+			e.printStackTrace();
+		}
+
 	}
 	
 	

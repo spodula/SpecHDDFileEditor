@@ -102,284 +102,287 @@ public class PlusThreePartPage extends GenericPage {
 			l.setFont(font);
 			label("", 3);
 
-			label("Partition free space: " + GeneralUtils.GetSizeAsString(pdp.freeSpace * 1024), 1);
-			label("Drive Mapping: " + pdp.DriveLetter, 1);
-			label("Reserved Tracks: " + pdp.ReservedTracks, 1);
-			label("Disk size: " + GeneralUtils.GetSizeAsString(pdp.diskSize * 1024), 1);
+			if (!pdp.IsValid) {
+				label("Partition does not contain a valid CPM/+3 filesystem.", 4);
+			} else {
 
-			label("Blocksize: " + pdp.BlockSize, 1);
-			label("Max Block: " + pdp.MaxBlock, 1);
-			label("Used blocks: " + pdp.usedblocks, 1);
-			label("Free space: " + GeneralUtils.GetSizeAsString(pdp.freeSpace * 1024), 1);
+				label("Partition free space: " + GeneralUtils.GetSizeAsString(pdp.freeSpace * 1024), 1);
+				label("Drive Mapping: " + pdp.DriveLetter, 1);
+				label("Reserved Tracks: " + pdp.ReservedTracks, 1);
+				label("Disk size: " + GeneralUtils.GetSizeAsString(pdp.diskSize * 1024), 1);
 
-			label("Max dirent: " + pdp.MaxDirent, 1);
-			label("Used dirents: " + pdp.usedDirEnts, 1);
+				label("Blocksize: " + pdp.BlockSize, 1);
+				label("Max Block: " + pdp.MaxBlock, 1);
+				label("Used blocks: " + pdp.usedblocks, 1);
+				label("Free space: " + GeneralUtils.GetSizeAsString(pdp.freeSpace * 1024), 1);
 
-			label("", 2);
+				label("Max dirent: " + pdp.MaxDirent, 1);
+				label("Used dirents: " + pdp.usedDirEnts, 1);
 
-			label("", 4);
-			// directory listing
-			DirectoryListing = new Table(ParentComp, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
-			DirectoryListing.setLinesVisible(true);
+				label("", 2);
 
-			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-			gd.horizontalSpan = 4;
-			gd.heightHint = 400;
-			DirectoryListing.setLayoutData(gd);
+				label("", 4);
+				// directory listing
+				DirectoryListing = new Table(ParentComp, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
+				DirectoryListing.setLinesVisible(true);
 
-			TableColumn tc1 = new TableColumn(DirectoryListing, SWT.LEFT);
-			TableColumn tc2 = new TableColumn(DirectoryListing, SWT.LEFT);
-			TableColumn tc3 = new TableColumn(DirectoryListing, SWT.LEFT);
-			TableColumn tc4 = new TableColumn(DirectoryListing, SWT.LEFT);
-			TableColumn tc5 = new TableColumn(DirectoryListing, SWT.LEFT);
-			tc1.setText("Fileame");
-			tc2.setText("Type");
-			tc3.setText("CPM Length");
-			tc4.setText("+3 Length");
-			tc5.setText("Flags");
-			tc1.setWidth(150);
-			tc2.setWidth(150);
-			tc3.setWidth(150);
-			tc4.setWidth(150);
-			tc5.setWidth(100);
-			DirectoryListing.setHeaderVisible(true);
-			/***********************************************************************************/
+				GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+				gd.horizontalSpan = 4;
+				gd.heightHint = 400;
+				DirectoryListing.setLayoutData(gd);
 
-			// Create the drop target
-			DropTarget target = new DropTarget(DirectoryListing, DND.DROP_LINK | DND.DROP_COPY | DND.DROP_DEFAULT);
-			target.setTransfer(new Transfer[] { FileTransfer.getInstance() });
-			target.addDropListener(new DropTargetAdapter() {
-				public void dragEnter(DropTargetEvent event) {
-					if (event.detail == DND.DROP_DEFAULT) {
-						event.detail = (event.operations & DND.DROP_COPY) != 0 ? DND.DROP_COPY : DND.DROP_NONE;
-					}
+				TableColumn tc1 = new TableColumn(DirectoryListing, SWT.LEFT);
+				TableColumn tc2 = new TableColumn(DirectoryListing, SWT.LEFT);
+				TableColumn tc3 = new TableColumn(DirectoryListing, SWT.LEFT);
+				TableColumn tc4 = new TableColumn(DirectoryListing, SWT.LEFT);
+				TableColumn tc5 = new TableColumn(DirectoryListing, SWT.LEFT);
+				tc1.setText("Fileame");
+				tc2.setText("Type");
+				tc3.setText("CPM Length");
+				tc4.setText("+3 Length");
+				tc5.setText("Flags");
+				tc1.setWidth(150);
+				tc2.setWidth(150);
+				tc3.setWidth(150);
+				tc4.setWidth(150);
+				tc5.setWidth(100);
+				DirectoryListing.setHeaderVisible(true);
+				/***********************************************************************************/
 
-					// Allow dropping text only
-					for (int i = 0, n = event.dataTypes.length; i < n; i++) {
-						if (FileTransfer.getInstance().isSupportedType(event.dataTypes[i])) {
-							event.currentDataType = event.dataTypes[i];
+				// Create the drop target
+				DropTarget target = new DropTarget(DirectoryListing, DND.DROP_LINK | DND.DROP_COPY | DND.DROP_DEFAULT);
+				target.setTransfer(new Transfer[] { FileTransfer.getInstance() });
+				target.addDropListener(new DropTargetAdapter() {
+					public void dragEnter(DropTargetEvent event) {
+						if (event.detail == DND.DROP_DEFAULT) {
+							event.detail = (event.operations & DND.DROP_COPY) != 0 ? DND.DROP_COPY : DND.DROP_NONE;
+						}
+
+						// Allow dropping text only
+						for (int i = 0, n = event.dataTypes.length; i < n; i++) {
+							if (FileTransfer.getInstance().isSupportedType(event.dataTypes[i])) {
+								event.currentDataType = event.dataTypes[i];
+							}
 						}
 					}
-				}
 
-				public void dragOver(DropTargetEvent event) {
-					event.feedback = DND.FEEDBACK_SELECT | DND.FEEDBACK_SCROLL;
-				}
+					public void dragOver(DropTargetEvent event) {
+						event.feedback = DND.FEEDBACK_SELECT | DND.FEEDBACK_SCROLL;
+					}
 
-				public void drop(DropTargetEvent event) {
-					if (FileTransfer.getInstance().isSupportedType(event.currentDataType)) {
-						String[] filenames = null;
-						if (event.data instanceof String[]) {
-							filenames = (String[]) event.data;
-						} else if (event.data instanceof String) {
-							filenames = ((String) event.data).split("\n");
-						}
-						if (filenames != null) {
-							DoDropFile(filenames);
+					public void drop(DropTargetEvent event) {
+						if (FileTransfer.getInstance().isSupportedType(event.currentDataType)) {
+							String[] filenames = null;
+							if (event.data instanceof String[]) {
+								filenames = (String[]) event.data;
+							} else if (event.data instanceof String) {
+								filenames = ((String) event.data).split("\n");
+							}
+							if (filenames != null) {
+								DoDropFile(filenames);
+							}
 						}
 					}
-				}
-			});
-			
-			/***********************************************************************************/
-			DragSource source = new DragSource(DirectoryListing, DND.DROP_MOVE | DND.DROP_COPY );
-			source.setTransfer(new Transfer[] { FileTransfer.getInstance() });
-			source.addDragListener(new DragSourceListener() {
-				File tempfiles[];
+				});
 
-				public void dragStart(DragSourceEvent event) {
-					event.doit = DirectoryListing.getSelectionCount() != 0;
-					if (event.doit) {
-						TableItem ItemsToDrag[] = DirectoryListing.getSelection();
-						tempfiles = new File[ItemsToDrag.length];
-						int i = 0;
-						for (TableItem item : ItemsToDrag) {
-							try {
-								File f = File.createTempFile("YYYY", "xxx");
-								int exporttype = RootPage.dragindex;
-								
-								FileEntry entry = (FileEntry) item.getData();
-								System.out.println("Exporttype:" +exporttype);
-								if (exporttype==HDDEditor.DRAG_TYPE) {
-									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
-									int actiontype = GeneralUtils.EXPORT_TYPE_HEX;
-									switch (sd.BasicType) {
-									case (Speccy.BASIC_BASIC):
-										actiontype = GeneralUtils.EXPORT_TYPE_TXT;
-										break;
-									case (Speccy.BASIC_NUMARRAY):
-										actiontype = GeneralUtils.EXPORT_TYPE_CSV;
-										break;
-									case (Speccy.BASIC_CHRARRAY):
-										actiontype = GeneralUtils.EXPORT_TYPE_CSV;
-										break;
-									case (Speccy.BASIC_CODE):
-										System.out.println("CODE: "+entry.GetFileSize());
-										if (entry.GetFileSize() == 0x1b00) {
-											actiontype = GeneralUtils.EXPORT_TYPE_PNG;
-										} else {
+				/***********************************************************************************/
+				DragSource source = new DragSource(DirectoryListing, DND.DROP_MOVE | DND.DROP_COPY);
+				source.setTransfer(new Transfer[] { FileTransfer.getInstance() });
+				source.addDragListener(new DragSourceListener() {
+					File tempfiles[];
+
+					public void dragStart(DragSourceEvent event) {
+						event.doit = DirectoryListing.getSelectionCount() != 0;
+						if (event.doit) {
+							TableItem ItemsToDrag[] = DirectoryListing.getSelection();
+							tempfiles = new File[ItemsToDrag.length];
+							int i = 0;
+							for (TableItem item : ItemsToDrag) {
+								try {
+									File f = File.createTempFile("YYYY", "xxx");
+									int exporttype = RootPage.dragindex;
+
+									FileEntry entry = (FileEntry) item.getData();
+									System.out.println("Exporttype:" + exporttype);
+									if (exporttype == HDDEditor.DRAG_TYPE) {
+										SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
+										int actiontype = GeneralUtils.EXPORT_TYPE_HEX;
+										switch (sd.BasicType) {
+										case (Speccy.BASIC_BASIC):
+											actiontype = GeneralUtils.EXPORT_TYPE_TXT;
+											break;
+										case (Speccy.BASIC_NUMARRAY):
+											actiontype = GeneralUtils.EXPORT_TYPE_CSV;
+											break;
+										case (Speccy.BASIC_CHRARRAY):
+											actiontype = GeneralUtils.EXPORT_TYPE_CSV;
+											break;
+										case (Speccy.BASIC_CODE):
+											System.out.println("CODE: " + entry.GetFileSize());
+											if (entry.GetFileSize() == 0x1b00) {
+												actiontype = GeneralUtils.EXPORT_TYPE_PNG;
+											} else {
+												actiontype = GeneralUtils.EXPORT_TYPE_HEX;
+											}
+											break;
+										default:
 											actiontype = GeneralUtils.EXPORT_TYPE_HEX;
 										}
-										break;
-									default:
-										actiontype = GeneralUtils.EXPORT_TYPE_HEX;
+
+										Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(),
+												entry.GetFileData().length, sd.BasicType, sd.LineStart, sd.VarStart,
+												sd.LoadAddress, sd.VarName + "", actiontype);
+									} else if (exporttype == HDDEditor.DRAG_RAW) {
+										GeneralUtils.WriteBlockToDisk(entry.GetFileData(), f);
+									} else {
+										SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
+										Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(),
+												entry.GetFileData().length, sd.BasicType, sd.LineStart, sd.VarStart,
+												sd.LoadAddress, sd.VarName + "", GeneralUtils.EXPORT_TYPE_HEX);
 									}
-									
-									
-									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(), entry.GetFileData().length,
-											sd.BasicType, sd.LineStart, sd.VarStart, sd.LoadAddress, sd.VarName+"",
-											actiontype);								
-								} else if (exporttype==HDDEditor.DRAG_RAW) {
-									GeneralUtils.WriteBlockToDisk(entry.GetFileData(), f);									
-								} else {
-									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
-									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(), entry.GetFileData().length,
-											sd.BasicType, sd.LineStart, sd.VarStart, sd.LoadAddress, sd.VarName+"",
-											GeneralUtils.EXPORT_TYPE_HEX);								
+									File f1 = new File(f.getParent(), entry.GetFilename());
+									f.renameTo(f1);
+									f.delete();
+									f1.deleteOnExit();
+									tempfiles[i] = f1;
+									i++;
+								} catch (IOException e) {
+									e.printStackTrace();
 								}
-								File f1 = new File(f.getParent(), entry.GetFilename());
-								f.renameTo(f1);
-								f.delete();
-								f1.deleteOnExit();
-								tempfiles[i] = f1;
-								i++;
-							} catch (IOException e) {
-								e.printStackTrace();
 							}
 						}
 					}
-				}
 
-				public void dragSetData(DragSourceEvent event) {
-					// Provide the data of the requested type.
-					if (FileTransfer.getInstance().isSupportedType(event.dataType)) {
-						if (tempfiles != null && tempfiles.length > 0) {
-							String data[] = new String[tempfiles.length];
-							for (int i=0;i<tempfiles.length;i++) {
-								File fle = tempfiles[i];
-								data[i] = fle.getAbsolutePath();
+					public void dragSetData(DragSourceEvent event) {
+						// Provide the data of the requested type.
+						if (FileTransfer.getInstance().isSupportedType(event.dataType)) {
+							if (tempfiles != null && tempfiles.length > 0) {
+								String data[] = new String[tempfiles.length];
+								for (int i = 0; i < tempfiles.length; i++) {
+									File fle = tempfiles[i];
+									data[i] = fle.getAbsolutePath();
+								}
+								event.data = data;
 							}
-							event.data = data;
 						}
 					}
-				}
 
-				public void dragFinished(DragSourceEvent event) {
-					if (event.detail == DND.DROP_MOVE) {
+					public void dragFinished(DragSourceEvent event) {
+						if (event.detail == DND.DROP_MOVE) {
 
+						}
 					}
-				}
-			}); 
-			/***********************************************************************************/
+				});
+				/***********************************************************************************/
 
-			PopulateDirectory();
+				PopulateDirectory();
 
-			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-			gd.widthHint = 200;
+				gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+				gd.widthHint = 200;
 
-			Button Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("File Properties");
-			Btn.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					DoEditFile();
-				}
+				Button Btn = new Button(ParentComp, SWT.PUSH);
+				Btn.setText("File Properties");
+				Btn.addSelectionListener(new SelectionListener() {
+					@Override
+					public void widgetSelected(SelectionEvent arg0) {
+						DoEditFile();
+					}
 
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
-			Btn.setLayoutData(gd);
+					@Override
+					public void widgetDefaultSelected(SelectionEvent arg0) {
+						widgetSelected(arg0);
+					}
+				});
+				Btn.setLayoutData(gd);
 
-			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Edit Raw file");
-			Btn.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					DoEditRawFile();
-				}
+				Btn = new Button(ParentComp, SWT.PUSH);
+				Btn.setText("Edit Raw file");
+				Btn.addSelectionListener(new SelectionListener() {
+					@Override
+					public void widgetSelected(SelectionEvent arg0) {
+						DoEditRawFile();
+					}
 
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
-			Btn.setLayoutData(gd);
+					@Override
+					public void widgetDefaultSelected(SelectionEvent arg0) {
+						widgetSelected(arg0);
+					}
+				});
+				Btn.setLayoutData(gd);
 
-			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Delete file");
-			Btn.setLayoutData(gd);
-			Btn.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					DoDeleteSelectedFile();
-				}
+				Btn = new Button(ParentComp, SWT.PUSH);
+				Btn.setText("Delete file");
+				Btn.setLayoutData(gd);
+				Btn.addSelectionListener(new SelectionListener() {
+					@Override
+					public void widgetSelected(SelectionEvent arg0) {
+						DoDeleteSelectedFile();
+					}
 
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
+					@Override
+					public void widgetDefaultSelected(SelectionEvent arg0) {
+						widgetSelected(arg0);
+					}
+				});
 
-			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Add File(s)");
-			Btn.setLayoutData(gd);
-			Btn.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					DoAddFiles();
-				}
+				Btn = new Button(ParentComp, SWT.PUSH);
+				Btn.setText("Add File(s)");
+				Btn.setLayoutData(gd);
+				Btn.addSelectionListener(new SelectionListener() {
+					@Override
+					public void widgetSelected(SelectionEvent arg0) {
+						DoAddFiles();
+					}
 
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
-			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Extract all Files");
-			Btn.setLayoutData(gd);
-			Btn.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					DoExtractAllFiles();
-				}
+					@Override
+					public void widgetDefaultSelected(SelectionEvent arg0) {
+						widgetSelected(arg0);
+					}
+				});
+				Btn = new Button(ParentComp, SWT.PUSH);
+				Btn.setText("Extract all Files");
+				Btn.setLayoutData(gd);
+				Btn.addSelectionListener(new SelectionListener() {
+					@Override
+					public void widgetSelected(SelectionEvent arg0) {
+						DoExtractAllFiles();
+					}
 
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
-			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Rename file");
-			Btn.setLayoutData(gd);
-			Btn.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					DoRenameFile();
-				}
+					@Override
+					public void widgetDefaultSelected(SelectionEvent arg0) {
+						widgetSelected(arg0);
+					}
+				});
+				Btn = new Button(ParentComp, SWT.PUSH);
+				Btn.setText("Rename file");
+				Btn.setLayoutData(gd);
+				Btn.addSelectionListener(new SelectionListener() {
+					@Override
+					public void widgetSelected(SelectionEvent arg0) {
+						DoRenameFile();
+					}
 
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
+					@Override
+					public void widgetDefaultSelected(SelectionEvent arg0) {
+						widgetSelected(arg0);
+					}
+				});
 
-			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Undelete file");
-			Btn.setLayoutData(gd);
-			Btn.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					DoUndeleteFile();
-				}
+				Btn = new Button(ParentComp, SWT.PUSH);
+				Btn.setText("Undelete file");
+				Btn.setLayoutData(gd);
+				Btn.addSelectionListener(new SelectionListener() {
+					@Override
+					public void widgetSelected(SelectionEvent arg0) {
+						DoUndeleteFile();
+					}
 
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
-
+					@Override
+					public void widgetDefaultSelected(SelectionEvent arg0) {
+						widgetSelected(arg0);
+					}
+				});
+			}
 			label("", 1);
 			ParentComp.pack();
 		}

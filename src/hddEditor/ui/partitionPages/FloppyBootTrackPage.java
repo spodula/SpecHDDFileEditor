@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.TableItem;
 import hddEditor.libs.ASMLib;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.ASMLib.DecodedASM;
+import hddEditor.libs.CPM;
 import hddEditor.libs.disks.FDD.FloppyDisk;
 import hddEditor.libs.partitions.FloppyBootTrack;
 import hddEditor.libs.partitions.IDEDosPartition;
@@ -31,21 +32,6 @@ import hddEditor.ui.HDDEditor;
 
 public class FloppyBootTrackPage extends GenericPage {
 	private Table HexTable = null;
-	
-	//Definitions of the bytes 0xfe00-0xfe0a
-	String datadesc[] = {
-			"DEFB %d ; Disk type",
-			"DEFB %d ; Sidedness",
-			"DEFB %d ; Tracks per side",
-			"DEFB %d ; Sectors per track",
-			"DEFB %d ; Sector size shift",
-			"DEFB %d ; Reserved tracks",
-			"DEFB %d ; Block size shift",
-			"DEFB %d ; # Directory blocks",
-			"DEFB %d ; RW gap length",
-			"DEFB %d ; Format gap length",
-		};
-	
 	
 	/**
 	 * 
@@ -212,7 +198,7 @@ public class FloppyBootTrackPage extends GenericPage {
 							if (loadedaddress < 0xfe10) {
 								if (loadedaddress < 0xfe0a) {
 									decLen = 1;
-									decStr = datadesc[loadedaddress-0xfe00];
+									decStr = CPM.datadesc[loadedaddress-0xfe00];
 									decStr = String.format(decStr, asmData[0] & 0xff);
 								} else if (loadedaddress < 0xfe0f) {
 									decLen = 5;
@@ -328,7 +314,7 @@ public class FloppyBootTrackPage extends GenericPage {
 				if (loadedaddress < 0xfe10) {
 					if (loadedaddress < 0xfe0a) {
 						decLen = 1;
-						decStr = datadesc[loadedaddress-0xfe00];
+						decStr = CPM.datadesc[loadedaddress-0xfe00];
 						decStr = String.format(decStr, asmData[0] & 0xff);
 					} else if (loadedaddress < 0xfe0f) {
 						decLen = 5;
