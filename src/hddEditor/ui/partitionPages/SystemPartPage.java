@@ -1,8 +1,6 @@
 package hddEditor.ui.partitionPages;
 // - Some files seem to be broken..
 
-import java.io.File;
-
 /**
  * Implementation of the System partition page. 
  */
