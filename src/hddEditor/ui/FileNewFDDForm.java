@@ -10,11 +10,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.disks.FDD.AMSDiskFile;
 import hddEditor.libs.disks.FDD.SCLDiskFile;
 import hddEditor.libs.disks.FDD.TrDosDiskFile;
@@ -43,13 +43,16 @@ public class FileNewFDDForm {
 	// Flag to prevent an endless loop when the boxes are being edited.
 	// private boolean ModInProgress = false;
 
+	private FileSelectDialog fsd = null;
+
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public FileNewFDDForm(Display display) {
+	public FileNewFDDForm(Display display, FileSelectDialog fsd) {
 		this.display = display;
+		this.fsd = fsd;
 	}
 
 	/**
@@ -98,14 +101,9 @@ public class FileNewFDDForm {
 		SelectTargetFileBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				FileDialog fd = new FileDialog(shell, SWT.SAVE);
-				fd.setText("Select Target file");
-				fd.setFileName("newfile.hdf");
-				String[] filterExt = { "*", "*.img", "*.hdf" };
-				fd.setFilterExtensions(filterExt);
-				String selected = fd.open();
-				if (selected != null) {
-					Targetfile.setText(selected);
+				File f = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_DRIVE , "Select target file");
+				if (f != null) {
+					Targetfile.setText(f.getAbsolutePath());
 				}
 			}
 

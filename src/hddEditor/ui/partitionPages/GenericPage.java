@@ -17,14 +17,17 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.ui.HDDEditor;
 
 public class GenericPage {
-	Composite ParentComp = null;
-	IDEDosPartition partition = null;
-	HDDEditor RootPage = null;
+	protected Composite ParentComp = null;
+	protected IDEDosPartition partition = null;
+	protected HDDEditor RootPage = null;
+	
+	protected FileSelectDialog fsd = null;
 
 	/**
 	 * Generic constructor.
@@ -33,9 +36,10 @@ public class GenericPage {
 	 * @param parent    - Parent component to put stuff on.
 	 * @param partition - Partition.
 	 */
-	public GenericPage(HDDEditor root, Composite parent, IDEDosPartition partition) {
+	public GenericPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog fsd) {
 		ParentComp = parent;
 		RootPage = root;
+		this.fsd = fsd;
 		this.partition = partition;
 		AddBasicDetails();
 	}

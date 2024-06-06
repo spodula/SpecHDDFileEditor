@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.LINEAR.MicrodriveSector;
@@ -29,8 +30,8 @@ import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 
 public class MicrodriveFileEditDialog extends EditFileDialog {     
 
-	public MicrodriveFileEditDialog(Display display) {
-		super(display);
+	public MicrodriveFileEditDialog(Display display,FileSelectDialog filesel) {
+		super(display,filesel);
 	}
 
 	/**
@@ -109,23 +110,22 @@ public class MicrodriveFileEditDialog extends EditFileDialog {
 			BasicRenderer BR = new BasicRenderer();
 			SpeccyBasicDetails sbd = ThisEntry.GetSpeccyBasicDetails();
 			BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, 
-					sbd.VarStart, sbd.LineStart);
+					sbd.VarStart, sbd.LineStart, filesel);
 			break;
 		case Speccy.BASIC_CODE:
 				CodeRenderer CR = new CodeRenderer();
-				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, ((MicrodriveDirectoryEntry)ThisEntry).GetVar2());
+				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, ((MicrodriveDirectoryEntry)ThisEntry).GetVar2(), filesel);
 				break;
 		case Speccy.BASIC_NUMARRAY:
 				NumericArrayRenderer NR = new NumericArrayRenderer();
-				NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A");
+				NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);
 				break;
 		case Speccy.BASIC_CHRARRAY:	
 				CharArrayRenderer CAR = new CharArrayRenderer();
-				CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A");
+				CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);
 		default:
 				FileRenderer FR = new FileRenderer();
-				FR.Render(MainPage, data, ThisEntry.GetFilename());
-				
+				FR.Render(MainPage, data, ThisEntry.GetFilename(), filesel);
 		}
 	}
 

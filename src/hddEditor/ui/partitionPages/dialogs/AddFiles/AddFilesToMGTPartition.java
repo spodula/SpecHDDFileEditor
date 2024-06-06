@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.MGT;
 import hddEditor.libs.partitions.MGTDosPartition;
 import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
@@ -42,8 +43,8 @@ public class AddFilesToMGTPartition  extends GenericAddPageDialog {
 	 * 
 	 * @param display
 	 */
-	public AddFilesToMGTPartition(Display display) {
-		super(display);
+	public AddFilesToMGTPartition(Display display, FileSelectDialog fsd) {
+		super(display, fsd);
 	}
 
 	/**

@@ -3,6 +3,7 @@ package hddEditor.ui.partitionPages.dialogs;
  * Implement the hex editors SAVE AS dialog
  */
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,11 +17,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import hddEditor.libs.FileSelectDialog;
 
 public class SaveAsDialog {
 	//Form components
@@ -31,13 +33,16 @@ public class SaveAsDialog {
 	private Text lengthEdit=null;
 	private Text FileNameEdit=null;
 	
+	private FileSelectDialog filesel = null;
+	
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public SaveAsDialog(Display display) {
+	public SaveAsDialog(Display display, FileSelectDialog filesel) {
 		this.display = display;
+		this.filesel = filesel;
 	}
 	
 	/**
@@ -192,13 +197,9 @@ public class SaveAsDialog {
 	 * Select the file to save as
 	 */
 	public void SelectFile() {
-		FileDialog fd = new FileDialog(shell, SWT.SAVE);
-		fd.setText("Save file as");
-		String[] filterExt = { "*.*" };
-		fd.setFilterExtensions(filterExt);
-		String selected = fd.open();
-		if (selected != null) {
-			FileNameEdit.setText(selected);
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES,"Save file as");
+		if (Selected != null) {
+			FileNameEdit.setText(Selected.getAbsolutePath());
 		}
 	}
 	

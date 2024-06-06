@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -35,6 +34,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.SpeccyFileEncoders;
 import hddEditor.libs.TRDOS;
 import hddEditor.libs.partitions.TrDosPartition;
@@ -59,8 +59,8 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 	private final static char FILETYPE_SCREEN = 'S';
 
 
-	public AddFilesToTrDosPartition(Display display) {
-		super(display);
+	public AddFilesToTrDosPartition(Display display, FileSelectDialog fsd) {
+		super(display, fsd);
 	}
 
 	public void Show(String Title, TrDosPartition partition) {
@@ -435,21 +435,16 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 
 	@Override
 	protected void DoAddImageFiles() {
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
-		fd.setText("Open Image file");
-		String[] filterExt = { "*" };
-		fd.setFilterExtensions(filterExt);
-		if ((fd.open() != null) && (fd.getFileNames().length > 0)) {
-			for (String filename : fd.getFileNames()) {
-				File FilePath = new File(fd.getFilterPath());
-				File filedets = new File(FilePath, filename);
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open image file");
+		if ((Selected != null) && (Selected.length > 0)) {
+			for (File filename : Selected) {
 
 				BufferedImage RawImage;
 				try {
 					/*
 					 * Load the image
 					 */
-					RawImage = ImageIO.read(filedets);
+					RawImage = ImageIO.read(filename);
 
 					/*
 					 * Convert and scale the image
@@ -460,10 +455,10 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 					/*
 					 * Create the row texts.
 					 */
-					String DosFileName = UniqueifyName(TRDOS.FixFullName(filename));
+					String DosFileName = UniqueifyName(TRDOS.FixFullName(filename.getName()));
 					TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 					String values[] = new String[5];
-					values[0] = filedets.getAbsolutePath();
+					values[0] = filename.getAbsolutePath();
 					values[1] = DosFileName;
 					values[2] = "C (scr)";
 					values[3] = String.valueOf(buffer.length);
@@ -474,7 +469,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 					 * the buffer
 					 */
 					NewFileListItem listitem = new NewFileListItem();
-					listitem.OriginalFilename = filedets;
+					listitem.OriginalFilename = filename;
 					listitem.filename = DosFileName;
 					listitem.cFileType = FILETYPE_SCREEN;
 					listitem.data = buffer;
@@ -488,7 +483,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 					item2.setText(values);
 					item2.setData(listitem);
 				} catch (IOException e) {
-					System.out.println("Failed to add " + filedets.getAbsolutePath() + " " + e.getMessage());
+					System.out.println("Failed to add " + filename.getAbsolutePath() + " " + e.getMessage());
 				}
 			}
 		}
@@ -547,26 +542,17 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 	}
 
 	protected void DoAddCodeFiles() {
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
-		fd.setText("Open CODE file");
-		String[] filterExt = { "*" };
-		fd.setFilterExtensions(filterExt);
-		if ((fd.open() != null) && (fd.getFileNames().length > 0)) {
-			/*
-			 * Iterate all the files selected.
-			 */
-			for (String filename : fd.getFileNames()) {
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file");
+		if ((Selected != null) && (Selected.length > 0)) {
+			for (File filename : Selected) {
 				/*
 				 * Load the file
 				 */
-				File FilePath = new File(fd.getFilterPath());
-				File filedets = new File(FilePath, filename);
-
-				byte buffer[] = new byte[(int) filedets.length()];
+				byte buffer[] = new byte[(int) filename.length()];
 				FileInputStream is = null;
 				try {
 					try {
-						is = new FileInputStream(filedets);
+						is = new FileInputStream(filename);
 						is.read(buffer);
 					} finally {
 						if (is != null)
@@ -579,10 +565,10 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 				/*
 				 * Create the texts for the Row
 				 */
-				String DosFileName = UniqueifyName(TRDOS.FixFullName(filename));
+				String DosFileName = UniqueifyName(TRDOS.FixFullName(filename.getName()));
 				TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 				String values[] = new String[5];
-				values[0] = filedets.getAbsolutePath();
+				values[0] = filename.getAbsolutePath();
 				values[1] = DosFileName;
 				values[2] = "Code (Raw Manual)";
 				values[3] = String.valueOf(buffer.length);
@@ -592,7 +578,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 				 * Create the data storage object
 				 */
 				NewFileListItem listitem = new NewFileListItem();
-				listitem.OriginalFilename = filedets;
+				listitem.OriginalFilename = filename;
 				listitem.filename = DosFileName;
 				listitem.cFileType = FILETYPE_CODE;
 				listitem.data = buffer;
@@ -610,26 +596,21 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 	@Override
 	protected void DoAddCharacterFiles() {
 		int filelimit = 16384;
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
-		fd.setText("Open CSV file");
-		String[] filterExt = { "*" };
-		fd.setFilterExtensions(filterExt);
-		if ((fd.open() != null) && (fd.getFileNames().length > 0)) {
-			for (String filename : fd.getFileNames()) {
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file");
+		if ((Selected != null) && (Selected.length > 0)) {
+			for (File filename : Selected) {
 				/*
 				 * Iterate all the selected files.
 				 */
-				File FilePath = new File(fd.getFilterPath());
-				File filedets = new File(FilePath, filename);
 				try {
-					byte ArrayAsBytes[] = SpeccyFileEncoders.EncodeCharacterArray(filedets, filelimit);
+					byte ArrayAsBytes[] = SpeccyFileEncoders.EncodeCharacterArray(filename, filelimit);
 					/*
 					 * Create the text strings for the row.
 					 */
-					String DosFileName = UniqueifyName(TRDOS.FixFullName(filename));
+					String DosFileName = UniqueifyName(TRDOS.FixFullName(filename.getName()));
 					TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 					String values[] = new String[5];
-					values[0] = filedets.getAbsolutePath();
+					values[0] = filename.getAbsolutePath();
 					values[1] = DosFileName;
 					values[2] = "D (Character Array)";
 					values[3] = String.valueOf(ArrayAsBytes.length);
@@ -639,7 +620,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 					 * Create the data object
 					 */
 					NewFileListItem listitem = new NewFileListItem();
-					listitem.OriginalFilename = filedets;
+					listitem.OriginalFilename = filename;
 					listitem.filename = DosFileName;
 					listitem.cFileType = FILETYPE_CHRARRAY;
 					listitem.data = ArrayAsBytes;
@@ -650,7 +631,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 					item2.setText(values);
 					item2.setData(listitem);
 				} catch (IOException e) {
-					System.out.println("Failed to add " + filedets.getAbsolutePath() + " " + e.getMessage());
+					System.out.println("Failed to add " + filename.getAbsolutePath() + " " + e.getMessage());
 				}
 			}
 		}
@@ -660,27 +641,19 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 	@Override
 	protected void DoAddNumericArrays() {
 		int filelimit = 16384;
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
-		fd.setText("Open CSV file");
-		String[] filterExt = { "*" };
-		fd.setFilterExtensions(filterExt);
-		if ((fd.open() != null) && (fd.getFileNames().length > 0)) {
-			/*
-			 * Iterate all the returned files.
-			 */
-			for (String filename : fd.getFileNames()) {
-				File FilePath = new File(fd.getFilterPath());
-				File filedets = new File(FilePath, filename);
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file");
+		if ((Selected != null) && (Selected.length > 0)) {
+			for (File filename : Selected) {
 				try {
-					byte ArrayAsBytes[] = SpeccyFileEncoders.EncodeNumericArray(filedets, filelimit);
+					byte ArrayAsBytes[] = SpeccyFileEncoders.EncodeNumericArray(filename, filelimit);
 
 					/*
 					 * Create the row text items
 					 */
-					String DosFileName = UniqueifyName(TRDOS.FixFullName(filename));
+					String DosFileName = UniqueifyName(TRDOS.FixFullName(filename.getName()));
 					TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 					String values[] = new String[5];
-					values[0] = filedets.getAbsolutePath();
+					values[0] = filename.getAbsolutePath();
 					values[1] = DosFileName;
 					values[2] = "(D) Number Array";
 					values[3] = String.valueOf(ArrayAsBytes.length);
@@ -690,7 +663,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 					 * Populate the data object
 					 */
 					NewFileListItem listitem = new NewFileListItem();
-					listitem.OriginalFilename = filedets;
+					listitem.OriginalFilename = filename;
 					listitem.filename = DosFileName;
 					listitem.cFileType = FILETYPE_NUMARRAY;
 					listitem.data = ArrayAsBytes;
@@ -701,7 +674,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 					item2.setText(values);
 					item2.setData(listitem);
 				} catch (IOException e) {
-					System.out.println("Failed to add " + filedets.getAbsolutePath() + " " + e.getMessage());
+					System.out.println("Failed to add " + filename.getAbsolutePath() + " " + e.getMessage());
 				}
 			}
 		}
@@ -709,23 +682,18 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 	
 	@Override
 	protected void DoAddBinaryBasicFiles() {
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
-		fd.setText("Open");
-		String[] filterExt = { "*" };
-		fd.setFilterExtensions(filterExt);
-		if ((fd.open() != null) && (fd.getFileNames().length > 0)) {
-			for (String filename : fd.getFileNames()) {
-				File FilePath = new File(fd.getFilterPath());
-				File filedets = new File(FilePath, filename);
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file");
+		if ((Selected != null) && (Selected.length > 0)) {
+			for (File filename : Selected) {
 
 				/*
 				 * Load the file
 				 */
-				byte buffer[] = new byte[(int) filedets.length()];
+				byte buffer[] = new byte[(int) filename.length()];
 				FileInputStream is = null;
 				try {
 					try {
-						is = new FileInputStream(filedets);
+						is = new FileInputStream(filename);
 						is.read(buffer);
 					} finally {
 						if (is != null)
@@ -738,10 +706,10 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 				/*
 				 * Create the texts for the table row
 				 */
-				String DosFileName = UniqueifyName(TRDOS.FixFullName(filename));
+				String DosFileName = UniqueifyName(TRDOS.FixFullName(filename.getName()));
 				TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 				String values[] = new String[5];
-				values[0] = filedets.getAbsolutePath();
+				values[0] = filename.getAbsolutePath();
 				values[1] = DosFileName;
 				values[2] = "Basic (Raw Manual)";
 				values[3] = String.valueOf(buffer.length);
@@ -751,7 +719,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 				 * Create the storage object and add it to the row
 				 */
 				NewFileListItem listitem = new NewFileListItem();
-				listitem.OriginalFilename = filedets;
+				listitem.OriginalFilename = filename;
 				listitem.filename = DosFileName;
 				listitem.cFileType = FILETYPE_BASIC;
 				listitem.data = buffer;
@@ -768,27 +736,19 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 
 	@Override
 	protected void DoAddTextBasicFiles() {
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
-		fd.setText("Open");
-		String[] filterExt = { "*" };
-		fd.setFilterExtensions(filterExt);
-		if ((fd.open() != null) && (fd.getFileNames().length > 0)) {
-			/*
-			 * Iterate all files selected...
-			 */
-			for (String filename : fd.getFileNames()) {
-				File FilePath = new File(fd.getFilterPath());
-				File filedets = new File(FilePath, filename);
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file");
+		if ((Selected != null) && (Selected.length > 0)) {
+			for (File filename : Selected) {
 
-				byte data[] = SpeccyFileEncoders.EncodeTextFileToBASIC(filedets);
+				byte data[] = SpeccyFileEncoders.EncodeTextFileToBASIC(filename);
 
 				/*
 				 * Make the values required for the table item.
 				 */
 				TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 				String values[] = new String[5];
-				values[0] = filedets.getAbsolutePath();
-				values[1] = UniqueifyName(TRDOS.FixFullName(filename));
+				values[0] = filename.getAbsolutePath();
+				values[1] = UniqueifyName(TRDOS.FixFullName(filename.getName()));
 				values[2] = "Basic (Manual)";
 				values[3] = String.valueOf(data.length);
 				values[4] = "";
@@ -797,7 +757,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 				 * Populate the storage array details.
 				 */
 				NewFileListItem listitem = new NewFileListItem();
-				listitem.OriginalFilename = filedets;
+				listitem.OriginalFilename = filename;
 				listitem.filename = values[1];
 				listitem.cFileType = FILETYPE_BASIC;
 				listitem.data = data;

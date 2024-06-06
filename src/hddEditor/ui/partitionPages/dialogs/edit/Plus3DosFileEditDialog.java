@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.cpm.Dirent;
@@ -36,8 +37,8 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 	 * 
 	 * @param display
 	 */
-	public Plus3DosFileEditDialog(Display display) {
-		super(display);
+	public Plus3DosFileEditDialog(Display display,FileSelectDialog filesel) {
+		super(display,filesel);
 	}
 
 	/**
@@ -159,20 +160,20 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 		 */
 		if (!p3d.IsPlusThreeDosFile) {
 			CodeRenderer CR = new CodeRenderer();
-			CR.RenderCode(MainPage, newdata, null, ThisEntry.GetFilename(), newdata.length, 0x0000);
+			CR.RenderCode(MainPage, newdata, null, ThisEntry.GetFilename(), newdata.length, 0x0000, filesel);
 		} else if (p3d.filetype == Speccy.BASIC_BASIC) {
 			BasicRenderer BR = new BasicRenderer();
 			BR.RenderBasic(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.filelength, p3d.VariablesOffset,
-					p3d.line);
+					p3d.line, filesel);
 		} else if (p3d.filetype == Speccy.BASIC_CODE) {
 			CodeRenderer CR = new CodeRenderer();
-			CR.RenderCode(MainPage, newdata, header, ThisEntry.GetFilename(), newdata.length, p3d.loadAddr);
+			CR.RenderCode(MainPage, newdata, header, ThisEntry.GetFilename(), newdata.length, p3d.loadAddr, filesel);
 		} else if (p3d.filetype == Speccy.BASIC_NUMARRAY) {
 			NumericArrayRenderer NR = new NumericArrayRenderer();
-			NR.RenderNumericArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.VarName);
+			NR.RenderNumericArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.VarName, filesel);
 		} else { // Char array
 			CharArrayRenderer CR = new CharArrayRenderer();
-			CR.RenderCharArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.VarName);
+			CR.RenderCharArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.VarName, filesel);
 		}
 	}
 }

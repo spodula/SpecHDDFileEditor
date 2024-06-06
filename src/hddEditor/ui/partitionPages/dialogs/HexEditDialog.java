@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
 
 public class HexEditDialog {
@@ -64,6 +65,8 @@ public class HexEditDialog {
 	private String EDIT_LABEL = "Press ENTER to edit byte";
 	private String EDITING_LABEL = "Press ENTER to set byte or ESCAPE to cancel";
 
+	private FileSelectDialog fsd = null;
+	
 	/**
 	 * 
 	 * @param Modified
@@ -92,7 +95,8 @@ public class HexEditDialog {
 	 * @param notes
 	 * @return
 	 */
-	public boolean Show(byte[] data, String title, AddressNote notes[]) {
+	public boolean Show(byte[] data, String title, AddressNote notes[], FileSelectDialog fsd) {
+		this.fsd = fsd;
 		result = false;
 		xModified = false;
 		this.Title = title;
@@ -499,7 +503,7 @@ public class HexEditDialog {
 		Display display = new Display();
 		byte data[] = GeneralUtils.ReadFileIntoArray("/home/graham/2gtest.img");
 		HexEditDialog testf = new HexEditDialog(display);
-		System.out.println(testf.Show(data, "CPM BAM", null));
+		System.out.println(testf.Show(data, "CPM BAM", null,null));
 	}
 
 	/**
@@ -509,11 +513,11 @@ public class HexEditDialog {
 	 */
 	protected void DoFileSaveItem(boolean SaveAscii) {
 		if (SaveAscii) {
-			SaveAsAsciiDlg = new SaveAsAsciiDialog(display);
+			SaveAsAsciiDlg = new SaveAsAsciiDialog(display,fsd);
 			SaveAsAsciiDlg.Show(Data, "Save file as ascii");
 			SaveAsAsciiDlg = null;
 		} else {
-			SaveAsDlg = new SaveAsDialog(display);
+			SaveAsDlg = new SaveAsDialog(display, fsd);
 			SaveAsDlg.Show(Data, "Save file (Binary)");
 			SaveAsDlg = null;
 		}

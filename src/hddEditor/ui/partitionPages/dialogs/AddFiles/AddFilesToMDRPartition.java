@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.partitions.SinclairMicrodrivePartition;
 import hddEditor.libs.partitions.mdf.MicrodriveDirectoryEntry;
 
@@ -38,8 +39,8 @@ public class AddFilesToMDRPartition extends GenericAddPageDialog {
 	 * 
 	 * @param display
 	 */
-	public AddFilesToMDRPartition(Display display) {
-		super(display);
+	public AddFilesToMDRPartition(Display display, FileSelectDialog fsd) {
+		super(display, fsd);
 	}
 
 	/**

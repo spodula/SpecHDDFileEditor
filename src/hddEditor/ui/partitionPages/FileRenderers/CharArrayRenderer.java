@@ -12,10 +12,10 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 
@@ -26,8 +26,8 @@ public class CharArrayRenderer extends FileRenderer {
 	 * Render the character array to the composite.
 	 */
 	@Override
-	public void Render(Composite mainPage, byte data[], String Filename) {
-		super.Render(mainPage, data, Filename);
+	public void Render(Composite mainPage, byte data[], String Filename, FileSelectDialog filesel) {
+		super.Render(mainPage, data, Filename, filesel);
 		Plus3DosFileHeader p3d = new Plus3DosFileHeader(data);
 		String Varname ="A";
 		byte header[] = null;
@@ -40,7 +40,7 @@ public class CharArrayRenderer extends FileRenderer {
 			System.arraycopy(data, 0x80, newdata, 0, newdata.length);
 		} 
 
-		RenderCharArray(mainPage, newdata, header, Filename, Varname);
+		RenderCharArray(mainPage, newdata, header, Filename, Varname,filesel);
 	}
 
 	/**
@@ -53,7 +53,7 @@ public class CharArrayRenderer extends FileRenderer {
 	 * @param Filename - filename
 	 * @param varname  - variable name
 	 */
-	public void RenderCharArray(Composite mainPage, byte data[], byte header[], String Filename, String varname) {
+	public void RenderCharArray(Composite mainPage, byte data[], byte header[], String Filename, String varname, FileSelectDialog filesel) {
 		Label lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("Character array: ");
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -215,13 +215,10 @@ public class CharArrayRenderer extends FileRenderer {
 	 * @param p3d
 	 */
 	protected void DoSaveArrayAsText(byte[] data, Composite mainPage, String varname) {
-		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
-		fd.setText("Save Array as");
-		String[] filterExt = { "*.*" };
-		fd.setFilterExtensions(filterExt);
-		String selected = fd.open();
-		if (selected != null) {
-			Speccy.DoSaveCharArrayAsText(new File(selected), data, varname);
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save array as...");
+		
+		if (Selected != null) {
+			Speccy.DoSaveCharArrayAsText(Selected, data, varname);
 		}
 	}
 }

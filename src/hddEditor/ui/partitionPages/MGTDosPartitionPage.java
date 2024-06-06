@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.MGT;
 import hddEditor.libs.Speccy;
@@ -71,8 +72,8 @@ public class MGTDosPartitionPage extends GenericPage {
 	RenameFileDialog RenFileDialog = null;
 	HexEditDialog HxEditDialog = null;
 
-	public MGTDosPartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition) {
-		super(root, parent, partition);
+	public MGTDosPartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
+		super(root, parent, partition, filesel);
 		AddComponents();
 	}
 
@@ -417,7 +418,7 @@ public class MGTDosPartitionPage extends GenericPage {
 	}
 
 	protected void DoAddFiles() {
-		AddFilesDialog = new AddFilesToMGTPartition(ParentComp.getDisplay());
+		AddFilesDialog = new AddFilesToMGTPartition(ParentComp.getDisplay(), fsd);
 		AddFilesDialog.Show("Add files", (MGTDosPartition) partition);
 		AddFilesDialog = null;
 		if (!ParentComp.isDisposed()) {
@@ -472,7 +473,7 @@ public class MGTDosPartitionPage extends GenericPage {
 				AddressNote NewAddressNote = new AddressNote(0, data.length, 0, "File: " + entry.GetFilename());
 				AddressNote ANArray[] = { NewAddressNote };
 
-				boolean WriteBackData = HxEditDialog.Show(data, "Editing " + entry.GetFilename(), ANArray);
+				boolean WriteBackData = HxEditDialog.Show(data, "Editing " + entry.GetFilename(), ANArray, fsd);
 				if (WriteBackData) {
 					MGTDosPartition mbc = (MGTDosPartition) partition;
 					mbc.UpdateFile(entry, data);
@@ -490,7 +491,7 @@ public class MGTDosPartitionPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 			MGTDirectoryEntry entry = (MGTDirectoryEntry) itms[0].getData();
 			try {
-				SpecFileEditDialog = new MGTDosFileEditDialog(ParentComp.getDisplay());
+				SpecFileEditDialog = new MGTDosFileEditDialog(ParentComp.getDisplay(), fsd);
 
 				byte[] data = entry.GetFileData();
 				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {

@@ -1,6 +1,8 @@
 package hddEditor.ui.partitionPages.FileRenderers;
 //BUGFIX: GDS 22/01/2023 - Fixed error deciding when REM statements need to be disassembled. Was calculating with wrong values.
 
+import java.io.File;
+
 //BUGFIX: GDS 23/01/2023 - Now handles bad basic files a bit better when the +3Size> CPMsize 
 //QOLFIX: GDS 22/01/2023 - DoSaveFileAsText: Now defaults to the current filename and puts in title bar.
 
@@ -14,12 +16,13 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+
+import hddEditor.libs.FileSelectDialog;
 
 public class BasicRenderer extends FileRenderer {
 	// Components
@@ -28,7 +31,7 @@ public class BasicRenderer extends FileRenderer {
 	public Table Listing = null;
 	public Table Variables = null;
 	public Label VarLBL = null;
-
+	
 	/**
 	 * Version of Render that doesn't rely on the +3DOS header
 	 * 
@@ -42,8 +45,8 @@ public class BasicRenderer extends FileRenderer {
 	 * @param Startline
 	 */
 	public void RenderBasic(Composite mainPage, byte data[], byte header[], String Filename, int filelength,
-			int VariablesOffset, int Startline) {
-		super.Render(mainPage, data, Filename);
+			int VariablesOffset, int Startline, FileSelectDialog filesel) {
+		super.Render(mainPage, data, Filename, filesel);
 
 		Label lbl = new Label(this.MainPage, SWT.NONE);
 		lbl.setText("BASIC program: ");
@@ -159,16 +162,12 @@ public class BasicRenderer extends FileRenderer {
 	 * @param mainPage
 	 */
 	protected void DoSaveFileAsText(Composite mainPage) {
-		FileDialog fd = new FileDialog(mainPage.getShell(), SWT.SAVE);
-		fd.setText("Save " + filename + " as text file");
-		String[] filterExt = { "*.*" };
-		fd.setFilterExtensions(filterExt);
-		fd.setFileName(filename);
-		String selected = fd.open();
-		if (selected != null) {
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save " + filename + " as text file");
+		
+		if (Selected != null) {
 			PrintWriter file;
 			try {
-				file = new PrintWriter(selected, "UTF-8");
+				file = new PrintWriter(Selected, "UTF-8");
 				try {
 					for (int line = 0; line < Listing.getItemCount(); line++) {
 						TableItem itm = Listing.getItem(line);

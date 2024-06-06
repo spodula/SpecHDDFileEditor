@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.TZX;
 import hddEditor.libs.disks.SpeccyBasicDetails;
@@ -44,8 +45,8 @@ import hddEditor.ui.partitionPages.FileRenderers.StaticTextsBlockRender;
 import hddEditor.ui.partitionPages.FileRenderers.TextDescRenderer;
 
 public class TzxFileEditDialog extends EditFileDialog {
-	public TzxFileEditDialog(Display display) {
-		super(display);
+	public TzxFileEditDialog(Display display,FileSelectDialog filesel) {
+		super(display, filesel);
 	}
 
 	/**
@@ -134,7 +135,7 @@ public class TzxFileEditDialog extends EditFileDialog {
 			// Cant render this, so just exit.
 		} else if ((TzxFileType == TZX.TZX_TEXTDESC) || (TzxFileType == TZX.TZX_GROUPSTART)) {
 			TextDescRenderer tdr = new TextDescRenderer();
-			tdr.RenderText(MainPage, te.GetTZXBlockData(), null, te.GetTZXBlockString());
+			tdr.RenderText(MainPage, te.GetTZXBlockData(), null, te.GetTZXBlockString(),filesel);
 		} else if ((TzxFileType == TZX.TZX_PURETONE)) {
 			PureToneBlock ptb = (PureToneBlock) te.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
@@ -178,7 +179,7 @@ public class TzxFileEditDialog extends EditFileDialog {
 		} else if ((TzxFileType == TZX.TZX_CUSTOMINFO)) {
 			CustomInfoBlock cib = (CustomInfoBlock) te.DataBlock;
 			CR = new CodeRenderer();
-			CR.RenderCode(MainPage, cib.data, null, cib.ID, cib.data.length, 0);
+			CR.RenderCode(MainPage, cib.data, null, cib.ID, cib.data.length, 0, filesel);
 		} else if ((TzxFileType == TZX.TZX_SNAPSHOT)) {
 			SnapshotBlock sb = (SnapshotBlock) te.DataBlock;
 			CR = new CodeRenderer();
@@ -188,7 +189,7 @@ public class TzxFileEditDialog extends EditFileDialog {
 			} else {
 				filename = filename +".Z80";
 			}
-			CR.RenderCode(MainPage, sb.data, null, filename, sb.data.length, 0);
+			CR.RenderCode(MainPage, sb.data, null, filename, sb.data.length, 0, filesel);
 		} else if ((TzxFileType == TZX.TZX_ARCHIVEINFO)) {
 			ArchiveInfoBlock aab = (ArchiveInfoBlock) te.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
@@ -256,22 +257,22 @@ public class TzxFileEditDialog extends EditFileDialog {
 			switch (sbd.BasicType) {
 			case Speccy.BASIC_BASIC:
 				BasicRenderer BR = new BasicRenderer();
-				BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.VarStart, sbd.LineStart);
+				BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.VarStart, sbd.LineStart, filesel);
 				break;
 			case Speccy.BASIC_CODE:
 				CR = new CodeRenderer();
-				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress);
+				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress, filesel);
 				break;
 			case Speccy.BASIC_NUMARRAY:
 				NumericArrayRenderer NR = new NumericArrayRenderer();
-				NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A");
+				NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);
 				break;
 			case Speccy.BASIC_CHRARRAY:
 				CharArrayRenderer CAR = new CharArrayRenderer();
-				CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A");
+				CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);
 			default:
 				CR = new CodeRenderer();
-				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, 0x0000);
+				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, 0x0000, filesel);
 			}
 		}
 	}

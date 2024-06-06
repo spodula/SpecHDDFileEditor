@@ -18,12 +18,12 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.DiskUtils;
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
@@ -66,14 +66,18 @@ public class FileImportForm {
 	//Target partition
 	private Combo TargetPartition = null;
 
+	
+	private FileSelectDialog fsd = null;
+	
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public FileImportForm(Display display, OSHandler handler) {
+	public FileImportForm(Display display, OSHandler handler, FileSelectDialog fsd) {
 		this.display = display;
 		this.CurrentTargetHandler = handler;
+		this.fsd = fsd;
 	}
 
 	/**
@@ -123,13 +127,9 @@ public class FileImportForm {
 		SelectSourceFileBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				FileDialog fd = new FileDialog(shell, SWT.OPEN);
-				fd.setText("Select source file");
-				fd.setFilterExtensions(HDDEditor.SUPPORTEDFILETYPES);
-				
-				String selected = fd.open();
+				File selected = fsd.AskForSingleFileOpen(FileSelectDialog.FILETYPE_IMPORTDRIVE, "Select file to import.");
 				if (selected != null) {
-					Sourcefile.setText(selected);
+					Sourcefile.setText(selected.getAbsolutePath());
 					DoLoadFile(selected);
 				}
 			}
@@ -303,12 +303,12 @@ public class FileImportForm {
 	 * 
 	 * @param selected
 	 */
-	protected void DoLoadFile(String selected) {
+	protected void DoLoadFile(File selected) {
 		try {
 			if (CurrentSourceDisk != null) {
 				CurrentSourceDisk.close();
 			}
-			CurrentSourceDisk = DiskUtils.GetCorrectDiskFromFile(new File(selected));
+			CurrentSourceDisk = DiskUtils.GetCorrectDiskFromFile(selected);
 			CurrentSourceHandler = DiskUtils.GetHandlerForDisk(CurrentSourceDisk);
 			String entries[] = null;
 

@@ -15,6 +15,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
@@ -23,8 +24,8 @@ import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 
 public class TapFileEditDialog extends EditFileDialog {
-	public TapFileEditDialog(Display display) {
-		super(display);
+	public TapFileEditDialog(Display display,FileSelectDialog filesel) {
+		super(display, filesel);
 	}
 
 	/**
@@ -89,22 +90,22 @@ public class TapFileEditDialog extends EditFileDialog {
 		switch (sbd.BasicType) {
 		case Speccy.BASIC_BASIC:
 			BasicRenderer BR = new BasicRenderer();
-			BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.VarStart, sbd.LineStart);
+			BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.VarStart, sbd.LineStart, filesel);
 			break;
 		case Speccy.BASIC_CODE:
 			CR = new CodeRenderer();
-			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress);
+			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress, filesel);
 			break;
 		case Speccy.BASIC_NUMARRAY:
 			NumericArrayRenderer NR = new NumericArrayRenderer();
-			NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A");
+			NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);
 			break;
 		case Speccy.BASIC_CHRARRAY:
 			CharArrayRenderer CAR = new CharArrayRenderer();
-			CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A");
+			CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);
 		default:
 			CR = new CodeRenderer();
-			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, 0x0000);
+			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, 0x0000, filesel);
 		}
 	}
 

@@ -3,6 +3,8 @@ package hddEditor.ui.partitionPages.FileRenderers;
  * This provides some helper functions for the rendering pages. 
  */
 
+import java.io.File;
+
 //BUGFIX: GDS 22/01/2023 - DoSaveFileAsHex: Was only saving from index 128 only. Hangover from the old system. Fixed 
 //QOLFIX: GDS 22/01/2023 - DoSaveFileAsHex/DoSaveFileAsBin: Now defaults to the current filename and puts in title bar.
 //BUGFIX: GDS 22/01/2023 - DoSaveFileAsHex: Will now stop at "filesize" rather than data.length 
@@ -14,14 +16,17 @@ import java.io.IOException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.MessageBox;
+
+import hddEditor.libs.FileSelectDialog;
 
 public class FileRenderer {
 	//Storage for the file details
 	protected String filename="";
 	public byte data[] = null;
 	public Composite MainPage =null;
+	
+	protected FileSelectDialog filesel = null;
 	
 	/**
 	 * Generic constructor. 
@@ -30,10 +35,11 @@ public class FileRenderer {
 	 * @param data
 	 * @param Filename
 	 */
-	public void Render(Composite mainPage, byte data[], String Filename) {
+	public void Render(Composite mainPage, byte data[], String Filename, FileSelectDialog filesel) {
 		this.filename = Filename;
 		this.MainPage = mainPage;
 		this.data = data;
+		this.filesel = filesel;
 	}
 
 	/**
@@ -46,16 +52,12 @@ public class FileRenderer {
 	 * @param Origfilename
 	 */
 	public void DoSaveFileAsHex(byte[] data, Composite mainPage, int loadaddr, int filesize, String Origfilename) {
-		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
-		fd.setText("Save "+Origfilename+" as Hex..");
-		fd.setFileName(Origfilename);
-		String[] filterExt = { "*.*" };
-		fd.setFilterExtensions(filterExt);
-		String selected = fd.open();
-		if (selected != null) {
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save "+Origfilename+" as Hex..");
+		
+		if (Selected != null) {
 			FileOutputStream file;
 			try {
-				file = new FileOutputStream(selected);
+				file = new FileOutputStream(Selected);
 				try {
 					file.write(("File: " + filename + System.lineSeparator()).getBytes());
 					file.write(("Org: " + loadaddr + System.lineSeparator()).getBytes());
@@ -122,18 +124,14 @@ public class FileRenderer {
 	 * @param Origfilename
 	 */
 	protected void DoSaveFileAsBin(byte data[], Composite mainPage, String Origfilename) {
-		FileDialog fd = new FileDialog(mainPage.getShell(), SWT.SAVE);
-		fd.setText("Save "+Origfilename+" as Binary...");
-		String[] filterExt = { "*.*" };
-		fd.setFilterExtensions(filterExt);
-		fd.setFileName(Origfilename);
-		String selected = fd.open();
-		if (selected != null) {
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save "+Origfilename+" as Binary..");
+		
+		if (Selected != null) {
 			FileOutputStream file;
 			try {
-				file = new FileOutputStream(selected);
+				file = new FileOutputStream(Selected);
 				try {
-					System.out.println("Writing " + selected + " from: 0 len: " + data.length);
+					System.out.println("Writing " + Selected + " from: 0 len: " + data.length);
 					file.write(data, 0, data.length);
 				} finally {
 					file.close();

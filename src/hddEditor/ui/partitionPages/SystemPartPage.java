@@ -1,6 +1,8 @@
 package hddEditor.ui.partitionPages;
 // - Some files seem to be broken..
 
+import java.io.File;
+
 /**
  * Implementation of the System partition page. 
  */
@@ -31,6 +33,7 @@ import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.PlusIDEDosException;
@@ -150,8 +153,8 @@ public class SystemPartPage extends GenericPage {
 	 * @param parent
 	 * @param partition
 	 */
-	public SystemPartPage(HDDEditor root, Composite parent, IDEDosPartition partition) {
-		super(root, parent, partition);
+	public SystemPartPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
+		super(root, parent, partition, filesel);
 		AddComponents();
 	}
 
@@ -741,12 +744,12 @@ public class SystemPartPage extends GenericPage {
 					data = part.GetAllDataInPartition();
 					AddressNote an[] = part.GetAddressNotes();
 					WriteBackData = HxEditDialog.Show(data,
-							"Editing " + partName + " (" + PLUSIDEDOS.GetTypeAsString(part.GetPartType()) + ")", an);
+							"Editing " + partName + " (" + PLUSIDEDOS.GetTypeAsString(part.GetPartType()) + ")", an, fsd);
 					if (WriteBackData) {
 						part.SetAllDataInPartition(HxEditDialog.Data);
 						part.Reload();
 						if (part.GetPartType() == PLUSIDEDOS.PARTITION_SYSTEM) {
-							RootPage.LoadFile(RootPage.CurrentDisk.GetFilename());
+							RootPage.LoadFile(new File(RootPage.CurrentDisk.GetFilename()));
 						}
 					}
 				} catch (IOException e) {
@@ -793,7 +796,7 @@ public class SystemPartPage extends GenericPage {
 		}
 		// Force a reload to make sure all parameters are up to date.
 		if (result) {
-			RootPage.LoadFile(sp.CurrentDisk.GetFilename());
+			RootPage.LoadFile(new File(sp.CurrentDisk.GetFilename()));
 		}
 	}
 
@@ -821,5 +824,4 @@ public class SystemPartPage extends GenericPage {
 			RenFileDialog = null;
 		}
 	}
-
 }

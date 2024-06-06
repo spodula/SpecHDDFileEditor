@@ -3,6 +3,7 @@ package hddEditor.ui.partitionPages.FileRenderers;
  * Render a CODE file
  */
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,11 +20,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.Renderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.SNARenderer;
@@ -55,8 +56,8 @@ public class CodeRenderer extends FileRenderer {
 	 * @param loadAddr
 	 */
 	public void RenderCode(Composite mainPage, byte data[], byte header [], String Filename, int fileSize,
-			int loadAddr) {
-		super.Render(mainPage, data, Filename);
+			int loadAddr, FileSelectDialog filesel) {
+		super.Render(mainPage, data, Filename, filesel);
 		Renderers = new Vector<Renderer>();
 		Label lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("CODE file: ");
@@ -291,7 +292,7 @@ public class CodeRenderer extends FileRenderer {
 			} else if (s.equals(CODETYPES[8])) {
 				SpriteRenderer renderer = new SpriteRenderer();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, 400, loadAddr);
+				renderer.Render(MainPage, data, 400, loadAddr, filesel);
 			} else {
 				BinaryRenderer renderer = new BinaryRenderer();
 				Renderers.add(renderer);
@@ -309,16 +310,10 @@ public class CodeRenderer extends FileRenderer {
 	}
 
 	protected void DoSaveFileAsAsm(byte[] data, Composite mainPage2, int loadAddr, String Origfilename) {
-		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
-		fd.setText("Save " + Origfilename + " as Assembly...");
-		String[] filterExt = { "*.*" };
-		fd.setFilterExtensions(filterExt);
-		fd.setFileName(Origfilename);
-
-		fd.setFilterExtensions(filterExt);
-		String selected = fd.open();
-		if (selected != null) {
-			Speccy.DoSaveFileAsAsm(data, selected, loadAddr);
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save " + Origfilename + " as Assembly...");
+		
+		if (Selected != null) {
+			Speccy.DoSaveFileAsAsm(data, Selected.getAbsolutePath(), loadAddr);
 		}
 	}
 
@@ -330,17 +325,14 @@ public class CodeRenderer extends FileRenderer {
 	 * @param mainPage
 	 */
 	protected void DoSaveFileAsPic(byte[] data, Composite mainPage, String Origfilename) {
-		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
-		fd.setText("Save " + Origfilename + " as a picture...");
-		String[] filterExt = { "*.jpg", "*.gif", "*.png", "*.bmp", "*.svg", "*.tiff", "*.ico" };
-		fd.setFilterExtensions(filterExt);
-		fd.setFileName(Origfilename);
-		String selected = fd.open();
-		if (selected != null) {
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save " + Origfilename + " as an image...");
+
+		if (Selected != null) {
 			FileOutputStream file;
 			try {
-				file = new FileOutputStream(selected);
+				file = new FileOutputStream(Selected);
 				try {
+					String selected = Selected.getName();
 					ImageData image = Speccy.GetImageFromFileArray(data, 0x00);
 					ImageLoader imageLoader = new ImageLoader();
 					imageLoader.data = new ImageData[] { image };

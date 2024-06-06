@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.disks.FileEntry;
 
 public class EditFileDialog {
@@ -35,13 +36,16 @@ public class EditFileDialog {
 	protected Shell shell;
 	protected Display display;
 	
+	protected FileSelectDialog filesel;
+	
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public EditFileDialog(Display display) {
+	public EditFileDialog(Display display, FileSelectDialog filesel) {
 		this.display = display;
+		this.filesel = filesel;
 	}
 
 	/**

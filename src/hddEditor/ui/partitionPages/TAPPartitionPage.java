@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
@@ -58,8 +59,8 @@ public class TAPPartitionPage extends GenericPage {
 	 * @param parent
 	 * @param partition
 	 */
-	public TAPPartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition) {
-		super(root, parent, partition);
+	public TAPPartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
+		super(root, parent, partition, filesel);
 		AddComponents();
 	}
 
@@ -400,7 +401,7 @@ public class TAPPartitionPage extends GenericPage {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
 			TapDirectoryEntry entry = (TapDirectoryEntry) itms[0].getData();
-			SpecFileEditDialog = new TapFileEditDialog(ParentComp.getDisplay());
+			SpecFileEditDialog = new TapFileEditDialog(ParentComp.getDisplay(), fsd);
 
 			byte data[];
 			try {
@@ -527,7 +528,7 @@ public class TAPPartitionPage extends GenericPage {
 	 * Show the Add files screen.
 	 */
 	protected void DoAddFiles() {
-		AddFilesDialog = new AddFilesToTAPPartition(ParentComp.getDisplay());
+		AddFilesDialog = new AddFilesToTAPPartition(ParentComp.getDisplay(), fsd);
 		AddFilesDialog.Show("Add files", (TAPPartition) partition);
 		AddFilesDialog = null;
 		if (!ParentComp.isDisposed()) {

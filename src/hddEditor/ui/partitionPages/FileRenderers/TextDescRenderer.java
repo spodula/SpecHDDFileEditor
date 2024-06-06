@@ -8,13 +8,14 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.TextRenderer;
 
 public class TextDescRenderer extends FileRenderer {
 	private TextRenderer tr = null;
 	
-	public void RenderText(Composite mainPage, byte data[], byte header[], String Filename) {	
-		super.Render(mainPage, data, Filename);
+	public void RenderText(Composite mainPage, byte data[], byte header[], String Filename, FileSelectDialog filesel) {
+		super.Render(mainPage, data, Filename, filesel);
 
 
 		Label lbl = new Label(mainPage, SWT.NONE);

@@ -28,7 +28,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -39,6 +38,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.CPM;
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
@@ -57,8 +57,9 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 	 * 
 	 * @param display
 	 */
-	public AddFilesToPlus3Partition(Display display) {
-		super(display);
+	public AddFilesToPlus3Partition(Display display, FileSelectDialog fsd) {
+		super(display, fsd);
+		
 	}
 
 	/**
@@ -445,16 +446,12 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 	 * header.
 	 */
 	protected void DoAddPlus3Files() {
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
-		fd.setText("Open");
-		String[] filterExt = { "*" };
-		fd.setFilterExtensions(filterExt);
-		if ((fd.open() != null) && (fd.getFileNames().length > 0)) {
+		File selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Select files to add");
+		if ((selected!= null) && (selected.length > 0)) {
 			/*
 			 * Iterate all files selected...
 			 */
-			for (String filename : fd.getFileNames()) {
-				File FilePath = new File(fd.getFilterPath());
+			for (File filename : selected) {
 				byte HeaderBuffer[] = new byte[0x80];
 				byte data[] = null;
 				InputStream is = null;
@@ -463,9 +460,8 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 					 * Open the file and load it.
 					 */
 					Plus3DosFileHeader p3d = null;
-					File filedets = new File(FilePath, filename);
 					try {
-						is = new FileInputStream(filedets);
+						is = new FileInputStream(filename);
 						int numRead = is.read(HeaderBuffer);
 						if (numRead < HeaderBuffer.length) {
 							byte newbuffer[] = new byte[numRead];
@@ -487,12 +483,12 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 					 */
 					// Check for a +3DOS header
 					if (p3d.IsPlusThreeDosFile) {
-						String DosFileName = UniqueifyName(filename);
+						String DosFileName = UniqueifyName(filename.getName());
 						String filetypeName = p3d.getTypeDesc() + "(+3Dos Header)";
 
 						TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 						String values[] = new String[5];
-						values[0] = filedets.getAbsolutePath();
+						values[0] = filename.getAbsolutePath();
 						values[1] = DosFileName;
 						values[2] = filetypeName;
 						values[3] = String.valueOf(p3d.filelength);
@@ -504,7 +500,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 						System.arraycopy(data, 0, newdata, 0x80, data.length);
 
 						NewFileListItem listitem = new NewFileListItem();
-						listitem.OriginalFilename = filedets;
+						listitem.OriginalFilename = filename;
 						listitem.filename = DosFileName;
 						listitem.fileheader = p3d;
 						listitem.FileType = FILETYPE_CPM;
@@ -529,23 +525,18 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 	 * Add file(s) as raw CPM files (EG, Headerless).
 	 */
 	protected void DoAddCPMFiles() {
-		FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
-		fd.setText("Open CPM file");
-		String[] filterExt = { "*" };
-		fd.setFilterExtensions(filterExt);
-		if ((fd.open() != null) && (fd.getFileNames().length > 0)) {
-			for (String filename : fd.getFileNames()) {
-				File FilePath = new File(fd.getFilterPath());
-				File filedets = new File(FilePath, filename);
+		File selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Select files to add");
+		if ((selected!= null) && (selected.length > 0)) {
+			for (File filename : selected) {
 
 				/*
 				 * Load the file
 				 */
-				byte buffer[] = new byte[(int) filedets.length()];
+				byte buffer[] = new byte[(int) filename.length()];
 				FileInputStream is = null;
 				try {
 					try {
-						is = new FileInputStream(filedets);
+						is = new FileInputStream(filename);
 						is.read(buffer);
 					} finally {
 						if (is != null)
@@ -558,10 +549,10 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 				/*
 				 * Create the Row texts
 				 */
-				String DosFileName = UniqueifyName(CPM.FixFullName(filename));
+				String DosFileName = UniqueifyName(CPM.FixFullName(filename.getName()));
 				TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 				String values[] = new String[5];
-				values[0] = filedets.getAbsolutePath();
+				values[0] = filename.getAbsolutePath();
 				values[1] = DosFileName;
 				values[2] = "CPM";
 				values[3] = String.valueOf(buffer.length);
@@ -571,7 +562,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 				 * Create the data storage object
 				 */
 				NewFileListItem listitem = new NewFileListItem();
-				listitem.OriginalFilename = filedets;
+				listitem.OriginalFilename = filename;
 				listitem.filename = DosFileName;
 				listitem.fileheader = null;
 				listitem.FileType = FILETYPE_CPM;

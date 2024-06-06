@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
@@ -33,8 +34,8 @@ public class TrDosFileEditDialog extends EditFileDialog {
 	 * 
 	 * @param display
 	 */
-	public TrDosFileEditDialog(Display display) {
-		super(display);
+	public TrDosFileEditDialog(Display display, FileSelectDialog filesel) {
+		super(display, filesel);
 	}
 
 	/**
@@ -104,17 +105,17 @@ public class TrDosFileEditDialog extends EditFileDialog {
 			if (ftype == 'B') {
 				BasicRenderer CurrentRenderer = new BasicRenderer();
 				CurrentRenderer.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), ThisEntry.GetFileSize(), 
-						trde.GetVar2(), trde.startline);
+						trde.GetVar2(), trde.startline, filesel);
 			} else if (ftype != 'D') {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
 				CurrentRenderer.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length,
-						trde.GetVar1());
+						trde.GetVar1(), filesel);
 			} else if (trde.IsCharArray()) {
 				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
-				CurrentRenderer.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A");
+				CurrentRenderer.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);
 			} else {
 				NumericArrayRenderer CurrentRenderer = new NumericArrayRenderer();
-				CurrentRenderer.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A");
+				CurrentRenderer.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);
 			}
 		} catch (Exception E) {
 			System.out.println("Error Showing " + ThisEntry.GetFilename() + ": " + E.getMessage());

@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.MGT;
 import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
@@ -28,8 +29,8 @@ import hddEditor.ui.partitionPages.FileRenderers.MGTExecuteRenderer;
 
 public class MGTDosFileEditDialog extends EditFileDialog {
 
-	public MGTDosFileEditDialog(Display display) {
-		super(display);
+	public MGTDosFileEditDialog(Display display, FileSelectDialog filesel) {
+		super(display, filesel);
 	}
 	
 	@Override
@@ -93,29 +94,29 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 			if (ftype == MGT.MGTFT_ZXBASIC) {
 				BasicRenderer CurrentRenderer = new BasicRenderer();
 				CurrentRenderer.RenderBasic(MainPage, data, null, mEnt.GetFilename(), mEnt.GetFileSize(),
-						mEnt.GetSpeccyBasicDetails().VarStart, mEnt.GetSpeccyBasicDetails().LineStart);
+						mEnt.GetSpeccyBasicDetails().VarStart, mEnt.GetSpeccyBasicDetails().LineStart,filesel);
 			} else if (ftype == MGT.MGTFT_ZXNUMARRAY) {
 				NumericArrayRenderer CurrentRenderer = new NumericArrayRenderer();
 				CurrentRenderer.RenderNumericArray(MainPage, data, null, mEnt.GetFilename(),
-						"" + mEnt.GetSpeccyBasicDetails().VarName);
+						"" + mEnt.GetSpeccyBasicDetails().VarName,filesel);
 			} else if (ftype == MGT.MGTFT_ZXSTRARRAY) {
 				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
 				CurrentRenderer.RenderCharArray(MainPage, data, null, mEnt.GetFilename(),
-						"" + mEnt.GetSpeccyBasicDetails().VarName);
+						"" + mEnt.GetSpeccyBasicDetails().VarName,filesel);
 			} else if (ftype == MGT.MGTFT_ZX48SNA) {
 				MGT48kSnapshotRenderer CurrentRenderer = new MGT48kSnapshotRenderer();
-				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt);
+				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt,filesel);
 			} else if (ftype == MGT.MGTFT_ZX128SNA) {
 				MGT128kSnapshotRenderer CurrentRenderer = new MGT128kSnapshotRenderer();
-				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt);
+				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt,filesel);
 				
 			} else if (ftype == MGT.MGTFT_ZXEXE) {
 				MGTExecuteRenderer CurrentRenderer = new MGTExecuteRenderer();
-				CurrentRenderer.Render(MainPage, data, mEnt.GetFilename());
+				CurrentRenderer.Render(MainPage, data, mEnt.GetFilename(),filesel);
 			} else {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
 				CurrentRenderer.RenderCode(MainPage, data, null, mEnt.GetFilename(), data.length,
-						mEnt.GetVar1());
+						mEnt.GetVar1(),filesel);
 			}
 		} catch (Exception E) {
 			System.out.println("Error Showing " + ThisEntry.GetFilename()+ ": " + E.getMessage());

@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
@@ -38,6 +37,7 @@ import org.eclipse.swt.widgets.Shell;
 import hddEditor.libs.HtmlHelp;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.DiskUtils;
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.handlers.OSHandler;
@@ -67,6 +67,8 @@ public class HDDEditor {
 
 	// SWT display object
 	public Display display = null;
+
+	public FileSelectDialog filesel = null;
 
 	// SWT shell object
 	private Shell shell = null;
@@ -152,18 +154,10 @@ public class HDDEditor {
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
-				FileDialog fd = new FileDialog(shell, SWT.OPEN);
-				fd.setText("Open a media file...");
-				fd.setFilterExtensions(HDDEditor.SUPPORTEDFILETYPES);
-
-				if (CurrentDisk != null && CurrentDisk.IsOpen()) {
-					File f = new File(CurrentDisk.GetFilename());
-					fd.setFilterPath(f.getPath());
-				}
-
-				String selected = fd.open();
-				if (selected != null) {
-					LoadFile(selected);
+				File f = filesel.AskForSingleFileOpen(FileSelectDialog.FILETYPE_DRIVE, "Select file to open.");
+				
+				if (f != null) {
+					LoadFile(f);
 				}
 			}
 		});
@@ -287,7 +281,7 @@ public class HDDEditor {
 			// get current partition
 			String currentPartName = PartitionDropdown.getText();
 			// reload file
-			LoadFile(CurrentDisk.GetFilename());
+			LoadFile(new File(CurrentDisk.GetFilename()));
 			// set partition
 			PartitionDropdown.setText(currentPartName);
 			ComboChanged();
@@ -325,6 +319,8 @@ public class HDDEditor {
 	 */
 
 	public void MakeForm() {
+		filesel = new FileSelectDialog();
+
 		display = new Display();
 		shell = new Shell(display);
 		shell.setSize(920, 864);
@@ -425,7 +421,7 @@ public class HDDEditor {
 			} else {
 				HDDEditor hdi = new HDDEditor();
 				hdi.MakeForm();
-				hdi.LoadFile(args[0]);
+				hdi.LoadFile(new File(args[0]));
 				hdi.loop();
 			}
 		} else {
@@ -440,17 +436,18 @@ public class HDDEditor {
 	 * 
 	 * @param selected
 	 */
-	public void LoadFile(String selected) {
-		System.out.println("Loading " + selected);
+	public void LoadFile(File selected) {
+		System.out.println("Loading " + selected.getAbsolutePath());
 		try {
 			if (CurrentDisk != null) {
 				CurrentDisk.close();
 			}
-			CurrentDisk = DiskUtils.GetCorrectDiskFromFile(new File(selected));
+			CurrentDisk = DiskUtils.GetCorrectDiskFromFile(selected);
 			if (CurrentDisk != null) {
 				CurrentHandler = DiskUtils.GetHandlerForDisk(CurrentDisk);
 				UpdateDropdown();
-				shell.setText(selected);
+				shell.setText(selected.getName());
+				filesel.SetDefaultFolderForType(FileSelectDialog.FILETYPE_DRIVE, selected);
 			}
 		} catch (IOException e) {
 			MessageBox messageBox = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
@@ -539,34 +536,34 @@ public class HDDEditor {
 		CurrentSelectedPartition = part;
 		switch (part.GetPartType()) {
 		case PLUSIDEDOS.PARTITION_SYSTEM:
-			new SystemPartPage(this, MainPage, part);
+			new SystemPartPage(this, MainPage, part, filesel);
 			break;
 		case PLUSIDEDOS.PARTITION_PLUS3DOS:
-			new PlusThreePartPage(this, MainPage, part);
+			new PlusThreePartPage(this, MainPage, part, filesel);
 			break;
 		case PLUSIDEDOS.PARTITION_BOOT:
-			new FloppyBootTrackPage(this, MainPage, part);
+			new FloppyBootTrackPage(this, MainPage, part, filesel);
 			break;
 		case PLUSIDEDOS.PARTITION_DISK_TRDOS:
-			new TrDosPartitionPage(this, MainPage, part);
+			new TrDosPartitionPage(this, MainPage, part, filesel);
 			break;
 		case PLUSIDEDOS.PARTITION_TAPE_SINCLAIRMICRODRIVE:
-			new MicrodrivePartitionPage(this, MainPage, part);
+			new MicrodrivePartitionPage(this, MainPage, part, filesel);
 			break;
 		case PLUSIDEDOS.PARTITION_TAPE_TAP:
-			new TAPPartitionPage(this, MainPage, part);
+			new TAPPartitionPage(this, MainPage, part, filesel);
 			break;
 		case PLUSIDEDOS.PARTITION_TAPE_TZX:
-			new TZXPartitionPage(this, MainPage, part);
+			new TZXPartitionPage(this, MainPage, part, filesel);
 			break;
 		case PLUSIDEDOS.PARTITION_DISK_PLUSD:
-			new MGTDosPartitionPage(this, MainPage, part);
+			new MGTDosPartitionPage(this, MainPage, part, filesel);
 			break;
 		case PLUSIDEDOS.PARTITION_UNKNOWN:
-			new FloppyGenericPage(this, MainPage, part);
+			new FloppyGenericPage(this, MainPage, part, filesel);
 			break;
 		default:
-			new GenericPage(this, MainPage, part);
+			new GenericPage(this, MainPage, part, filesel);
 		}
 	}
 
@@ -574,7 +571,7 @@ public class HDDEditor {
 	 * Show the conversion form
 	 */
 	protected void ShowConvertForm() {
-		fileConvForm = new FileConversionForm(display);
+		fileConvForm = new FileConversionForm(display, filesel);
 		fileConvForm.Show();
 		fileConvForm = null;
 	}
@@ -583,22 +580,22 @@ public class HDDEditor {
 	 * New hard disk file form
 	 */
 	protected void doNewHDDFile() {
-		fileNewHDDForm = new FileNewHDDForm(display);
+		fileNewHDDForm = new FileNewHDDForm(display, filesel);
 		String newfile = fileNewHDDForm.Show();
 		fileNewHDDForm = null;
 		if (newfile != null)
-			LoadFile(newfile);
+			LoadFile(new File(newfile));
 	}
 
 	/**
 	 * New floppy disk file
 	 */
 	protected void doNewFDDFile() {
-		fileNewFDDForm = new FileNewFDDForm(display);
+		fileNewFDDForm = new FileNewFDDForm(display, filesel);
 		String newfile = fileNewFDDForm.Show();
 		fileNewFDDForm = null;
 		if (newfile != null)
-			LoadFile(newfile);
+			LoadFile(new File(newfile));
 	}
 
 	/**
@@ -610,7 +607,7 @@ public class HDDEditor {
 			current = current + "                     ";
 			current = current.substring(0, 20).trim();
 		}
-		fileImportForm = new FileImportForm(display, CurrentHandler);
+		fileImportForm = new FileImportForm(display, CurrentHandler, filesel);
 		try {
 			fileImportForm.Show(current);
 			// force a refresh

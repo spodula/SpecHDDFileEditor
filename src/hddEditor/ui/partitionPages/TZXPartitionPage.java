@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
@@ -58,8 +59,8 @@ public class TZXPartitionPage extends GenericPage {
 	 * @param parent
 	 * @param partition
 	 */
-	public TZXPartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition) {
-		super(root, parent, partition);
+	public TZXPartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
+		super(root, parent, partition, filesel);
 		AddComponents();
 	}
 
@@ -427,7 +428,7 @@ public class TZXPartitionPage extends GenericPage {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
 			TzxDirectoryEntry entry = (TzxDirectoryEntry) itms[0].getData();
-			SpecFileEditDialog = new TzxFileEditDialog(ParentComp.getDisplay());
+			SpecFileEditDialog = new TzxFileEditDialog(ParentComp.getDisplay(), fsd);
 
 			byte data[];
 			try {
@@ -554,7 +555,7 @@ public class TZXPartitionPage extends GenericPage {
 	 * Show the Add files screen.
 	 */
 	protected void DoAddFiles() {
-		AddFilesDialog = new AddFilesToTZXPartition(ParentComp.getDisplay());
+		AddFilesDialog = new AddFilesToTZXPartition(ParentComp.getDisplay(), fsd);
 		AddFilesDialog.Show("Add files", (TZXPartition) partition);
 		AddFilesDialog = null;
 		if (!ParentComp.isDisposed()) {

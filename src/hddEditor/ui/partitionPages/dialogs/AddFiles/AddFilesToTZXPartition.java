@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.partitions.TZXPartition;
 import hddEditor.libs.partitions.tzx.TzxDirectoryEntry;
 
@@ -48,8 +49,8 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 	 * 
 	 * @param display
 	 */
-	public AddFilesToTZXPartition(Display display) {
-		super(display);
+	public AddFilesToTZXPartition(Display display, FileSelectDialog fsd) {
+		super(display, fsd);
 	}
 	
 	/**

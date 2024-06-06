@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
@@ -60,8 +61,8 @@ public class MicrodrivePartitionPage extends GenericPage {
 	 * @param parent
 	 * @param partition
 	 */
-	public MicrodrivePartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition) {
-		super(root, parent, partition);
+	public MicrodrivePartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
+		super(root, parent, partition, filesel);
 		AddComponents();
 	}
 
@@ -425,7 +426,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 
 			MicrodriveDirectoryEntry entry = (MicrodriveDirectoryEntry) itms[0].getData();
-			SpecFileEditDialog = new MicrodriveFileEditDialog(ParentComp.getDisplay());
+			SpecFileEditDialog = new MicrodriveFileEditDialog(ParentComp.getDisplay(), fsd);
 
 			byte data[];
 			try {
@@ -475,7 +476,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 				AddressNote NewAddressNote = new AddressNote(0, data.length, 0, "File: " + entry.GetFilename());
 				AddressNote ANArray[] = { NewAddressNote };
 
-				boolean WriteBackData = HxEditDialog.Show(data, "Editing " + entry.GetFilename(), ANArray);
+				boolean WriteBackData = HxEditDialog.Show(data, "Editing " + entry.GetFilename(), ANArray, fsd);
 				if (WriteBackData) {
 					try {
 						entry.SetFileRawData(HxEditDialog.Data, (MDFMicrodriveFile) partition.CurrentDisk);
@@ -612,7 +613,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 	 * Show the Add files screen.
 	 */
 	protected void DoAddFiles() {
-		AddFilesDialog = new AddFilesToMDRPartition(ParentComp.getDisplay());
+		AddFilesDialog = new AddFilesToMDRPartition(ParentComp.getDisplay(), fsd);
 		AddFilesDialog.Show("Add files", (SinclairMicrodrivePartition) partition);
 		AddFilesDialog = null;
 		if (!ParentComp.isDisposed()) {

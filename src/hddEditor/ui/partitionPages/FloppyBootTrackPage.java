@@ -3,6 +3,7 @@ package hddEditor.ui.partitionPages;
  * Partition page for floppy boot track..
  */
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -15,7 +16,6 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -25,6 +25,7 @@ import hddEditor.libs.ASMLib;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.ASMLib.DecodedASM;
 import hddEditor.libs.CPM;
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.disks.FDD.FloppyDisk;
 import hddEditor.libs.partitions.FloppyBootTrack;
 import hddEditor.libs.partitions.IDEDosPartition;
@@ -39,8 +40,8 @@ public class FloppyBootTrackPage extends GenericPage {
 	 * @param parent
 	 * @param partition
 	 */
-	public FloppyBootTrackPage(HDDEditor root, Composite parent, IDEDosPartition partition) {
-		super(root, parent, partition);
+	public FloppyBootTrackPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog fsd) {
+		super(root, parent, partition, fsd);
 		AddComponents();
 	}
 
@@ -144,13 +145,9 @@ public class FloppyBootTrackPage extends GenericPage {
 	 * @param data
 	 */
 	protected void DoSaveRawData(byte[] data) {
-		FileDialog fd = new FileDialog(ParentComp.getShell(), SWT.SAVE);
-		fd.setText("Save Raw Bootsector data as");
-		String[] filterExt = { "*.*" };
-		fd.setFilterExtensions(filterExt);
-		String selected = fd.open();
-		if (selected != null) {
-			GeneralUtils.WriteBlockToDisk(data, selected);
+		File Selected = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save Raw Bootsector data as");
+		if (Selected != null) {
+			GeneralUtils.WriteBlockToDisk(data, Selected);
 		}
 	}
 
@@ -160,15 +157,11 @@ public class FloppyBootTrackPage extends GenericPage {
 	 * @param data
 	 */
 	private void DoSaveAsm(byte data[]) {
-		FileDialog fd = new FileDialog(ParentComp.getShell(), SWT.SAVE);
-		fd.setText("Save Assembly file as");
-		String[] filterExt = { "*.*" };
-		fd.setFilterExtensions(filterExt);
-		String selected = fd.open();
-		if (selected != null) {
+		File Selected = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save assembly file as");
+		if (Selected != null) {
 			FileOutputStream file;
 			try {
-				file = new FileOutputStream(selected);
+				file = new FileOutputStream(Selected);
 				file.write(("Boot sector of : " + partition.CurrentDisk.GetFilename() + System.lineSeparator()).getBytes());
 				file.write(("Org: 0xfe00" + System.lineSeparator()).getBytes());
 				file.write(("Length: 512 bytes" + System.lineSeparator() + System.lineSeparator()).getBytes());

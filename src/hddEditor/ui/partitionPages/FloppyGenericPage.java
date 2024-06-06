@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.disks.FDD.FloppyDisk;
 import hddEditor.libs.disks.FDD.Sector;
@@ -24,8 +25,8 @@ public class FloppyGenericPage extends GenericPage {
 	Combo TrackCombo = null;
 	Composite TrackComposite = null;
 
-	public FloppyGenericPage(HDDEditor root, Composite parent, IDEDosPartition partition) {
-		super(root, parent, partition);
+	public FloppyGenericPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
+		super(root, parent, partition, filesel);
 		AddComponents();
 	}
 

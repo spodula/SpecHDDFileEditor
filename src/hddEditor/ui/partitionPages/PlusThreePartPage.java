@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
@@ -75,8 +76,8 @@ public class PlusThreePartPage extends GenericPage {
 	 * @param parent
 	 * @param partition
 	 */
-	public PlusThreePartPage(HDDEditor root, Composite parent, IDEDosPartition partition) {
-		super(root, parent, partition);
+	public PlusThreePartPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
+		super(root, parent, partition, filesel);
 		AddComponents();
 	}
 
@@ -467,7 +468,7 @@ public class PlusThreePartPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 			DirectoryEntry entry = (DirectoryEntry) itms[0].getData();
 			try {
-				SpecFileEditDialog = new Plus3DosFileEditDialog(ParentComp.getDisplay());
+				SpecFileEditDialog = new Plus3DosFileEditDialog(ParentComp.getDisplay(), fsd);
 
 				byte[] data = entry.GetFileRawData();
 
@@ -489,7 +490,7 @@ public class PlusThreePartPage extends GenericPage {
 	 * Add files pressed
 	 */
 	private void DoAddFiles() {
-		AddFilesDialog = new AddFilesToPlus3Partition(ParentComp.getDisplay());
+		AddFilesDialog = new AddFilesToPlus3Partition(ParentComp.getDisplay(), fsd);
 		AddFilesDialog.Show("Add files", (PLUS3DOSPartition) partition);
 		AddFilesDialog = null;
 		if (!ParentComp.isDisposed()) {
@@ -513,7 +514,7 @@ public class PlusThreePartPage extends GenericPage {
 				AddressNote NewAddressNote = new AddressNote(0, data.length, 0, "File: " + entry.GetFilename());
 				AddressNote ANArray[] = { NewAddressNote };
 
-				boolean WriteBackData = HxEditDialog.Show(data, "Editing " + entry.GetFilename(), ANArray);
+				boolean WriteBackData = HxEditDialog.Show(data, "Editing " + entry.GetFilename(), ANArray, fsd);
 				if (WriteBackData) {
 					entry.SetDeleted(true);
 					((PLUS3DOSPartition) partition).AddCPMFile(entry.GetFilename(), HxEditDialog.Data);

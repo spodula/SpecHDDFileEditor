@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.partitions.TAPPartition;
 import hddEditor.libs.partitions.tap.TapDirectoryEntry;
 
@@ -48,8 +49,8 @@ public class AddFilesToTAPPartition extends GenericAddPageDialog {
 	 * 
 	 * @param display
 	 */
-	public AddFilesToTAPPartition(Display display) {
-		super(display);
+	public AddFilesToTAPPartition(Display display, FileSelectDialog fsd) {
+		super(display, fsd);
 	}
 	
 	/**

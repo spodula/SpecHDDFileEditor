@@ -13,10 +13,10 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 
@@ -28,7 +28,8 @@ public class NumericArrayRenderer extends FileRenderer {
 	 * render the array to the given composite.
 	 */
 	@Override
-	public void Render(Composite mainPage, byte data[], String Filename) {
+	public void Render(Composite mainPage, byte data[], String Filename, FileSelectDialog filesel) {
+		this.filesel = filesel;
 		Plus3DosFileHeader p3d = new Plus3DosFileHeader(data);
 		String Varname ="A";
 		byte header[] = null;
@@ -41,7 +42,7 @@ public class NumericArrayRenderer extends FileRenderer {
 			System.arraycopy(data, 0x80, newdata, 0, newdata.length);
 		} 
 
-		RenderNumericArray(mainPage, newdata, header, Filename, Varname);
+		RenderNumericArray(mainPage, newdata, header, Filename, Varname, filesel);
 	}
 
 	/**
@@ -53,8 +54,8 @@ public class NumericArrayRenderer extends FileRenderer {
 	 * @param Filename - Filename
 	 * @param varname - Variable name.
 	 */
-	public void RenderNumericArray(Composite mainPage, byte data[], byte header[], String Filename, String varname) {
-		super.Render(mainPage, data, Filename);
+	public void RenderNumericArray(Composite mainPage, byte data[], byte header[], String Filename, String varname, FileSelectDialog filesel) {
+		super.Render(mainPage, data, Filename, filesel);
 
 
 		Label lbl = new Label(mainPage, SWT.NONE);
@@ -222,13 +223,10 @@ public class NumericArrayRenderer extends FileRenderer {
 	 * @param varname - Variable name
 	 */
 	protected void DoSaveArrayAsText(byte[] data, Composite mainPage, String varname) {
-		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
-		fd.setText("Save Array as");
-		String[] filterExt = { "*.*" };
-		fd.setFilterExtensions(filterExt);
-		String selected = fd.open();
-		if (selected != null) {
-			Speccy.DoSaveNumericArrayAsText(new File(selected), data, varname);
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save array as...");
+		
+		if (Selected != null) {
+			Speccy.DoSaveNumericArrayAsText(Selected, data, varname);
 		}
 	}
 

@@ -16,12 +16,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.HDFUtils;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.disks.Disk;
@@ -48,13 +48,16 @@ public class FileConversionForm {
 	//Set so the form cant close when the conversion is running. 
 	private boolean running = false;
 
+	private FileSelectDialog fsd = null;
+	
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public FileConversionForm(Display display) {
+	public FileConversionForm(Display display, FileSelectDialog fsd) {
 		this.display = display;
+		this.fsd = fsd;
 	}
 
 	/**
@@ -103,13 +106,9 @@ public class FileConversionForm {
 		SelectSourceFileBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				FileDialog fd = new FileDialog(shell, SWT.OPEN);
-				fd.setText("Select source file");
-				String[] filterExt = { "*", "*.img", "*.hdf" };
-				fd.setFilterExtensions(filterExt);
-				String selected = fd.open();
-				if (selected != null) {
-					Sourcefile.setText(selected);
+				File Selected = fsd.AskForSingleFileOpen(FileSelectDialog.FILETYPE_DRIVE,"Select source file");
+				if (Selected != null) {
+					Sourcefile.setText(Selected.getAbsolutePath());
 				}
 			}
 
@@ -135,14 +134,9 @@ public class FileConversionForm {
 		SelectTargetFileBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				FileDialog fd = new FileDialog(shell, SWT.SAVE);
-				fd.setText("Select Target file");
-				fd.setFileName("newfile.hdf");
-				String[] filterExt = { "*", "*.img", "*.hdf" };
-				fd.setFilterExtensions(filterExt);
-				String selected = fd.open();
-				if (selected != null) {
-					Targetfile.setText(selected);
+				File Selected = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_DRIVE,"Select Target file");
+				if (Selected != null) {
+					Targetfile.setText(Selected.getAbsolutePath());
 				}
 			}
 

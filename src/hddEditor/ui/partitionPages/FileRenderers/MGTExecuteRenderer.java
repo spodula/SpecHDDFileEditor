@@ -9,6 +9,7 @@ package hddEditor.ui.partitionPages.FileRenderers;
  *         and executed (it should contain relocatable code!).
  */
 
+import java.io.File;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
@@ -17,9 +18,9 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 
+import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.AssemblyRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.Renderer;
@@ -29,9 +30,9 @@ public class MGTExecuteRenderer extends FileRenderer {
 	private Vector<Renderer> Renderers = null;
 
 	public void RenderCode(Composite mainPage, byte data[], byte header [], String Filename, int fileSize,
-			int loadAddr) {
-		super.Render(mainPage, data, Filename);
-
+			int loadAddr , FileSelectDialog filesel) {
+		
+		super.Render(mainPage, data, Filename, filesel);
 		Renderers = new Vector<Renderer>();
 		Label lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("CODE file: ");
@@ -161,16 +162,10 @@ public class MGTExecuteRenderer extends FileRenderer {
 	}
 
 	protected void DoSaveFileAsAsm(byte[] data, Composite mainPage2, int loadAddr, String Origfilename) {
-		FileDialog fd = new FileDialog(MainPage.getShell(), SWT.SAVE);
-		fd.setText("Save " + Origfilename + " as Assembly...");
-		String[] filterExt = { "*.*" };
-		fd.setFilterExtensions(filterExt);
-		fd.setFileName(Origfilename);
-
-		fd.setFilterExtensions(filterExt);
-		String selected = fd.open();
-		if (selected != null) {
-			Speccy.DoSaveFileAsAsm(data, selected, loadAddr);
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save " + Origfilename + " as Assembly...");
+		
+		if (Selected != null) {
+			Speccy.DoSaveFileAsAsm(data, Selected.getAbsolutePath(), loadAddr);
 		}
 	}
 

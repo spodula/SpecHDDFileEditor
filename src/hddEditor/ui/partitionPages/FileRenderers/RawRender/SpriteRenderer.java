@@ -3,6 +3,7 @@ package hddEditor.ui.partitionPages.FileRenderers.RawRender;
  * Renderer for code files as sprites.
  */
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,7 +23,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
@@ -30,6 +30,8 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+
+import hddEditor.libs.FileSelectDialog;
 
 public class SpriteRenderer implements Renderer {
 	private Text SpriteWidth = null;
@@ -49,9 +51,12 @@ public class SpriteRenderer implements Renderer {
 	private ArrayList<Image> Images = null;
 
 	private Composite page;
+	
+	private FileSelectDialog filesel = null;
 
-	public void Render(Composite mainPage, byte data[], int HeightLimit, int baseaddress) {
-		page = mainPage;
+	public void Render(Composite mainPage, byte data[], int HeightLimit, int baseaddress,FileSelectDialog filesel) {
+		this.page = mainPage;
+		this.filesel = filesel;
 		this.data = data;
 		this.BaseAddress = baseaddress;
 		Label lbl = new Label(mainPage, SWT.NONE);
@@ -327,20 +332,17 @@ public class SpriteRenderer implements Renderer {
 			selecteditems = SprTable.getItems();
 		}
 		int width = Math.max(Integer.valueOf(SpriteWidth.getText()), 1);
-		FileDialog fd = new FileDialog(page.getShell(), SWT.SAVE);
-		fd.setText("Save block as binary");
-		if (Binary) {
-			fd.setFileName("sprites.bin");
-		} else {
-			fd.setFileName("sprites.asm");
+		
+		String title = "Save sprites as bin";
+		if (!Binary) {
+			title = "Save sprites as asm";
 		}
-		String[] filterExt = { "*.*" };
-		fd.setFilterExtensions(filterExt);
-		String selected = fd.open();
-		if (selected != null) {
+
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, title);
+		if (Selected != null) {
 			FileOutputStream file;
 			try {
-				file = new FileOutputStream(selected);
+				file = new FileOutputStream(Selected);
 				try {
 					for (TableItem t : selecteditems) {
 						for (int ColNo = 0; ColNo < 4; ColNo++) {
