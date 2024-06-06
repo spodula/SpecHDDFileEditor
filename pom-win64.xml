@@ -6,8 +6,9 @@
     <artifactId>SpecImgManipulator</artifactId>
     <version>1.8</version>
     <description>SpecImgManipulator
-    	This program allows you to edit spectrum +3 hard disk images in either Raw or Realsoft HDF format. It also now allows editing of floppy disk images in DSK and TRD format. 
+    	This program allows you to edit spectrum +3 hard disk images in either Raw or Realsoft HDF format, TAP, TZX and most floppy types. 
     </description>
+
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,17 +21,17 @@
         </developer>
     </developers>
     
-    <dependencies>
-	<dependency>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
-            <version>3.117.0</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.11.0</version>
-        </dependency>
+	<dependencies>
+		<dependency>
+    		<groupId>commons-io</groupId>
+    		<artifactId>commons-io</artifactId>
+    		<version>2.11.0</version>
+		</dependency>
+		<dependency>
+    		<groupId>org.eclipse.platform</groupId>
+    		<artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+    		<version>3.125.0</version>
+		</dependency>
     </dependencies>
     
     <build>
@@ -53,26 +54,26 @@
                                         <Main-Class>hddEditor.ui.HDDEditor</Main-Class>
                                     </manifestEntries>
                                 </transformer>
-				</transformers>
-				<filters>
-   <filter>
-      <artifact>org.eclipse.*:*</artifact>
-      <excludes>
-         <exclude>META-INF/*.MF</exclude>
-         <exclude>about_files/IJG_README</exclude>
-         <exclude>about.html</exclude>
-         <exclude>.api_description</exclude>
-      </excludes>
-   </filter>
-			   	    <filter>
-					<artifact>*:*</artifact>
-				        <excludes>
-					    <exclude>META-INF/*.SF</exclude>
-					    <exclude>META-INF/*.DSA</exclude>
-				   	    <exclude>META-INF/*.RSA</exclude>
-					</excludes>
-				    </filter>
-				</filters>
+							</transformers>
+							<filters>
+								<filter>
+									<artifact>org.eclipse.*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.MF</exclude>
+										<exclude>about_files/IJG_README</exclude>
+										<exclude>about.html</exclude>
+										<exclude>.api_description</exclude>
+									</excludes>
+								</filter>
+						   	    <filter>
+								<artifact>*:*</artifact>
+						    	    <excludes>
+									    <exclude>META-INF/*.SF</exclude>
+									    <exclude>META-INF/*.DSA</exclude>
+								   	    <exclude>META-INF/*.RSA</exclude>
+									</excludes>
+						    	</filter>
+							</filters>
                         </configuration>
                     </execution>
                 </executions>

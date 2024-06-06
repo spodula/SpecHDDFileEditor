@@ -1,4 +1,6 @@
 package hddEditor.ui.partitionPages;
+//TODO: CPM ISVALID flag doesnt seem to work properly.
+//TODO: when displaying basic from 48k files, show system variables.
 
 import java.io.File;
 
@@ -102,7 +104,7 @@ public class PlusThreePartPage extends GenericPage {
 			l.setFont(font);
 			label("", 3);
 
-			if (!pdp.IsValid) {
+			if (pdp.DirectoryBlocks==0 || pdp.bam==null) {
 				label("Partition does not contain a valid CPM/+3 filesystem.", 4);
 			} else {
 

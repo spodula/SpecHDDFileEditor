@@ -1,5 +1,6 @@
 package hddEditor.ui;
 //TODO: add sort by filename, filesize, type
+
 //TODO: When adding raw basic files, doesnt want to render them. 
 
 /**
@@ -86,16 +87,17 @@ public class HDDEditor {
 
 	private String helpcontext = "Main";
 
-	//Items for the drag menu.
+	// Items for the drag menu.
 	public int dragindex = 0;
 	String dragtypes[] = { "TYPE", "RAW", "HEX" };
 
-	//Drag target types for when dragging off the form.
-	public static int DRAG_TYPE = 0;   //Basic->text, code->hex, screens->PNG, arrays->csv
-	public static int DRAG_RAW = 1;    //Raw data exactly as on disk.
-	public static int DRAG_HEX = 2;    //Always hex dump
+	// Drag target types for when dragging off the form.
+	public static int DRAG_TYPE = 0; // Basic->text, code->hex, screens->PNG, arrays->csv
+	public static int DRAG_RAW = 1; // Raw data exactly as on disk.
+	public static int DRAG_HEX = 2; // Always hex dump
 
-	//Used to stop the file change check pestering the user when the have cancelled the dialog
+	// Used to stop the file change check pestering the user when the have cancelled
+	// the dialog
 	public boolean DontAskReload = false;
 
 	/**
@@ -289,7 +291,7 @@ public class HDDEditor {
 			// set partition
 			PartitionDropdown.setText(currentPartName);
 			ComboChanged();
-			DontAskReload=false;
+			DontAskReload = false;
 		}
 	}
 

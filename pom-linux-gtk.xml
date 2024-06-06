@@ -6,7 +6,7 @@
     <artifactId>SpecImgManipulator</artifactId>
     <version>1.8</version>
     <description>SpecImgManipulator
-    	This program allows you to edit spectrum +3 hard disk images in either Raw or Realsoft HDF format. It also now allows editing of floppy disk images in DSK and TRD format. 
+    	This program allows you to edit spectrum +3 hard disk images in either Raw or Realsoft HDF format, TAP, TZX and most floppy types. 
     </description>
     
     <properties>
@@ -20,17 +20,17 @@
         </developer>
     </developers>
     
-    <dependencies>
-<dependency>
-    <groupId>commons-io</groupId>
-    <artifactId>commons-io</artifactId>
-    <version>2.11.0</version>
-</dependency>
-<dependency>
-    <groupId>org.eclipse.platform</groupId>
-    <artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
-    <version>3.121.0</version>
-</dependency>
+	<dependencies>
+		<dependency>
+    		<groupId>commons-io</groupId>
+    		<artifactId>commons-io</artifactId>
+    		<version>2.11.0</version>
+		</dependency>
+		<dependency>
+	    	<groupId>org.eclipse.platform</groupId>
+    		<artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
+    		<version>3.125.0</version>
+		</dependency>
     </dependencies>
     
     <build>
@@ -53,26 +53,26 @@
                                         <Main-Class>hddEditor.ui.HDDEditor</Main-Class>
                                     </manifestEntries>
                                 </transformer>
-				</transformers>
-				<filters>
-   <filter>
-      <artifact>org.eclipse.*:*</artifact>
-      <excludes>
-         <exclude>META-INF/*.MF</exclude>
-         <exclude>about_files/IJG_README</exclude>
-         <exclude>about.html</exclude>
-         <exclude>.api_description</exclude>
-      </excludes>
-   </filter>
-			   	    <filter>
-					<artifact>*:*</artifact>
-				        <excludes>
-					    <exclude>META-INF/*.SF</exclude>
-					    <exclude>META-INF/*.DSA</exclude>
-				   	    <exclude>META-INF/*.RSA</exclude>
-					</excludes>
-				    </filter>
-				</filters>
+							</transformers>
+							<filters>
+								<filter>
+									<artifact>org.eclipse.*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.MF</exclude>
+										<exclude>about_files/IJG_README</exclude>
+										<exclude>about.html</exclude>
+										<exclude>.api_description</exclude>
+									</excludes>
+								</filter>
+						   	    <filter>
+								<artifact>*:*</artifact>
+						    	    <excludes>
+									    <exclude>META-INF/*.SF</exclude>
+									    <exclude>META-INF/*.DSA</exclude>
+								   	    <exclude>META-INF/*.RSA</exclude>
+									</excludes>
+						    	</filter>
+							</filters>
                         </configuration>
                     </execution>
                 </executions>
@@ -80,22 +80,22 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-		<version>3.9.0</version>
+				<version>3.9.0</version>
                 <configuration>
                     <source>11</source>
                     <target>11</target>
                     <encoding>UTF-8</encoding>
-		    <compilerArgs>
-		    </compilerArgs>
-		    </configuration>
-		    <executions>
-			    <execution>
-				    <goals>
-					    <goal>compile</goal>
-				    </goals>
-				    <id>compile</id>
-			    </execution>
-		    </executions>
+				    <compilerArgs>
+			    	</compilerArgs>
+			    </configuration>
+			    <executions>
+				    <execution>
+					    <goals>
+						    <goal>compile</goal>
+					    </goals>
+				    	<id>compile</id>
+				    </execution>
+			    </executions>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
