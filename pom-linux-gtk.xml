@@ -11,11 +11,11 @@
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <main.class>hddEditor.ui.HDDEditor</main.class>
-        <swt.version>4.6</swt.version>
-        <swt.arch>gtk.linux.x86_64</swt.arch>
-        <final.name>HDDFileEditor</final.name>
-        <final.arch>linux-86_64</final.arch>
+		<main.class>hddEditor.ui.HDDEditor</main.class>
+		<swt.version>4.6</swt.version>
+		<swt.arch>gtk.linux.x86_64</swt.arch>
+		<final.name>HDDFileEditor</final.name>
+		<final.arch>linux-86_64</final.arch>
 	</properties> 
 
 	<developers>
@@ -77,14 +77,14 @@
 									</excludes>
 								</filter>
 						   		<filter>
-								<artifact>*:*</artifact>
+									<artifact>*:*</artifact>
 									<excludes>
 										<exclude>META-INF/*.SF</exclude>
 										<exclude>META-INF/*.DSA</exclude>
 								   		<exclude>META-INF/*.RSA</exclude>
-								</excludes>
-							</filter>
-						</filters>
+									</excludes>
+								</filter>
+							</filters>
 						</configuration>
 					</execution>
 				</executions>
