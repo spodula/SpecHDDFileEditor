@@ -155,7 +155,7 @@ public class HDDEditor {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 				File f = filesel.AskForSingleFileOpen(FileSelectDialog.FILETYPE_DRIVE, "Select file to open.");
-				
+
 				if (f != null) {
 					LoadFile(f);
 				}
@@ -403,6 +403,9 @@ public class HDDEditor {
 			} catch (Exception E) {
 				E.printStackTrace();
 			}
+		}
+		if (filesel!=null) {
+			filesel.SaveDefaults();
 		}
 		display.dispose();
 	}
