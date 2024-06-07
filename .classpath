@@ -7,6 +7,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/home/graham/work/dev/commons-io.jar"/>
-	<classpathentry kind="lib" path="/home/graham/work/dev/org.eclipse.swt.gtk.linux.x86_64-3.125.0.jar"/>
+	<classpathentry kind="lib" path="/home/graham/work/dev/swt-4.8.jar" sourcepath="/home/graham/work/dev/swt-4.8-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

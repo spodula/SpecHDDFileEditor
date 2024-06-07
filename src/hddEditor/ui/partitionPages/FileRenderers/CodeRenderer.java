@@ -343,8 +343,6 @@ public class CodeRenderer extends FileRenderer {
 						filetyp = SWT.IMAGE_PNG;
 					} else if (selected.toLowerCase().endsWith(".bmp")) {
 						filetyp = SWT.IMAGE_BMP;
-					} else if (selected.toLowerCase().endsWith(".svg")) {
-						filetyp = SWT.IMAGE_SVG;
 					} else if (selected.toLowerCase().endsWith(".tiff")) {
 						filetyp = SWT.IMAGE_TIFF;
 					} else if (selected.toLowerCase().endsWith(".ico")) {

@@ -24,6 +24,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
@@ -97,8 +98,11 @@ public class SystemPartPage extends GenericPage {
 	Table PartitionTable = null;
 
 	// Colours for the default colour combos.
-	Color colours[] = { new Color(0, 0, 0), new Color(0, 0, 255), new Color(255, 0, 0), new Color(255, 0, 255),
-			new Color(0, 255, 0), new Color(0, 255, 255), new Color(255, 255, 0), new Color(255, 255, 255) };
+	Display d = Display.getCurrent();
+
+	Color colours[] = { new Color(d, 0, 0, 0), new Color(d, 0, 0, 255), new Color(d, 255, 0, 0),
+			new Color(d, 255, 0, 255), new Color(d, 0, 255, 0), new Color(d, 0, 255, 255), new Color(d, 255, 255, 0),
+			new Color(d, 255, 255, 255) };
 
 	/**
 	 * Set the colour for a given colour combo taking into account we actually want
@@ -155,6 +159,7 @@ public class SystemPartPage extends GenericPage {
 	 */
 	public SystemPartPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
 		super(root, parent, partition, filesel);
+
 		AddComponents();
 	}
 
@@ -744,7 +749,8 @@ public class SystemPartPage extends GenericPage {
 					data = part.GetAllDataInPartition();
 					AddressNote an[] = part.GetAddressNotes();
 					WriteBackData = HxEditDialog.Show(data,
-							"Editing " + partName + " (" + PLUSIDEDOS.GetTypeAsString(part.GetPartType()) + ")", an, fsd);
+							"Editing " + partName + " (" + PLUSIDEDOS.GetTypeAsString(part.GetPartType()) + ")", an,
+							fsd);
 					if (WriteBackData) {
 						part.SetAllDataInPartition(HxEditDialog.Data);
 						part.Reload();

@@ -4,21 +4,33 @@
 	<name>Spectrum IDEDOS Hard drive file viewer/editor</name>
 	<groupId>SpecImgManipulator</groupId>
 	<artifactId>SpecImgManipulator</artifactId>
-	<version>1.8</version>
+	<version>1.9</version>
 	<description>SpecImgManipulator
 		This program allows you to edit spectrum +3 hard disk images in either Raw or Realsoft HDF format, TAP, TZX and most floppy types. 
 	</description>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <main.class>hddEditor.ui.HDDEditor</main.class>
+        <swt.version>4.6</swt.version>
+        <swt.arch>gtk.linux.x86_64</swt.arch>
+        <final.name>HDDFileEditor</final.name>
+        <final.arch>linux-86_64</final.arch>
 	</properties> 
-	
+
 	<developers>
 		<developer>
 			<name>Graham Salkin</name>
 			<email>graham@salkin.co.uk</email>
 		</developer>
 	</developers>
+
+	<repositories>
+		<repository>
+			<id>maven-eclipse-repo</id>
+			<url>http://maven-eclipse.github.io/maven</url>
+		</repository>
+	</repositories>
 	
 	<dependencies>
 		<dependency>
@@ -27,9 +39,9 @@
 			<version>2.11.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.platform</groupId>
-			<artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
-			<version>3.125.0</version>
+			<groupId>org.eclipse.swt</groupId>
+			<artifactId>org.eclipse.swt.${swt.arch}</artifactId>
+			<version>${swt.version}</version>
 		</dependency>
 	</dependencies>
 	
@@ -46,11 +58,11 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
-							<finalName>HDDFileEditor-linux-86_64</finalName>
+							<finalName>${final.name}-${final.arch}</finalName>
 							<transformers>
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<manifestEntries>
-										<Main-Class>hddEditor.ui.HDDEditor</Main-Class>
+										<Main-Class>${main.class}</Main-Class>
 									</manifestEntries>
 								</transformer>
 							</transformers>

@@ -167,8 +167,9 @@ public class NewPartitionDialog {
 		PartName.setLayoutData(gridData);
 		Color defaultBGColour = PartName.getBackground();
 		Color defaultPenColour = PartName.getForeground();
-		Color WarningBGColour = new Color(255, 0, 0);
-		Color WarningPenColour = new Color(255, 255, 255);
+		
+		Color WarningBGColour = new Color(defaultBGColour.getDevice(), 255, 0, 0);
+		Color WarningPenColour = new Color(defaultBGColour.getDevice(),255, 255, 255);
 
 		KeyAdapter PartitionKeyAdapter = new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
