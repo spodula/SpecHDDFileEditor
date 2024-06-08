@@ -145,7 +145,9 @@ public class FloppyBootTrackPage extends GenericPage {
 	 * @param data
 	 */
 	protected void DoSaveRawData(byte[] data) {
-		File Selected = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save Raw Bootsector data as");
+		String defaultfilename = new File(partition.CurrentDisk.GetFilename()).getName();
+		
+		File Selected = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save Raw Bootsector data as", new String[] {"*"},defaultfilename+".raw");
 		if (Selected != null) {
 			GeneralUtils.WriteBlockToDisk(data, Selected);
 		}
@@ -157,7 +159,8 @@ public class FloppyBootTrackPage extends GenericPage {
 	 * @param data
 	 */
 	private void DoSaveAsm(byte data[]) {
-		File Selected = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save assembly file as");
+		String defaultfilename = new File(partition.CurrentDisk.GetFilename()).getName();
+		File Selected = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save assembly file as", new String[] {"*.asm"},defaultfilename+".asm");
 		if (Selected != null) {
 			FileOutputStream file;
 			try {

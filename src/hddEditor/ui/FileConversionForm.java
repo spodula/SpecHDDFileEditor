@@ -106,7 +106,7 @@ public class FileConversionForm {
 		SelectSourceFileBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				File Selected = fsd.AskForSingleFileOpen(FileSelectDialog.FILETYPE_DRIVE,"Select source file");
+				File Selected = fsd.AskForSingleFileOpen(FileSelectDialog.FILETYPE_DRIVE,"Select source file", new String[] { "*", "*.img", "*.hdf" },"");
 				if (Selected != null) {
 					Sourcefile.setText(Selected.getAbsolutePath());
 				}
@@ -134,7 +134,7 @@ public class FileConversionForm {
 		SelectTargetFileBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				File Selected = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_DRIVE,"Select Target file");
+				File Selected = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_DRIVE,"Select Target file",new String[] { "*", "*.img", "*.hdf" },"");
 				if (Selected != null) {
 					Targetfile.setText(Selected.getAbsolutePath());
 				}

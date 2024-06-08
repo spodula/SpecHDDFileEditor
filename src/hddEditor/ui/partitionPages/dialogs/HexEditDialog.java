@@ -514,11 +514,11 @@ public class HexEditDialog {
 	protected void DoFileSaveItem(boolean SaveAscii) {
 		if (SaveAscii) {
 			SaveAsAsciiDlg = new SaveAsAsciiDialog(display,fsd);
-			SaveAsAsciiDlg.Show(Data, "Save file as ascii");
+			SaveAsAsciiDlg.Show(Data, "Save file as ascii", Title);
 			SaveAsAsciiDlg = null;
 		} else {
 			SaveAsDlg = new SaveAsDialog(display, fsd);
-			SaveAsDlg.Show(Data, "Save file (Binary)");
+			SaveAsDlg.Show(Data, "Save file (Binary)",Title);
 			SaveAsDlg = null;
 		}
 	}

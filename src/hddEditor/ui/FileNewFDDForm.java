@@ -101,7 +101,7 @@ public class FileNewFDDForm {
 		SelectTargetFileBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				File f = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_DRIVE , "Select target file");
+				File f = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_DRIVE , "Select target file", new String[] { "*" },"newdisk.dsk");
 				if (f != null) {
 					Targetfile.setText(f.getAbsolutePath());
 				}

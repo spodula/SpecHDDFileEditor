@@ -292,7 +292,7 @@ public class CodeRenderer extends FileRenderer {
 			} else if (s.equals(CODETYPES[8])) {
 				SpriteRenderer renderer = new SpriteRenderer();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, 400, loadAddr, filesel);
+				renderer.Render(MainPage, data, 400, loadAddr, filesel, filename);
 			} else {
 				BinaryRenderer renderer = new BinaryRenderer();
 				Renderers.add(renderer);
@@ -310,10 +310,10 @@ public class CodeRenderer extends FileRenderer {
 	}
 
 	protected void DoSaveFileAsAsm(byte[] data, Composite mainPage2, int loadAddr, String Origfilename) {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save " + Origfilename + " as Assembly...");
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save " + Origfilename + " as Assembly...", new String[] {"*.asm"},filename);
 		
 		if (Selected != null) {
-			Speccy.DoSaveFileAsAsm(data, Selected.getAbsolutePath(), loadAddr);
+			Speccy.DoSaveFileAsAsm(data, Selected, loadAddr);
 		}
 	}
 
@@ -325,7 +325,7 @@ public class CodeRenderer extends FileRenderer {
 	 * @param mainPage
 	 */
 	protected void DoSaveFileAsPic(byte[] data, Composite mainPage, String Origfilename) {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save " + Origfilename + " as an image...");
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save " + Origfilename + " as an image...", new String[] {"*.png","*.gif","*.bmp","*.tiff","*.jpg","*.ico"},filename+".png");
 
 		if (Selected != null) {
 			FileOutputStream file;

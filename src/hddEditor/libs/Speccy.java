@@ -275,7 +275,7 @@ public class Speccy {
 	 * @param loadAddr
 	 * @throws IOException
 	 */
-	public static void DoSaveFileAsAsm(byte[] data, String filename, int loadAddr) {
+	public static void DoSaveFileAsAsm(byte[] data, File filename, int loadAddr) {
 		StringBuilder sb = new StringBuilder();
 		try {
 			String cr = System.lineSeparator();
@@ -1683,7 +1683,7 @@ public class Speccy {
 				String hexdata = GeneralUtils.HexDump(data, 0, data.length, 0);
 				GeneralUtils.WriteBlockToDisk(hexdata.getBytes(), targetFilename);
 			} else {
-				DoSaveFileAsAsm(data, targetFilename.getAbsolutePath(), codeLoadAddress);
+				DoSaveFileAsAsm(data, targetFilename, codeLoadAddress);
 			}
 		}
 	}
@@ -1821,7 +1821,7 @@ public class Speccy {
 			GeneralUtils.WriteBlockToDisk(hexdata.getBytes(), targetFilename);
 			break;
 		case GeneralUtils.EXPORT_TYPE_ASM:
-			DoSaveFileAsAsm(entrydata, targetFilename.getAbsolutePath(), codeLoadAddress);
+			DoSaveFileAsAsm(entrydata, targetFilename, codeLoadAddress);
 			break;
 		case GeneralUtils.EXPORT_TYPE_TXT:
 			SaveBasicFile(targetFilename, entrydata, basicLine, basicVarsOffset, filelength);

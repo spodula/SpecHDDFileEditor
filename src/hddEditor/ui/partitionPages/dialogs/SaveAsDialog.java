@@ -35,6 +35,8 @@ public class SaveAsDialog {
 	
 	private FileSelectDialog filesel = null;
 	
+	private String defaultFilename;
+	
 	/**
 	 * Constructor
 	 * 
@@ -51,7 +53,8 @@ public class SaveAsDialog {
 	 * @param data
 	 * @param title
 	 */
-	public void Show(byte[] data, String title) {
+	public void Show(byte[] data, String title, String defaultFilename) {
+		this.defaultFilename = defaultFilename;
 		Createform(data, title);
 		loop();
 	}
@@ -197,7 +200,7 @@ public class SaveAsDialog {
 	 * Select the file to save as
 	 */
 	public void SelectFile() {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES,"Save file as");
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES,"Save file as", new String[] {"*"}, defaultFilename);
 		if (Selected != null) {
 			FileNameEdit.setText(Selected.getAbsolutePath());
 		}

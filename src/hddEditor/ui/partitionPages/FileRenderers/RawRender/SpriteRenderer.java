@@ -53,12 +53,15 @@ public class SpriteRenderer implements Renderer {
 	private Composite page;
 	
 	private FileSelectDialog filesel = null;
+	
+	private String filename;
 
-	public void Render(Composite mainPage, byte data[], int HeightLimit, int baseaddress,FileSelectDialog filesel) {
+	public void Render(Composite mainPage, byte data[], int HeightLimit, int baseaddress,FileSelectDialog filesel, String filename) {
 		this.page = mainPage;
 		this.filesel = filesel;
 		this.data = data;
 		this.BaseAddress = baseaddress;
+		this.filename = filename;
 		Label lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("View as sprites: ");
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -338,7 +341,7 @@ public class SpriteRenderer implements Renderer {
 			title = "Save sprites as asm";
 		}
 
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, title);
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, title, new String[] {"*"},filename);
 		if (Selected != null) {
 			FileOutputStream file;
 			try {

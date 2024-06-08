@@ -215,7 +215,7 @@ public class CharArrayRenderer extends FileRenderer {
 	 * @param p3d
 	 */
 	protected void DoSaveArrayAsText(byte[] data, Composite mainPage, String varname) {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save array as...");
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save array as...", new String[] {"*.csv"},filename);
 		
 		if (Selected != null) {
 			Speccy.DoSaveCharArrayAsText(Selected, data, varname);

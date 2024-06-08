@@ -435,7 +435,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 
 	@Override
 	protected void DoAddImageFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open image file");
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open image file",new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 
@@ -542,7 +542,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 	}
 
 	protected void DoAddCodeFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file");
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file",new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				/*
@@ -596,7 +596,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 	@Override
 	protected void DoAddCharacterFiles() {
 		int filelimit = 16384;
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file");
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file",new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				/*
@@ -641,7 +641,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 	@Override
 	protected void DoAddNumericArrays() {
 		int filelimit = 16384;
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file");
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file",new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				try {
@@ -682,7 +682,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 	
 	@Override
 	protected void DoAddBinaryBasicFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file");
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file",new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 
@@ -736,7 +736,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 
 	@Override
 	protected void DoAddTextBasicFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file");
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file",new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 

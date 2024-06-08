@@ -456,7 +456,7 @@ public class GenericAddPageDialog {
 	 */
 	protected void DoAddCharacterFiles() {
 		int filelimit = 16384;
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CSV file");
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CSV file",new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				/*
@@ -503,7 +503,7 @@ public class GenericAddPageDialog {
 	 */
 	protected void DoAddNumericArrays() {
 		int filelimit = 16384;
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CSV file");
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CSV file",new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				try {
@@ -548,7 +548,7 @@ public class GenericAddPageDialog {
 	 * ImageIO supports (PNG, GIF, JPEG, BMP, WEBMP)
 	 */
 	protected void DoAddImageFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open Image file");
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open Image file",new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				BufferedImage RawImage;
@@ -608,7 +608,7 @@ public class GenericAddPageDialog {
 	 * Add BINARY file(s) as a CODE file.
 	 */
 	protected void DoAddBinaryFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open raw binary file");
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open raw binary file",new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				
@@ -662,7 +662,7 @@ public class GenericAddPageDialog {
 	 * Add a text file as a BASIC file.
 	 */
 	protected void DoAddTextBasicFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open BASIC text file");
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open BASIC text file",new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				
@@ -702,7 +702,7 @@ public class GenericAddPageDialog {
 	 * Add pre-converted basic files.
 	 */
 	protected void DoAddBinaryBasicFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open encoded BASIC file");
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open encoded BASIC file",new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				/*

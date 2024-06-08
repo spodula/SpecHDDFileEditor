@@ -446,7 +446,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 	 * header.
 	 */
 	protected void DoAddPlus3Files() {
-		File selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Select files to add");
+		File selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Select files to add",new String[] {"*"});
 		if ((selected!= null) && (selected.length > 0)) {
 			/*
 			 * Iterate all files selected...
@@ -525,7 +525,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 	 * Add file(s) as raw CPM files (EG, Headerless).
 	 */
 	protected void DoAddCPMFiles() {
-		File selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Select files to add");
+		File selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Select files to add",new String[] {"*"});
 		if ((selected!= null) && (selected.length > 0)) {
 			for (File filename : selected) {
 

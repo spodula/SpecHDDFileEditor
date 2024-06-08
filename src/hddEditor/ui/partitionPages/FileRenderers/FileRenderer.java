@@ -52,7 +52,7 @@ public class FileRenderer {
 	 * @param Origfilename
 	 */
 	public void DoSaveFileAsHex(byte[] data, Composite mainPage, int loadaddr, int filesize, String Origfilename) {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save "+Origfilename+" as Hex..");
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save "+Origfilename+" as Hex..", new String[] {"*"},filename);
 		
 		if (Selected != null) {
 			FileOutputStream file;
@@ -124,7 +124,7 @@ public class FileRenderer {
 	 * @param Origfilename
 	 */
 	protected void DoSaveFileAsBin(byte data[], Composite mainPage, String Origfilename) {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save "+Origfilename+" as Binary..");
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save "+Origfilename+" as Binary..", new String[] {"*"},filename);
 		
 		if (Selected != null) {
 			FileOutputStream file;

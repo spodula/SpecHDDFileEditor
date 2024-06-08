@@ -106,7 +106,7 @@ public class FileNewHDDForm {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				
-				File Selected = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_DRIVE, "Select target file");
+				File Selected = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_DRIVE, "Select target file", new String[] { "*", "*.img", "*.hdf" },"newhdd.hdf");
 				if (Selected != null) {
 					Targetfile.setText(Selected.getAbsolutePath());
 				}

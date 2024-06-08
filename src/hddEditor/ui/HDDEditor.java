@@ -154,7 +154,12 @@ public class HDDEditor {
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
-				File f = filesel.AskForSingleFileOpen(FileSelectDialog.FILETYPE_DRIVE, "Select file to open.");
+				String defaultdisk = "";
+				if (CurrentDisk!=null && CurrentDisk.IsOpen()) {
+					defaultdisk = new File(CurrentDisk.GetFilename()).getName();
+				}
+				
+				File f = filesel.AskForSingleFileOpen(FileSelectDialog.FILETYPE_DRIVE, "Select file to open.", HDDEditor.SUPPORTEDFILETYPES,defaultdisk);
 
 				if (f != null) {
 					LoadFile(f);
@@ -319,10 +324,10 @@ public class HDDEditor {
 	 */
 
 	public void MakeForm() {
-		filesel = new FileSelectDialog();
 
 		display = new Display();
 		shell = new Shell(display);
+		filesel = new FileSelectDialog(shell);
 		shell.setSize(920, 864);
 		shell.addDisposeListener(new DisposeListener() {
 			@Override

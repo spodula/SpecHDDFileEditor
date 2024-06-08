@@ -223,7 +223,7 @@ public class NumericArrayRenderer extends FileRenderer {
 	 * @param varname - Variable name
 	 */
 	protected void DoSaveArrayAsText(byte[] data, Composite mainPage, String varname) {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save array as...");
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save array as...", new String[] {"*"}, filename);
 		
 		if (Selected != null) {
 			Speccy.DoSaveNumericArrayAsText(Selected, data, varname);

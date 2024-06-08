@@ -162,10 +162,10 @@ public class MGTExecuteRenderer extends FileRenderer {
 	}
 
 	protected void DoSaveFileAsAsm(byte[] data, Composite mainPage2, int loadAddr, String Origfilename) {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save " + Origfilename + " as Assembly...");
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save " + Origfilename + " as Assembly...", new String[] {"*.asm"}, Origfilename+".asm");
 		
 		if (Selected != null) {
-			Speccy.DoSaveFileAsAsm(data, Selected.getAbsolutePath(), loadAddr);
+			Speccy.DoSaveFileAsAsm(data, Selected, loadAddr);
 		}
 	}
 

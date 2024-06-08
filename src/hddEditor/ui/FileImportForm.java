@@ -127,7 +127,7 @@ public class FileImportForm {
 		SelectSourceFileBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				File selected = fsd.AskForSingleFileOpen(FileSelectDialog.FILETYPE_IMPORTDRIVE, "Select file to import.");
+				File selected = fsd.AskForSingleFileOpen(FileSelectDialog.FILETYPE_IMPORTDRIVE, "Select file to import.",HDDEditor.SUPPORTEDFILETYPES,"");
 				if (selected != null) {
 					Sourcefile.setText(selected.getAbsolutePath());
 					DoLoadFile(selected);

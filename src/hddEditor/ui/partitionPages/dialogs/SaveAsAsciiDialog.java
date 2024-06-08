@@ -51,6 +51,8 @@ public class SaveAsAsciiDialog {
 
 	private FileSelectDialog filesel = null;
 	
+	private String defaultfilename = "";
+	
 	/**
 	 * Constructor
 	 * @param display
@@ -66,8 +68,9 @@ public class SaveAsAsciiDialog {
 	 * @param data
 	 * @param title
 	 */
-	public void Show(byte[] data, String title) {
-		DataLength = data.length;
+	public void Show(byte[] data, String title, String defaultfilename) {
+		this.DataLength = data.length;
+		this.defaultfilename = defaultfilename;
 		Createform(data, title);
 		loop();
 	}
@@ -365,7 +368,7 @@ public class SaveAsAsciiDialog {
 	 * Select a file to save as
 	 */
 	public void SelectFile() {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save file as:");
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save file as:", new String[] {"*.txt"}, defaultfilename);
 		if (Selected != null) {
 			FileNameEdit.setText(Selected.getAbsolutePath());
 		}

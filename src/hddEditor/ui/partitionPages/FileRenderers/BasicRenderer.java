@@ -162,7 +162,7 @@ public class BasicRenderer extends FileRenderer {
 	 * @param mainPage
 	 */
 	protected void DoSaveFileAsText(Composite mainPage) {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save " + filename + " as text file");
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save " + filename + " as text file", new String[] {"*.txt"},filename);
 		
 		if (Selected != null) {
 			PrintWriter file;
