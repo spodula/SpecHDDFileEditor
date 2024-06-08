@@ -549,7 +549,9 @@ public class Speccy {
 
 				byte line[] = new byte[linelen];
 				for (int i = 0; i < linelen; i++) {
-					line[i] = file[ptr + i];
+					if (ptr+i < file.length) {
+						line[i] = file[ptr + i];
+					}
 				}
 
 				Speccy.DecodeBasicLine(sb, line, 0, linelen, DisplayValueOnly);

@@ -1,8 +1,6 @@
 package hddEditor.ui;
 //TODO: add sort by filename, filesize, type
 
-//TODO: When adding raw basic files, doesnt want to render them. 
-
 /**
  * Main UI.
  */
