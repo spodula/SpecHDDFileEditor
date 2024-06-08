@@ -132,6 +132,7 @@ public class FileImportForm {
 					Sourcefile.setText(selected.getAbsolutePath());
 					DoLoadFile(selected);
 				}
+				shell.forceActive();
 			}
 
 			@Override

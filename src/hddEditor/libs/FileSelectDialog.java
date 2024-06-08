@@ -164,7 +164,7 @@ public class FileSelectDialog {
 			fd.setFileName(defaultFilename);
 			String selected = fd.open();
 			if (selected != null) {
-				return(new File(fd.getFilterPath(),selected));
+				return(new File(selected));
 			}
 		}
 		return (null);
@@ -194,7 +194,7 @@ public class FileSelectDialog {
 			fd.setFileName(defaultFilename);
 			String selected = fd.open();
 			if (selected != null) {
-				return(new File(fd.getFilterPath(), selected));
+				return(new File(selected));
 			}
 		}
 		return (null);

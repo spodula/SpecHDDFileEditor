@@ -1,5 +1,7 @@
 package hddEditor.ui;
 //TODO: add sort by filename, filesize, type
+//TODO: when selecting colour on the SYSTEM screen, dropdowns are not coloured correctly.
+//TODO: Add a "Convert Snapshot to disk" option
 
 /**
  * Main UI.
