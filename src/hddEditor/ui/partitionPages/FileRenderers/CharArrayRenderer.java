@@ -220,5 +220,7 @@ public class CharArrayRenderer extends FileRenderer {
 		if (Selected != null) {
 			Speccy.DoSaveCharArrayAsText(Selected, data, varname);
 		}
+		mainPage.getShell().moveAbove(null);
+
 	}
 }

@@ -315,6 +315,8 @@ public class CodeRenderer extends FileRenderer {
 		if (Selected != null) {
 			Speccy.DoSaveFileAsAsm(data, Selected, loadAddr);
 		}
+		mainPage2.getShell().moveAbove(null);
+
 	}
 
 	/**
@@ -368,6 +370,8 @@ public class CodeRenderer extends FileRenderer {
 				e.printStackTrace();
 			}
 		}
+		mainPage.getShell().moveAbove(null);
+
 	}
 
 }

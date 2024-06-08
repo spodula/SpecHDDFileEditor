@@ -496,6 +496,7 @@ public class GenericAddPageDialog {
 				}
 			}
 		}
+		shell.moveAbove(null);
 	}
 
 	/**
@@ -541,6 +542,7 @@ public class GenericAddPageDialog {
 				}
 			}
 		}
+		shell.moveAbove(null);
 	}
 
 	/**
@@ -602,6 +604,7 @@ public class GenericAddPageDialog {
 				}
 			}
 		}
+		shell.moveAbove(null);
 	}
 
 	/**
@@ -656,6 +659,7 @@ public class GenericAddPageDialog {
 				item2.setData(listitem);
 			}
 		}
+		shell.moveAbove(null);
 	}
 
 	/**
@@ -696,6 +700,7 @@ public class GenericAddPageDialog {
 				item2.setData(listitem);
 			}
 		}
+		shell.moveAbove(null);
 	}
 
 	/**
@@ -751,6 +756,7 @@ public class GenericAddPageDialog {
 				item2.setData(listitem);
 			}
 		}
+		shell.moveAbove(null);
 	}
 
 }

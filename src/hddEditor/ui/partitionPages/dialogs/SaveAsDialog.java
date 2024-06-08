@@ -204,6 +204,7 @@ public class SaveAsDialog {
 		if (Selected != null) {
 			FileNameEdit.setText(Selected.getAbsolutePath());
 		}
+		shell.moveAbove(null);
 	}
 	
 	/**

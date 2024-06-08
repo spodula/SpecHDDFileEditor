@@ -167,6 +167,8 @@ public class MGTExecuteRenderer extends FileRenderer {
 		if (Selected != null) {
 			Speccy.DoSaveFileAsAsm(data, Selected, loadAddr);
 		}
+		mainPage2.getShell().moveAbove(null);
+
 	}
 
 	

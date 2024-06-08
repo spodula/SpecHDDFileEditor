@@ -193,8 +193,9 @@ public class BasicRenderer extends FileRenderer {
 				dialog.open();
 				e.printStackTrace();
 			}
-
 		}
+		mainPage.getShell().moveAbove(null);
+
 	}
 
 

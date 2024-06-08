@@ -114,6 +114,8 @@ public class FileRenderer {
 				e.printStackTrace();
 			}
 		}
+		mainPage.getShell().moveAbove(null);
+
 	}
 
 	/**

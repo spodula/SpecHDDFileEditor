@@ -59,7 +59,6 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 	 */
 	public AddFilesToPlus3Partition(Display display, FileSelectDialog fsd) {
 		super(display, fsd);
-		
 	}
 
 	/**
@@ -446,8 +445,9 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 	 * header.
 	 */
 	protected void DoAddPlus3Files() {
-		File selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Select files to add",new String[] {"*"});
-		if ((selected!= null) && (selected.length > 0)) {
+		File selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Select files to add",
+				new String[] { "*" });
+		if ((selected != null) && (selected.length > 0)) {
 			/*
 			 * Iterate all files selected...
 			 */
@@ -519,14 +519,16 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 				}
 			}
 		}
+		shell.moveAbove(null);
 	}
 
 	/**
 	 * Add file(s) as raw CPM files (EG, Headerless).
 	 */
 	protected void DoAddCPMFiles() {
-		File selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Select files to add",new String[] {"*"});
-		if ((selected!= null) && (selected.length > 0)) {
+		File selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Select files to add",
+				new String[] { "*" });
+		if ((selected != null) && (selected.length > 0)) {
 			for (File filename : selected) {
 
 				/*
@@ -576,6 +578,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 				item2.setData(listitem);
 			}
 		}
+		shell.moveAbove(null);
 	}
 
 	/**

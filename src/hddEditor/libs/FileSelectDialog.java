@@ -1,6 +1,4 @@
 package hddEditor.libs;
-//TODO: Something going funky with file dialogs on AddFilesToPlus3Partition
-
 
 import java.io.File;
 import java.io.FileInputStream;

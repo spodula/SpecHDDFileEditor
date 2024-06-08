@@ -372,6 +372,7 @@ public class SaveAsAsciiDialog {
 		if (Selected != null) {
 			FileNameEdit.setText(Selected.getAbsolutePath());
 		}
+		shell.moveAbove(null);
 	}
 
 	/**

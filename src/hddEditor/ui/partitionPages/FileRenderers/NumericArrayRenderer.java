@@ -228,6 +228,8 @@ public class NumericArrayRenderer extends FileRenderer {
 		if (Selected != null) {
 			Speccy.DoSaveNumericArrayAsText(Selected, data, varname);
 		}
+		mainPage.getShell().moveAbove(null);
+
 	}
 
 

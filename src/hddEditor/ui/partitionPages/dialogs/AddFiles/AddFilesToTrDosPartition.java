@@ -487,6 +487,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 				}
 			}
 		}
+		shell.moveAbove(null);
 	}
 
 	protected void DoSelectedFileChange() {
@@ -590,7 +591,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 				item2.setData(listitem);
 			}
 		}
-
+		shell.moveAbove(null);
 	}
 
 	@Override
@@ -635,7 +636,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 				}
 			}
 		}
-
+		shell.moveAbove(null);
 	}
 
 	@Override
@@ -678,6 +679,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 				}
 			}
 		}
+		shell.moveAbove(null);
 	}
 	
 	@Override
@@ -732,6 +734,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 				item2.setData(listitem);
 			}
 		}
+		shell.moveAbove(null);
 	}
 
 	@Override
@@ -770,7 +773,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 				item2.setData(listitem);
 			}
 		}
-
+		shell.moveAbove(null);
 	}
 
 	protected void DoAddFiles() {
