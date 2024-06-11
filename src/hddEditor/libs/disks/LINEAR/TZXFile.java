@@ -4,14 +4,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.util.Vector;
 
 import hddEditor.libs.PLUSIDEDOS;
+import hddEditor.libs.Speccy;
 import hddEditor.libs.TZX;
 import hddEditor.libs.disks.Disk;
+import hddEditor.libs.disks.ExtendedSpeccyBasicDetails;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
 import hddEditor.libs.disks.LINEAR.tzxblocks.ArchiveInfoBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.C64RomBlock;
@@ -58,7 +61,7 @@ public class TZXFile implements Disk {
 
 	// TZX file blocks
 	public TZXBlock Blocks[] = null;
-	
+
 	public long LastModified;
 
 	public void ParseTZXFile() throws IOException {
@@ -604,44 +607,75 @@ public class TZXFile implements Disk {
 	}
 
 	/**
-	 * Test harness
+	 * Test harness While this is primarily used for testing, its also useful to
+	 * provide a full directory listing of all the TZX files and their contents in a
+	 * folder.
 	 * 
 	 * @param args
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
+		if (args.length != 2) {
+			System.out.println("Expecting paramaters [Directory] [target file]");
+		} else {
 
-		try {
-			String filename = "/media/graham/CB4B-457D/Antique computers/Sinclair ZX Spectrum/Games/[TZX]/Yogi Bear (1987)(Alternative Software)[re-release].tzx";
+			PrintWriter pr;
+			pr = new PrintWriter(new FileWriter(args[1]));
+			try {
+				File folder = new File(args[0]);
+				File contents[] = folder.listFiles();
+				for (File f : contents) {
+					if (f.getName().endsWith(".tzx")) {
+						pr.println("=============================================");
+						pr.println(f.getName());
+						pr.println("=============================================");
+						System.out.println(f.getName());
+						try {
+							TZXFile mdt = new TZXFile(f, pr);
+							pr.println(mdt);
+							pr.println("----------------------------------------------");
+							for (TZXBlock block : mdt.Blocks) {
+								if (block.DecodeHeader() != null) {
+									pr.print("Blocks: " + block.BlockNumber + "\\" + (block.BlockNumber + 1) + " ");
 
-			TZXFile mdt = new TZXFile(new File(filename));
-			if (mdt.IsMyFileType(new File(filename))) {
-				System.out.println("File is a valid TZX file.");
-				System.out.println(mdt);
-			} else {
-				System.out.println("File is not a valid tzx file.");
+									ExtendedSpeccyBasicDetails ebd = block.DecodeHeader();
+									String s = "  '" + ebd.filename + "' " + ebd.BasicTypeString() + " ("
+											+ ebd.BasicType + ") Len:" + ebd.filelength;
+
+									switch (ebd.BasicType) {
+									case Speccy.BASIC_BASIC:
+										s = s + " Line: " + ebd.LineStart;
+										s = s + " Vars: " + ebd.VarStart;
+										break;
+									case Speccy.BASIC_NUMARRAY:
+										s = s + " Var: " + ebd.VarName;
+										break;
+									case Speccy.BASIC_CHRARRAY:
+										s = s + " Var: " + ebd.VarName + "$";
+										break;
+									case Speccy.BASIC_CODE:
+										s = s + " Loadaddr: " + ebd.LoadAddress;
+										break;
+									default:
+										s = s + "UNKNOWN/INVALID TYPE ID";
+									}
+									pr.println(s.trim());
+								}
+							}
+
+							mdt.close();
+							mdt = null;
+						} catch (IOException | BadDiskFileException | NullPointerException
+								| ArrayIndexOutOfBoundsException e) {
+							pr.println(e.getMessage());
+							e.printStackTrace();
+						}
+					}
+				}
+			} finally {
+				pr.close();
 			}
-
-		} catch (IOException | BadDiskFileException e) {
-			e.printStackTrace();
 		}
-
-		/*
-		 * PrintWriter pr; pr = new PrintWriter(new FileWriter("tzx.log")); try { File
-		 * folder = new
-		 * File("/media/graham/CB4B-457D/Antique computers/Sinclair ZX Spectrum/Games/[TZX]"
-		 * ); File contents[] = folder.listFiles(); for (File f : contents) { if
-		 * (f.getName().endsWith(".tzx")) {
-		 * pr.println("=============================================");
-		 * pr.println(f.getName());
-		 * pr.println("=============================================");
-		 * System.out.println(f.getName()); try { TZXFile mdt = new TZXFile(f, pr);
-		 * pr.println(mdt); mdt.close(); mdt = null; } catch (IOException |
-		 * BadDiskFileException | NullPointerException | ArrayIndexOutOfBoundsException
-		 * e) { pr.println(e.getMessage()); e.printStackTrace(); } } } } finally {
-		 * pr.close(); }
-		 */
-
 	}
 
 	/**
@@ -649,8 +683,8 @@ public class TZXFile implements Disk {
 	 */
 	@Override
 	public boolean DiskOutOfDate() {
-		if (inFile!=null) {
-			return(LastModified < file.lastModified()); 
+		if (inFile != null) {
+			return (LastModified < file.lastModified());
 		}
 		return false;
 	}
@@ -660,9 +694,9 @@ public class TZXFile implements Disk {
 	 */
 	@Override
 	public void UpdateLastModified() {
-		if (inFile!=null) {
-			LastModified = file.lastModified(); 
+		if (inFile != null) {
+			LastModified = file.lastModified();
 		}
 	}
-	
+
 }
