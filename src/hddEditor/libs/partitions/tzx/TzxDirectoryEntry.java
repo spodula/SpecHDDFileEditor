@@ -32,7 +32,10 @@ public class TzxDirectoryEntry implements FileEntry {
 	public String GetFilename() {
 		String name = "Block" + DataBlock.BlockNumber;
 		if (HeaderBlock != null) {
-			name = HeaderBlock.DecodeHeader().filename;
+			ExtendedSpeccyBasicDetails hdr = HeaderBlock.DecodeHeader();
+			if (hdr != null) {
+				name = hdr.filename;
+			}
 		}
 		return name;
 	}
