@@ -9,10 +9,8 @@ import java.io.File;
  */
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
@@ -627,11 +625,8 @@ public class PlusThreePartPage extends GenericPage {
 		int i = 0;
 		for (String file : data) {
 			try {
-				URL url = new URL(file);
-				URI uri = url.toURI();
+				URI uri = new URI(file);
 				file = uri.getPath();
-			} catch (MalformedURLException e) {
-				System.out.println("Cannot parse " + file);
 			} catch (URISyntaxException e) {
 				System.out.println("Cannot parse " + file);
 			}
