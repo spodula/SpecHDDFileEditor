@@ -1,53 +1,272 @@
 ﻿<?xml version="1.0"?>
-<!-- zx81 system variables as extracted from Mastering Machine Code on Your ZX81 by Toni Baker. 
-     ASCIIfied by Thunor
+<!-- zx Spectrum system variables as extracted from the Word of Spectrum Manual at
+    http://www.fruitcake.plus.com/Sinclair/Spectrum128/ROMDisassembly/Spectrum128ROMDisassembly4.htm (128k)
+	https://worldofspectrum.org/ZXSpectrum128+3Manual/chapter8pt25.html (+3 and 48k)
      Converted to XML by GDS
 -->
 <systemvariables>
- <!--sysvar address="4009" class="BYTE" abbrev="VERSN">Version number (0=zx81 8k rom)</sysvar --> 
- <!--sysvar address="400A" class="WORD" abbrev="E_PPC">Current line number with cursor</sysvar -->
- <!--sysvar address="400C" class="WORD" abbrev="D_FILE">Address of the display file</sysvar --> 
- <!--sysvar address="400E" class="WORD" abbrev="DF_CC">Address of print position in display file</sysvar -->
- <!--sysvar address="4010" class="WORD" abbrev="VARS">Address of the variables area</sysvar --> 
- <!--sysvar address="4012" class="WORD" abbrev="DEST">Address of the variable when assigning</sysvar -->
- <!--sysvar address="4014" class="WORD" abbrev="E_LINE">Address of line being typed...</sysvar --> 
- <!--sysvar address="4016" class="WORD" abbrev="CH_ADD">Address of next character to be interpreted</sysvar -->
- <!--sysvar address="4018" class="WORD" abbrev="X_PTR">Address of the previous character to the cursor</sysvar --> 
- <!--sysvar address="401A" class="WORD" abbrev="STKBOT">Bottom of the calculator stack</sysvar -->
- <!--sysvar address="401C" class="WORD" abbrev="STKEND">Top of the calculator stack</sysvar --> 
- <!--sysvar address="401E" class="WORD" abbrev="BERG">Calculator B register</sysvar -->
- <!--sysvar address="401F" class="WORD" abbrev="MEM">Address of the calculators memory</sysvar --> 
- <!--sysvar address="4021" class="BYTE" abbrev="SPARE1">not used</sysvar -->
- <!--sysvar address="4022" class="BYTE" abbrev="DF_SZ">The number of lines (including one blank line) in the lower part of the screen.</sysvar --> 
- <!--sysvar address="4023" class="WORD" abbrev="S_TOP">The number of the top program line in automatic listings</sysvar -->
- <!--sysvar address="4025" class="WORD" abbrev="LAST_K">Raw last key pressed</sysvar --> 
- <!--sysvar address="4027" class="BYTE" abbrev="DB_ST">Keyboard debounce status</sysvar -->
- <!--sysvar address="4028" class="BYTE" abbrev="MARGIN">Number of blank lines above or below picture (55 for the UK, 31 for the US)</sysvar --> 
- <!--sysvar address="4029" class="WORD" abbrev="NXTLIN">Address of next program line to be executed</sysvar -->
- <!--sysvar address="402B" class="WORD" abbrev="OLDPPC">Line number to which CONT jumps after a STOP</sysvar --> 
- <!--sysvar address="402D" class="FLAGS" abbrev="FLAGX">Flags, Most used during variable Parsing, but bit 5 sets K/L mode which may be useful</sysvar -->
- <!--sysvar address="402E" class="WORD" abbrev="STRLEN">Length of string type designation in assignment.</sysvar --> 
- <!--sysvar address="4030" class="WORD" abbrev="T_ADDR">Address of next item in syntax table</sysvar -->
- <!--sysvar address="4032" class="WORD" abbrev="SEED"> The seed for RND. This is the variable that is set by RAND.</sysvar --> 
- <!--sysvar address="4034" class="WORD" abbrev="FRAMES"> Counts the frames displayed on the television. Bit 15 is 1. Bits 0 to 14 are decremented for each frame sent to the television. This can be used for timing, but PAUSE also uses it. PAUSE resets bit 15 to 0 and puts in bits 0 to 14 the length of the pause. When these have been counted down to zero, the pause stops. If the pause stops because of a key  depression, bit 15 is set to 1 again.</sysvar -->
- <!--sysvar address="4036" class="COORDS" abbrev="COORDS">X,Y plotted coordinates</sysvar --> 
- <!--sysvar address="4038" class="BYTE" abbrev="PR_CC">Less significant byte of address of next position for LPRINT to print at (in PRBUFF).</sysvar -->
- <!--sysvar address="4039" class="COORDS" abbrev="S_POSN">X,Y position of print position</sysvar -->
- <!--sysvar address="403B" class="FLAGS" abbrev="CDFLAG">Fast/slow flags. Bit 6 contains the current fast/slow mode. Bit 7 is set if the display is actually being displayed (Eg, if in fast, a Pause is being executed)</sysvar -->
- <!--sysvar address="403C" class="PRBUFF" abbrev="PRBUFF">Printer buffer</sysvar -->
- <!--sysvar address="405D" class="WORD" abbrev="MEMBOT">Calculator’s memory area; used to store numbers that cannot conveniently be put on the calculator stack</sysvar -->
- <!--sysvar address="407B" class="BYTE" abbrev="SPARE2">Not used</sysvar -->
- <flags>
-	<flag abbrev="CDFLAG">
-		<bit num="6" false="FAST" true="SLOW">Global FAST/SLOW mode.</bit>
-		<bit num="7" false="NODISPLAY" true="DISPLAY">Determines if we are Actually displaying the screen (EG, Fast mode in a PAUSE statement)</bit>
-	</flag>
-	<flag abbrev="FLAGX">
-		<bit num="0" false="ARRAY" true="NOT ARRAY">Variable being parsed is an array</bit>
-		<bit num="1" false="OLD VAR" true="NEW VAR">Variable being parsed is new</bit>
-		<bit num="5" false="K Mode" true="L Mode">K or L mode</bit>
-		<bit num="6" false="STRING" true="NUMERIC">Variable being parsed is a String</bit>
-	</flag>
- </flags>
+    <sysvar address="5B00" machine="128" class="SUBROUTINE-20" abbrev="SWAP">Paging subroutine.</sysvar>
+    <sysvar address="5B14" machine="128" class="SUBROUTINE-9" abbrev="YOUNGER">Paging subroutine.</sysvar>
+    <sysvar address="5B1D" machine="128" class="SUBROUTINE-18" abbrev="ONERR">Paging subroutine.</sysvar>
+    <sysvar address="5B2F" machine="128" class="SUBROUTINE-5" abbrev="PIN">RS232 input pre-routine.</sysvar>
+    <sysvar address="5B3f" machine="128" class="SUBROUTINE-22" abbrev="POUT">RS232 token output pre-routine. This can be patched to bypass the control code filter.</sysvar>
+    <sysvar address="5B4A" machine="128" class="SUBROUTINE-14" abbrev="POUT2">RS232 character output pre-routine.</sysvar>
+    <sysvar address="5B58" machine="128" class="WORD" abbrev="TARGET">Address of subroutine to call in ROM 1.</sysvar>
+    <sysvar address="5B5A" machine="128" class="WORD" abbrev="RETADDR">Return address in ROM 0.</sysvar>
+    <sysvar address="5B5C" machine="128" class="BANKM" abbrev="BANK_M">Copy of last byte output to I/O port $7FFD.</sysvar>
+    <sysvar address="5B5D" machine="128" class="BYTE" abbrev="RAMRST">Stores instruction RST $08 and used to produce a standard ROM error.</sysvar>
+    <sysvar address="5B5E" machine="128" class="BYTE" abbrev="RAMERR">Error number for use by RST $08 held in RAMRST.</sysvar>
+    <sysvar address="5B5F" machine="128" class="WORD" abbrev="BAUD">Baud rate timing constant for RS232 socket. Default value of 11. [Name clash with ZX Interface 1 system variable at $5CC3]</sysvar>
+    <sysvar address="5B61" machine="128" class="SERFL" abbrev="SERFL">Second character received flag</sysvar>
+    <sysvar address="5b62" machine="128" class="BYTE" abbrev="SERFLB">Received Character.</sysvar>
+    <sysvar address="5b63" machine="128" class="BYTE" abbrev="COL">Current column from 1 to WIDTH.</sysvar>
+    <sysvar address="5B64" machine="128" class="BYTE" abbrev="WIDTH">Paper column width. Default value of 80. [Name clash with ZX Interface 1 Edition 2 system variable at $5CB1]</sysvar>
+    <sysvar address="5B65" machine="128" class="BYTE" abbrev="TVPARS">Number of inline parameters expected by RS232 (e.g. 2 for AT).</sysvar>
+    <sysvar address="5B66" machine="128" class="FLAGS3" abbrev="FLAGS3">Various flags: [Name clashes with the ZX Interface 1 system variable at $5CB6]</sysvar>
+    <sysvar address="5B67" machine="128" class="CHAR-10" abbrev="N_STR1">Used by RAM disk to store a filename. Used by the renumber routine to store the address of the BASIC line being examined.</sysvar>
+    <sysvar address="5B71" machine="128" class="BYTE" abbrev="HD_00">Used by RAM disk to store file header information (see RAM disk Catalogue section below for details).Used as column pixel counter in COPY routine.  Used by FORMAT command to store specified baud rate.</sysvar>
+    <sysvar address="5B72" machine="128" class="WORD" abbrev="HD_0B">Used by RAM disk to store header info - length of block. Used as half row counter in COPY routine. Used by renumber routine to generate ASCII representation of a new line number.</sysvar>
+    <sysvar address="5B74" machine="128" class="WORD" abbrev="HD_0D">Used by RAM disk to store file header information (see RAM disk Catalogue section below for details). </sysvar>
+    <sysvar address="5B76" machine="128" class="WORD" abbrev="HD_0F">Used by RAM disk to store file header information (see RAM disk Catalogue section below for details). Used by renumber routine to store the address of a referenced BASIC line.</sysvar>
+    <sysvar address="5B78" machine="128" class="WORD" abbrev="HD_11">Used by RAM disk to store file header information (see RAM disk Catalogue section below for details). Used by renumber routine to store existing VARS address/current address within a line.</sysvar>
+    <sysvar address="5B7A" machine="128" class="BYTE" abbrev="SC_00">Used by RAM disk to store alternate file header information</sysvar>
+    <sysvar address="5B7B" machine="128" class="WORD" abbrev="SC_0B">Used by RAM disk to store alternate file header information</sysvar>
+    <sysvar address="5B7D" machine="128" class="WORD" abbrev="SC_0D">Used by RAM disk to store alternate file header information</sysvar>
+    <sysvar address="5B7F" machine="128" class="WORD" abbrev="SC_0F">Used by RAM disk to store alternate file header information</sysvar>
+    <sysvar address="5B81" machine="128" class="WORD" abbrev="OLDSP">Stores old stack pointer when TSTACK in use.</sysvar>
+    <sysvar address="5B83" machine="128" class="WORD" abbrev="SFNEXT">End of RAM disk catalogue marker. Pointer to first empty catalogue entry.</sysvar>
+    <sysvar address="5B85" machine="128" class="TRIPLE" abbrev="SFSPACE">Number of bytes free in RAM disk (3 bytes, 17 bit, LSB first).</sysvar>
+    <sysvar address="5B88" machine="128" class="ROW01" abbrev="ROW01">Stores keypad data for row 3, and flags</sysvar>
+    <sysvar address="5B89" machine="128" class="ROW23" abbrev="ROW23">Stores keypad key press data for rows 1 and 2</sysvar>
+    <sysvar address="5B8A" machine="128" class="ROW45" abbrev="ROW45">Stores keypad key press data for rows 4 and 5</sysvar>
+    <sysvar address="5B8B" machine="128" class="WORD" abbrev="SYNRET">Return address for ONERR routine.</sysvar>
+    <sysvar address="5B8D" machine="128" class="FLOAT" abbrev="LASTV">Last value printed by calculator.</sysvar>
+    <sysvar address="5B92" machine="128" class="WORD" abbrev="RNLINE">Address of the length bytes in the line currently being renumbered.</sysvar>
+    <sysvar address="5B94" machine="128" class="WORD" abbrev="RNFIRST">Starting line number when renumbering. Default value of 10.</sysvar>
+    <sysvar address="5B96" machine="128" class="WORD" abbrev="RNSTEP">Step size when renumbering. Default value of 10.</sysvar>
+    <sysvar address="5B98" machine="128" class="BYTE-32" abbrev="STRIP1">Used as RAM disk transfer buffer (32 bytes to $5BB7) and the Sinclair stripe character patterns (16 bytes to $5BA7) when a menu is in use</sysvar>
+    <sysvar address="5BFF" machine="+3" class="STACK" abbrev="TSTACK">Temporary stack (grows downwards). The byte at $5BFF is not actually used.</sysvar>
+
+<!-- Spectrum +2A/+3 specific variables -->
+    <sysvar address="5B00" machine="+3" class="SUBROUTINE-16" abbrev="SWAP">Paging subroutine.</sysvar>
+    <sysvar address="5B10" machine="+3" class="SUBROUTINE-17" abbrev="STOO">Paging subroutine. Entered with interrupts already disabled and AF, BC on the stack.</sysvar>
+    <sysvar address="5B21" machine="+3" class="SUBROUTINE-9" abbrev="YOUNGER">Paging subroutine.</sysvar>
+    <sysvar address="5B2A" machine="+3" class="SUBROUTINE-16" abbrev="REGNUOY">Paging subroutine.</sysvar>
+    <sysvar address="5B3A" machine="+3" class="SUBROUTINE-24" abbrev="ONERR">Paging subroutine.</sysvar>
+    <sysvar address="5B52" machine="+3" class="WORD" abbrev="OLDHL">Temporary register store while switching ROMs.</sysvar>
+    <sysvar address="5B54" machine="+3" class="WORD" abbrev="OLDBC">Temporary register store while switching ROMs.</sysvar>
+    <sysvar address="5B56" machine="+3" class="WORD" abbrev="OLDAF">Temporary register store while switching ROMs.</sysvar>
+    <sysvar address="5B58" machine="+3" class="WORD" abbrev="TARGET">Subroutine address in ROM 3.</sysvar>
+    <sysvar address="5B5A" machine="+3" class="WORD" abbrev="RETADDR">Return address in ROM 1.</sysvar>
+    <sysvar address="5B5C" machine="+3" class="BANKM" abbrev="BANK_M">Copy of last byte output to I/O port 7FFDh (32765).</sysvar>
+    <sysvar address="5B5D" machine="+3" class="BYTE" abbrev="RAMRST">RST 8 instruction. Used by ROM 1 to report old errors to ROM 3.</sysvar>
+    <sysvar address="5B5E" machine="+3" class="BYTE" abbrev="RAMERR">Error number passed from ROM 1 to ROM 3. Also used by SAVE/LOAD as temporary drive store.</sysvar>
+    <sysvar address="5B5F" machine="+3" class="WORD" abbrev="BAUD">RS232 bit period in T states/26. Set by FORMAT LINE.</sysvar>
+    <sysvar address="5B61" machine="+3" class="SERFL" abbrev="SERFL">Second character received flag</sysvar>
+    <sysvar address="5b62" machine="+3" class="BYTE" abbrev="SERFLB">Received Character.</sysvar>
+    <sysvar address="5B63" machine="+3" class="BYTE" abbrev="COL">Current column from 1 to width.</sysvar>
+    <sysvar address="5B64" machine="+3" class="BYTE" abbrev="WIDTH">Paper column width. Defaults to 80.</sysvar>
+    <sysvar address="5B65" machine="+3" class="BYTE" abbrev="TVPARS">Number of inline parameters expected by RS232.</sysvar>
+    <sysvar address="5B66" machine="+3" class="FLAGS3A" abbrev="FLAGS3">Various flags. Bits 0, 1, 6 and 7 unlikely to be useful. Bit 2 is set when tokens are to be expanded on printing. Bit 3 is set if print output is RS232. The default (at reset) is Centronics. Bit 4 is set if a disk interface</sysvar>
+    <sysvar address="5B67" machine="+3" class="BANK678" abbrev="BANK678">Copy of last byte output to I/O port 1FFDh (8189). This port is used to control the +3 extended RAM and ROM switching (bits 0..2 - if bit 0 is 0 then bit 2 controls the 'vertical' ROM switch 0-2 and 1-3, the disk motor</sysvar>
+    <sysvar address="5B68" machine="+3" class="BYTE" abbrev="XLOC">Holds X location when using the unexpanded COPY command.</sysvar>
+    <sysvar address="5B69" machine="+3" class="BYTE" abbrev="YLOC">Holds Y location when using the unexpanded COPY command.</sysvar>
+    <sysvar address="5B6A" machine="+3" class="WORD" abbrev="OLDSP">Old SP (stack pointer) when TSTACK is in use.</sysvar>
+    <sysvar address="5B6C" machine="+3" class="WORD" abbrev="SYNRET">Return address for ONERR.</sysvar>
+    <sysvar address="5B6E" machine="+3" class="FLOAT" abbrev="LASTV">Last value printed by calculator.</sysvar>
+    <sysvar address="5B73" machine="+3" class="WORD" abbrev="RCLINE">Current line being renumbered.</sysvar>
+    <sysvar address="5B75" machine="+3" class="WORD" abbrev="RCSTART">Starting line number for renumbering. The default value is 10.</sysvar>
+    <sysvar address="5B77" machine="+3" class="WORD" abbrev="RCSTEP">Incremental value for renumbering. The default is 10.</sysvar>
+    <sysvar address="5B79" machine="+3" class="CHAR" abbrev="LODDRV">Holds 'T' if LOAD, VERIFY, MERGE are from tape, otherwise holds 'A', 'B' or 'M'.</sysvar>
+    <sysvar address="5B7A" machine="+3" class="CHAR" abbrev="SAVDRV">Holds 'T' if SAVE is to tape, otherwise holds 'A', 'B' or 'M'.</sysvar>
+    <sysvar address="5B7B" machine="+3" class="BYTE" abbrev="DUMPLF">Holds the number of 1/216ths user for line feeds in 'COPY EXP'. This is normally set to 9. If problems are experienced fitting a dump onto a sheet of A4 paper, POKE this location with 8. This will reduce the size of the dump</sysvar>
+    <sysvar address="5B7C" machine="+3" class="BYTE-8" abbrev="STRIP1">Stripe one bitmap.</sysvar>
+    <sysvar address="5B84" machine="+3" class="BYTE-8" abbrev="STRIP2">Stripe two bitmap. This extends to 5B8Bh (23436).</sysvar>
+    <sysvar address="5BFF" machine="+3" class="STACK" abbrev="TSTACK">Temporary stack grows down from here. Used when RAM page 7 is switched in at top of memory (while executing the editor or calling +3DOS). it may safely go down to 5B8Ch (and across STRIP1 and STRIP2 if necessary)</sysvar>
+
+<!-- Spectrum 48 variables (Also shared with Spec 128/+3) -->
+
+    <sysvar address="5C00" machine="48" class="BYTE-8" abbrev="KSTATE">Used in reading the keyboard.</sysvar>
+    <sysvar address="5C08" machine="48" class="BYTE" abbrev="LASTK">Stores newly pressed key.</sysvar>
+    <sysvar address="5C09" machine="48" class="BYTE" abbrev="REPDEL">Time (in 50ths of a second) that a key must be held down before it repeats. This starts off at 35, but you can POKE in other values.</sysvar>
+    <sysvar address="5C0A" machine="48" class="BYTE" abbrev="REPPER">Delay (in 50ths of a second) between successive repeats of a key held down - initially 5.</sysvar>
+    <sysvar address="5C0B" machine="48" class="WORD" abbrev="DEFADD">Address of arguments of user defined function (if one is being evaluated), otherwise 0.</sysvar>
+    <sysvar address="5C0d" machine="48" class="BYTE" abbrev="K DATA">Stores 2nd byte of colour controls entered from keyboard .</sysvar>
+    <sysvar address="5C0D" machine="48" class="BYTE" abbrev="TVDATA">Stores bytes of colour, AT and TAB controls going to TV.</sysvar>
+    <sysvar address="5C10" machine="48" class="WORD-38" abbrev="STRMS">Addresses of channels attached to streams.</sysvar>
+    <sysvar address="5C36" machine="48" class="WORD" abbrev="CHARS">256 less than address of character set (which starts with space and carries on to (C)). Normally in ROM, but you can set up your down in RAM and make CHARS point to it.</sysvar>
+    <sysvar address="5C38" machine="48" class="BYTE" abbrev="RASP">Length of warning buzz.</sysvar>
+    <sysvar address="5C39" machine="48" class="BYTE" abbrev="PIP">Length of keyboard click.</sysvar>
+    <sysvar address="5C3A" machine="48" class="BYTE" abbrev="ERRNR">1 less than the report code. Starts off at 255 (for -1) so 'PEEK 23610' gives 255.</sysvar>
+    <sysvar address="5C3B" machine="48" class="FLAGS" abbrev="FLAGS">Various flags to control the BASIC system.</sysvar>
+    <sysvar address="5C3C" machine="48" class="TVFLAG" abbrev="TVFLAG">Flags associated with the TV.</sysvar>
+    <sysvar address="5C3D" machine="48" class="WORD" abbrev="ERRSP">Address of item on machine stack to be used as error return.</sysvar>
+    <sysvar address="5C3F" machine="48" class="WORD" abbrev="LISTSP">Address of return address from automatic listing.</sysvar>
+    <sysvar address="5C41" machine="48" class="BYTE" abbrev="MODE">Specifies 'K', 'L', 'C', 'E' or 'G' cursor. (0=CKL, 1=E 2=G)</sysvar>
+    <sysvar address="5C42" machine="48" class="WORD" abbrev="NEWPPC">Line to be jumped to.</sysvar>
+    <sysvar address="5C44" machine="48" class="BYTE" abbrev="NSPPC">Statement number in line to be jumped to. Poking first NEWPPC and then NSPPC forces a jump to a specified statement in a line.</sysvar>
+    <sysvar address="5C45" machine="48" class="WORD" abbrev="PPC">Line number of statement currently being executed.</sysvar>
+    <sysvar address="5C47" machine="48" class="BYTE" abbrev="SUBPPC">Number within line of statement currently being executed.</sysvar>
+    <sysvar address="5C48" machine="48" class="BYTE" abbrev="BORDCR">Border colour multiplied by 8; also contains the attributes normally used for the lower half of the screen.</sysvar>
+    <sysvar address="5C49" machine="48" class="WORD" abbrev="E PPC">Number of current line (with program cursor).</sysvar>
+    <sysvar address="5C4B" machine="48" class="WORD" abbrev="VARS">Address of variables.</sysvar>
+    <sysvar address="5C4D" machine="48" class="WORD" abbrev="DEST">Address of variable in assignment.</sysvar>
+    <sysvar address="5C4F" machine="48" class="WORD" abbrev="CHANS">Address of channel data.</sysvar>
+    <sysvar address="5C51" machine="48" class="WORD" abbrev="CURCHL">Address of information currently being used for input and output.</sysvar>
+    <sysvar address="5C53" machine="48" class="WORD" abbrev="PROG">Address of BASIC program.</sysvar>
+    <sysvar address="5C57" machine="48" class="WORD" abbrev="NXTLIN">Address of next line in program.</sysvar>
+    <sysvar address="5C57" machine="48" class="WORD" abbrev="DATADD">Address of terminator of last DATA item.</sysvar>
+    <sysvar address="5C59" machine="48" class="WORD" abbrev="E LINE">Address of command being typed in.</sysvar>
+    <sysvar address="5C5B" machine="48" class="WORD" abbrev="K CUR">Address of cursor.</sysvar>
+    <sysvar address="5C5D" machine="48" class="WORD" abbrev="CH ADD">Address of the next character to be interpreted - the character after the argument of PEEK, or the NEWLINE at the end of a POKE statement.</sysvar>
+    <sysvar address="5C5F" machine="48" class="WORD" abbrev="X PTR">Address of the character after the [] marker.</sysvar>
+    <sysvar address="5C61" machine="48" class="WORD" abbrev="WORKSP">Address of temporary work space.</sysvar>
+    <sysvar address="5C63" machine="48" class="WORD" abbrev="STKBOT">Address of bottom of calculator stack.</sysvar>
+    <sysvar address="5C65" machine="48" class="WORD" abbrev="STKEND">Address of start of spare space.</sysvar>
+    <sysvar address="5C67" machine="48" class="BYTE" abbrev="BREG">Calculator's B register.</sysvar>
+    <sysvar address="5C68" machine="48" class="WORD" abbrev="MEM">Address of area used for calculator's memory (usually MEMBOT, but not always).</sysvar>
+    <sysvar address="5C6A" machine="48" class="FLAGS2" abbrev="FLAGS2">More flags. (Bit 3 set when CAPS SHIFT or CAPS LOCK is on.)</sysvar>
+    <sysvar address="5C6B" machine="48" class="BYTE" abbrev="DF SZ">The number of lines (including one blank line) in the lower part of the screen.</sysvar>
+    <sysvar address="5C6C" machine="48" class="WORD" abbrev="S TOP">The number of the top program line in automatic listings.</sysvar>
+    <sysvar address="5C6E" machine="48" class="WORD" abbrev="OLDPPC">Line number to which CONTINUE jumps.</sysvar>
+    <sysvar address="5C70" machine="48" class="BYTE" abbrev="OSPPC">Number within line of statement to which CONTINUE jumps.</sysvar>
+    <sysvar address="5C71" machine="48" class="FLAGX" abbrev="FLAGX">Various flags.</sysvar>
+    <sysvar address="5C72" machine="48" class="WORD" abbrev="STRLEN">Length of string type destination in assignment.</sysvar>
+    <sysvar address="5C74" machine="48" class="WORD" abbrev="T ADDR">Address of next item in syntax table (very unlikely to be useful).</sysvar>
+    <sysvar address="5C76" machine="48" class="WORD" abbrev="SEED">The seed for RND. This is the variable that is set by RANDOMIZE.</sysvar>
+    <sysvar address="5C78" machine="48" class="TRIPLE" abbrev="FRAMES">3 byte (least significant byte first), frame counter incremented every 20ms.</sysvar>
+    <sysvar address="5C7B" machine="48" class="WORD" abbrev="UDG">Address of first user-defined graphic. You can change this, for instance, to save space by having fewer user-defined characters.</sysvar>
+    <sysvar address="5C7D" machine="48" class="BYTE" abbrev="COORDSX">X-coordinate of last point plotted.</sysvar>
+    <sysvar address="5C7E" machine="48" class="BYTE" abbrev="COORDSY">Y-coordinate of last point plotted.</sysvar>
+    <sysvar address="5C7F" machine="48" class="BYTE" abbrev="P POSN">33-column number of printer position.</sysvar>
+    <sysvar address="5C80" machine="48" class="WORD" abbrev="PRCC">Full address of next position for LPRINT to print at (in ZX printer buffer). Legal values 5B00 - 5B1F. [Not used in 128K mode or when certain peripherals  are attached]</sysvar>
+    <sysvar address="5C82" machine="48" class="WORD" abbrev="ECHO E">33-column number and 24-line number (in lower half) of end of input buffer.</sysvar>
+    <sysvar address="5C84" machine="48" class="WORD" abbrev="DF CC">Address in display file of PRINT position.</sysvar>
+    <sysvar address="5C86" machine="48" class="WORD" abbrev="DF CCL">Like DF CC for lower part of screen.</sysvar>
+    <sysvar address="5C88" machine="48" class="BYTE" abbrev="SPOSNY">33-column number for PRINT position.</sysvar>
+    <sysvar address="5C89" machine="48" class="BYTE" abbrev="SPOSNX">24-line number for PRINT position.</sysvar>
+    <sysvar address="5C8A" machine="48" class="BYTE" abbrev="SPOSNLY">33-column number for PRINT in the lower part.</sysvar>
+    <sysvar address="5C8B" machine="48" class="BYTE" abbrev="SPOSNLX">24-line number for PRINT position in the lower part.</sysvar>
+    <sysvar address="5C8C" machine="48" class="BYTE" abbrev="SCRCT">Counts scrolls - it is always 1 more than the number of scrolls that will be done before stopping with 'scroll?'. If you keep poking this with a number bigger than 1 (say 255), the screen will scroll on and on without asking</sysvar>
+    <sysvar address="5C8D" machine="48" class="COLOUR" abbrev="ATTR P">Permanent current colours, etc., (as set up by colour statements).</sysvar>
+    <sysvar address="5C8E" machine="48" class="COLOUR" abbrev="MASK P">Used for transparent colours, etc. Any bit that is 1 shows that the corresponding attribute bit is taken not from ATTR P, but from what is already on the screen.</sysvar>
+    <sysvar address="5C8F" machine="48" class="COLOUR" abbrev="ATTR T">Temporary current colours, etc., (as set up by colour items).</sysvar>
+    <sysvar address="5C90" machine="48" class="COLOUR" abbrev="MASK T">Like MASK P, but temporary.</sysvar>
+    <sysvar address="5C91" machine="48" class="PFLAG" abbrev="P FLAG">More flags.</sysvar>
+    <sysvar address="5C92" machine="48" class="FLOAT-30" abbrev="MEMBOT">Calculator''s memory area - used to store numbers that cannot conveniently be put on the calculator stack.</sysvar>
+    <sysvar address="5CB0" machine="48" class="WORD" abbrev="NMIADD">Holds the address of the users NMI service routine. NOTE - On previous machines, this did not work correctly and these two bytes were documented as 'Not used.'</sysvar>
+    <sysvar address="5CB2" machine="48" class="WORD" abbrev="RAMTOP">Address of last byte of BASIC system area.</sysvar>
+    <sysvar address="5CB4" machine="48" class="WORD" abbrev="P RAMT">Address of last byte of physical RAM.</sysvar>
+
+  <flags>
+    <flag abbrev="SERFL">
+      <bit num="0" false="not in buffer" true="in buffer">Character in buffer flag</bit>
+    </flag>
+    <flag abbrev="FLAGS3">
+      <bit num="0" false="Editor/menu" true="BASIC/Calc">BASIC-Calculator mode / Editor-menu mode</bit>
+      <bit num="1" false="dontAuto-run" true="Auto-run">Auto-run loaded BASIC program. [Set but never tested by the ROM]</bit>
+      <bit num="2" false="Not editing" true="Editing">Editing RAM disk catalogue</bit>
+      <bit num="3" false="Using Tape" true="Using Ramdisk">Using RAM disk commands</bit>
+      <bit num="4" false="false" true="true">Indicate Load</bit>
+      <bit num="5" false="false" true="true">Indicate Save</bit>
+      <bit num="6" false="false" true="true">Indicate Merge</bit>
+      <bit num="7" false="false" true="true">Indicate Verify</bit>
+    </flag>
+    <flag abbrev="ROW01">
+      <bit num="0" false="Not pressed" true="pressed">Key '+'?</bit>
+      <bit num="1" false="Not pressed" true="pressed">Key '6'?</bit>
+      <bit num="2" false="Not pressed" true="pressed">Key '5'?</bit>
+      <bit num="3" false="Not pressed" true="pressed">Key '4'?</bit>
+      <bit num="6" false="No" true="Yes">Successful communications to the keypad?</bit>
+      <bit num="7" false="No" true="Yes">Communications to the keypad established?</bit>
+    </flag>
+    <flag abbrev="ROW23">
+      <bit num="0" false="Not pressed" true="pressed">Key ')'?</bit>
+      <bit num="1" false="Not pressed" true="pressed">Key '('?</bit>
+      <bit num="2" false="Not pressed" true="pressed">Key '*'?</bit>
+      <bit num="3" false="Not pressed" true="pressed">Key '/'?</bit>
+      <bit num="4" false="Not pressed" true="pressed">Key '-'?</bit>
+      <bit num="5" false="Not pressed" true="pressed">Key '9'?</bit>
+      <bit num="6" false="Not pressed" true="pressed">Key '8'?</bit>
+      <bit num="7" false="Not pressed" true="pressed">Key '7'?</bit>
+    </flag>
+    <flag abbrev="ROW45">
+      <bit num="1" false="Not pressed" true="pressed">Key '.'?</bit>
+      <bit num="3" false="Not pressed" true="pressed">Key '0'?</bit>
+      <bit num="4" false="Not pressed" true="pressed">Key 'Enter'?</bit>
+      <bit num="5" false="Not pressed" true="pressed">Key '3'?</bit>
+      <bit num="6" false="Not pressed" true="pressed">Key '2'?</bit>
+      <bit num="7" false="Not pressed" true="pressed">Key '1'?</bit>
+    </flag>
+    <flag abbrev="BANKM">
+      <bit num="0" false="0" true="1">$C000 page LSB</bit>
+      <bit num="1" false="0" true="1">$C000 page middle bit</bit>
+      <bit num="2" false="0" true="1">$C000 page MSB</bit>
+      <bit num="3" false="Rom 0/2" true="Rom 1/3">Horizontal rom switch (On 128k machines, Rom 0-1, on +2a/+3, Rom 0-1 or Rom 2-3 depending on BANK678)</bit>
+      <bit num="4" false="Page 5" true="Page 7">Display Screen Selection</bit>
+      <bit num="5" false="Unlocked" true="Locked">Page lock flag</bit>
+    </flag>
+    <flag abbrev="BANK678">
+      <bit num="0" false="Normal rom/ram mode" true="AllRAM mode enabled">AllRAM mode</bit>
+      <bit num="1" false="0" true="1">Special page mode LSB. Ignored in normal paging mode</bit>
+      <bit num="2" false="0" true="1">Special page mode MSB / Vertical Rom switch (Between 0-2,1-3 depending on BANKM)</bit>
+      <bit num="3" false="off " true="on">Disk Motor</bit>
+      <bit num="4" false="0" true="1">Centronics Strobe</bit>
+    </flag>
+
+    <flag abbrev="FLAGS">
+      <bit num="0" false="dont suppress" true="suppress">Leading space flag</bit>
+      <bit num="1" false="not in use" true="in use">Printer</bit>
+      <bit num="2" false="K" true="L">Printer mode</bit>
+      <bit num="3" false="K" true="L">Keyboard mode</bit>
+      <bit num="4" false="48k" true="128k">always 0 on 48k machines or in 48k mode on 128k machines. Set to allow usage of 128K channels</bit>
+      <bit num="5" false="No" true="Yes">New key?</bit>
+      <bit num="6" false="String" true="Number">Variable type</bit>
+      <bit num="7" false="Syntax check" true="Execution">Syntax/running?</bit>
+    </flag>
+  
+    <flag abbrev="TVFLAG">
+      <bit num="0" false="Upper screen" true="Lower screen">Print target</bit>
+      <bit num="3" false="No" true="Yes">Input mode has changed</bit>
+      <bit num="4" false="No" true="Yes">auto-listing in progress</bit>
+      <bit num="5" false="No" true="Yes">lower screen needs clearing</bit>
+    </flag>
+
+    <flag abbrev="FLAGS2">
+      <bit num="0" false="no" true="yes">Screen clear?</bit>
+      <bit num="1" false="no" true="yes">Printer buffer in use</bit>
+      <bit num="2" false="no" true="yes">In quotes when line parsing?</bit>
+      <bit num="3" false="no" true="yes">Caps lock</bit>
+      <bit num="4" false="no" true="yes">Using Channel "K" (keyboard)</bit>
+    </flag>
+
+    <flag abbrev="FLAGX">
+      <bit num="0" false="no" true="yes">Dealing with complete simple string?</bit>
+      <bit num="1" false="no" true="yes">new variable</bit>
+      <bit num="5" false="EDITING" true="INPUT">Input mode</bit>
+      <bit num="7" false="no" true="yes">Dealing with INPUT line?</bit>
+    </flag>
+
+    <flag abbrev="FLAGS3A">
+      <bit num="0" false="Editor/menu" true="BASIC/Calc">BASIC-Calculator mode / Editor-menu mode</bit>
+      <bit num="1" false="dontAuto-run" true="Auto-run">Auto-run loaded BASIC program. [Set but never tested by the ROM]</bit>
+      <bit num="2" false="not Expanded" true="Expanded">Auto-expand print tokens?</bit>
+      <bit num="3" false="Centronics" true="RS232">Print output</bit>
+      <bit num="4" false="Not present" true="Present">Floppy disk hardware present</bit>
+      <bit num="5" false="Not present" true="Present">Drive B?</bit>
+    </flag>
+
+    <flag abbrev="PFLAG">
+      <bit num="0" false="0" true="1">OVER bit (temp)</bit>
+      <bit num="1" false="0" true="1">OVER bit (Perm)</bit>
+      <bit num="2" false="0" true="1">INVERSE bit (temp)</bit>
+      <bit num="3" false="0" true="1">INVERSE bit (perm)</bit>
+      <bit num="4" false="0" true="1">INK 9 if set (temp)</bit>
+      <bit num="5" false="0" true="1">INK 9 if set (perm)</bit>
+      <bit num="6" false="0" true="1">PAPER 9 if set (temp)</bit>
+      <bit num="7" false="0" true="1">PAPER 9 if set (perm)</bit>
+    </flag>
+
+  </flags>
 </systemvariables>
 

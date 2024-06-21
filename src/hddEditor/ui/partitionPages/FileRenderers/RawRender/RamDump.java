@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
+//TODO:Add exporting of system variables to ramdump export.
 
 /**
  * This object implements displaying of a dump of memory. from 16384 to 65535.
@@ -43,7 +44,11 @@ public class RamDump implements Renderer {
 	private String fName = null;
 	private int IYReg = 0;
 	private int i128BankOrder[];
-
+	
+	private boolean HasBasic;
+	private BasicRenderer BR;
+	private SystemVariablesRenderer SVR;
+	
 	@Override
 	public void DisposeRenderer() {
 		if (labels != null) {
@@ -121,24 +126,30 @@ public class RamDump implements Renderer {
 		Font boldFont = new Font(lbl.getShell().getDisplay(),
 				new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 
-//		if (IY == 0x5c3a) {
-			// check for BASIC.
-			int diff = 0x4000;
+		// check for BASIC.
+		int diff = 0x4000;
 
-			int PROG = (data[0x5c54 - diff] & 0xff) * 256 + (data[0x5c53 - diff] & 0xff);
-			int VARS = (data[0x5c4c - diff] & 0xff) * 256 + (data[0x5c4b - diff] & 0xff);
-			int E_LINE = (data[0x5c5a - diff] & 0xff) * 256 + (data[0x5c59 - diff] & 0xff);
+		int PROG = (data[0x5c54 - diff] & 0xff) * 256 + (data[0x5c53 - diff] & 0xff);
+		int VARS = (data[0x5c4c - diff] & 0xff) * 256 + (data[0x5c4b - diff] & 0xff);
+		int E_LINE = (data[0x5c5a - diff] & 0xff) * 256 + (data[0x5c59 - diff] & 0xff);
 
-			// some basic checking.
-			if ((VARS > PROG) && (E_LINE > VARS) && (PROG > 23754) && (PROG < 25000)) {
-				byte BasicData[] = new byte[E_LINE - PROG];
-				System.arraycopy(data, PROG - diff, BasicData, 0, BasicData.length);
+		// some basic checking.
+		HasBasic = false;
+		if ((VARS > PROG) && (E_LINE > VARS) && (PROG > 23754) && (PROG < 25000)) {
 
-				BasicRenderer BR = new BasicRenderer();
-				Renderers.add(BR);
-				BR.AddBasicFile(TargetPage, BasicData, BasicData.length, VARS - PROG);
-			}
-	//	}
+			byte BasicData[] = new byte[E_LINE - PROG];
+			System.arraycopy(data, PROG - diff, BasicData, 0, BasicData.length);
+			BR = new BasicRenderer();
+			Renderers.add(BR);
+			BR.AddBasicFile(TargetPage, BasicData, BasicData.length, VARS - PROG);
+
+			byte SysVars[] = new byte[512];
+			System.arraycopy(data, 0x5b00 - diff, SysVars, 0, SysVars.length);
+			SVR = new SystemVariablesRenderer();
+			Renderers.add(SVR);
+			SVR.AddSysVars(TargetPage, SysVars, false, false);
+			HasBasic = true;
+		}
 
 		if (is128K) {
 			lbl.setText("Paged in memory (5B00-7FFF)=bank 5, (8000-BFFF)=bank 2, (C000-FFFF)=bank " + i128BankOrder[2]);
@@ -209,11 +220,11 @@ public class RamDump implements Renderer {
 			System.arraycopy(rawdata, 0, ram, 0, Math.min(49152, rawdata.length));
 			GeneralUtils.WriteBlockToDisk(ram, RootFile.getAbsoluteFile() + ".ramdump");
 
-			//save the raw scr file.
+			// save the raw scr file.
 			byte scr[] = new byte[6912];
 			System.arraycopy(rawdata, 0, scr, 0, Math.min(6912, rawdata.length));
 			GeneralUtils.WriteBlockToDisk(scr, RootFile.getAbsoluteFile() + ".scr");
-			
+
 			// Each ram bank.
 			int ptr = 0;
 			for (int page : i128BankOrder) {
@@ -229,7 +240,18 @@ public class RamDump implements Renderer {
 				}
 				ptr = ptr + 0x4000;
 			}
-
+			
+			//save BASIC
+			if (HasBasic) {
+				if (BR!= null) {
+					String basicdets = BR.GetBasicSummary();
+					GeneralUtils.WriteBlockToDisk(basicdets.getBytes(), RootFile.getAbsoluteFile() + ".basic");
+				}
+				if (SVR!=null) {
+					String Sysvars = SVR.getSystemVariableSummary();
+					GeneralUtils.WriteBlockToDisk(Sysvars.getBytes(), RootFile.getAbsoluteFile() + ".SYSVARS");
+				}
+			}
 		}
 	}
 
@@ -251,17 +273,28 @@ public class RamDump implements Renderer {
 			// save the snapshot
 			GeneralUtils.WriteBlockToDisk(ram, RootFile.getAbsoluteFile() + ".ramdump");
 
-			//save the raw scr file.
+			// save the raw scr file.
 			byte scr[] = new byte[6912];
 			System.arraycopy(rawdata, 0, scr, 0, Math.min(6912, rawdata.length));
 			GeneralUtils.WriteBlockToDisk(scr, RootFile.getAbsoluteFile() + ".scr");
-			
-			
+
 			// save the screen as a PNG
 			ImageData image = Speccy.GetImageFromFileArray(ram, 0);
 			ImageLoader saver = new ImageLoader();
 			saver.data = new ImageData[] { image };
 			saver.save(RootFile.getAbsoluteFile() + ".image", SWT.IMAGE_PNG);
+			
+			//save BASIC
+			if (HasBasic) {
+				if (BR!= null) {
+					String basicdets = BR.GetBasicSummary();
+					GeneralUtils.WriteBlockToDisk(basicdets.getBytes(), RootFile.getAbsoluteFile() + ".basic");
+				}
+				if (SVR!=null) {
+					String Sysvars = SVR.getSystemVariableSummary();
+					GeneralUtils.WriteBlockToDisk(Sysvars.getBytes(), RootFile.getAbsoluteFile() + ".SYSVARS");
+				}
+			}
 		}
 	}
 

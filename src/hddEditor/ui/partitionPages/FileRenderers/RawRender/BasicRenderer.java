@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
+
 /**
  * Try to decode a given binary file as BASIC.
  * 
@@ -23,25 +24,45 @@ public class BasicRenderer implements Renderer {
 	public Table Listing = null;
 	public Table Variables = null;
 	public Label VarLBL = null;
-	
+
 	@Override
 	public void DisposeRenderer() {
-		if (Listing!=null) {
+		if (Listing != null) {
 			Listing.dispose();
 		}
-		Listing=null;
+		Listing = null;
 
-		if (Variables!=null) {
+		if (Variables != null) {
 			Variables.dispose();
 		}
-		Variables=null;
+		Variables = null;
 
-		if (VarLBL!=null) {
+		if (VarLBL != null) {
 			VarLBL.dispose();
 		}
-		VarLBL=null;
+		VarLBL = null;
+	}
 
+	public String GetBasicSummary() {
+		String result = "";
 
+		for (TableItem line : Listing.getItems()) {
+			String lineno = line.getText(0);
+			String content = line.getText(1);
+			result = result + lineno + " " + content + "\n";
+		}
+		result = result + "\nVariables:\n";
+		if (Variables != null && Variables.getItems() != null ) {
+			for (TableItem line : Variables.getItems()) {
+				String varname = line.getText(0);
+				String type = line.getText(1);
+				String content = line.getText(2);
+				result = result + varname + " " + type + " - " + content + "\n";
+			}
+		} else {
+			result = result + "None.";
+		}
+		return (result.trim());
 	}
 
 	/**
@@ -52,7 +73,7 @@ public class BasicRenderer implements Renderer {
 	 * @param VariablesOffset
 	 */
 	public void AddVariables(Composite TargetPage, byte data[], int filelength, int VariablesOffset) {
-		if (VarLBL!=null) {
+		if (VarLBL != null) {
 			VarLBL.dispose();
 		}
 		VarLBL = new Label(TargetPage, SWT.NONE);
@@ -90,13 +111,14 @@ public class BasicRenderer implements Renderer {
 			DecodeVariables(TargetPage, variables);
 		}
 	}
+
 	/**
 	 * Add the file as BASIC.
 	 * 
 	 * @param filelength
 	 * @param VariablesOffset
 	 */
-	public void AddBasicFile(Composite TargetPage, byte data[],int filelength, int VariablesOffset) {
+	public void AddBasicFile(Composite TargetPage, byte data[], int filelength, int VariablesOffset) {
 		class RemDetails {
 			public int locationAddr;
 			public int size;
@@ -105,7 +127,7 @@ public class BasicRenderer implements Renderer {
 			public int line;
 		}
 
-		if (Listing!= null) {
+		if (Listing != null) {
 			Listing.dispose();
 		}
 		Listing = new Table(TargetPage, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
@@ -124,7 +146,6 @@ public class BasicRenderer implements Renderer {
 		tc2.setText("Line");
 		tc2.setWidth(600);
 
-		
 		Font mono = new Font(TargetPage.getDisplay(), "Monospace", 10, SWT.NONE);
 
 		ArrayList<RemDetails> RemLocations = new ArrayList<RemDetails>();
@@ -294,42 +315,42 @@ public class BasicRenderer implements Renderer {
 	 */
 	private void DecodeVariables(Composite mainPage, byte[] VarData) {
 		try {
-		int ptr = 0x00;
-		if (ptr >= (VarData.length)) {
-			TableItem Row = new TableItem(Variables, SWT.NONE);
-			Row.setText(new String[] { "No Variables", "", "" });
-		} else {
-			while (ptr < VarData.length) {
-				int var = (int) (VarData[ptr++] & 0xff);
-				int vartype = var / 0x20;
-				// char c = (char) ((var & 0x1f) + 0x60);
+			int ptr = 0x00;
+			if (ptr >= (VarData.length)) {
+				TableItem Row = new TableItem(Variables, SWT.NONE);
+				Row.setText(new String[] { "No Variables", "", "" });
+			} else {
+				while (ptr < VarData.length) {
+					int var = (int) (VarData[ptr++] & 0xff);
+					int vartype = var / 0x20;
+					// char c = (char) ((var & 0x1f) + 0x60);
 
-				if (vartype == 0x00) {
-					// anything after this marker is junk so just skip it.
-					TableItem Row = new TableItem(Variables, SWT.NONE);
-					Row.setText(new String[] { "End of variables", "", "" });
-					ptr = VarData.length;
-				} else if (vartype == 1) {
-					TableItem Row = new TableItem(Variables, SWT.NONE);
-					Row.setText(new String[] { "Unknown type", "", "" });
-					ptr = VarData.length;
-				} else if (vartype == 2) { // string
-					ptr = VariableType2(ptr, var, VarData);
-				} else if (vartype == 3) { // number (1 letter)
-					ptr = VariableType3(ptr, var, VarData);
-				} else if (vartype == 4) { // Array of numbers
-					ptr = VariableType4(ptr, var, VarData);
-				} else if (vartype == 5) { // Number who's name is longer than 1 letter
-					ptr = VariableType5(ptr, var, VarData);
-				} else if (vartype == 6) { // array of characters
-					ptr = VariableType6(ptr, var, VarData);
-				} else if (vartype == 7) { // for/next control variable
-					ptr = VariableType7(ptr, var, VarData);
-				} else {
-					System.out.print("UNKNOWN! $" + Integer.toHexString(var) + " at " + ptr);
+					if (vartype == 0x00) {
+						// anything after this marker is junk so just skip it.
+						TableItem Row = new TableItem(Variables, SWT.NONE);
+						Row.setText(new String[] { "End of variables", "", "" });
+						ptr = VarData.length;
+					} else if (vartype == 1) {
+						TableItem Row = new TableItem(Variables, SWT.NONE);
+						Row.setText(new String[] { "Unknown type", "", "" });
+						ptr = VarData.length;
+					} else if (vartype == 2) { // string
+						ptr = VariableType2(ptr, var, VarData);
+					} else if (vartype == 3) { // number (1 letter)
+						ptr = VariableType3(ptr, var, VarData);
+					} else if (vartype == 4) { // Array of numbers
+						ptr = VariableType4(ptr, var, VarData);
+					} else if (vartype == 5) { // Number who's name is longer than 1 letter
+						ptr = VariableType5(ptr, var, VarData);
+					} else if (vartype == 6) { // array of characters
+						ptr = VariableType6(ptr, var, VarData);
+					} else if (vartype == 7) { // for/next control variable
+						ptr = VariableType7(ptr, var, VarData);
+					} else {
+						System.out.print("UNKNOWN! $" + Integer.toHexString(var) + " at " + ptr);
+					}
 				}
 			}
-		}
 		} catch (Exception E) {
 			TableItem Row = new TableItem(Variables, SWT.NONE);
 			Row.setText(new String[] { "Failed to decode variables.", "", "" });
@@ -581,5 +602,4 @@ public class BasicRenderer implements Renderer {
 		return (Address);
 	}
 
-	
 }
