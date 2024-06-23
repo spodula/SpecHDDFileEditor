@@ -1,6 +1,5 @@
 package hddEditor.ui.partitionPages;
 //TODO: CPM ISVALID flag doesnt seem to work properly.
-//TODO: when displaying basic from 48k files, show system variables.
 
 import java.io.File;
 

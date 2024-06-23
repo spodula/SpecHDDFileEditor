@@ -393,7 +393,7 @@ public class FileImportForm {
 						filename =  TargetPartition.UniqueifyFileNameIfRequired(filename);
 						switch (sbd.BasicType) {
 						case Speccy.BASIC_BASIC:
-							TargetPartition.AddBasicFile(filename, fe.GetFileData(), sbd.LineStart,
+							TargetPartition.AddBasicFile(filename, fe.GetFileData(), sbd.LineStart ,
 									sbd.VarStart);
 							break;
 						case Speccy.BASIC_NUMARRAY:

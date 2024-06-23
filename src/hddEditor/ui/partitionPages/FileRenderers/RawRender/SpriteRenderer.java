@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
+
 /**
  * Renderer for code files as sprites.
  */
@@ -51,12 +52,13 @@ public class SpriteRenderer implements Renderer {
 	private ArrayList<Image> Images = null;
 
 	private Composite page;
-	
+
 	private FileSelectDialog filesel = null;
-	
+
 	private String filename;
 
-	public void Render(Composite mainPage, byte data[], int HeightLimit, int baseaddress,FileSelectDialog filesel, String filename) {
+	public void Render(Composite mainPage, byte data[], int HeightLimit, int baseaddress, FileSelectDialog filesel,
+			String filename) {
 		this.page = mainPage;
 		this.filesel = filesel;
 		this.data = data;
@@ -129,10 +131,10 @@ public class SpriteRenderer implements Renderer {
 			public void widgetSelected(SelectionEvent arg0) {
 				widgetDefaultSelected(arg0);
 			}
-
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 				DoExportSelected(true);
+				mainPage.getShell().forceActive();
 			}
 		});
 
@@ -143,10 +145,10 @@ public class SpriteRenderer implements Renderer {
 			public void widgetSelected(SelectionEvent arg0) {
 				widgetDefaultSelected(arg0);
 			}
-
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 				DoExportSelected(false);
+				mainPage.getShell().forceActive();
 			}
 		});
 
@@ -185,7 +187,7 @@ public class SpriteRenderer implements Renderer {
 	 * Update the table.
 	 */
 	private void UpdateTable() {
-		// TODO: bugfix: when exporting with more than 1 column, seems to export incorrect data.
+		// incorrect data.
 		SprTable.removeAll();
 		SprTable.clearAll();
 
@@ -205,7 +207,7 @@ public class SpriteRenderer implements Renderer {
 		int width = Math.max(Integer.valueOf(SpriteWidth.getText()), 1);
 		int height = Math.max(Integer.valueOf(SpriteHeight.getText()), 8);
 
-		// default pallette, black and white.
+		// default palette, black and white.
 		PaletteData pd = new PaletteData(new RGB[] { new RGB(0, 0, 0), new RGB(255, 255, 255) });
 
 		// One rows worth of data.
@@ -255,7 +257,7 @@ public class SpriteRenderer implements Renderer {
 			gc.drawImage(img, 0, 0, img.getBounds().width, img.getBounds().height, 0, 0, DISPLAYIMAGEWIDTH,
 					DISPLAYIMAGEHEIGHT);
 			gc.dispose();
-			
+
 			// dispose of the source image.
 			img.dispose();
 			img = null;
@@ -335,13 +337,14 @@ public class SpriteRenderer implements Renderer {
 			selecteditems = SprTable.getItems();
 		}
 		int width = Math.max(Integer.valueOf(SpriteWidth.getText()), 1);
-		
+
 		String title = "Save sprites as bin";
 		if (!Binary) {
 			title = "Save sprites as asm";
 		}
 
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, title, new String[] {"*"},filename);
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, title, new String[] { "*" },
+				filename);
 		if (Selected != null) {
 			FileOutputStream file;
 			try {
@@ -353,7 +356,7 @@ public class SpriteRenderer implements Renderer {
 							String t2[] = texts.split("\n");
 							int start = Integer.parseInt(t2[0].substring(1), 16) - BaseAddress;
 							int end = Integer.parseInt(t2[1].substring(1), 16) - BaseAddress;
-							System.out.println(start+"->"+end+" "+t2[0]+","+t2[1]);
+							System.out.println(start + "->" + end + " " + t2[0] + "," + t2[1]);
 							byte datax[] = new byte[end - start + 1];
 							System.arraycopy(data, start, datax, 0, datax.length);
 							if (Binary) {
@@ -365,7 +368,6 @@ public class SpriteRenderer implements Renderer {
 								while (ptr < datax.length) {
 									int d = datax[ptr++] & 0xff;
 									String binval = Integer.toBinaryString(d);
-
 									String xxx = "00000000".substring(binval.length()) + binval;
 
 									CurrentLine = CurrentLine + xxx + "b";
