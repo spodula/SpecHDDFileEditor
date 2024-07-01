@@ -3,7 +3,7 @@ package hddEditor.libs.partitions;
  * Implementation of a partition representing the boot track
  * for a CPM or CPM-like disk. Particularly the Amstrad variant.
  */
-//TODO: Need to better handle copy-protected +3 DISKS. 
+//TODO: find out why batman the movie disk wont load.
 
 import java.io.File;
 import java.io.FileWriter;
