@@ -1,4 +1,5 @@
 package hddEditor.libs;
+//TODO: scaling images with colours doesnt work properly.
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -90,6 +91,7 @@ public class SpeccyFileEncoders {
 			Graphics2D graphics2D = TargetImg.createGraphics();
 			graphics2D.drawImage(RawImage, 0, 0, 256, 192, null);
 			graphics2D.dispose();
+			
 			// process it.
 
 			if (isBW) {
@@ -420,7 +422,6 @@ public class SpeccyFileEncoders {
 					} else {
 						curritem = curritem + c;
 					}
-
 				}
 			}
 		}

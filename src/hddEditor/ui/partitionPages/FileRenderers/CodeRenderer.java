@@ -44,7 +44,7 @@ public class CodeRenderer extends FileRenderer {
 	private Vector<Renderer> Renderers = null;
 
 	// Rendering options
-	private String[] CODETYPES = { "Binary", "Screen", "Assembly", "SNA file", "Z80 file","48k Ram Dump", ".SP file","ASCII Text","Sprite" };
+	private String[] CODETYPES = { "Binary", "Screen", "Assembly", "SNA file", "Z80 file","48k Ram Dump", ".SP file","ASCII Text","Sprite", "48K ram dump (minus screen)" };
 
 	/**
 	 * 
@@ -293,6 +293,14 @@ public class CodeRenderer extends FileRenderer {
 				SpriteRenderer renderer = new SpriteRenderer();
 				Renderers.add(renderer);
 				renderer.Render(MainPage, data, 400, loadAddr, filesel, filename);
+			} else if (s.equals(CODETYPES[9])) {
+				RamDump renderer = new RamDump();
+				Renderers.add(renderer);
+				
+				byte data1[] = new byte[0xc000];
+				System.arraycopy(data, 0,data1, 0x1b00, Math.min(0xc000-0x1b00, data.length));
+				
+				renderer.Render(MainPage, data1, loadAddr, false, 0x5c3a , new int [0], filename);
 			} else {
 				BinaryRenderer renderer = new BinaryRenderer();
 				Renderers.add(renderer);

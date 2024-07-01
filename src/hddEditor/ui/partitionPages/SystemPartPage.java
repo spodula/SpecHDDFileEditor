@@ -755,7 +755,7 @@ public class SystemPartPage extends GenericPage {
 						part.SetAllDataInPartition(HxEditDialog.Data);
 						part.Reload();
 						if (part.GetPartType() == PLUSIDEDOS.PARTITION_SYSTEM) {
-							RootPage.LoadFile(new File(RootPage.CurrentDisk.GetFilename()));
+							RootPage.LoadFile(new File(RootPage.CurrentDisk.GetFilename()), false);
 						}
 					}
 				} catch (IOException e) {
@@ -802,7 +802,7 @@ public class SystemPartPage extends GenericPage {
 		}
 		// Force a reload to make sure all parameters are up to date.
 		if (result) {
-			RootPage.LoadFile(new File(sp.CurrentDisk.GetFilename()));
+			RootPage.LoadFile(new File(sp.CurrentDisk.GetFilename()), false);
 		}
 	}
 

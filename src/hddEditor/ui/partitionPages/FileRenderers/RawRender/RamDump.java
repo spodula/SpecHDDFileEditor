@@ -1,6 +1,4 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
-//TODO:Add exporting of system variables to ramdump export.
-
 /**
  * This object implements displaying of a dump of memory. from 16384 to 65535.
  * It will try to decode any BASIC if found. 
@@ -48,6 +46,8 @@ public class RamDump implements Renderer {
 	private boolean HasBasic;
 	private BasicRenderer BR;
 	private SystemVariablesRenderer SVR;
+
+	private byte BasicData[];
 	
 	@Override
 	public void DisposeRenderer() {
@@ -135,9 +135,10 @@ public class RamDump implements Renderer {
 
 		// some basic checking.
 		HasBasic = false;
+		BasicData = null;
 		if ((VARS > PROG) && (E_LINE > VARS) && (PROG > 23754) && (PROG < 25000)) {
-
-			byte BasicData[] = new byte[E_LINE - PROG];
+			
+			BasicData = new byte[E_LINE - PROG];
 			System.arraycopy(data, PROG - diff, BasicData, 0, BasicData.length);
 			BR = new BasicRenderer();
 			Renderers.add(BR);
@@ -251,6 +252,10 @@ public class RamDump implements Renderer {
 					String Sysvars = SVR.getSystemVariableSummary();
 					GeneralUtils.WriteBlockToDisk(Sysvars.getBytes(), RootFile.getAbsoluteFile() + ".SYSVARS");
 				}
+				if (BasicData!=null) {
+					GeneralUtils.WriteBlockToDisk(BasicData, RootFile.getAbsoluteFile() + ".rawbasic");
+				}
+				
 			}
 		}
 	}
@@ -293,6 +298,9 @@ public class RamDump implements Renderer {
 				if (SVR!=null) {
 					String Sysvars = SVR.getSystemVariableSummary();
 					GeneralUtils.WriteBlockToDisk(Sysvars.getBytes(), RootFile.getAbsoluteFile() + ".SYSVARS");
+				}
+				if (BasicData!=null) {
+					GeneralUtils.WriteBlockToDisk(BasicData, RootFile.getAbsoluteFile() + ".rawbasic");
 				}
 			}
 		}

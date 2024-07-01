@@ -13,6 +13,7 @@ import hddEditor.libs.partitions.FloppyBootTrack;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.NonCPMDiskImagePartition;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
+import hddEditor.libs.partitions.RawDiskData;
 import hddEditor.libs.partitions.SystemPartition;
 import hddEditor.libs.partitions.TrDosPartition;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
@@ -140,10 +141,16 @@ public class NonPartitionedDiskHandler extends OSHandler {
 				p3dp.SetEndSector((long) ((CurrentDisk.GetNumCylinders() - ActualReservedTracks)
 						* CurrentDisk.GetNumHeads() * CurrentDisk.GetNumSectors()));
 				p3dp.ReservedTracks = 0;
+
 				SystemPart.partitions = new IDEDosPartition[3];
 				SystemPart.partitions[0] = SystemPart;
 				SystemPart.partitions[1] = BootPart;
-				SystemPart.partitions[2] = p3dp;
+				if (!p3dp.IsValid) {
+					RawDiskData rdd = new RawDiskData(1, CurrentDisk, rawData, 1, false);
+					SystemPart.partitions[2] = rdd;					
+				} else {
+					SystemPart.partitions[2] = p3dp;
+				}
 			} else if (fn.endsWith(".TRD")) {
 				TrDosPartition tdp = new TrDosPartition(1, CurrentDisk, rawData, 1, false);
 				tdp.SetPartType(PLUSIDEDOS.PARTITION_DISK_TRDOS);
@@ -154,7 +161,7 @@ public class NonPartitionedDiskHandler extends OSHandler {
 				SystemPart.partitions[0] = SystemPart;
 				SystemPart.partitions[1] = tdp;
 			} else if (fn.endsWith(".MGT")) {
-				MGTDosPartition mdp = new  MGTDosPartition(1, CurrentDisk, rawData, 1, false);
+				MGTDosPartition mdp = new MGTDosPartition(1, CurrentDisk, rawData, 1, false);
 				mdp.SetPartType(PLUSIDEDOS.PARTITION_DISK_PLUSD);
 				mdp.SetName("MGT/+D disk");
 				mdp.SetStartCyl(0);

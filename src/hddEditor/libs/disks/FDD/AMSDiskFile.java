@@ -93,12 +93,21 @@ public class AMSDiskFile extends FloppyDisk {
 
 	public boolean IsValid = false;
 
+	/**
+	 * 
+	 * @param file
+	 * @throws IOException
+	 * @throws BadDiskFileException
+	 */
 	public AMSDiskFile(File file) throws IOException, BadDiskFileException {
 		super(file);
 		IsValid = false;
 		ParseDisk();
 	}
 
+	/**
+	 * 
+	 */
 	public AMSDiskFile() {
 		inFile = null;
 		file = null;
@@ -107,6 +116,12 @@ public class AMSDiskFile extends FloppyDisk {
 		SetNumCylinders(0);
 	}
 
+	
+	/**
+	 * 
+	 * @throws IOException
+	 * @throws BadDiskFileException
+	 */
 	private void ParseDisk() throws IOException, BadDiskFileException {
 		NumLogicalSectors = 0;
 		InputStream in = new FileInputStream(file);
@@ -281,12 +296,12 @@ public class AMSDiskFile extends FloppyDisk {
 				System.out.println(h);
 				System.out.println("Track 1:");
 				byte data[] = h.GetBytesStartingFromSector(9, 512);
-				System.out.println(GeneralUtils.HexDump(data, 0, 512,0));
+				System.out.println(GeneralUtils.HexDump(data, 0, 512, 0));
 				// data[2] = 0x49;
 				h.SetLogicalBlockFromSector(9, data);
 				System.out.println("Track 1:");
 				data = h.GetBytesStartingFromSector(9, 512);
-				System.out.println(GeneralUtils.HexDump(data, 0, 512,0));
+				System.out.println(GeneralUtils.HexDump(data, 0, 512, 0));
 				h.close();
 			} else {
 				System.out.println(filename + " is Not an AMS disk file");
@@ -305,8 +320,9 @@ public class AMSDiskFile extends FloppyDisk {
 	 */
 	@Override
 	public byte[] GetBytesStartingFromSector(long SectorNum, long sz) throws IOException {
-		//Note, this will restrict length for AMS files of 128Mb. This probably shouldnt be an issue. 
-		long asz = Math.min(sz,1024*1024*128);
+		// Note, this will restrict length for AMS files of 128Mb. This probably
+		// shouldnt be an issue.
+		long asz = Math.min(sz, 1024 * 1024 * 128);
 		byte result[] = new byte[(int) asz];
 		// Find the track and sector...
 		int TrStart = 0;
@@ -324,7 +340,12 @@ public class AMSDiskFile extends FloppyDisk {
 		int ptr = 0;
 		byte sector[] = new byte[1];
 		while ((ptr < sz) && (sector.length > 0)) {
-			sector = Track.GetSectorBySectorID((int)FirstSector).data;
+			Sector sect = Track.GetSectorBySectorID((int) FirstSector);
+			if (sect == null) {
+				sector = new byte[SectorSize];
+			} else {
+				sector = sect.data;
+			}
 			System.arraycopy(sector, 0, result, ptr, Math.min(sector.length, result.length - ptr));
 
 			ptr = ptr + sector.length;
@@ -364,7 +385,7 @@ public class AMSDiskFile extends FloppyDisk {
 		int ptr = 0;
 		byte sectorData[] = new byte[1];
 		while ((ptr < result.length)) {
-			Sector sect = Track.GetSectorBySectorID((int)FirstSector);
+			Sector sect = Track.GetSectorBySectorID((int) FirstSector);
 			sectorData = sect.data;
 			System.arraycopy(result, ptr, sectorData, 0, Math.min(sectorData.length, result.length - ptr));
 			WriteSector(sect);
@@ -414,7 +435,7 @@ public class AMSDiskFile extends FloppyDisk {
 	 * @param Filename
 	 * @param VolumeName
 	 * @throws IOException
-	 * @throws BadDiskFileException 
+	 * @throws BadDiskFileException
 	 */
 	public void CreateBlankAMSDisk(File file, boolean Extended) throws IOException, BadDiskFileException {
 		FileOutputStream NewFile = new FileOutputStream(file);
@@ -448,7 +469,7 @@ public class AMSDiskFile extends FloppyDisk {
 
 			// Size of track. (Sector size * sector + track info block (256) )
 			int tracksz = (512 * 9) + 0x100;
-			
+
 			if (!Extended) {
 				// For normal disks, all track sizes are the same.
 				DiskInfoBlock[0x32] = (byte) (tracksz & 0xff);
@@ -459,7 +480,7 @@ public class AMSDiskFile extends FloppyDisk {
 				for (int i = 0; i < 40 * 1; i++) {
 					DiskInfoBlock[0x34 + i] = (byte) ((tracksz / 0x100) & 0xff);
 				}
-			}			
+			}
 
 			// Write the disk header
 			NewFile.write(DiskInfoBlock);
@@ -468,45 +489,45 @@ public class AMSDiskFile extends FloppyDisk {
 			 * Tracks
 			 */
 			for (int TrackNum = 0; TrackNum < 40; TrackNum++) {
-				//Track header
+				// Track header
 				byte TrackBlock[] = new byte[tracksz];
 				header = AMSDISKTRACKHEADER;
 				for (int i = 0; i < header.length(); i++) {
 					TrackBlock[i] = (byte) header.charAt(i);
 				}
-				
-				TrackBlock[0x10] = (byte) (TrackNum & 0xff); //tracknum
-				TrackBlock[0x11] = 0x00; //side number
-				TrackBlock[0x14] = 2; //sector size (Fiddled as usual)
-				TrackBlock[0x15] = 9; //Number of sectors
-				TrackBlock[0x16] = 0x4e; //gap3 length
-				TrackBlock[0x17] = (byte) (0xe5 & 0xff); //Filler byte
-				
-				//Sector list - Sectors from 1-9 inclusive
+
+				TrackBlock[0x10] = (byte) (TrackNum & 0xff); // tracknum
+				TrackBlock[0x11] = 0x00; // side number
+				TrackBlock[0x14] = 2; // sector size (Fiddled as usual)
+				TrackBlock[0x15] = 9; // Number of sectors
+				TrackBlock[0x16] = 0x4e; // gap3 length
+				TrackBlock[0x17] = (byte) (0xe5 & 0xff); // Filler byte
+
+				// Sector list - Sectors from 1-9 inclusive
 				int SectorBase = 0x18;
-				for(int SectorNum = 1; SectorNum < 10; SectorNum++) {
-					TrackBlock[SectorBase+0] = (byte) (TrackNum & 0xff); //tracknum
-					TrackBlock[SectorBase+1] = 0x00; //side 
-					TrackBlock[SectorBase+2] = (byte) (SectorNum & 0xff); //Sectornum
-					TrackBlock[SectorBase+3] = 0x02; //Sectorsize
-					TrackBlock[SectorBase+4] = 0x00; //fdc SR0
-					TrackBlock[SectorBase+5] = 0x00; //fdc SR1
+				for (int SectorNum = 1; SectorNum < 10; SectorNum++) {
+					TrackBlock[SectorBase + 0] = (byte) (TrackNum & 0xff); // tracknum
+					TrackBlock[SectorBase + 1] = 0x00; // side
+					TrackBlock[SectorBase + 2] = (byte) (SectorNum & 0xff); // Sectornum
+					TrackBlock[SectorBase + 3] = 0x02; // Sectorsize
+					TrackBlock[SectorBase + 4] = 0x00; // fdc SR0
+					TrackBlock[SectorBase + 5] = 0x00; // fdc SR1
 					if (!Extended) {
-						TrackBlock[SectorBase+6] = 0x00; //Not used
-						TrackBlock[SectorBase+7] = 0x00; //Not used
+						TrackBlock[SectorBase + 6] = 0x00; // Not used
+						TrackBlock[SectorBase + 7] = 0x00; // Not used
 					} else {
-						TrackBlock[SectorBase+6] = (byte) 0x00; //Sector size (LSB first)
-						TrackBlock[SectorBase+7] = (byte) 0x02; 						
-					}					
+						TrackBlock[SectorBase + 6] = (byte) 0x00; // Sector size (LSB first)
+						TrackBlock[SectorBase + 7] = (byte) 0x02;
+					}
 					SectorBase = SectorBase + 0x08;
 				}
-				
-				//Actual sector data
-				for(int ptr=0x100; ptr < TrackBlock.length;ptr++) {
+
+				// Actual sector data
+				for (int ptr = 0x100; ptr < TrackBlock.length; ptr++) {
 					TrackBlock[ptr] = (byte) (0xe5 & 0xff);
 				}
-				
-				//Write the track.
+
+				// Write the track.
 				NewFile.write(TrackBlock);
 			}
 		} finally {
@@ -514,16 +535,16 @@ public class AMSDiskFile extends FloppyDisk {
 			NewFile.close();
 			NewFile = null;
 		}
-		
+
 		/*
-		 *  Load the newly created file.
+		 * Load the newly created file.
 		 */
 		this.file = file;
 		inFile = new RandomAccessFile(file, "rw");
 		FileSize = file.length();
 		IsValid = false;
 		ParseDisk();
-		
+
 	}
 
 }

@@ -420,7 +420,7 @@ public class CPMPartition extends IDEDosPartition {
 			if (valid) {
 				validdirents++;
 			} else {
-	//			invalidDirents++;
+				// invalidDirents++;
 			}
 		}
 		IsValid = ((validdirents > 1)); // && (invalidDirents < validdirents)) || ((invalidDirents == 0));

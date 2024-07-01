@@ -35,6 +35,7 @@ public class PLUSIDEDOS {
 	public static final int PARTITION_TAPE_SINCLAIRMICRODRIVE = 0x70;
 	public static final int PARTITION_TAPE_TAP = 0x71;
 	public static final int PARTITION_TAPE_TZX = 0x72;
+	public static final int PARTITION_RAWFDD = 0x73;
 
 	/*
 	 * Partition flags

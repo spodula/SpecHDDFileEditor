@@ -1,5 +1,6 @@
 package hddEditor.ui;
 //TODO: add sort by filename, filesize, type
+
 //TODO: when selecting colour on the SYSTEM screen, dropdowns are not coloured correctly.
 //TODO: Add a "Convert Snapshot to disk" option
 
@@ -41,13 +42,16 @@ import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.handlers.OSHandler;
+import hddEditor.libs.partitions.CPMPartition;
 import hddEditor.libs.partitions.IDEDosPartition;
+import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.ui.partitionPages.FloppyBootTrackPage;
 import hddEditor.ui.partitionPages.FloppyGenericPage;
 import hddEditor.ui.partitionPages.GenericPage;
 import hddEditor.ui.partitionPages.MGTDosPartitionPage;
 import hddEditor.ui.partitionPages.MicrodrivePartitionPage;
 import hddEditor.ui.partitionPages.PlusThreePartPage;
+import hddEditor.ui.partitionPages.RawFloppyPage;
 import hddEditor.ui.partitionPages.SystemPartPage;
 import hddEditor.ui.partitionPages.TAPPartitionPage;
 import hddEditor.ui.partitionPages.TZXPartitionPage;
@@ -155,14 +159,15 @@ public class HDDEditor {
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 				String defaultdisk = "";
-				if (CurrentDisk!=null && CurrentDisk.IsOpen()) {
+				if (CurrentDisk != null && CurrentDisk.IsOpen()) {
 					defaultdisk = new File(CurrentDisk.GetFilename()).getName();
 				}
-				
-				File f = filesel.AskForSingleFileOpen(FileSelectDialog.FILETYPE_DRIVE, "Select file to open.", HDDEditor.SUPPORTEDFILETYPES,defaultdisk);
+
+				File f = filesel.AskForSingleFileOpen(FileSelectDialog.FILETYPE_DRIVE, "Select file to open.",
+						HDDEditor.SUPPORTEDFILETYPES, defaultdisk);
 
 				if (f != null) {
-					LoadFile(f);
+					LoadFile(f, false);
 				}
 			}
 		});
@@ -286,7 +291,7 @@ public class HDDEditor {
 			// get current partition
 			String currentPartName = PartitionDropdown.getText();
 			// reload file
-			LoadFile(new File(CurrentDisk.GetFilename()));
+			LoadFile(new File(CurrentDisk.GetFilename()), false);
 			// set partition
 			PartitionDropdown.setText(currentPartName);
 			ComboChanged();
@@ -409,34 +414,10 @@ public class HDDEditor {
 				E.printStackTrace();
 			}
 		}
-		if (filesel!=null) {
+		if (filesel != null) {
 			filesel.SaveDefaults();
 		}
 		display.dispose();
-	}
-
-	/**
-	 * Main function.
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		if (args.length > 0) {
-			if (args[0].toLowerCase().startsWith("script=")) {
-				ScriptRunner sr = new ScriptRunner();
-				String splitParam[] = args[0].split("=");
-				sr.RunScript(splitParam[1]);
-			} else {
-				HDDEditor hdi = new HDDEditor();
-				hdi.MakeForm();
-				hdi.LoadFile(new File(args[0]));
-				hdi.loop();
-			}
-		} else {
-			HDDEditor hdi = new HDDEditor();
-			hdi.MakeForm();
-			hdi.loop();
-		}
 	}
 
 	/**
@@ -444,7 +425,7 @@ public class HDDEditor {
 	 * 
 	 * @param selected
 	 */
-	public void LoadFile(File selected) {
+	public void LoadFile(File selected, boolean suppressdialog) {
 		System.out.println("Loading " + selected.getAbsolutePath());
 		try {
 			if (CurrentDisk != null) {
@@ -458,10 +439,12 @@ public class HDDEditor {
 				filesel.SetDefaultFolderForType(FileSelectDialog.FILETYPE_DRIVE, selected);
 			}
 		} catch (IOException e) {
-			MessageBox messageBox = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-			messageBox.setMessage("Cannot load file.");
-			messageBox.setText(e.getMessage());
-			messageBox.open();
+			if (!suppressdialog) {
+				MessageBox messageBox = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+				messageBox.setMessage("Cannot load file.");
+				messageBox.setText(e.getMessage());
+				messageBox.open();
+			}
 			System.out.println("Loading failed. " + e.getMessage());
 		}
 	}
@@ -570,6 +553,9 @@ public class HDDEditor {
 		case PLUSIDEDOS.PARTITION_UNKNOWN:
 			new FloppyGenericPage(this, MainPage, part, filesel);
 			break;
+		case PLUSIDEDOS.PARTITION_RAWFDD: 
+			new RawFloppyPage(this, MainPage, part, filesel);
+			break;
 		default:
 			new GenericPage(this, MainPage, part, filesel);
 		}
@@ -592,7 +578,7 @@ public class HDDEditor {
 		String newfile = fileNewHDDForm.Show();
 		fileNewHDDForm = null;
 		if (newfile != null)
-			LoadFile(new File(newfile));
+			LoadFile(new File(newfile), false);
 	}
 
 	/**
@@ -603,7 +589,7 @@ public class HDDEditor {
 		String newfile = fileNewFDDForm.Show();
 		fileNewFDDForm = null;
 		if (newfile != null)
-			LoadFile(new File(newfile));
+			LoadFile(new File(newfile), false);
 	}
 
 	/**
@@ -625,6 +611,9 @@ public class HDDEditor {
 		}
 	}
 
+	/**
+	 * Called when the currently loaded disk detected as out of date
+	 */
 	public void OnDiskOutOfDate() {
 		if (!DontAskReload) {
 			MessageBox messageBox = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
@@ -635,6 +624,55 @@ public class HDDEditor {
 			} else {
 				DontAskReload = true;
 			}
+		}
+	}
+
+	/**
+	 * Main function.
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		if (args.length > 0) {
+			if (args[0].toLowerCase().startsWith("cat")) {
+				File folder = new File(args[1]);
+				System.out.println("Folder" + folder.getAbsolutePath());
+				for (File file : folder.listFiles()) {
+					try {
+						System.out.println("===============================================================");
+						System.out.println("Processing: " + file.getName());
+						System.out.println("===============================================================");
+						OSHandler handler = DiskUtils.LoadDiskDetails(file);
+						if (handler != null) {
+							for (IDEDosPartition partition : handler.SystemPart.partitions) {
+								if (partition.GetPartType() == PLUSIDEDOS.PARTITION_CPM
+										|| partition.GetPartType() == PLUSIDEDOS.PARTITION_PLUS3DOS) {
+									CPMPartition sp = (CPMPartition) partition;
+									for (DirectoryEntry de : sp.DirectoryEntries) {
+										System.out.println("   " + de.GetFilename() + " " + de.GetFileTypeString() + " "
+												+ de.GetFileSize());
+									}
+								}
+							}
+						} 
+					} catch (Exception E) {
+						System.out.println(E.getMessage());
+					}
+				}
+			} else if (args[0].toLowerCase().startsWith("script=")) {
+				ScriptRunner sr = new ScriptRunner();
+				String splitParam[] = args[0].split("=");
+				sr.RunScript(splitParam[1]);
+			} else {
+				HDDEditor hdi = new HDDEditor();
+				hdi.MakeForm();
+				hdi.LoadFile(new File(args[0]), false);
+				hdi.loop();
+			}
+		} else {
+			HDDEditor hdi = new HDDEditor();
+			hdi.MakeForm();
+			hdi.loop();
 		}
 	}
 

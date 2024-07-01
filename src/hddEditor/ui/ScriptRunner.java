@@ -92,7 +92,7 @@ public class ScriptRunner {
 
 			if (command.equals("load")) {
 				System.out.println(restOfCommand);
-				hdi.LoadFile(new File(restOfCommand.trim()));
+				hdi.LoadFile(new File(restOfCommand.trim()), true);
 			} else if (command.equals("new")) {
 				DoNew(restOfCommand);
 			} else if (command.equals("show")) {
@@ -169,43 +169,43 @@ public class ScriptRunner {
 					String filename = params[4];
 					FileNewHDDForm FNHDD = new FileNewHDDForm(hdi.display, null);
 					FNHDD.DoCreateFile(IsHDF, Is8Bit, filename, cyl, hed, spt);
-					hdi.LoadFile(new File(filename));
+					hdi.LoadFile(new File(filename), true);
 					System.out.println(">Disk " + params[4] + " created and loaded.");
 				} else if (disktype.startsWith("DSK")) {
 					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null);
 					FNFDD.DoCreateFile(params[1], "AMSTRAD", "", false, "", false);
-					hdi.LoadFile(new File(params[1]));
+					hdi.LoadFile(new File(params[1]), true);
 					System.out.println(">Disk " + params[1] + " created and loaded.");
 				} else if (disktype.startsWith("EDSK")) {
 					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null);
 					FNFDD.DoCreateFile(params[1], "AMSTRAD", "", true, "", false);
-					hdi.LoadFile(new File(params[1]));
+					hdi.LoadFile(new File(params[1]), true);
 					System.out.println(">Disk " + params[1] + " created and loaded.");
 				} else if (disktype.startsWith("MDF")) {
 					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null);
 					FNFDD.DoCreateFile(params[2], "MICRODRIVE", params[1], false, "", false);
-					hdi.LoadFile(new File(params[2]));
+					hdi.LoadFile(new File(params[2]), true);
 					System.out.println(">Cart " + params[2] + " created and loaded.");
 				} else if (disktype.startsWith("TAP")) {
 					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null);
 					FNFDD.DoCreateFile(params[1], "TAP", params[1], false, "", false);
-					hdi.LoadFile(new File(params[1]));
+					hdi.LoadFile(new File(params[1]), true);
 					System.out.println(">Tape " + params[1] + " created and loaded.");
 				} else if (disktype.startsWith("TZX")) {
 					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null);
 					FNFDD.DoCreateFile(params[1], "TZX", params[1], false, "", false);
-					hdi.LoadFile(new File(params[1]));
+					hdi.LoadFile(new File(params[1]), true);
 					System.out.println(">TZX " + params[1] + " created and loaded.");
 				} else if (disktype.startsWith("TRD")) {
 					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null);
 					String TRDOSFormat = params[1] + " TRACKS " + params[2] + " HEADS";
 					FNFDD.DoCreateFile(params[4], "TR-DOS", params[3], false, TRDOSFormat, false);
-					hdi.LoadFile(new File(params[4]));
+					hdi.LoadFile(new File(params[4]), true);
 					System.out.println(">Disk " + params[4] + " created and loaded.");
 				} else if (disktype.startsWith("SCL")) {
 					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null);
 					FNFDD.DoCreateFile(params[2], "TR-DOS", params[1], false, "", true);
-					hdi.LoadFile(new File(params[2]));
+					hdi.LoadFile(new File(params[2]), true);
 					System.out.println(">Disk " + params[2] + " created and loaded.");
 				} else {
 					System.out.println(">>Unidentified disk type: " + disktype);

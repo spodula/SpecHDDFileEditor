@@ -87,5 +87,23 @@ public class DiskUtils {
 		}
 		return(result);
 	}
+	
+	/**
+	 * 
+	 */
+	public static OSHandler LoadDiskDetails(File sourcefile) {
+		try {
+			Disk CurrentDisk = DiskUtils.GetCorrectDiskFromFile(sourcefile);
+			if (CurrentDisk != null) {
+				OSHandler CurrentHandler = DiskUtils.GetHandlerForDisk(CurrentDisk);
+				return(CurrentHandler);
+			}
+			return(null);
+		} catch (IOException e) {
+			return(null);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			return(null);			
+		}
+	}
 
 }

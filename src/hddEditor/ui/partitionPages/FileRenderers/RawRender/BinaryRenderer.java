@@ -30,6 +30,10 @@ public class BinaryRenderer implements Renderer {
 	 * @param HeightLimit
 	 */
 	public void Render(Composite TargetPage, byte data[], int loadAddr, int HeightLimit) {
+		if (BinTable!=null) {
+			BinTable.dispose();
+		}
+
 		int AddressLength = String.format("%X", data.length - 1).length();
 
 		BinTable = new Table(TargetPage, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
