@@ -112,38 +112,39 @@ public class SpeccyFileEncoders {
 	 * @param bwSlider    - Colour cutoff (0->255)
 	 * @return - Screen$
 	 */
-	//TODO: scaling images with colours doesnt work properly.
 	private static byte[] RenderColour(BufferedImage SourceImage, int CutoffSlider) {
 		byte Screen[] = new byte[6912];
 		int compval = (CutoffSlider * 256) / 100;
-		// scale to 8 colours
-		for (int x = 0; x < 256; x++) {
-			for (int y = 0; y < 192; y++) {
+
+		// Create an array scaling all the bits to 8 bit speccy colours.
+		// Speccy representation is GRB
+		int rawscreen[] = new int[192*256];
+		int rawscreenptr = 0;
+		
+		for (int y = 0; y < 192; y++) {
+			for (int x = 0; x < 256; x++) {
 				int col = SourceImage.getRGB(x, y);
-				int red = (col & 0xff0000) >> 16;
-				int green = (col & 0xff00) >> 8;
+				int red = (col >> 16) & 0xff;
+				int green = (col >> 8) & 0xff;
 				int blue = col & 0xff;
 
-				if (red > compval) {
-					red = 0xff;
-				} else {
-					red = 0x00;
-				}
-				if (green > compval) {
-					green = 0xff;
-				} else {
-					green = 0x00;
-				}
+				int newcol = 0;
 				if (blue > compval) {
-					blue = 0xff;
-				} else {
-					blue = 0x00;
+					newcol = 1;
+				} 
+
+				if (red > compval) {
+					newcol = newcol | 2;
+				} 
+				
+				if (green > compval) {
+					newcol = newcol | 4;
 				}
 
-				col = (red << 16) + (green << 8) + blue;
-				SourceImage.setRGB(x, y, col);
+				rawscreen[rawscreenptr++] = newcol;
 			}
 		}
+		
 		// Group into attributes
 		int attriblocation = 0x1800;
 		int colours[] = new int[8];
@@ -159,14 +160,8 @@ public class SpeccyFileEncoders {
 				// get the square
 				for (int a = 0; a < 7; a++) {
 					for (int b = 0; b < 7; b++) {
-						// col = 00000000 RRRRRRRR GGGGGGGG BBBBBBBB
-						// Speccy = 00000GRB
-						int col = SourceImage.getRGB(basex + a, basey + b);
-						int red = (col >> 16) & 0x02;
-						int green = (col >> 8) & 0x04;
-						int blue = (col & 0x01);
-
-						col = red + green + blue;
+						int col = rawscreen[basex + a + ((basey + b) * 256)];
+						
 						colours[col]++;
 					}
 				}
@@ -193,30 +188,19 @@ public class SpeccyFileEncoders {
 				if (maxnum == 0) {
 					paper = ink;
 				}
-				// make an array of colours
-				int newcolours[] = new int[8];
-				for (int i = 0; i < 8; i++) {
-					newcolours[i] = Speccy.colours[ink];
-				}
-				newcolours[paper] = Speccy.colours[paper];
-
-				// rewrite the square
-				Screen[attriblocation++] = (byte) (ink + (paper * 8));
+				
+				// Set the attribute
+				Screen[attriblocation++] = (byte) ((ink + (paper * 8)) & 0xff);
+				
+				// rewrite the square				
 				for (int a = 0; a < 8; a++) {
 					int byt = 0;
 					for (int b = 0; b < 8; b++) {
-						int col = SourceImage.getRGB(basex + b, basey + a);
-						int red = (col >> 16) & 0x02;
-						int green = (col >> 8) & 0x04;
-						int blue = (col & 0x01);
-						col = red + green + blue;
+						int col = rawscreen[(basex + b) + ((basey + a) * 256)];
 
-						int newcol = newcolours[col];
-
-						SourceImage.setRGB(basex + b, basey + a, newcol);
 						// calculate if we are ink or paper.
-						byt = byt << 1;
-						if (newcol == Speccy.colours[ink]) {
+						byt = byt * 2;
+						if (col == ink) {
 							byt = byt + 1;
 						}
 					}
@@ -226,7 +210,7 @@ public class SpeccyFileEncoders {
 					int y1 = yptn & 0x07;
 					int y2 = (yptn & 0x38) >> 3;
 					int y3 = (yptn & 0xc0) >> 6;
-					int address = (y3 << 11) + (y1 << 8) + (y2 << 5) + (basex >> 3);
+					int address = (y3 << 11) + (y1 << 8) + (y2 << 5) + x;
 					// write the pixel data
 					Screen[address] = (byte) (byt & 0xff);
 
