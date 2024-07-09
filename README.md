@@ -34,7 +34,7 @@ File system documentation:
 * MGT file: https://sinclair.wiki.zxnet.co.uk/wiki/MGT_filesystem
 * TZX file: https://k1.spdns.de/Develop/Projects/zasm/Info/TZX%20format.html
 
-Requires at least Java 11 (I use OpenJDK 18 on Linux.)
+Requires at least Java 17 (I use OpenJDK 18 on Linux.)
 
 Building:
 Copy the appropriate POM file. 
