@@ -7,7 +7,6 @@ package hddEditor.ui.partitionPages;
  */
 
 import java.io.File;
-//TODO: raw floppy page - add ASM to export options.
 
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -16,8 +15,10 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 
+import hddEditor.libs.ASMLib;
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.ASMLib.DecodedASM;
 import hddEditor.libs.disks.FDD.FloppyDisk;
 import hddEditor.libs.disks.FDD.Sector;
 import hddEditor.libs.disks.FDD.TrackInfo;
@@ -233,17 +234,68 @@ public class RawFloppyPage extends GenericPage {
 							xptr++;
 
 							if (Character.isAlphabetic(b)) {
-								xbytes = xbytes + String.valueOf((char)b);
+								xbytes = xbytes + String.valueOf((char) b);
 							} else {
 								xbytes = xbytes + " ";
 							}
-
 						}
 						dlen = dlen + s.data.length;
 					} else {
 						sb.append(System.lineSeparator() + "No data");
 					}
 					sb.append(System.lineSeparator());
+
+					sb.append(System.lineSeparator());
+					sb.append("Assembly: " + System.lineSeparator());
+
+					ASMLib asm = new ASMLib();
+					int loadedaddress = 0x0000;
+					int realaddress = 0x0080;
+					try {
+						int asmData[] = new int[5];
+						while (realaddress < s.data.length) {
+							String chrdata = "";
+							for (int i = 0; i < 5; i++) {
+								int d = 0;
+								if (realaddress + i < s.data.length) {
+									d = (int) s.data[realaddress + i] & 0xff;
+								}
+								asmData[i] = d;
+
+								if ((d > 0x1F) && (d < 0x7f)) {
+									chrdata = chrdata + (char) d;
+								} else {
+									chrdata = chrdata + "?";
+								}
+							}
+							int decLen = 0;
+							String decStr = "";
+							// decode instruction
+							DecodedASM Instruction = asm.decode(asmData, loadedaddress);
+							decLen = Instruction.length;
+							decStr = Instruction.instruction;
+
+							// output it. - First, assemble a list of hex bytes, but pad out to 12 chars
+							// (4x3)
+							String hex = "";
+							for (int j = 0; j < decLen; j++) {
+								hex = hex + String.format("%02X", asmData[j]) + " ";
+							}
+
+							sb.append(String.format("%04X", loadedaddress));
+							sb.append(
+									("\t" + hex + "\t\t" + decStr + "\t\t" + chrdata.substring(0, decLen)));
+							sb.append(System.lineSeparator());
+
+							realaddress = realaddress + decLen;
+							loadedaddress = loadedaddress + decLen;
+
+						} // while
+					} catch (Exception E) {
+						System.out.println("Error at: " + realaddress + "(" + loadedaddress + ")");
+						System.out.println(E.getMessage());
+						E.printStackTrace();
+					}
 				}
 				sb.append(System.lineSeparator());
 

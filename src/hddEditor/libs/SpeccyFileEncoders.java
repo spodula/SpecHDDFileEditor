@@ -1,5 +1,4 @@
 package hddEditor.libs;
-//TODO: scaling images with colours doesnt work properly.
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -113,6 +112,7 @@ public class SpeccyFileEncoders {
 	 * @param bwSlider    - Colour cutoff (0->255)
 	 * @return - Screen$
 	 */
+	//TODO: scaling images with colours doesnt work properly.
 	private static byte[] RenderColour(BufferedImage SourceImage, int CutoffSlider) {
 		byte Screen[] = new byte[6912];
 		int compval = (CutoffSlider * 256) / 100;
