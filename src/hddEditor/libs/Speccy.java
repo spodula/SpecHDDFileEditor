@@ -28,6 +28,7 @@ public class Speccy {
 	// TAPE block types
 	public static int TAPE_HEADER = 0x00;
 	public static int TAPE_DATA = 0xff;
+	public static int TAPE_HEADER_LEN = 17;
 
 	// Spectrum colours
 	public static int COLOUR_BLACK = 0;
@@ -38,7 +39,7 @@ public class Speccy {
 	public static int COLOUR_CYAN = 5;
 	public static int COLOUR_YELLOW = 6;
 	public static int COLOUR_WHITE = 7;
-
+	
 	// Colour names
 	public final static String[] SPECTRUM_COLOURS = { "Black", "Blue", "Red", "Magenta", "Green", "Cyan", "Yellow",
 			"White" };

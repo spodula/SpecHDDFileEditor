@@ -62,7 +62,7 @@ public class TAPPartition extends IDEDosPartition {
 
 		TAPBlock lastblock = null;
 		for (TAPBlock tb : tf.Blocks) {
-			if (tb.flagbyte == 0x00 && tb.data.length == 17) {
+			if (tb.flagbyte == 0x00 && tb.data.length == Speccy.TAPE_HEADER_LEN) {
 				if (lastblock != null) {
 					// create orphan header block.
 					TapDirectoryEntry tde = new TapDirectoryEntry(lastblock, null);
@@ -139,7 +139,7 @@ public class TAPPartition extends IDEDosPartition {
 		}
 		if (!foundfile) {
 			for (TAPBlock file : mdf.Blocks) {
-				if (file.data.length == 17 && file.flagbyte == 0x00) {
+				if (file.data.length == Speccy.TAPE_HEADER_LEN && file.flagbyte == 0x00) {
 					byte dfn[] = new byte[10];
 					System.arraycopy(file.data, 1, dfn, 0, 10);
 					String tapeFileName = new String(dfn).trim();

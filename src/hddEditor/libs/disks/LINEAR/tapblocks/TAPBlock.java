@@ -2,6 +2,7 @@ package hddEditor.libs.disks.LINEAR.tapblocks;
 
 import java.io.IOException;
 
+import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.ExtendedSpeccyBasicDetails;
 
 /*
@@ -139,7 +140,7 @@ public class TAPBlock {
 	 */
 	public ExtendedSpeccyBasicDetails DecodeHeader() {
 		ExtendedSpeccyBasicDetails result = null;
-		if (data.length == 17 && flagbyte == 0x00) {
+		if (data.length == Speccy.TAPE_HEADER_LEN && flagbyte == 0x00) {
 			int type = data[0] & 0xff;
 			int filelen = (data[11] & 0xff) + ((data[12] & 0xff) * 0x100);
 			int param1 = (data[13] & 0xff) + ((data[14] & 0xff) * 0x100);

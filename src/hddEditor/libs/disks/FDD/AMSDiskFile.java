@@ -116,7 +116,6 @@ public class AMSDiskFile extends FloppyDisk {
 		SetNumCylinders(0);
 	}
 
-	
 	/**
 	 * 
 	 * @throws IOException
@@ -165,90 +164,107 @@ public class AMSDiskFile extends FloppyDisk {
 				TrackInfo CurrentTrack = new TrackInfo();
 				CurrentTrack.TrackStartPtr = fileptr;
 				fileptr = fileptr + CurrentRawTrack.length;
-				// Track-Info
-				for (int i = 0; i < 12; i++) {
-					CurrentTrack.header = CurrentTrack.header + (char) CurrentRawTrack[i];
+				if (CurrentRawTrack.length == 0) {
+					System.out.println("Track: " + tracknum + " contains no data.");
+					CurrentTrack.header="**BAD**";
+					CurrentTrack.tracknum = Tracknum / NumHeads;
+					CurrentTrack.side = tracknum % NumHeads;
+					CurrentTrack.datarate = 0;
+					CurrentTrack.recordingmode = 0;
+					CurrentTrack.sectorsz = 0;
+					CurrentTrack.numsectors = 0;
+					CurrentTrack.gap3len = 0;
+					CurrentTrack.fillerByte = 0xf5;
+					CurrentTrack.Sectors = new Sector[0];
+					CurrentTrack.minsectorID = 0;
+					CurrentTrack.maxsectorID = 0;
+					
+				} else {
+					// Track-Info
+					for (int i = 0; i < 12; i++) {
+						CurrentTrack.header = CurrentTrack.header + (char) CurrentRawTrack[i];
+					}
+					// track number
+					CurrentTrack.tracknum = (int) CurrentRawTrack[16] & 0xff;
+					// side number
+					CurrentTrack.side = (int) CurrentRawTrack[17] & 0xff;
+					// Data rate (optional)
+					CurrentTrack.datarate = (int) CurrentRawTrack[18] & 0xff;
+					// Recording mode(optional)
+					CurrentTrack.recordingmode = (int) CurrentRawTrack[19] & 0xff;
+					// sector size
+					CurrentTrack.sectorsz = (int) CurrentRawTrack[20] * 256;
+					// Number of sectors
+					CurrentTrack.numsectors = (int) CurrentRawTrack[21] & 0xff;
+					// gap #3 length
+					CurrentTrack.gap3len = (int) CurrentRawTrack[22] & 0xff;
+					// Filler byte
+					CurrentTrack.fillerByte = (int) CurrentRawTrack[23] & 0xff;
+
+					// *********************************************************
+					// Sector information list starts here.
+					// *********************************************************
+					CurrentTrack.Sectors = new Sector[CurrentTrack.numsectors];
+					int sectorbase = 24;
+					int minsector = 255;
+					int maxsector = 0;
+					NumSectors = Math.max(NumSectors, CurrentTrack.numsectors);
+					for (int i = 0; i < CurrentTrack.numsectors; i++) {
+						Sector CurrentSector = new Sector();
+						// track
+						CurrentSector.track = (int) CurrentRawTrack[sectorbase] & 0xff;
+						// side
+						CurrentSector.side = (int) CurrentRawTrack[sectorbase + 1] & 0xff;
+						// sector id
+						CurrentSector.sectorID = (int) CurrentRawTrack[sectorbase + 2] & 0xff;
+						if (CurrentSector.sectorID > maxsector) {
+							maxsector = CurrentSector.sectorID;
+						}
+						if (CurrentSector.sectorID < minsector) {
+							minsector = CurrentSector.sectorID;
+						}
+						// sector sz
+						CurrentSector.Sectorsz = (int) CurrentRawTrack[sectorbase + 3] & 0xff;
+						// fdc status 1
+						CurrentSector.FDCsr1 = (int) CurrentRawTrack[sectorbase + 4] & 0xff;
+						// fdc status 2
+						CurrentSector.FDCsr2 = (int) CurrentRawTrack[sectorbase + 5] & 0xff;
+						// actual data length. Note this is only valid on EXTENDED format disks.
+						// If not the case, the sector size read from the track block.
+						CurrentSector.ActualSize = (int) (CurrentRawTrack[sectorbase + 7] & 0xff) * 256
+								+ (int) (CurrentRawTrack[sectorbase + 6] & 0xff);
+						if (!ParsedDiskInfo.IsExtended) {
+							CurrentSector.ActualSize = CurrentTrack.sectorsz;
+						}
+						// Add sector
+						CurrentTrack.Sectors[i] = CurrentSector;
+						sectorbase = sectorbase + 8;
+						NumLogicalSectors++;
+					}
+					CurrentTrack.minsectorID = minsector;
+					CurrentTrack.maxsectorID = maxsector;
+
+					// The first sector is is after the track information block on the next $100
+					// junction.
+					sectorbase = sectorbase + 0x100;
+					sectorbase = sectorbase - (sectorbase % 0x100);
+
+					// *********************************************************
+					// now the sector data
+					// sectorbase should now point to the start of the first sector.
+					// *********************************************************
+					for (Sector sect : CurrentTrack.Sectors) {
+						sect.SectorStart = sectorbase + CurrentTrack.TrackStartPtr;
+						byte rawdata[] = new byte[sect.ActualSize];
+						for (int i = 0; i < sect.ActualSize; i++) {
+							rawdata[i] = CurrentRawTrack[sectorbase++];
+						}
+						sect.data = rawdata;
+					}
+
+					// Now add the completed track to the track list.
+					System.out.print(".");
 				}
-				// track number
-				CurrentTrack.tracknum = (int) CurrentRawTrack[16] & 0xff;
-				// side number
-				CurrentTrack.side = (int) CurrentRawTrack[17] & 0xff;
-				// Data rate (optional)
-				CurrentTrack.datarate = (int) CurrentRawTrack[18] & 0xff;
-				// Recording mode(optional)
-				CurrentTrack.recordingmode = (int) CurrentRawTrack[19] & 0xff;
-				// sector size
-				CurrentTrack.sectorsz = (int) CurrentRawTrack[20] * 256;
-				// Number of sectors
-				CurrentTrack.numsectors = (int) CurrentRawTrack[21] & 0xff;
-				// gap #3 length
-				CurrentTrack.gap3len = (int) CurrentRawTrack[22] & 0xff;
-				// Filler byte
-				CurrentTrack.fillerByte = (int) CurrentRawTrack[23] & 0xff;
-
-				// *********************************************************
-				// Sector information list starts here.
-				// *********************************************************
-				CurrentTrack.Sectors = new Sector[CurrentTrack.numsectors];
-				int sectorbase = 24;
-				int minsector = 255;
-				int maxsector = 0;
-				NumSectors = Math.max(NumSectors, CurrentTrack.numsectors);
-				for (int i = 0; i < CurrentTrack.numsectors; i++) {
-					Sector CurrentSector = new Sector();
-					// track
-					CurrentSector.track = (int) CurrentRawTrack[sectorbase] & 0xff;
-					// side
-					CurrentSector.side = (int) CurrentRawTrack[sectorbase + 1] & 0xff;
-					// sector id
-					CurrentSector.sectorID = (int) CurrentRawTrack[sectorbase + 2] & 0xff;
-					if (CurrentSector.sectorID > maxsector) {
-						maxsector = CurrentSector.sectorID;
-					}
-					if (CurrentSector.sectorID < minsector) {
-						minsector = CurrentSector.sectorID;
-					}
-					// sector sz
-					CurrentSector.Sectorsz = (int) CurrentRawTrack[sectorbase + 3] & 0xff;
-					// fdc status 1
-					CurrentSector.FDCsr1 = (int) CurrentRawTrack[sectorbase + 4] & 0xff;
-					// fdc status 2
-					CurrentSector.FDCsr2 = (int) CurrentRawTrack[sectorbase + 5] & 0xff;
-					// actual data length. Note this is only valid on EXTENDED format disks.
-					// If not the case, the sector size read from the track block.
-					CurrentSector.ActualSize = (int) (CurrentRawTrack[sectorbase + 7] & 0xff) * 256
-							+ (int) (CurrentRawTrack[sectorbase + 6] & 0xff);
-					if (!ParsedDiskInfo.IsExtended) {
-						CurrentSector.ActualSize = CurrentTrack.sectorsz;
-					}
-					// Add sector
-					CurrentTrack.Sectors[i] = CurrentSector;
-					sectorbase = sectorbase + 8;
-					NumLogicalSectors++;
-				}
-				CurrentTrack.minsectorID = minsector;
-				CurrentTrack.maxsectorID = maxsector;
-
-				// The first sector is is after the track information block on the next $100
-				// junction.
-				sectorbase = sectorbase + 0x100;
-				sectorbase = sectorbase - (sectorbase % 0x100);
-
-				// *********************************************************
-				// now the sector data
-				// sectorbase should now point to the start of the first sector.
-				// *********************************************************
-				for (Sector sect : CurrentTrack.Sectors) {
-					sect.SectorStart = sectorbase + CurrentTrack.TrackStartPtr;
-					byte rawdata[] = new byte[sect.ActualSize];
-					for (int i = 0; i < sect.ActualSize; i++) {
-						rawdata[i] = CurrentRawTrack[sectorbase++];
-					}
-					sect.data = rawdata;
-				}
-
-				// Now add the completed track to the track list.
-				System.out.print(".");
 				diskTracks[Tracknum++] = CurrentTrack;
 			}
 			System.out.println(" " + String.valueOf(Tracknum) + " tracks");

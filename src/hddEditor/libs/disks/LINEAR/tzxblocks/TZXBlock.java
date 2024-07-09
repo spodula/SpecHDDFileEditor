@@ -1,6 +1,7 @@
 package hddEditor.libs.disks.LINEAR.tzxblocks;
 
 import hddEditor.libs.disks.ExtendedSpeccyBasicDetails;
+import hddEditor.libs.Speccy;
 import hddEditor.libs.TZX;
 
 public class TZXBlock {
@@ -47,7 +48,7 @@ public class TZXBlock {
 	 */
 	public ExtendedSpeccyBasicDetails DecodeHeader() {
 		ExtendedSpeccyBasicDetails result = null;
-		if (data.length == 17 && ValidChecksum()) {
+		if (data.length == Speccy.TAPE_HEADER_LEN && ValidChecksum()) {
 			int type = data[0] & 0xff;
 			int filelen = GetDblByte(data, 11);
 			int param1 = GetDblByte(data, 13);

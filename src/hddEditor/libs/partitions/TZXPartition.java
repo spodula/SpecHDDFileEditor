@@ -67,7 +67,7 @@ public class TZXPartition extends IDEDosPartition {
 				System.out.println("Processing block " + tb.BlockNumber);
 
 				if (tb.data != null) {
-					if (tb.data.length == 17) {
+					if (tb.data.length == Speccy.TAPE_HEADER_LEN) {
 						if (lastblock != null) {
 							// create orphan header block.
 							TzxDirectoryEntry tde = new TzxDirectoryEntry(lastblock, null);
@@ -153,7 +153,7 @@ public class TZXPartition extends IDEDosPartition {
 		}
 		if (!foundfile) {
 			for (TZXBlock file : mdf.Blocks) {
-				if (file.data.length == 17) {
+				if (file.data.length == Speccy.TAPE_HEADER_LEN) {
 					byte dfn[] = new byte[10];
 					System.arraycopy(file.data, 1, dfn, 0, 10);
 					String tapeFileName = new String(dfn).trim();

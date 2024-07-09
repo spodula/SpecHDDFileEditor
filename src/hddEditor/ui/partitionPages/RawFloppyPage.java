@@ -7,6 +7,7 @@ package hddEditor.ui.partitionPages;
  */
 
 import java.io.File;
+//TODO: raw floppy page - add ASM to export options.
 
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -220,7 +221,7 @@ public class RawFloppyPage extends GenericPage {
 					String xbytes = "";
 					if (s.data != null) {
 						for (byte b : s.data) {
-							if (xptr % 16 == 0) {
+							if (xptr % 32 == 0) {
 								if (xptr == 0) {
 									sb.append(System.lineSeparator() + String.format("%04X", xptr));
 								} else {
