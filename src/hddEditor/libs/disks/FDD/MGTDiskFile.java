@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.partitions.cpm.DirectoryEntry;
 
 public class MGTDiskFile extends FloppyDisk {
 

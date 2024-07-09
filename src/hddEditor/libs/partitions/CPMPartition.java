@@ -11,6 +11,8 @@ import java.io.FileWriter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import hddEditor.libs.CPM;
 import hddEditor.libs.Speccy;
@@ -764,5 +766,13 @@ public class CPMPartition extends IDEDosPartition {
 		}
 		return filename;
 	}
-
+	
+	/**
+	 * Sort the directory entries.
+	 * 
+	 * @param SortType 0 = no sort, 1=name, 2 = file type, 3=file size,
+	 */
+	public void SortDirectoryEntries(int SortType) {
+		DirectoryEntries = (DirectoryEntry[]) SortFileEntry(SortType);
+	}	
 }

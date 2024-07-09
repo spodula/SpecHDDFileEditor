@@ -21,6 +21,8 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -31,6 +33,7 @@ import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
+import hddEditor.libs.partitions.CPMPartition;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.TrDosPartition;
 import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
@@ -106,6 +109,27 @@ public class TrDosPartitionPage extends GenericPage {
 			tc4.setWidth(150);
 			tc5.setWidth(100);
 			DirectoryListing.setHeaderVisible(true);
+			
+			/***********************************************************************************/
+		    Listener sortListener = new Listener() {
+		        public void handleEvent(Event e) {
+		        	TableColumn column = (TableColumn) e.widget;
+		        	TrDosPartition p = (TrDosPartition)partition;
+	                if (column == tc1) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_NAME);
+	                if (column == tc2) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_TYPE);
+	                if (column == tc4) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_SIZE);
+	                if (column == tc5) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_SIZE);
+	                DirectoryListing.setSortColumn(column);
+	                UpdateDirectoryEntryList();
+		        }
+		    };
+			tc1.addListener(SWT.Selection,sortListener);
+			tc2.addListener(SWT.Selection,sortListener);
+			tc3.addListener(SWT.Selection,sortListener);
+			tc4.addListener(SWT.Selection,sortListener);
+			
+			/***********************************************************************************/
+
 
 			/***********************************************************************************/
 

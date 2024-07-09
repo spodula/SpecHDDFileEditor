@@ -25,6 +25,8 @@ import java.io.File;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.GeneralUtils;
@@ -34,7 +36,10 @@ import hddEditor.libs.disks.ModifiedEvent;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 
 public class IDEDosPartition {
-	public static int PARTITION_TYPE_INDEX = 16;
+	public static final int PARTITION_TYPE_INDEX = 16;
+	public static final int SORTTYPE_NAME = 1;
+	public static final int SORTTYPE_TYPE = 2;
+	public static final int SORTTYPE_SIZE = 3;
 
 	public Disk CurrentDisk = null;
 	public int DirentLocation = 0;
@@ -43,7 +48,7 @@ public class IDEDosPartition {
 	public byte RawPartition[] = null;
 
 	public boolean CanExport = false;
-	
+
 	/**
 	 * Update and set the Partition name
 	 * 
@@ -341,8 +346,6 @@ public class IDEDosPartition {
 		return (result);
 	}
 
-
-
 	/**
 	 * Return either a letter or nothing if b=0;
 	 * 
@@ -370,12 +373,11 @@ public class IDEDosPartition {
 		LogicalSectorStartOfPartition = LogicalSectorStartOfPartition + (GetStartHead() * CurrentDisk.GetNumSectors());
 
 		long NumSectors = GetEndSector() * CurrentDisk.GetSectorSize();
-		
+
 		byte result[] = CurrentDisk.GetBytesStartingFromSector(LogicalSectorStartOfPartition, NumSectors);
-		return (result);		
+		return (result);
 	}
 
-	
 	/**
 	 * 
 	 * @param startsector
@@ -393,11 +395,10 @@ public class IDEDosPartition {
 		return (result);
 	}
 
-
 	public void SetAllDataInPartition(byte[] data) throws IOException {
-		SetDataInPartition(0,data);
+		SetDataInPartition(0, data);
 	}
-	
+
 	/**
 	 * 
 	 * @param startsector
@@ -436,8 +437,9 @@ public class IDEDosPartition {
 	protected void LoadPartitionSpecificInformation() throws IOException {
 
 	}
+
 	/**
-	 * Extract partition with flags showing what to do with each file type. 
+	 * Extract partition with flags showing what to do with each file type.
 	 * 
 	 * @param folder
 	 * @param BasicAction
@@ -448,8 +450,11 @@ public class IDEDosPartition {
 	 * @param progress
 	 * @throws IOException
 	 */
-	public void ExtractPartitiontoFolderAdvanced(File folder,int BasicAction, int CodeAction, int ArrayAction, int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted) throws IOException {
-		System.out.println("Class "+this.getClass().getName()+" does not support ExtractPartitiontoFolderAdvanced.");		
+	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted)
+			throws IOException {
+		System.out
+				.println("Class " + this.getClass().getName() + " does not support ExtractPartitiontoFolderAdvanced.");
 	}
 
 	/**
@@ -458,17 +463,17 @@ public class IDEDosPartition {
 	 * @return
 	 */
 	public FileEntry[] GetFileList(String wildcard) {
-		System.out.println("Class "+this.getClass().getName()+" does not support GetFileList.");
-		return(null);
+		System.out.println("Class " + this.getClass().getName() + " does not support GetFileList.");
+		return (null);
 	}
-	
+
 	/**
 	 * 
 	 * @param wildcard
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void DeleteFile(String wildcard) throws IOException {
-		System.out.println("Class "+this.getClass().getName()+" does not support Deletefile.");
+		System.out.println("Class " + this.getClass().getName() + " does not support Deletefile.");
 	}
 
 	/**
@@ -479,7 +484,7 @@ public class IDEDosPartition {
 	 * @throws IOException
 	 */
 	public void RenameFile(String filename, String newName) throws IOException {
-		System.out.println("Class "+this.getClass().getName()+" does not support RenameFile.");
+		System.out.println("Class " + this.getClass().getName() + " does not support RenameFile.");
 	}
 
 	/**
@@ -489,8 +494,8 @@ public class IDEDosPartition {
 	 * @param address
 	 * @param data
 	 */
-	public void AddCodeFile(String filename, int address, byte[] data) throws IOException  {
-		System.out.println("Class "+this.getClass().getName()+" does not support AddRawCodeFile.");
+	public void AddCodeFile(String filename, int address, byte[] data) throws IOException {
+		System.out.println("Class " + this.getClass().getName() + " does not support AddRawCodeFile.");
 	}
 
 	/**
@@ -499,10 +504,10 @@ public class IDEDosPartition {
 	 * @param basicAsBytes
 	 * @param line
 	 * @param basicoffset
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void AddBasicFile(String nameOnDisk, byte[] basicAsBytes, int line, int basicoffset) throws IOException {
-		System.out.println("Class "+this.getClass().getName()+" does not support AddBASICFile.");
+		System.out.println("Class " + this.getClass().getName() + " does not support AddBASICFile.");
 	}
 
 	/**
@@ -515,9 +520,9 @@ public class IDEDosPartition {
 	 * @throws IOException
 	 */
 	public void AddCharArray(String filename, byte[] EncodedArray, String varname) throws IOException {
-		System.out.println("Class "+this.getClass().getName()+" does not support AddCharArray.");
+		System.out.println("Class " + this.getClass().getName() + " does not support AddCharArray.");
 	}
-	
+
 	/**
 	 * Add an pre-encoded numeric array to the microdrive.
 	 * 
@@ -528,9 +533,8 @@ public class IDEDosPartition {
 	 * @throws IOException
 	 */
 	public void AddNumericArray(String filename, byte[] EncodedArray, String varname) throws IOException {
-		System.out.println("Class "+this.getClass().getName()+" does not support AddNumericArray.");		
+		System.out.println("Class " + this.getClass().getName() + " does not support AddNumericArray.");
 	}
-
 
 	/**
 	 * Get all the files on this partition.
@@ -540,15 +544,100 @@ public class IDEDosPartition {
 	public FileEntry[] GetFileList() {
 		return null;
 	}
-	
+
 	/**
 	 * Uniquify a filename if required. (IE, a disk)
+	 * 
 	 * @param filename
 	 * @return
 	 */
 	public String UniqueifyFileNameIfRequired(String filename) {
 		return filename;
 	}
-	
+
+	/**
+	 * Utility functions used for sorting a file listing. This makes more sense on
+	 * disks rather than tape, as messing with the order of items on a tape may
+	 * result in it being saved incorrectly.
+	 */
+
+	// Last sort type.
+	private int lastsort = 0;
+	// Whether the sort is reversed or not.
+	private boolean sortreverse = false;
+
+	/**
+	 * Sort the current file list and return it.
+	 * 
+	 * @param SortType
+	 * @return
+	 */
+	public FileEntry[] SortFileEntry(int SortType) {
+		FileEntry fe[] = GetFileList();
+		if (SortType == lastsort) {
+			sortreverse = !sortreverse;
+		}
+
+		switch (SortType) {
+		case SORTTYPE_NAME:
+			Arrays.sort(fe, SortByName);
+			break;
+		case SORTTYPE_TYPE:
+			Arrays.sort(fe, SortByExt);
+			break;
+		case SORTTYPE_SIZE:
+			Arrays.sort(fe, SortBySize);
+			break;
+		}
+		lastsort = SortType;
+		return (fe);
+
+	}
+
+	/**
+	 * Used to sort a fileentry list by its filename.
+	 */
+	public final Comparator<FileEntry> SortByName = new Comparator<FileEntry>() {
+		@Override
+		public int compare(FileEntry o1, FileEntry o2) {
+			if (!sortreverse) {
+				return o1.GetFilename().compareTo(o2.GetFilename());
+			} else {
+				return -o1.GetFilename().compareTo(o2.GetFilename());
+			}
+		}
+	};
+
+	/**
+	 * Used to sort a fileentry list by its entry type.
+	 */
+	public final Comparator<FileEntry> SortByExt = new Comparator<FileEntry>() {
+		@Override
+		public int compare(FileEntry o1, FileEntry o2) {
+			if (!sortreverse) {
+				return o1.GetFileTypeString().compareTo(o2.GetFileTypeString());
+			} else {
+				return -o1.GetFileTypeString().compareTo(o2.GetFileTypeString());
+			}
+		}
+	};
+
+	/**
+	 * Used to sort a fileentry list by its size.
+	 */
+	public final Comparator<FileEntry> SortBySize = new Comparator<FileEntry>() {
+		@Override
+		public int compare(FileEntry o1, FileEntry o2) {
+			int result = 0;
+			if (o1.GetFileSize() < o2.GetFileSize())
+				result = -1;
+			if (o1.GetFileSize() > o2.GetFileSize())
+				result = 1;
+			if (sortreverse) {
+				result = -result;
+			}
+			return (result);
+		}
+	};
 
 }

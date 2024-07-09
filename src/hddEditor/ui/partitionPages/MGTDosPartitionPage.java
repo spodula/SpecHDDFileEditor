@@ -38,6 +38,8 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -51,7 +53,6 @@ import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.MGTDosPartition;
-import hddEditor.libs.partitions.TrDosPartition;
 import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
 import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;
@@ -107,7 +108,24 @@ public class MGTDosPartitionPage extends GenericPage {
 			DirectoryListing.setHeaderVisible(true);
 
 			/***********************************************************************************/
-
+		    Listener sortListener = new Listener() {
+		        public void handleEvent(Event e) {
+		        	TableColumn column = (TableColumn) e.widget;
+		        	MGTDosPartition p = (MGTDosPartition)partition;
+	                if (column == tc1) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_NAME);
+	                if (column == tc2) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_TYPE);
+	                if (column == tc4) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_SIZE);
+	                if (column == tc5) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_SIZE);
+	                DirectoryListing.setSortColumn(column);
+	                UpdateDirectoryEntryList();
+		        }
+		    };
+			tc1.addListener(SWT.Selection,sortListener);
+			tc2.addListener(SWT.Selection,sortListener);
+			tc3.addListener(SWT.Selection,sortListener);
+			tc4.addListener(SWT.Selection,sortListener);
+			
+			/***********************************************************************************/
 			// Create the drop target
 			DropTarget target = new DropTarget(DirectoryListing, DND.DROP_LINK | DND.DROP_COPY | DND.DROP_DEFAULT);
 			Transfer[] types = new Transfer[] { TextTransfer.getInstance() };
@@ -435,7 +453,7 @@ public class MGTDosPartitionPage extends GenericPage {
 
 			int response = messageBox.open();
 			if (response == SWT.YES) {
-				TrDosPartition fbc = (TrDosPartition) partition;
+				MGTDosPartition fbc = (MGTDosPartition) partition;
 				try {
 					for (TableItem itm : itms) {
 						entry = (MGTDirectoryEntry) itm.getData();

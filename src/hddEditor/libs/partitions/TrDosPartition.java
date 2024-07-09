@@ -32,6 +32,7 @@ import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
 import hddEditor.libs.disks.FDD.SCLDiskFile;
 import hddEditor.libs.disks.FDD.TrDosDiskFile;
+import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
 
 public class TrDosPartition extends IDEDosPartition {
@@ -786,5 +787,14 @@ public class TrDosPartition extends IDEDosPartition {
 		return filename;
 	}
 
+	/**
+	 * Sort the directory entries.
+	 * 
+	 * @param SortType 0 = no sort, 1=name, 2 = file type, 3=file size,
+	 */
+	public void SortDirectoryEntries(int SortType) {
+		DirectoryEntries = (TrdDirectoryEntry[]) SortFileEntry(SortType);
+	}	
+	
 	
 }

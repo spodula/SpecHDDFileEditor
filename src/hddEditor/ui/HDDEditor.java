@@ -1,5 +1,4 @@
 package hddEditor.ui;
-//TODO: add sort by filename, filesize, type
 //TODO: Add a "Convert Snapshot to disk" option
 
 /**

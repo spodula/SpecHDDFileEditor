@@ -14,6 +14,7 @@ import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
 import hddEditor.libs.disks.FDD.MGTDiskFile;
 import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
+import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
 
 public class MGTDosPartition extends IDEDosPartition {
 	public boolean IsValid = false;
@@ -712,5 +713,13 @@ public class MGTDosPartition extends IDEDosPartition {
 		return filename;
 	}
 
+	/**
+	 * Sort the directory entries.
+	 * 
+	 * @param SortType 0 = no sort, 1=name, 2 = file type, 3=file size,
+	 */
+	public void SortDirectoryEntries(int SortType) {
+		DirectoryEntries = (MGTDirectoryEntry[]) SortFileEntry(SortType);
+	}	
 	
 }

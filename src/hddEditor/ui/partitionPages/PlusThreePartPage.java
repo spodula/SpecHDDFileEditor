@@ -10,6 +10,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.Collator;
+import java.util.Arrays;
+import java.util.Locale;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
@@ -30,7 +33,9 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -147,6 +152,24 @@ public class PlusThreePartPage extends GenericPage {
 				tc4.setWidth(150);
 				tc5.setWidth(100);
 				DirectoryListing.setHeaderVisible(true);
+				/***********************************************************************************/
+			    Listener sortListener = new Listener() {
+			        public void handleEvent(Event e) {
+			        	TableColumn column = (TableColumn) e.widget;
+			        	CPMPartition p = (CPMPartition)partition;
+		                if (column == tc1) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_NAME);
+		                if (column == tc2) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_TYPE);
+		                if (column == tc3) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_SIZE);
+		                if (column == tc4) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_SIZE);
+		                DirectoryListing.setSortColumn(column);
+		                PopulateDirectory();
+			        }
+			    };
+				tc1.addListener(SWT.Selection,sortListener);
+				tc2.addListener(SWT.Selection,sortListener);
+				tc3.addListener(SWT.Selection,sortListener);
+				tc4.addListener(SWT.Selection,sortListener);
+				
 				/***********************************************************************************/
 
 				// Create the drop target
@@ -422,7 +445,6 @@ public class PlusThreePartPage extends GenericPage {
 	 * Populate the directory listing.
 	 */
 	private void PopulateDirectory() {
-		DirectoryListing.clearAll();
 		DirectoryListing.removeAll();
 
 		PLUS3DOSPartition pdp = (PLUS3DOSPartition) partition;
