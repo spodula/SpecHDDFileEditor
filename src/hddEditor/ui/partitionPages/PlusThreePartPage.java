@@ -131,9 +131,9 @@ public class PlusThreePartPage extends GenericPage {
 				DirectoryListing = new Table(ParentComp, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 				DirectoryListing.setLinesVisible(true);
 
-				GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+				GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 				gd.horizontalSpan = 4;
-				gd.heightHint = 400;
+				gd.heightHint = 100;
 				DirectoryListing.setLayoutData(gd);
 
 				TableColumn tc1 = new TableColumn(DirectoryListing, SWT.LEFT);

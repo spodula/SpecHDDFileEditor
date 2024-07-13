@@ -85,7 +85,7 @@ public class MGTDosPartitionPage extends GenericPage {
 			DirectoryListing = new Table(ParentComp, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 			DirectoryListing.setLinesVisible(true);
 
-			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 			gd.horizontalSpan = 4;
 			gd.heightHint = 400;
 			DirectoryListing.setLayoutData(gd);

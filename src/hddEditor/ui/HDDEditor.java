@@ -363,6 +363,7 @@ public class HDDEditor {
 		MainPage1.setExpandHorizontal(true);
 		MainPage1.setExpandVertical(true);
 		MainPage1.setAlwaysShowScrollBars(true);
+		
 		GridData gd = new GridData(GridData.FILL_BOTH);
 		gd.horizontalSpan = 4;
 		MainPage1.setLayoutData(gd);
@@ -550,7 +551,7 @@ public class HDDEditor {
 		case PLUSIDEDOS.PARTITION_UNKNOWN:
 			new FloppyGenericPage(this, MainPage, part, filesel);
 			break;
-		case PLUSIDEDOS.PARTITION_RAWFDD: 
+		case PLUSIDEDOS.PARTITION_RAWFDD:
 			new RawFloppyPage(this, MainPage, part, filesel);
 			break;
 		default:
@@ -651,7 +652,7 @@ public class HDDEditor {
 									}
 								}
 							}
-						} 
+						}
 					} catch (Exception E) {
 						System.out.println(E.getMessage());
 					}
