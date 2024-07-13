@@ -340,9 +340,9 @@ public class SystemPartPage extends GenericPage {
 			PartitionTable = new Table(ParentComp, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 			PartitionTable.setLinesVisible(true);
 
-			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 			gd.horizontalSpan = 4;
-			gd.heightHint = 210;
+			gd.heightHint = 110;
 			PartitionTable.setLayoutData(gd);
 
 			TableColumn tc1 = new TableColumn(PartitionTable, SWT.LEFT);
