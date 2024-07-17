@@ -32,7 +32,6 @@ import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
 import hddEditor.libs.disks.FDD.SCLDiskFile;
 import hddEditor.libs.disks.FDD.TrDosDiskFile;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
 
 public class TrDosPartition extends IDEDosPartition {

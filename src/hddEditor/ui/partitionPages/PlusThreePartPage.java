@@ -10,9 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.Collator;
-import java.util.Arrays;
-import java.util.Locale;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;

@@ -11,8 +11,6 @@ import java.io.FileWriter;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 
 import hddEditor.libs.CPM;
 import hddEditor.libs.Speccy;

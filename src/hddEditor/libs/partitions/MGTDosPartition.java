@@ -14,7 +14,6 @@ import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
 import hddEditor.libs.disks.FDD.MGTDiskFile;
 import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
-import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
 
 public class MGTDosPartition extends IDEDosPartition {
 	public boolean IsValid = false;
