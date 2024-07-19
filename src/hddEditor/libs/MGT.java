@@ -1,6 +1,9 @@
 package hddEditor.libs;
 
 public class MGT {
+	public static int MGT_SECTORSIZE = 512;
+	public static int MGT_SECTORSPERTRACK = 10;
+	
 	public static String MGTFileTypes[] = { "Empty", "ZX Basic", "ZX NumArray", "ZX StrArray", // 0-3
 			"ZX Code", "48k SNA", "ZX Microdrive", "ZX Screen", // 4-7
 			"Special", "128k SNA", "OpenType", "ZX Execute", // 8-11

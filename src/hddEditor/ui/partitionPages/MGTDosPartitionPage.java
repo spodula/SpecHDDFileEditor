@@ -51,6 +51,8 @@ import hddEditor.libs.MGT;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
+import hddEditor.libs.disks.FDD.BadDiskFileException;
+import hddEditor.libs.disks.FDD.MGTDiskFile;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.MGTDosPartition;
 import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
@@ -349,20 +351,6 @@ public class MGTDosPartitionPage extends GenericPage {
 				}
 			});
 
-			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Defrag disk");
-			Btn.setLayoutData(gd);
-			Btn.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					DoDefragDisk();
-				}
-
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
 			ParentComp.getShell().pack();
 			((ScrolledComposite) ParentComp.getParent())
 					.setMinSize(ParentComp.computeSize(ParentComp.getParent().getClientArea().width + 1, SWT.DEFAULT));
@@ -390,11 +378,6 @@ public class MGTDosPartitionPage extends GenericPage {
 		if (!ParentComp.isDisposed()) {
 			AddComponents();
 		}
-	}
-
-	protected void DoDefragDisk() {
-		// TODO MGT: Defrag disk
-
 	}
 
 	protected void DoRenameFile() {

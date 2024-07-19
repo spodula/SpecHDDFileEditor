@@ -17,8 +17,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Arrays;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.MGT;
 
 public class MGTDiskFile extends FloppyDisk {
 
@@ -45,8 +47,8 @@ public class MGTDiskFile extends FloppyDisk {
 	private void ParseDisk() throws IOException {
 		// This is just a list of sectors. We will have to determine the number of heads
 		// after loading.
-		SetNumSectors(10);
-		SetSectorSize(512);
+		SetNumSectors(MGT.MGT_SECTORSPERTRACK);
+		SetSectorSize(MGT.MGT_SECTORSIZE);
 		long numLogicalTracks = GetFileSize() / GetSectorSize() / GetNumSectors();
 
 		if (numLogicalTracks > 159) {
@@ -257,7 +259,7 @@ public class MGTDiskFile extends FloppyDisk {
 
 			// Point to next sector. Note, MGT disks are HCS format.
 			logicalSector++;
-			if (logicalSector == 11) {
+			if (logicalSector > MGT.MGT_SECTORSPERTRACK) {
 				logicalSector = 1;
 				logicalTrack++;
 				if (logicalTrack > GetNumCylinders()) {
@@ -280,7 +282,55 @@ public class MGTDiskFile extends FloppyDisk {
 	}
 
 	/**
-	 * Create a blank disk, 40 tracks, 1 head, 9 sectors per track, 512 bytes per
+	 * Create a file with the given number of tracks and sides.
+	 * NOTE, creating a disk with values other than 40/80 tracks and 1/2 sides will produce
+	 * an error.
+	 * 
+	 * @param Filename
+	 * @param tracks
+	 * @param sides
+	 * @throws IOException
+	 * @throws BadDiskFileException
+	 */
+	public void CreateBlankMGTDiskParams(File Filename, int tracks, int sides) throws IOException, BadDiskFileException {
+		if (tracks != 40 && tracks != 80) {
+			throw new BadDiskFileException("MGT disks must have either 40 or 80 tracks!");
+		}
+		if (sides != 1 && sides != 2) {
+			throw new BadDiskFileException("MGT disks must have either 1 or 2 sides!");
+		}
+		
+		FileOutputStream NewFile = new FileOutputStream(Filename);
+		try {
+			byte track[] = new byte[MGT.MGT_SECTORSIZE * MGT.MGT_SECTORSPERTRACK];
+			// Blank the track
+			Arrays.fill(track, (byte)0x00);
+
+			/*
+			 * Write the tracks.
+			 */
+			for (int tracknum = 0; tracknum < (sides*tracks); tracknum++) {
+				NewFile.write(track);
+			}
+		} finally {
+			NewFile.close();
+			NewFile = null;
+		}
+
+		/*
+		 * Load the newly created file.
+		 */
+		inFile = new RandomAccessFile(Filename, "rw");
+		this.file = Filename;
+		FileSize = file.length();
+		IsValid = false;
+		ParseDisk();
+		
+	}
+	
+	
+	/**
+	 * Create a blank disk, 80 tracks, 2 heads, 9 sectors per track, 512 bytes per
 	 * sector.
 	 * 
 	 * @param Filename
@@ -288,14 +338,12 @@ public class MGTDiskFile extends FloppyDisk {
 	 * @throws IOException
 	 * @throws BadDiskFileException
 	 */
-	public void CreateBlankMGTDisk(String Filename) throws IOException, BadDiskFileException {
+	public void CreateBlankMGTDisk(File Filename) throws IOException, BadDiskFileException {
 		FileOutputStream NewFile = new FileOutputStream(Filename);
 		try {
-			byte track[] = new byte[512 * 10];
+			byte track[] = new byte[MGT.MGT_SECTORSIZE * MGT.MGT_SECTORSPERTRACK];
 			// Blank the track
-			for (int i = 0; i < track.length; i++) {
-				track[i] = 0x00;
-			}
+			Arrays.fill(track, (byte)0x00);
 			/*
 			 * Write the tracks.
 			 */
@@ -311,7 +359,7 @@ public class MGTDiskFile extends FloppyDisk {
 		 * Load the newly created file.
 		 */
 		inFile = new RandomAccessFile(Filename, "rw");
-		this.file = new File(Filename);
+		this.file = Filename;
 		FileSize = file.length();
 		IsValid = false;
 		ParseDisk();
