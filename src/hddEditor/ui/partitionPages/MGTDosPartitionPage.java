@@ -51,8 +51,6 @@ import hddEditor.libs.MGT;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
-import hddEditor.libs.disks.FDD.BadDiskFileException;
-import hddEditor.libs.disks.FDD.MGTDiskFile;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.MGTDosPartition;
 import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
