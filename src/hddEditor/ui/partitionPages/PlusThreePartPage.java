@@ -1,5 +1,4 @@
 package hddEditor.ui.partitionPages;
-//TODO: CPM ISVALID flag doesnt seem to work properly.
 
 import java.io.File;
 
@@ -70,10 +69,12 @@ public class PlusThreePartPage extends GenericPage {
 	DropFilestoPlus3Partition DropFilesDialog = null;
 
 	/**
+	 * Open a +3 Partition page
 	 * 
-	 * @param root
-	 * @param parent
-	 * @param partition
+	 * @param root	- The root object. used for global variables.
+	 * @param parent - Parent shell for the form. 
+	 * @param partition - Current partition.
+	 * @param filesel - File selection dialog object.
 	 */
 	public PlusThreePartPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
 		super(root, parent, partition, filesel);
@@ -408,6 +409,9 @@ public class PlusThreePartPage extends GenericPage {
 		}
 	}
 
+	/**
+	 * Undelete the currently selected file(s)
+	 */
 	protected void DoUndeleteFile() {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
@@ -582,6 +586,9 @@ public class PlusThreePartPage extends GenericPage {
 		}
 	}
 
+	/**
+	 * Show the "Extract all files" form. 
+	 */
 	protected void DoExtractAllFiles() {
 		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay());
 		try {
@@ -638,6 +645,11 @@ public class PlusThreePartPage extends GenericPage {
 		}
 	}
 
+	/**
+	 * Handle the drag/drop of files on to this form.
+	 * 
+	 * @param data
+	 */
 	protected void DoDropFile(String[] data) {
 		File fFiles[] = new File[data.length];
 		int i = 0;
@@ -658,7 +670,6 @@ public class PlusThreePartPage extends GenericPage {
 		if (!ParentComp.isDisposed()) {
 			AddComponents();
 		}
-
 	}
 
 }

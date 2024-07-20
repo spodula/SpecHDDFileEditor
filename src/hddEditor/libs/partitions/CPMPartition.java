@@ -23,10 +23,10 @@ import hddEditor.ui.partitionPages.dialogs.AddressNote;
 public class CPMPartition extends IDEDosPartition {
 	// This data needs to be populated by an inherited class.
 	// It forms the CPM DPB for the disk.
-	public int BlockSize;
+	public int BlockSize; // CPM BLock size in bytes
 	public int RecordsPerTrack;
 	public int BlockSizeShift;
-	public int BLM;
+	public int BLM; // Block mask
 	public int ExtentMask;
 	public int MaxBlock;
 	public int MaxDirent;
@@ -44,8 +44,14 @@ public class CPMPartition extends IDEDosPartition {
 	public int GapLengthRW;
 	public int GapLengthFmt;
 	public int Flags;
+
+	// List of dirents.
 	public Dirent[] Dirents;
+
+	// List of directory entries assembled from the Dirents.
 	public DirectoryEntry[] DirectoryEntries;
+
+	// Block availability map.
 	public boolean[] bam;
 
 	// Calculated fields.
@@ -209,6 +215,7 @@ public class CPMPartition extends IDEDosPartition {
 				NewBlocks.add(block);
 				int size = file.length - ptr;
 				int DataSize = size;
+				
 				if (size > BlockSize) {
 					DataSize = BlockSize;
 				} else {
@@ -341,14 +348,7 @@ public class CPMPartition extends IDEDosPartition {
 
 		long ActualLogicalSector = LogicalSectorStartOfPartition + LogicalSectorInPartition;
 
-		/*
-		 * System.out.println("SetLogicalBlock: " + BlockID + " SC:" + GetStartCyl() +
-		 * " SH:" + GetStartHead() + " RealSector:" + ActualLogicalSector + " Log:" +
-		 * LogicalSectorInPartition + " Startsect:" + LogicalSectorStartOfPartition);
-		 */
-
 		CurrentDisk.SetLogicalBlockFromSector(ActualLogicalSector, Block);
-
 	}
 
 	/**
@@ -402,9 +402,10 @@ public class CPMPartition extends IDEDosPartition {
 		}
 		RecalculateDirectoryListing();
 		int validdirents = 0;
-//		int invalidDirents = 0;
+		int invalidDirents = 0;
 		for (DirectoryEntry d : DirectoryEntries) {
 			boolean valid = d.IsComplete();
+
 			if (d.dirents[0].GetUserNumber() > 16 && d.dirents[0].GetUserNumber() != 0xe5) {
 				valid = false;
 			}
@@ -423,7 +424,7 @@ public class CPMPartition extends IDEDosPartition {
 				// invalidDirents++;
 			}
 		}
-		IsValid = ((validdirents > 1)); // && (invalidDirents < validdirents)) || ((invalidDirents == 0));
+		IsValid = ((validdirents > 1) && (invalidDirents < validdirents)); // || ((invalidDirents == 0));
 	}
 
 	/**
@@ -764,7 +765,7 @@ public class CPMPartition extends IDEDosPartition {
 		}
 		return filename;
 	}
-	
+
 	/**
 	 * Sort the directory entries.
 	 * 
@@ -772,5 +773,5 @@ public class CPMPartition extends IDEDosPartition {
 	 */
 	public void SortDirectoryEntries(int SortType) {
 		DirectoryEntries = (DirectoryEntry[]) SortFileEntry(SortType);
-	}	
+	}
 }
