@@ -599,9 +599,14 @@ public class TZXFile implements Disk {
 	 * Overridden TOString for debugging purposes.
 	 */
 	public String toString() {
-		String result = "Filename: " + file.getName() + "\n";
-		for (TZXBlock t : Blocks) {
-			result = result + "#" + t.BlockNumber + ": " + t + "\n";
+		String result = "Filename: " + file.getName() + System.lineSeparator();
+		if (Blocks == null) {
+			result = result + " No blocks found. Parsing error?" + System.lineSeparator();
+			;
+		} else {
+			for (TZXBlock t : Blocks) {
+				result = result + "#" + t.BlockNumber + ": " + t + System.lineSeparator();
+			}
 		}
 		return (result);
 	}
@@ -634,32 +639,36 @@ public class TZXFile implements Disk {
 							TZXFile mdt = new TZXFile(f, pr);
 							pr.println(mdt);
 							pr.println("----------------------------------------------");
-							for (TZXBlock block : mdt.Blocks) {
-								if (block.DecodeHeader() != null) {
-									pr.print("Blocks: " + block.BlockNumber + "\\" + (block.BlockNumber + 1) + " ");
+							if (mdt.Blocks == null) {
+								pr.println("No blocks found. parsing error?");
+							} else {
+								for (TZXBlock block : mdt.Blocks) {
+									if (block.DecodeHeader() != null) {
+										pr.print("Blocks: " + block.BlockNumber + "\\" + (block.BlockNumber + 1) + " ");
 
-									ExtendedSpeccyBasicDetails ebd = block.DecodeHeader();
-									String s = "  '" + ebd.filename + "' " + ebd.BasicTypeString() + " ("
-											+ ebd.BasicType + ") Len:" + ebd.filelength;
+										ExtendedSpeccyBasicDetails ebd = block.DecodeHeader();
+										String s = "  '" + ebd.filename + "' " + ebd.BasicTypeString() + " ("
+												+ ebd.BasicType + ") Len:" + ebd.filelength;
 
-									switch (ebd.BasicType) {
-									case Speccy.BASIC_BASIC:
-										s = s + " Line: " + ebd.LineStart;
-										s = s + " Vars: " + ebd.VarStart;
-										break;
-									case Speccy.BASIC_NUMARRAY:
-										s = s + " Var: " + ebd.VarName;
-										break;
-									case Speccy.BASIC_CHRARRAY:
-										s = s + " Var: " + ebd.VarName + "$";
-										break;
-									case Speccy.BASIC_CODE:
-										s = s + " Loadaddr: " + ebd.LoadAddress;
-										break;
-									default:
-										s = s + "UNKNOWN/INVALID TYPE ID";
+										switch (ebd.BasicType) {
+										case Speccy.BASIC_BASIC:
+											s = s + " Line: " + ebd.LineStart;
+											s = s + " Vars: " + ebd.VarStart;
+											break;
+										case Speccy.BASIC_NUMARRAY:
+											s = s + " Var: " + ebd.VarName;
+											break;
+										case Speccy.BASIC_CHRARRAY:
+											s = s + " Var: " + ebd.VarName + "$";
+											break;
+										case Speccy.BASIC_CODE:
+											s = s + " Loadaddr: " + ebd.LoadAddress;
+											break;
+										default:
+											s = s + "UNKNOWN/INVALID TYPE ID";
+										}
+										pr.println(s.trim());
 									}
-									pr.println(s.trim());
 								}
 							}
 

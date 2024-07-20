@@ -1,6 +1,5 @@
 package hddEditor.ui.partitionPages;
 //TODO: CPM ISVALID flag doesnt seem to work properly.
-//TODO: Zanthrax from TOSEC collection doesn't load. Works in FUSE. 
 
 import java.io.File;
 
