@@ -191,7 +191,7 @@ public class FileSelectDialog {
 			fd.setText(title);
 			fd.setFilterExtensions(extension);
 			fd.setFilterPath(DefaultFolders[filetype].getAbsolutePath());
-			fd.setFileName(defaultFilename);
+			fd.setFileName(defaultFilename.trim());
 			String selected = fd.open();
 			if (selected != null) {
 				return(new File(selected));
