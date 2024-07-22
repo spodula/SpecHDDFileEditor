@@ -39,7 +39,7 @@ public class Speccy {
 	public static int COLOUR_CYAN = 5;
 	public static int COLOUR_YELLOW = 6;
 	public static int COLOUR_WHITE = 7;
-	
+
 	// Colour names
 	public final static String[] SPECTRUM_COLOURS = { "Black", "Blue", "Red", "Magenta", "Green", "Cyan", "Yellow",
 			"White" };
@@ -550,7 +550,7 @@ public class Speccy {
 
 				byte line[] = new byte[linelen];
 				for (int i = 0; i < linelen; i++) {
-					if (ptr+i < file.length) {
+					if (ptr + i < file.length) {
 						line[i] = file[ptr + i];
 					}
 				}

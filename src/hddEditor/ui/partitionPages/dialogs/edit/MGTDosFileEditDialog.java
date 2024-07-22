@@ -26,6 +26,7 @@ import hddEditor.ui.partitionPages.FileRenderers.MGT48kSnapshotRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.MGT128kSnapshotRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.MGTExecuteRenderer;
+import hddEditor.ui.partitionPages.FileRenderers.MGTScreenRenderer;
 
 public class MGTDosFileEditDialog extends EditFileDialog {
 
@@ -99,6 +100,9 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 				NumericArrayRenderer CurrentRenderer = new NumericArrayRenderer();
 				CurrentRenderer.RenderNumericArray(MainPage, data, null, mEnt.GetFilename(),
 						"" + mEnt.GetSpeccyBasicDetails().VarName,filesel);
+			} else if (ftype == MGT.MGTFT_SAMSCREEN) {
+				MGTScreenRenderer CurrentRenderer = new MGTScreenRenderer();
+				CurrentRenderer.RenderScreen(MainPage, data, mEnt.GetFilename(),mEnt, filesel); 
 			} else if (ftype == MGT.MGTFT_ZXSTRARRAY) {
 				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
 				CurrentRenderer.RenderCharArray(MainPage, data, null, mEnt.GetFilename(),
