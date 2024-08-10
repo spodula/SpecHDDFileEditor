@@ -113,7 +113,6 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 			} else if (ftype == MGT.MGTFT_ZX128SNA) {
 				MGT128kSnapshotRenderer CurrentRenderer = new MGT128kSnapshotRenderer();
 				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt,filesel);
-				
 			} else if (ftype == MGT.MGTFT_ZXEXE) {
 				MGTExecuteRenderer CurrentRenderer = new MGTExecuteRenderer();
 				CurrentRenderer.Render(MainPage, data, mEnt.GetFilename(),filesel);

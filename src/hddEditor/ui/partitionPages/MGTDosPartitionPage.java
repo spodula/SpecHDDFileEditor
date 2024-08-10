@@ -11,7 +11,8 @@ import java.io.File;
   o Opentype (10)
   o UNIDOS Subdirectory (12)
   o UNIDOS create?(13)
-  o SAM types 16-20, 22,23
+  o SAM types 16-19, 22,23
+  o Sam type 20 (screen) only partially supported.
   o Masterdos subdirectory (21)
   o EDOS (23-26)
   o HDOS (28-31)

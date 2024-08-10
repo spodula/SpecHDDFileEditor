@@ -2,8 +2,8 @@ package hddEditor.ui.partitionPages.FileRenderers.RawRender;
 /**
  * Implementation of a Sam Coupe screen renderer. 
  * 
- * There are some limitations over the speccy one in addition to the SAM 
- * Because of the layout of the image file, we cant determine multiple screens.
+ * There are some limitations over the Speccy one in addition to the SAM 
+ * Because of the layout of the image file, we can't determine multiple screens.
  */
 
 import java.util.ArrayList;

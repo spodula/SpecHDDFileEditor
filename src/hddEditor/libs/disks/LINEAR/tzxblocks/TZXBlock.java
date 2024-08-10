@@ -84,7 +84,7 @@ public class TZXBlock {
 	 * the start (The data block type ID as specified in A when calling 0556 (0 for
 	 * header, 255 for data) and a byte at the end containing the checksum.
 	 * 
-	 * If the checksum isnt valid, it will assume the block is raw and not written
+	 * If the checksum isn't valid, it will assume the block is raw and not written
 	 * by a Rom or Rom-derived saver.
 	 */
 	protected void UpdateDataFromBlockData() {

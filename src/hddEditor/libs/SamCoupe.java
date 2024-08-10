@@ -5,6 +5,7 @@ package hddEditor.libs;
 //TODO: SAM Files seem to have a 9 byte header. Basic header? 
 //TODO: MGT/SAM filenames, trim out spaces.
 //TODO: MGT/SAM files: lots of "Warning, active sectors in Sector address map (0) doesnt match Dirent Count (8) for file" errors
+//TODO: MGT/SAM files: Sam defines additional file type flags. Bit 7=HIDDEN, bit7=PROTECTED. Implement in MGT
 
 import java.util.ArrayList;
 
@@ -18,6 +19,167 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 public class SamCoupe {
+	/*-
+	 * Class to wrap up a raw MGT file to extract the SAMDOS information.
+	 * 
+	 * SAM file headers (types 16-20) (taken from https://www.mono.org/~unc/Coupe/Tech/dos.html)
+	 * 
+	 * 	SAMDOS type
+	 *	0	File type
+	 *	1-2	Modulo length
+	 *  3-4	Offset start
+	 *	5-6	Unused
+	 *	7	Number of pages
+	 *	8	Starting page number
+	 */
+	public class SamFileWrapper {
+		public boolean IsValid;
+		private byte rawdata[];
+		
+		/**
+		 * parse the data and do some basic sanity checking.
+		 * @param data
+		 */
+		public SamFileWrapper(byte data[]) {
+			rawdata = data;
+			IsValid = true;
+			if (rawdata.length < 9) {
+				IsValid = false;
+			}
+			int ft =getFileType(); 
+			if (ft < MGT.MGTFT_SAMBASIC || ft < MGT.MGTFT_SAMSCREEN) {
+				IsValid = false;
+			}
+		}
+		
+		/**
+		 * File type. 
+		 * 
+		 * @return
+		 */
+		public int getFileType() {
+			return (rawdata[0] & 0xff);
+		}
+		public void setFileType(int filetype) {
+			rawdata[0] = (byte)(filetype & 0xff);
+		}
+		
+		/**
+		 * Offset bytes in the final page.
+		 * 
+		 * @return
+		 */
+		public int getModuloLength() {
+			int value = -1;
+			if (IsValid) {
+				value = ((rawdata[2] & 0xff) * 0x100) + (rawdata[1] & 0xff);
+			}
+			return (value);
+		}
+		public void setModuloLength(int len) {
+			int lsb = len & 0xff;
+			int msb = len & 0xff00;
+			rawdata[1] = (byte) (lsb & 0xff);
+			rawdata[2] = (byte) (msb & 0xff);
+		}
+		
+		/**
+		 * offset in the first page to start reading the file.
+		 * 
+		 * @return
+		 */
+		public int getOffsetStart() {
+			int value = -1;
+			if (IsValid) {
+				value = ((rawdata[4] & 0xff) * 0x100) + (rawdata[3] & 0xff);
+			}
+			return (value);
+		}
+		public void setOffsetStart(int offset) {
+			int lsb = offset & 0xff;
+			int msb = offset & 0xff00;
+			rawdata[3] = (byte) (lsb & 0xff);
+			rawdata[4] = (byte) (msb & 0xff);
+		}
+
+		/**
+		 * Number of complete 16k pages used in the file.
+		 * @return
+		 */
+		public int getNumPages() {
+			if (IsValid) {
+				return (rawdata[7] & 0xff);
+			} else {
+				return(-1);
+			}
+		}
+		public void setNumPages(int numpages) {
+			rawdata[7] = (byte)(numpages & 0xff);
+		}
+
+		/**
+		 * start page to load the file
+		 * @return
+		 */
+		public int getStartPage() {
+			if (IsValid) {
+				return (rawdata[7] & 0xff);
+			} else {
+				return(-1);
+			}
+		}
+		public void setStartPage(int startpage) {
+			rawdata[8] = (byte)(startpage & 0xff);
+		}
+		
+		/**
+		 * Get the file data minus its header
+		 * @return
+		 */
+		public byte[] getData() {
+			if (IsValid) {
+				byte data[] = new byte[rawdata.length-9];
+				System.arraycopy(rawdata, 9, data, 0, data.length);
+				return(data);
+			} else {
+				return(rawdata);
+			}
+		}
+		
+		/**
+		 * Calculate the file size.
+		 * Details sourced from https://www.mono.org/~unc/Coupe/Tech/dos.html
+		 * @return
+		 */
+		public int getSAMFileSize() {
+			int result = (getNumPages() * 0x4000) + getModuloLength(); 
+			return(result);
+		}
+		public void setetSAMFileSize(int filesize) {
+			int numpages = filesize / 0x4000;
+			int modulo = filesize % 0x4000;
+			setNumPages(numpages);
+			setModuloLength(modulo);
+		}
+		
+		/**
+		 * return details as a string.
+		 */
+		@Override
+		public String toString() {
+			String result = "";
+			result = result + "Type: "+getFileType();
+			result = result + " - Valid: "+IsValid;
+			result = result + " - Modulo len: "+getModuloLength();
+			result = result + " - Offset: "+getOffsetStart();
+			result = result + " - Pages: "+getNumPages();
+			result = result + " - StartPage: "+getStartPage();
+			result = result + " - RealLen: "+getSAMFileSize();
+			result = result + " - Datalen: "+(rawdata.length-9);
+			return(result);
+		}
+	}
+	
 
 	/*-
 	 * Implementation of the SAM Coupe version of a screen$.
@@ -169,6 +331,8 @@ public class SamCoupe {
 		 * screens as i have no documentation about the format. Mode 3 screens haven't
 		 * yet been tested, but should work
 		 * 
+		 * Interrupt colour changes havent been implemented. 
+		 * 
 		 * @return
 		 */
 		public ImageData GetImage() {
@@ -258,11 +422,11 @@ public class SamCoupe {
 		/**
 		 * Convert a Sam Palette entry into an RGB colour.
 		 * 
-		 * This is an extremely long-winded way of doing it, but i'm sure i'm doing it
-		 * wrong, and i want to make it easier to debug.
+		 * This is an extremely long-winded way of doing it, but at time of writing i was sure i was doing it
+		 * wrong, and i wanted to make it easier to debug.
 		 * 
-		 * @param samcol
-		 * @return
+		 * @param samcol - SAM colour
+		 * @return rgb
 		 */
 		public int SamToRGB(int samcol) {
 			boolean b0 = (samcol & 0x01) != 0;
@@ -464,4 +628,50 @@ public class SamCoupe {
 			}
 		}
 	}
+	
+	public static final String[] tokens = {
+			"","","","","","","<PComma>","<edit>","<left>","<right>","<down>","<up>","<del>","<cr>","<num>","",
+			"<pen>","<paper>","<flash>","<bright>","<inverse>","<over>","<at>","<tab>","<lWord>","<rWord>","","","","","","",
+			"","","","","","","EXIT PROC","EXIT DO","EXIT FOR","LOCN","RESERVED","EQU","TICKS","SHIFT$","SVAL$","USING$",
+			"TIME$","DATE$","INP$","DIR$","FSTAT","DSTAT","FPAGES","SCRAD","INARRAY","","","PI","RND","POINT","FREE","LENGTH",
+
+			"ITEM","ATTR","FN","BIN","XMOUSE","YMOUSE","XPEN","YPEN","RAMTOP","","INSTR","INKEY$","SCREEN$","MEM$","","PATH$",
+			"STRING$","","","SIN","COS","TAN","ASN","ACS","ATN","LN","EXP","ABS","SGN","SQR","INT","USR",
+			"IN","PEEK","DPEEK","DVAR","SVAR","BUTTON","EOF","PTR","XVAR","UDG","NVAL","LEN","CODE","VAL$","VAL","TRUNC$",
+			"CHR$","STR$","BIN$","HEX$","USR$","","NOT","","","","MOD","DIV","BOR","","BAND","OR",
+			
+			"AND","<>","<=",">=","-","USING","WRITE","AT","TAB","OFF","WHILE","UNTIL","LINE","THEN","TO","STEP",
+			"DIR","FORMAT","ERASE","MOVE","SAVE","LOAD","MERGE","VERIFY","OPEN","CLOSE","CIRCLE","PLOT","LET","BLITZ","BORDER","CLS",
+			"PALETTE","PEN","PAPER","FLASH","BRIGHT","INVERSE","OVER","FATPIX","CSIZE","BLOCKS","MODE","GRAB","PUT","BEEP","SOUND","NEW",
+			"RUN","STOP","CONTINUE","CLEAR","GO TO","GO SUB","RETURN","REM","READ","DATA","RESTORE","PRINT","LPRINT","LIST","LLIST","DUMP",
+
+			"FOR","NEXT","PAUSE","DRAW","DEFAULT","DIM","INPUT","RANDOMIZE","DEF FN","DEF KEYCODE","DEF PROC","END PROC","RENUM","DELETE","REF","COPY",
+			"","KEYIN","LOCAL","LOOP","IF DO","LOOP","EXIT IF","IF","IF","ELSE","ELSE","END IF","KEY","ON ERROR","ON","GET",
+			"OUT","POKE","DPOKE","RENAME","CALL","ROLL","SCROLL","SCREEN","DISPLAY","BOOT","LABEL","FILL","WINDOW","AUTO","POP","RECORD",
+			"DEVICE","PROTECT","HIDE","ZAP","POW","BOOM","ZOOM","BACKUP","TIME","DATE","ALTER","SORT","JOIN","EDIT","",""
+	};
+	public static final String[] characters = {
+			"","","","","","","<PComma>","<edit>","<left>","<right>","<down>","<up>","<del>","<cr>","<num>","",
+			"<pen>","<paper>","<flash>","<bright>","<inverse>","<over>","<at>","<tab>","<lWord>","<rWord>","","","","","","",
+			" ","!","\"","#","$","%","&","'","(",")","*","+",",","-",".","/",
+			"0","1","2","3","4","5","6","7","8","9",":",";","<","=",">","?",
+
+			"@","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O",
+			"P","Q","R","S","T","U","V","W","X","Y","Z","[","\\","]","^","_",
+			"£","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o",
+			"p","q","r","s","t","u","v","w","x","y","z","{","|","}","~","" + (char) 0x24B8,
+
+			//TODO: complete Sam characters
+			"","","","","","","","","","","","","","","","",
+			"","","","","","","","","","","","","","","","",
+			"","","","","","","","","","","","","","","","",
+			"","","","","","","","","","","","","","","","",
+
+			"","","","","","","","","","","","","","","","",
+			"","","","","","","","","","","","","","","","",
+			"","","","","","","","","","","","","","","","",
+			"","","","","","","","","","","","","","","",""
+	};
+
+	
 }
