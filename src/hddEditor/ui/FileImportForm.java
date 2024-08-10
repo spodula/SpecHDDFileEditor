@@ -213,7 +213,7 @@ public class FileImportForm {
 		
 
 		SourceList = new Table(shell, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.SINGLE);
-		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 4;
 		gd.heightHint = 200;
 		gd.verticalSpan = 2;
