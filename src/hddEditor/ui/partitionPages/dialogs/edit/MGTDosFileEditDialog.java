@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.MGT;
+import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
@@ -30,8 +31,8 @@ import hddEditor.ui.partitionPages.FileRenderers.MGTScreenRenderer;
 
 public class MGTDosFileEditDialog extends EditFileDialog {
 
-	public MGTDosFileEditDialog(Display display, FileSelectDialog filesel) {
-		super(display, filesel);
+	public MGTDosFileEditDialog(Display display, FileSelectDialog filesel,IDEDosPartition CurrentPartition) {
+		super(display, filesel, CurrentPartition);
 	}
 	
 	@Override
@@ -119,7 +120,7 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 			} else {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
 				CurrentRenderer.RenderCode(MainPage, data, null, mEnt.GetFilename(), data.length,
-						mEnt.GetVar1(),filesel);
+						mEnt.GetVar1(),filesel,CurrentPartition);
 			}
 		} catch (Exception E) {
 			System.out.println("Error Showing " + ThisEntry.GetFilename()+ ": " + E.getMessage());

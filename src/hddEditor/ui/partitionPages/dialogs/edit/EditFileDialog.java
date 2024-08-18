@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.disks.FileEntry;
+import hddEditor.libs.partitions.IDEDosPartition;
 
 public class EditFileDialog {
 	// Directory entry of the file being displayed
@@ -38,14 +39,17 @@ public class EditFileDialog {
 	
 	protected FileSelectDialog filesel;
 	
+	protected IDEDosPartition CurrentPartition;
+	
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public EditFileDialog(Display display, FileSelectDialog filesel) {
+	public EditFileDialog(Display display, FileSelectDialog filesel,IDEDosPartition CurrentPartition) {
 		this.display = display;
 		this.filesel = filesel;
+		this.CurrentPartition = CurrentPartition;
 	}
 
 	/**

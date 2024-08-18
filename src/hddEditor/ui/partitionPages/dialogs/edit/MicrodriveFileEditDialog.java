@@ -20,6 +20,7 @@ import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.LINEAR.MicrodriveSector;
+import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.mdf.MicrodriveDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
@@ -30,8 +31,8 @@ import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 
 public class MicrodriveFileEditDialog extends EditFileDialog {     
 
-	public MicrodriveFileEditDialog(Display display,FileSelectDialog filesel) {
-		super(display,filesel);
+	public MicrodriveFileEditDialog(Display display,FileSelectDialog filesel,IDEDosPartition CurrentPartition) {
+		super(display,filesel, CurrentPartition);
 	}
 
 	/**
@@ -114,7 +115,7 @@ public class MicrodriveFileEditDialog extends EditFileDialog {
 			break;
 		case Speccy.BASIC_CODE:
 				CodeRenderer CR = new CodeRenderer();
-				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, ((MicrodriveDirectoryEntry)ThisEntry).GetVar2(), filesel);
+				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, ((MicrodriveDirectoryEntry)ThisEntry).GetVar2(), filesel,CurrentPartition);
 				break;
 		case Speccy.BASIC_NUMARRAY:
 				NumericArrayRenderer NR = new NumericArrayRenderer();

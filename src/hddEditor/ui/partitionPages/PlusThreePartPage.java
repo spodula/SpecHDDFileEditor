@@ -488,7 +488,7 @@ public class PlusThreePartPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 			DirectoryEntry entry = (DirectoryEntry) itms[0].getData();
 			try {
-				SpecFileEditDialog = new Plus3DosFileEditDialog(ParentComp.getDisplay(), fsd);
+				SpecFileEditDialog = new Plus3DosFileEditDialog(ParentComp.getDisplay(), fsd,partition);
 
 				byte[] data = entry.GetFileRawData();
 
@@ -499,6 +499,7 @@ public class PlusThreePartPage extends GenericPage {
 					AddComponents();
 				}
 				SpecFileEditDialog = null;
+				PopulateDirectory();
 			} catch (IOException e) {
 				ErrorBox("Error reading partition: " + e.getMessage());
 				e.printStackTrace();

@@ -537,9 +537,9 @@ public class TrDosPartitionPage extends GenericPage {
 				ErrorBox("Error editing partition: " + e.getMessage());
 				e.printStackTrace();
 			}
-
+			
 			HxEditDialog = null;
-
+			UpdateDirectoryEntryList();
 		}
 	}
 
@@ -551,7 +551,7 @@ public class TrDosPartitionPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 			TrdDirectoryEntry entry = (TrdDirectoryEntry) itms[0].getData();
 			try {
-				SpecFileEditDialog = new TrDosFileEditDialog(ParentComp.getDisplay(), fsd);
+				SpecFileEditDialog = new TrDosFileEditDialog(ParentComp.getDisplay(), fsd,partition);
 
 				byte[] data = entry.GetFileData();
 				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
@@ -561,6 +561,7 @@ public class TrDosPartitionPage extends GenericPage {
 					AddComponents();
 				}
 				SpecFileEditDialog = null;
+				UpdateDirectoryEntryList();
 			} catch (IOException e) {
 				ErrorBox("Error reading partition: " + e.getMessage());
 				e.printStackTrace();

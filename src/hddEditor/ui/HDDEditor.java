@@ -1,5 +1,4 @@
 package hddEditor.ui;
-//TODO: Add a "Convert Snapshot to disk" option
 
 /**
  * Main UI.

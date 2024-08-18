@@ -159,7 +159,7 @@ public class MGT128KRenderer extends RamDump {
 		byte newdata[] = new byte[data.length-1];
 		System.arraycopy(data, 1, newdata, 0, newdata.length-1);
 		
-		super.Render(TargetPage,data, 0x4000, true, IY,new int[] {0,1,2,3,4,5,6,7}, entry.GetFilename());
+		super.Render(TargetPage,data, 0x4000, true, IY,new int[] {0,1,2,3,4,5,6,7}, entry.GetFilename(),null,null);
 	}
 
 }

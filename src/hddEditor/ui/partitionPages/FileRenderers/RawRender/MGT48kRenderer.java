@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
+//TODO: MGT48snapshot - savetopart
 /**
  * Render an MGT 48K snapshot. This is incomplete at the moment.
  */
@@ -144,6 +145,6 @@ public class MGT48kRenderer extends RamDump {
 		
 		int IY = (int) ((entry.RawDirectoryEntry[0xdd] & 0xff) * 0x100) + (entry.RawDirectoryEntry[0xdc] & 0xff);
 		
-		super.Render(TargetPage,data, 0x4000, false, IY,new int[1], entry.GetFilename());
+		super.Render(TargetPage,data, 0x4000, false, IY,new int[1], entry.GetFilename(),null,null);
 	}
 }

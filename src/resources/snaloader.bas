@@ -1,0 +1,40 @@
+###########################################
+# Basic file used for the loaders for
+# 48k z80/SNA files. 
+# Used by CPUStateTOFiles.java
+###########################################
+10 BORDER 0 : PAPER 0 : INK 7: CLEAR 27391
+20 LOAD "--filename--.scr" SCREEN$
+30 LOAD "--filename--.bi2" CODE 32768
+40 RESTORE 120
+50 LET a=32000
+60 READ b: IF b=-1 THEN GOTO 80 
+70 POKE a,b: LET a=a+1 : GOTO 60 
+80 RANDOMISE USR 32000
+120 DATA 243
+130 DATA 62,19,1,253,127,237,121
+140 DATA 33,0,128,17,0,192,1,0,16,237,176
+150 DATA 62,16,1,253,127,237,121
+160 DATA 251,201,-1
+170 REM Load rest of game 
+180 LOAD "--filename--.bi1" CODE
+200 RESTORE 390
+210 LET a=16384
+220 READ b: IF b=-1 THEN GOTO 240
+225 IF B > 255 THEN LET A=B : GOTO 220
+230 POKE a,b: LET a=a+1 : GOTO 220
+240 RANDOMISE USR 16384
+390 DATA 243
+400 DATA 62,19,1,253,127,237,121
+410 DATA 33,0,192,17,0,91,1,0,16,237,176
+420 DATA 62,16,1,253,127,237,121
+430 DATA 49,--spl--,--sph--,195,0,65,16640
+440 DATA 62,--I--,237,71
+445 DATA 237,--IM--
+450 DATA 33,--AltF--,--AltA--,229,241,8
+460 DATA 33,--AltL--,--AltH--,17,--AltE--,--AltD--,1,--AltC--,--AltB--,217
+470 DATA 33,--F--,--A--,229,241,195,0,66,16896
+480 DATA 33,--L--,--H--,17,--E--,--D--,1,--C--,--B--
+490 DATA 221,33,--IXL--,--IXH--
+500 DATA 253,33,--IYL--,--IYH--
+510 DATA --DIEI--201,-1

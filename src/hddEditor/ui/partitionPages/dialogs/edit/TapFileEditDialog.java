@@ -18,14 +18,15 @@ import org.eclipse.swt.widgets.Shell;
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.SpeccyBasicDetails;
+import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 
 public class TapFileEditDialog extends EditFileDialog {
-	public TapFileEditDialog(Display display,FileSelectDialog filesel) {
-		super(display, filesel);
+	public TapFileEditDialog(Display display,FileSelectDialog filesel,IDEDosPartition CurrentPartition) {
+		super(display, filesel,CurrentPartition);
 	}
 
 	/**
@@ -94,7 +95,7 @@ public class TapFileEditDialog extends EditFileDialog {
 			break;
 		case Speccy.BASIC_CODE:
 			CR = new CodeRenderer();
-			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress, filesel);
+			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress, filesel,CurrentPartition);
 			break;
 		case Speccy.BASIC_NUMARRAY:
 			NumericArrayRenderer NR = new NumericArrayRenderer();
@@ -105,7 +106,7 @@ public class TapFileEditDialog extends EditFileDialog {
 			CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);
 		default:
 			CR = new CodeRenderer();
-			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, 0x0000, filesel);
+			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, 0x0000, filesel,CurrentPartition);
 		}
 	}
 

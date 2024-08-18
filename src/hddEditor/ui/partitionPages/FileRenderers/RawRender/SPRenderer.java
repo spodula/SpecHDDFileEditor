@@ -52,6 +52,8 @@ import org.eclipse.swt.widgets.Label;
 
 import hddEditor.libs.ASMLib;
 import hddEditor.libs.Speccy;
+import hddEditor.libs.partitions.IDEDosPartition;
+import hddEditor.libs.snapshots.CPUState;
 
 public class SPRenderer extends RamDump {
 	private ArrayList<Label> labels = null;
@@ -93,7 +95,7 @@ public class SPRenderer extends RamDump {
 	 */
 	@Override
 	public void Render(Composite TargetPage, byte[] data, int loadAddr, boolean is128K, int xx, int i128BankOrder[],
-			String filename) {
+			String filename, CPUState cpustate, IDEDosPartition targetpartition) {
 		labels = new ArrayList<Label>();
 		Renderers = new ArrayList<Renderer>();
 
@@ -183,7 +185,7 @@ public class SPRenderer extends RamDump {
 		byte rawdata[] = new byte[49152];
 		System.arraycopy(data, 38, rawdata, 0, Math.min(data.length - 38, 49152));
 
-		super.Render(TargetPage, rawdata, loadAddr, false, IY, new int[8], filename);
+		super.Render(TargetPage, rawdata, loadAddr, false, IY, new int[8], filename, null,null);
 	}
 
 }

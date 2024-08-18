@@ -421,7 +421,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 
 			MicrodriveDirectoryEntry entry = (MicrodriveDirectoryEntry) itms[0].getData();
-			SpecFileEditDialog = new MicrodriveFileEditDialog(ParentComp.getDisplay(), fsd);
+			SpecFileEditDialog = new MicrodriveFileEditDialog(ParentComp.getDisplay(), fsd,partition);
 
 			byte data[];
 			try {
@@ -449,6 +449,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 					AddComponents();
 				}
 				SpecFileEditDialog = null;
+				UpdateDirectoryEntryList();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}

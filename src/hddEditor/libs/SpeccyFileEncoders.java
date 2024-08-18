@@ -58,6 +58,28 @@ public class SpeccyFileEncoders {
 		System.arraycopy(BasicAsBytes, 0, data, 0, targetPtr);
 		return (data);
 	}
+	
+	/**
+	 * 
+	 * @param filedets
+	 * @return
+	 */
+	public static byte[] EncodeTextFileToBASIC(String[] basic) {
+		/*
+		 * Read the file and tokenize it. Note, no syntax checking is done, so if your
+		 * basic is invalid, it will still be added
+		 */
+		byte BasicAsBytes[] = new byte[0xffff];
+		int targetPtr = 0;
+		for (String line:basic) {
+			targetPtr = Speccy.DecodeBasicLine(line, BasicAsBytes, targetPtr);
+		}
+
+		// Copy to an array of the correct size.
+		byte data[] = new byte[targetPtr];
+		System.arraycopy(BasicAsBytes, 0, data, 0, targetPtr);
+		return (data);
+	}
 
 	/**
 	 * Load a given image file and scale it to zx Spectrum format and return in

@@ -396,7 +396,7 @@ public class TAPPartitionPage extends GenericPage {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
 			TapDirectoryEntry entry = (TapDirectoryEntry) itms[0].getData();
-			SpecFileEditDialog = new TapFileEditDialog(ParentComp.getDisplay(), fsd);
+			SpecFileEditDialog = new TapFileEditDialog(ParentComp.getDisplay(), fsd,partition);
 
 			byte data[];
 			try {
@@ -419,6 +419,7 @@ public class TAPPartitionPage extends GenericPage {
 					AddComponents();
 				}
 				SpecFileEditDialog = null;
+				UpdateDirectoryEntryList();
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}

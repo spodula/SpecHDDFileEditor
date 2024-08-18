@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.disks.FileEntry;
+import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
@@ -34,8 +35,8 @@ public class TrDosFileEditDialog extends EditFileDialog {
 	 * 
 	 * @param display
 	 */
-	public TrDosFileEditDialog(Display display, FileSelectDialog filesel) {
-		super(display, filesel);
+	public TrDosFileEditDialog(Display display, FileSelectDialog filesel,IDEDosPartition CurrentPartition) {
+		super(display, filesel,CurrentPartition);
 	}
 
 	/**
@@ -109,7 +110,7 @@ public class TrDosFileEditDialog extends EditFileDialog {
 			} else if (ftype != 'D') {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
 				CurrentRenderer.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length,
-						trde.GetVar1(), filesel);
+						trde.GetVar1(), filesel,CurrentPartition);
 			} else if (trde.IsCharArray()) {
 				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
 				CurrentRenderer.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);

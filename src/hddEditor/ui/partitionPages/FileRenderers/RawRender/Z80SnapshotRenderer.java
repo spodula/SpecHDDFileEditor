@@ -1,4 +1,7 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
+//TODO: Terra cresta conversion doesnt work. Figure out why
+//TODO: Use Z80 object for z80 renderer
+//TODO: Use SNA object for SNA renderer
 
 import java.util.ArrayList;
 
@@ -10,6 +13,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import hddEditor.libs.Speccy;
+import hddEditor.libs.partitions.IDEDosPartition;
+import hddEditor.libs.snapshots.CPUState;
+import hddEditor.libs.snapshots.readers.Z80file;
 
 public class Z80SnapshotRenderer extends RamDump {
 	private ArrayList<Label> labels = null;
@@ -19,15 +25,15 @@ public class Z80SnapshotRenderer extends RamDump {
 	 * Array object for each individual page.
 	 */
 	private class z80Page {
-		//Length while compressed
+		// Length while compressed
 		public int CompressedLength;
-		//Is block compressed
+		// Is block compressed
 		public boolean IsCompressed;
-		//z80 page number. (Note, this differs from the 128k page number).
+		// z80 page number. (Note, this differs from the 128k page number).
 		public int Pagenum;
-		//Raw (compressed) data
+		// Raw (compressed) data
 		public byte Rawdata[];
-		//uncompressed data
+		// uncompressed data
 		public byte Data[];
 
 		/**
@@ -37,12 +43,12 @@ public class Z80SnapshotRenderer extends RamDump {
 		public String toString() {
 			return ("Page: " + Pagenum + "  compressed?:" + IsCompressed + "  Compressed length: " + CompressedLength);
 		}
-		
+
 		public int get128Page() {
-			int result = Math.max(-1,Pagenum-3);
-			if (result > 7) 
+			int result = Math.max(-1, Pagenum - 3);
+			if (result > 7)
 				result = -1;
-			return(result);
+			return (result);
 		}
 	}
 
@@ -72,21 +78,20 @@ public class Z80SnapshotRenderer extends RamDump {
 	 * Treat the file as a z80 file.
 	 * 
 	 * @param TargetPage - Page to render to.
-	 * @param data - Data to render
-	 * @param loadAddr - Load address (unused)
-	 * @param filename - Filename
+	 * @param data       - Data to render
+	 * @param loadAddr   - Load address (unused)
+	 * @param filename   - Filename
 	 */
 	private String[] snaVars = { "A", "F", "BC", "HL", "PC", "SP", "I", "R", "FLAGS", "DE", "BC'", "DE'", "HL'", "A'",
 			"F'", "IY", "IX", "Int Status", "IFF2", "FLAGS2" };
 	private int[] snaLen = { 1, 1, 2, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 1, 1, 2, 2, 1, 1, 1 };
 
-	String HWv2[] = { "48K", "48K + IF1", "SAMRAM", "128K", "128K + IF1", "-", "-", "-", "-", "-", "-", "-",
-			"-", "-", "-" };
+	String HWv2[] = { "48K", "48K + IF1", "SAMRAM", "128K", "128K + IF1", "-", "-", "-", "-", "-", "-", "-", "-", "-",
+			"-" };
 	String HWv3[] = { "48K", "48K + IF1", "SAMRAM", "48K + MGT", "128K", "128K + IF1", "128K + MGT", "+3", "+3",
 			"Pentagon 128", "Scorpion 256", "Didaktik-Kompakt", "+2", "+2A", "TC2048", "TC2068" };
 
-	
-	public void Render(Composite TargetPage, byte[] data, int loadAddr, String filename) {
+	public void Render(Composite TargetPage, byte[] data, int loadAddr, String filename, IDEDosPartition targetpart) {
 		labels = new ArrayList<Label>();
 		Renderers = new ArrayList<Renderer>();
 
@@ -103,7 +108,7 @@ public class Z80SnapshotRenderer extends RamDump {
 			if (data[30] == 23)
 				version = 2;
 
-			// 128k snapshots are supported in V2 and V3 snapshots, 
+			// 128k snapshots are supported in V2 and V3 snapshots,
 			// so figure out which it is...
 			if (version == 2) {
 				is128K = (data[34] > 2);
@@ -365,67 +370,73 @@ public class Z80SnapshotRenderer extends RamDump {
 				byte block[] = ExtractCompressedBlock(b48kRam, 49152);
 				System.arraycopy(block, 0, b48kRam, 0, Math.min(b48kRam.length, block.length));
 			}
-			super.Render(TargetPage, b48kRam, 0, false, IY, new int[0], filename);
+			CPUState cpustate = null;
+			try {
+				cpustate = Z80file.LoadZ80File(data);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			super.Render(TargetPage, b48kRam, 0, false, IY, new int[0], filename, cpustate, targetpart);
 		} else {
 			int blockstart = (data[30] & 0xff) + 29;
 			z80Page pages[] = ExtractPages(data, blockstart);
 			if (!is128K) {
-				//assemble a 48k block
+				// assemble a 48k block
 				byte ram[] = new byte[0xc000];
-				for(z80Page page:pages) {
-					if (page.Pagenum==4)
-						System.arraycopy(page.Data, 0, ram, 0x4000 , 0x4000);
-					if (page.Pagenum==5)
-						System.arraycopy(page.Data, 0, ram, 0x8000 , 0x4000);
-					if (page.Pagenum==8)
-						System.arraycopy(page.Data, 0, ram, 0x0000 , 0x4000);
+				for (z80Page page : pages) {
+					if (page.Pagenum == 4)
+						System.arraycopy(page.Data, 0, ram, 0x4000, 0x4000);
+					if (page.Pagenum == 5)
+						System.arraycopy(page.Data, 0, ram, 0x8000, 0x4000);
+					if (page.Pagenum == 8)
+						System.arraycopy(page.Data, 0, ram, 0x0000, 0x4000);
 				}
-				super.Render(TargetPage, ram, 0, false, IY, new int[0], filename);
+				CPUState cpustate = null;
+				try {
+					cpustate = Z80file.LoadZ80File(data);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				super.Render(TargetPage, ram, 0, false, IY, new int[0], filename, cpustate, targetpart);
 			} else {
 				/*
-				 * Assembling pages in the data block as:
-				 *  0000 -  3fff  page 8 (128k Page 5)
-				 *  4000 -  7fff  page 4 (128k page 1)
-				 *  8000 -  bfff  Paged in page
+				 * Assembling pages in the data block as: 0000 - 3fff page 8 (128k Page 5) 4000
+				 * - 7fff page 4 (128k page 1) 8000 - bfff Paged in page
 				 * 
-				 * 3  $0C000  (128k Page 0)
-				 * 4  $10000  (128k Page 1) 
-				 * 5  $14000  (128k Page 2)
-				 * 6  $18000  (128k Page 3) 
-				 * 7  $1C000  (128k Page 4) 
-				 * 8  $20000  (128k Page 5) 
-				 * 9  $24000  (128k Page 6)
-				 * 10 $28000  (128k Page 7) 
+				 * 3 $0C000 (128k Page 0) 4 $10000 (128k Page 1) 5 $14000 (128k Page 2) 6 $18000
+				 * (128k Page 3) 7 $1C000 (128k Page 4) 8 $20000 (128k Page 5) 9 $24000 (128k
+				 * Page 6) 10 $28000 (128k Page 7)
 				 */
-				byte ram[] = new byte[11*0x4000];
-				for(z80Page page:pages) {
-					if (page.get128Page()==pagedRam) { 
+				byte ram[] = new byte[11 * 0x4000];
+				for (z80Page page : pages) {
+					if (page.get128Page() == pagedRam) {
 						System.arraycopy(page.Data, 0, ram, 0x8000, 0x4000);
 					}
-					if (page.get128Page()==0) 
+					if (page.get128Page() == 0)
 						System.arraycopy(page.Data, 0, ram, 0xC000, 0x4000);
-					if (page.get128Page()==1) 
+					if (page.get128Page() == 1)
 						System.arraycopy(page.Data, 0, ram, 0x10000, 0x4000);
-					if (page.get128Page()==2) {
+					if (page.get128Page() == 2) {
 						System.arraycopy(page.Data, 0, ram, 0x14000, 0x4000);
-						System.arraycopy(page.Data, 0, ram, 0x4000, 0x4000);						
+						System.arraycopy(page.Data, 0, ram, 0x4000, 0x4000);
 					}
-					if (page.get128Page()==3) 
+					if (page.get128Page() == 3)
 						System.arraycopy(page.Data, 0, ram, 0x18000, 0x4000);
-					if (page.get128Page()==4) 
+					if (page.get128Page() == 4)
 						System.arraycopy(page.Data, 0, ram, 0x1C000, 0x4000);
-					if (page.get128Page()==5) {
+					if (page.get128Page() == 5) {
 						System.arraycopy(page.Data, 0, ram, 0x20000, 0x4000);
 						System.arraycopy(page.Data, 0, ram, 0x0000, 0x4000);
 					}
-					if (page.get128Page()==6) 
+					if (page.get128Page() == 6)
 						System.arraycopy(page.Data, 0, ram, 0x24000, 0x4000);
-					if (page.get128Page()==7) 
+					if (page.get128Page() == 7)
 						System.arraycopy(page.Data, 0, ram, 0x28000, 0x4000);
-				}			
-				int pagelist[] = {5,2,pagedRam,0,1,2,3,4,5,6,7};
-				
-				super.Render(TargetPage, ram, 0, true, IY, pagelist, filename);
+				}
+				int pagelist[] = { 5, 2, pagedRam, 0, 1, 2, 3, 4, 5, 6, 7 };
+
+				super.Render(TargetPage, ram, 0, true, IY, pagelist, filename, null, null);
 			}
 		}
 	}
@@ -453,7 +464,8 @@ public class Z80SnapshotRenderer extends RamDump {
 			if (page.Pagenum > 18)
 				break;
 			if ((page.Pagenum > 2) && (page.Pagenum != 11)) {
-				System.arraycopy(data, blockstart, page.Rawdata, 0, Math.min(data.length - blockstart, page.Rawdata.length));
+				System.arraycopy(data, blockstart, page.Rawdata, 0,
+						Math.min(data.length - blockstart, page.Rawdata.length));
 				blockstart = blockstart + page.CompressedLength;
 
 				if (!page.IsCompressed) {
@@ -472,10 +484,10 @@ public class Z80SnapshotRenderer extends RamDump {
 	}
 
 	/**
-	 * Extract the block and decompress it. 
-	 * Z80 files are compressed using a simple RLE scheme.
+	 * Extract the block and decompress it. Z80 files are compressed using a simple
+	 * RLE scheme.
 	 * 
-	 * @param block - Block to decompress
+	 * @param block          - Block to decompress
 	 * @param ExpectedLength - Expected length of the block. Usually 16384.
 	 * @return
 	 */
@@ -486,7 +498,7 @@ public class Z80SnapshotRenderer extends RamDump {
 		int EDstate = 0;
 		int edRUN = 0;
 		int byteptr = 0;
-		for (;byteptr < block.length;byteptr++) {
+		for (; byteptr < block.length; byteptr++) {
 			byte b = block[byteptr];
 			int x = (b & 0xff);
 			if (!InED) {
@@ -520,8 +532,8 @@ public class Z80SnapshotRenderer extends RamDump {
 				}
 			}
 			if (destPtr >= ExpectedLength) {
-				if (block.length == (byteptr-1))
-					System.out.println("Stopping at " + destPtr+" ptr="+byteptr+"/"+block.length);
+				if (block.length == (byteptr - 1))
+					System.out.println("Stopping at " + destPtr + " ptr=" + byteptr + "/" + block.length);
 				break;
 			}
 		}

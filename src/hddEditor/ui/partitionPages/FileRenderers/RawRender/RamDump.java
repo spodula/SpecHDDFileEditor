@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
+
 /**
  * This object implements displaying of a dump of memory. from 16384 to 65535.
  * It will try to decode any BASIC if found. 
@@ -30,6 +31,9 @@ import org.eclipse.swt.graphics.ImageLoader;
 
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Speccy;
+import hddEditor.libs.partitions.IDEDosPartition;
+import hddEditor.libs.snapshots.CPUState;
+import hddEditor.libs.snapshots.CPUStateToFiles;
 
 import org.eclipse.swt.widgets.Button;
 
@@ -37,18 +41,19 @@ public class RamDump implements Renderer {
 	private ArrayList<Label> labels = null;
 	private ArrayList<Renderer> Renderers = null;
 	private Button ExtractBtn = null;
+	private Button AddSnapshotBtn = null;
 	private Composite Targetpg = null;
 	private byte rawdata[] = null;
 	private String fName = null;
 	private int IYReg = 0;
 	private int i128BankOrder[];
-	
+
 	private boolean HasBasic;
 	private BasicRenderer BR;
 	private SystemVariablesRenderer SVR;
 
 	private byte BasicData[];
-	
+
 	@Override
 	public void DisposeRenderer() {
 		if (labels != null) {
@@ -79,9 +84,12 @@ public class RamDump implements Renderer {
 	 * @param is128K
 	 * @param IY
 	 * @param i128BankOrder
+	 * @param filename
+	 * @param cpustate
+	 * @param targetpartition
 	 */
 	public void Render(Composite TargetPage, byte[] data, int loadAddr, boolean is128K, int IY, int i128BankOrder[],
-			String filename) {
+			String filename, CPUState cpustate, IDEDosPartition targetpartition) {
 		labels = new ArrayList<Label>();
 		Renderers = new ArrayList<Renderer>();
 		Targetpg = TargetPage;
@@ -102,9 +110,8 @@ public class RamDump implements Renderer {
 		ScrRenderer.Render(TargetPage, screen);
 
 		ExtractBtn = new Button(TargetPage, SWT.NONE);
-		ExtractBtn.setText("Extract into files");
+		ExtractBtn.setText("Extract to disk");
 		ExtractBtn.addSelectionListener(new SelectionListener() {
-
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				if (is128K) {
@@ -119,6 +126,22 @@ public class RamDump implements Renderer {
 				widgetSelected(arg0);
 			}
 		});
+
+		if (!is128K && (cpustate != null)) {
+			AddSnapshotBtn = new Button(TargetPage, SWT.NONE);
+			AddSnapshotBtn.setText("Convert Snapshot to files");
+			AddSnapshotBtn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					doConvertSnaToLoadableFiles(cpustate, targetpartition, filename);
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+		}
 
 		Label lbl = new Label(TargetPage, SWT.NONE);
 		labels.add(lbl);
@@ -137,7 +160,7 @@ public class RamDump implements Renderer {
 		HasBasic = false;
 		BasicData = null;
 		if ((VARS > PROG) && (E_LINE > VARS) && (PROG > 23754) && (PROG < 25000)) {
-			
+
 			BasicData = new byte[E_LINE - PROG];
 			System.arraycopy(data, PROG - diff, BasicData, 0, BasicData.length);
 			BR = new BasicRenderer();
@@ -203,6 +226,18 @@ public class RamDump implements Renderer {
 		}
 	}
 
+	protected void doConvertSnaToLoadableFiles(CPUState cpustate, IDEDosPartition targetpartition, String filename) {
+		int i = filename.indexOf(".");
+		if (i > 0) {
+			filename = filename.substring(0, i).trim();
+		}
+		try {
+			CPUStateToFiles.SaveToPartition(cpustate, targetpartition, filename);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	protected void doExtractFiles128() {
 		DirectoryDialog dialog = new DirectoryDialog(Targetpg.getShell());
 		dialog.setText("Select folder for target");
@@ -241,21 +276,21 @@ public class RamDump implements Renderer {
 				}
 				ptr = ptr + 0x4000;
 			}
-			
-			//save BASIC
+
+			// save BASIC
 			if (HasBasic) {
-				if (BR!= null) {
+				if (BR != null) {
 					String basicdets = BR.GetBasicSummary();
 					GeneralUtils.WriteBlockToDisk(basicdets.getBytes(), RootFile.getAbsoluteFile() + ".basic");
 				}
-				if (SVR!=null) {
+				if (SVR != null) {
 					String Sysvars = SVR.getSystemVariableSummary();
 					GeneralUtils.WriteBlockToDisk(Sysvars.getBytes(), RootFile.getAbsoluteFile() + ".SYSVARS");
 				}
-				if (BasicData!=null) {
+				if (BasicData != null) {
 					GeneralUtils.WriteBlockToDisk(BasicData, RootFile.getAbsoluteFile() + ".rawbasic");
 				}
-				
+
 			}
 		}
 	}
@@ -288,18 +323,18 @@ public class RamDump implements Renderer {
 			ImageLoader saver = new ImageLoader();
 			saver.data = new ImageData[] { image };
 			saver.save(RootFile.getAbsoluteFile() + ".image", SWT.IMAGE_PNG);
-			
-			//save BASIC
+
+			// save BASIC
 			if (HasBasic) {
-				if (BR!= null) {
+				if (BR != null) {
 					String basicdets = BR.GetBasicSummary();
 					GeneralUtils.WriteBlockToDisk(basicdets.getBytes(), RootFile.getAbsoluteFile() + ".basic");
 				}
-				if (SVR!=null) {
+				if (SVR != null) {
 					String Sysvars = SVR.getSystemVariableSummary();
 					GeneralUtils.WriteBlockToDisk(Sysvars.getBytes(), RootFile.getAbsoluteFile() + ".SYSVARS");
 				}
-				if (BasicData!=null) {
+				if (BasicData != null) {
 					GeneralUtils.WriteBlockToDisk(BasicData, RootFile.getAbsoluteFile() + ".rawbasic");
 				}
 			}

@@ -423,7 +423,7 @@ public class TZXPartitionPage extends GenericPage {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
 			TzxDirectoryEntry entry = (TzxDirectoryEntry) itms[0].getData();
-			SpecFileEditDialog = new TzxFileEditDialog(ParentComp.getDisplay(), fsd);
+			SpecFileEditDialog = new TzxFileEditDialog(ParentComp.getDisplay(), fsd,partition);
 
 			byte data[];
 			try {
@@ -446,6 +446,8 @@ public class TZXPartitionPage extends GenericPage {
 					AddComponents();
 				}
 				SpecFileEditDialog = null;
+				UpdateDirectoryEntryList();
+
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
@@ -553,6 +555,7 @@ public class TZXPartitionPage extends GenericPage {
 		AddFilesDialog = new AddFilesToTZXPartition(ParentComp.getDisplay(), fsd);
 		AddFilesDialog.Show("Add files", (TZXPartition) partition);
 		AddFilesDialog = null;
+		UpdateDirectoryEntryList();
 		if (!ParentComp.isDisposed()) {
 			AddComponents();
 		}

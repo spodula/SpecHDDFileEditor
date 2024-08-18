@@ -15,6 +15,9 @@ import org.eclipse.swt.widgets.Label;
 
 import hddEditor.libs.ASMLib;
 import hddEditor.libs.Speccy;
+import hddEditor.libs.partitions.IDEDosPartition;
+import hddEditor.libs.snapshots.CPUState;
+import hddEditor.libs.snapshots.readers.SNAfile;
 
 public class SNARenderer extends RamDump {
 	private ArrayList<Label> labels = null;
@@ -56,7 +59,8 @@ public class SNARenderer extends RamDump {
 	 * @param loadAddr - Load address - Unused for the SNA renderer.
 	 * @param filename - Filename
 	 */
-	public void Render(Composite TargetPage, byte[] data, int loadAddr, String filename) {
+	public void Render(Composite TargetPage, byte[] data, int loadAddr, String filename, IDEDosPartition targetpart) {
+		
 		labels = new ArrayList<Label>();
 		Renderers = new ArrayList<Renderer>();
 		boolean is128K = (data.length > 50000);
@@ -120,6 +124,7 @@ public class SNARenderer extends RamDump {
 		int IY = (int) ((data[0x10] & 0xff) * 0x100) + (data[0x0f] & 0xff);
 
 		int RamBankOrder[] = new int[8];
+		CPUState cpustate = null;
 		
 		byte rawdata[] = null;
 		if (is128K) {
@@ -163,7 +168,13 @@ public class SNARenderer extends RamDump {
 		} else {
 			rawdata = new byte[49152];
 			System.arraycopy(data, 0x1b, rawdata, 0, Math.min(data.length-0x1b,49152));
+			try {
+				cpustate = SNAfile.ParseSNAData(data);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-		super.Render(TargetPage, rawdata, loadAddr, is128K, IY, RamBankOrder, filename);
+		
+		super.Render(TargetPage, rawdata, loadAddr, is128K, IY, RamBankOrder, filename,cpustate,targetpart);
 	}
 }

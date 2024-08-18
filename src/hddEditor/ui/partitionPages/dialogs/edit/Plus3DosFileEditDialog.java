@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
+import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.cpm.DirectoryEntry;
 import hddEditor.libs.partitions.cpm.Dirent;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
@@ -37,8 +38,8 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 	 * 
 	 * @param display
 	 */
-	public Plus3DosFileEditDialog(Display display,FileSelectDialog filesel) {
-		super(display,filesel);
+	public Plus3DosFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition) {
+		super(display, filesel, CurrentPartition);
 	}
 
 	/**
@@ -140,8 +141,12 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 			// Separate the header and the file data.
 			header = new byte[0x80];
 			System.arraycopy(data, 0, header, 0, 0x80);
-			newdata = new byte[data.length - 0x80];
-			System.arraycopy(data, 0x80, newdata, 0, newdata.length);
+			newdata = new byte[p3d.filelength];
+			if (p3d.filelength > data.length-0x80) {
+				System.arraycopy(data, 0x80, newdata, 0, data.length-0x80);
+			} else {
+				System.arraycopy(data, 0x80, newdata, 0, newdata.length);
+			}
 		}
 
 		/*
@@ -160,14 +165,16 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 		 */
 		if (!p3d.IsPlusThreeDosFile) {
 			CodeRenderer CR = new CodeRenderer();
-			CR.RenderCode(MainPage, newdata, null, ThisEntry.GetFilename(), newdata.length, 0x0000, filesel);
+			CR.RenderCode(MainPage, newdata, null, ThisEntry.GetFilename(), newdata.length, 0x0000, filesel,
+					CurrentPartition);
 		} else if (p3d.filetype == Speccy.BASIC_BASIC) {
 			BasicRenderer BR = new BasicRenderer();
 			BR.RenderBasic(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.filelength, p3d.VariablesOffset,
 					p3d.line, filesel);
 		} else if (p3d.filetype == Speccy.BASIC_CODE) {
 			CodeRenderer CR = new CodeRenderer();
-			CR.RenderCode(MainPage, newdata, header, ThisEntry.GetFilename(), newdata.length, p3d.loadAddr, filesel);
+			CR.RenderCode(MainPage, newdata, header, ThisEntry.GetFilename(), newdata.length, p3d.loadAddr, filesel,
+					CurrentPartition);
 		} else if (p3d.filetype == Speccy.BASIC_NUMARRAY) {
 			NumericArrayRenderer NR = new NumericArrayRenderer();
 			NR.RenderNumericArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.VarName, filesel);

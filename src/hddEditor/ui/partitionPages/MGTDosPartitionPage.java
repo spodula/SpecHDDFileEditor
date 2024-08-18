@@ -109,23 +109,27 @@ public class MGTDosPartitionPage extends GenericPage {
 			DirectoryListing.setHeaderVisible(true);
 
 			/***********************************************************************************/
-		    Listener sortListener = new Listener() {
-		        public void handleEvent(Event e) {
-		        	TableColumn column = (TableColumn) e.widget;
-		        	MGTDosPartition p = (MGTDosPartition)partition;
-	                if (column == tc1) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_NAME);
-	                if (column == tc2) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_TYPE);
-	                if (column == tc4) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_SIZE);
-	                if (column == tc5) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_SIZE);
-	                DirectoryListing.setSortColumn(column);
-	                UpdateDirectoryEntryList();
-		        }
-		    };
-			tc1.addListener(SWT.Selection,sortListener);
-			tc2.addListener(SWT.Selection,sortListener);
-			tc3.addListener(SWT.Selection,sortListener);
-			tc4.addListener(SWT.Selection,sortListener);
-			
+			Listener sortListener = new Listener() {
+				public void handleEvent(Event e) {
+					TableColumn column = (TableColumn) e.widget;
+					MGTDosPartition p = (MGTDosPartition) partition;
+					if (column == tc1)
+						p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_NAME);
+					if (column == tc2)
+						p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_TYPE);
+					if (column == tc4)
+						p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_SIZE);
+					if (column == tc5)
+						p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_SIZE);
+					DirectoryListing.setSortColumn(column);
+					UpdateDirectoryEntryList();
+				}
+			};
+			tc1.addListener(SWT.Selection, sortListener);
+			tc2.addListener(SWT.Selection, sortListener);
+			tc3.addListener(SWT.Selection, sortListener);
+			tc4.addListener(SWT.Selection, sortListener);
+
 			/***********************************************************************************/
 			// Create the drop target
 			DropTarget target = new DropTarget(DirectoryListing, DND.DROP_LINK | DND.DROP_COPY | DND.DROP_DEFAULT);
@@ -164,7 +168,7 @@ public class MGTDosPartitionPage extends GenericPage {
 				}
 			});
 			/***********************************************************************************/
-			DragSource source = new DragSource(DirectoryListing, DND.DROP_MOVE | DND.DROP_COPY );
+			DragSource source = new DragSource(DirectoryListing, DND.DROP_MOVE | DND.DROP_COPY);
 			source.setTransfer(new Transfer[] { FileTransfer.getInstance() });
 			source.addDragListener(new DragSourceListener() {
 				File tempfiles[];
@@ -179,11 +183,10 @@ public class MGTDosPartitionPage extends GenericPage {
 							try {
 								File f = File.createTempFile("YYYY", "xxx");
 								int exporttype = RootPage.dragindex;
-								
-								
+
 								FileEntry entry = (FileEntry) item.getData();
-								System.out.println("Exporttype:" +exporttype);
-								if (exporttype==HDDEditor.DRAG_TYPE) {
+								System.out.println("Exporttype:" + exporttype);
+								if (exporttype == HDDEditor.DRAG_TYPE) {
 									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
 									int actiontype = GeneralUtils.EXPORT_TYPE_HEX;
 									switch (sd.BasicType) {
@@ -197,7 +200,7 @@ public class MGTDosPartitionPage extends GenericPage {
 										actiontype = GeneralUtils.EXPORT_TYPE_CSV;
 										break;
 									case (Speccy.BASIC_CODE):
-										System.out.println("CODE: "+entry.GetFileSize());
+										System.out.println("CODE: " + entry.GetFileSize());
 										if (entry.GetFileSize() == 0x1b00) {
 											actiontype = GeneralUtils.EXPORT_TYPE_PNG;
 										} else {
@@ -207,18 +210,17 @@ public class MGTDosPartitionPage extends GenericPage {
 									default:
 										actiontype = GeneralUtils.EXPORT_TYPE_HEX;
 									}
-									
-									
-									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(), entry.GetFileData().length,
-											sd.BasicType, sd.LineStart, sd.VarStart, sd.LoadAddress, sd.VarName+"",
-											actiontype);								
-								} else if (exporttype==HDDEditor.DRAG_RAW) {
-									GeneralUtils.WriteBlockToDisk(entry.GetFileData(), f);									
+
+									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(),
+											entry.GetFileData().length, sd.BasicType, sd.LineStart, sd.VarStart,
+											sd.LoadAddress, sd.VarName + "", actiontype);
+								} else if (exporttype == HDDEditor.DRAG_RAW) {
+									GeneralUtils.WriteBlockToDisk(entry.GetFileData(), f);
 								} else {
 									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
-									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(), entry.GetFileData().length,
-											sd.BasicType, sd.LineStart, sd.VarStart, sd.LoadAddress, sd.VarName+"",
-											GeneralUtils.EXPORT_TYPE_HEX);								
+									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(),
+											entry.GetFileData().length, sd.BasicType, sd.LineStart, sd.VarStart,
+											sd.LoadAddress, sd.VarName + "", GeneralUtils.EXPORT_TYPE_HEX);
 								}
 								File f1 = new File(f.getParent(), entry.GetFilename());
 								f.renameTo(f1);
@@ -238,7 +240,7 @@ public class MGTDosPartitionPage extends GenericPage {
 					if (FileTransfer.getInstance().isSupportedType(event.dataType)) {
 						if (tempfiles != null && tempfiles.length > 0) {
 							String data[] = new String[tempfiles.length];
-							for (int i=0;i<tempfiles.length;i++) {
+							for (int i = 0; i < tempfiles.length; i++) {
 								File fle = tempfiles[i];
 								data[i] = fle.getAbsolutePath();
 							}
@@ -252,9 +254,9 @@ public class MGTDosPartitionPage extends GenericPage {
 
 					}
 				}
-			}); 
+			});
 			/***********************************************************************************/
-			
+
 			UpdateDirectoryEntryList();
 
 			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -356,7 +358,7 @@ public class MGTDosPartitionPage extends GenericPage {
 		}
 
 	}
-	
+
 	protected void DoDropFile(String[] filenames) {
 		File fFiles[] = new File[filenames.length];
 		int i = 0;
@@ -473,6 +475,8 @@ public class MGTDosPartitionPage extends GenericPage {
 					MGTDosPartition mbc = (MGTDosPartition) partition;
 					mbc.UpdateFile(entry, data);
 				}
+				UpdateDirectoryEntryList();
+
 			} catch (IOException e) {
 				ErrorBox("Error editing partition: " + e.getMessage());
 				e.printStackTrace();
@@ -486,7 +490,7 @@ public class MGTDosPartitionPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 			MGTDirectoryEntry entry = (MGTDirectoryEntry) itms[0].getData();
 			try {
-				SpecFileEditDialog = new MGTDosFileEditDialog(ParentComp.getDisplay(), fsd);
+				SpecFileEditDialog = new MGTDosFileEditDialog(ParentComp.getDisplay(), fsd, partition);
 
 				byte[] data = entry.GetFileData();
 				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {

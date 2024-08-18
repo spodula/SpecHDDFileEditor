@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
+import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.Renderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.SNARenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.SPRenderer;
@@ -42,6 +43,7 @@ public class CodeRenderer extends FileRenderer {
 	private Text StartAddress = null;
 	private Combo CodeTypeDropDown = null;
 	private Vector<Renderer> Renderers = null;
+	private IDEDosPartition part; 
 
 	// Rendering options
 	private String[] CODETYPES = { "Binary", "Screen", "Assembly", "SNA file", "Z80 file","48k Ram Dump", ".SP file","ASCII Text","Sprite", "48K ram dump (minus screen)" };
@@ -56,8 +58,9 @@ public class CodeRenderer extends FileRenderer {
 	 * @param loadAddr
 	 */
 	public void RenderCode(Composite mainPage, byte data[], byte header [], String Filename, int fileSize,
-			int loadAddr, FileSelectDialog filesel) {
+			int loadAddr, FileSelectDialog filesel, IDEDosPartition currentpart) {
 		super.Render(mainPage, data, Filename, filesel);
+		part = currentpart;
 		Renderers = new Vector<Renderer>();
 		Label lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("CODE file: ");
@@ -272,19 +275,19 @@ public class CodeRenderer extends FileRenderer {
 			} else if (s.equals(CODETYPES[3])) {
 				SNARenderer renderer = new SNARenderer();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, loadAddr, filename);
+				renderer.Render(MainPage, data, loadAddr, filename,part );
 			} else if (s.equals(CODETYPES[4])) {
 				Z80SnapshotRenderer renderer = new Z80SnapshotRenderer();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, loadAddr, filename);
+				renderer.Render(MainPage, data, loadAddr, filename,part);
 			} else if (s.equals(CODETYPES[5])) {
 				RamDump renderer = new RamDump();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a , new int [0], filename);
+				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a , new int [0], filename,null,null);
 			} else if (s.equals(CODETYPES[6])) {
 				RamDump renderer = new SPRenderer();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a , new int [0], filename);
+				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a , new int [0], filename,null,null);
 			} else if (s.equals(CODETYPES[7])) {
 				TextRenderer renderer = new TextRenderer();
 				Renderers.add(renderer);
@@ -300,7 +303,7 @@ public class CodeRenderer extends FileRenderer {
 				byte data1[] = new byte[0xc000];
 				System.arraycopy(data, 0,data1, 0x1b00, Math.min(0xc000-0x1b00, data.length));
 				
-				renderer.Render(MainPage, data1, loadAddr, false, 0x5c3a , new int [0], filename);
+				renderer.Render(MainPage, data1, loadAddr, false, 0x5c3a , new int [0], filename,null,null);
 			} else {
 				BinaryRenderer renderer = new BinaryRenderer();
 				Renderers.add(renderer);
