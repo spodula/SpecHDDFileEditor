@@ -135,19 +135,20 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 	private void RenderAppropriatePage() {
 		Plus3DosFileHeader p3d = ((DirectoryEntry) ThisEntry).GetPlus3DosHeader();
 
+		
 		byte header[] = null;
 		byte newdata[] = data;
 		if (p3d.IsPlusThreeDosFile) {
 			// Separate the header and the file data.
 			header = new byte[0x80];
 			System.arraycopy(data, 0, header, 0, 0x80);
-			newdata = new byte[p3d.filelength];
-			if (p3d.filelength > data.length-0x80) {
+			newdata = new byte[p3d.fileSize];
+			if (p3d.fileSize > data.length-0x80) {
 				System.arraycopy(data, 0x80, newdata, 0, data.length-0x80);
 			} else {
 				System.arraycopy(data, 0x80, newdata, 0, newdata.length);
 			}
-		}
+		}		
 
 		/*
 		 * CPM saves file in 128 byte chunks. This trims the data down to the size that

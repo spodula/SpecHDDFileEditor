@@ -1,4 +1,7 @@
 package hddEditor.libs.snapshots;
+
+import java.util.Hashtable;
+
 /**
  * Wrapper for the entire CPU state.
  * 
@@ -7,24 +10,22 @@ package hddEditor.libs.snapshots;
  */
 
 public class CPUState {
-	Registers MainRegs;
-	Registers AltRegs;
-	byte I;
-	byte IXL;
-	byte IXH;
-	byte IYL;
-	byte IYH;
-	byte R;
-	byte IM;
-	boolean EI;
-	byte SPL;
-	byte SPH;
-	int PC;
-	byte BORDER;
-	byte RAM[];
+	public Registers MainRegs;
+	public Registers AltRegs;
+	public byte I;
+	public byte IXL;
+	public byte IXH;
+	public byte IYL;
+	public byte IYH;
+	public byte R;
+	public byte IM;
+	public boolean EI;
+	public byte SPL;
+	public byte SPH;
+	public int PC;
 
-	public CPUState(Registers main, Registers alt, byte i, byte ixl, byte ixh, byte iyl, byte iyh, byte r, byte im,
-			boolean ei, byte spl, byte sph, byte border, int pc, byte ram[]) {
+	protected CPUState(Registers main, Registers alt, byte i, byte ixl, byte ixh, byte iyl, byte iyh, byte r, byte im,
+			boolean ei, byte spl, byte sph, int pc) {
 		MainRegs = main;
 		AltRegs = alt;
 		I = i;
@@ -38,8 +39,6 @@ public class CPUState {
 		SPL = spl;
 		SPH = sph;
 		PC = pc;
-		BORDER = border;
-		RAM = ram;
 	}
 
 	private String outReg(String reg, byte dat) {
@@ -58,5 +57,36 @@ public class CPUState {
 
 		return (result);
 	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public Hashtable<String, String> DetailsAsArray() {
+		Hashtable<String, String> result = new Hashtable<String, String>();
+
+		result.putAll(MainRegs.RegisterAsArray(""));
+		result.putAll(AltRegs.RegisterAsArray("'"));
+		
+		result.put("IX",String.format("%02x%02x",IXH,IXL));
+		result.put("IY",String.format("%02x%02x",IYH,IYL));
+		result.put("SP",String.format("%02x%02x",SPH,SPL));
+		if (PC!=-1) {
+			result.put("PC",String.format("%04x",PC));
+		}
+		result.put("I",String.format("%02x",I));
+		result.put("R",String.format("%02x",R));
+		result.put("IM",String.format("%02x",IM));
+		
+		if (EI) {
+			result.put("Interrupts","Enabled");
+		} else {
+			result.put("Interrupts","Disabled");
+		}
+		
+		return(result);
+	}
+
+
 
 }

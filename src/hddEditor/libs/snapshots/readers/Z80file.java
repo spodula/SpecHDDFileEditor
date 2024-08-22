@@ -1,4 +1,5 @@
 package hddEditor.libs.snapshots.readers;
+//SNAFile: support 128k
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -6,13 +7,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import hddEditor.libs.snapshots.CPUState;
+import hddEditor.libs.snapshots.MachineState;
 import hddEditor.libs.snapshots.Registers;
 import hddEditor.libs.snapshots.Z80Page;
 
 
 public class Z80file {
-	public static CPUState LoadZ80File(File Z80File) throws Exception {
+	public static MachineState LoadZ80File(File Z80File) throws Exception {
 		byte z80file[] = new byte[(int) Z80File.length()];
 		InputStream inputStream = null;
 		try {
@@ -41,7 +42,7 @@ public class Z80file {
 	 * @return
 	 * @throws Exception
 	 */
-	public static CPUState LoadZ80File(byte z80file[]) throws Exception {
+	public static MachineState LoadZ80File(byte z80file[]) throws Exception {
 		int version = 1;
 		boolean is128K = false;
 		
@@ -140,8 +141,8 @@ public class Z80file {
 		byte border = (byte) ((z80file[12] & 0x0e) / 2);
 		int pc = ((z80file[7] & 0xff) * 256) + (z80file[6] & 0xff);
 
-		CPUState state = new CPUState(NormalRegs, AltRegs, z80file[10], z80file[25], z80file[26], z80file[23],
-				z80file[24], z80file[11], im, z80file[27] != 0, z80file[8], z80file[9], border, pc, ram);
+		MachineState state = new MachineState(NormalRegs, AltRegs, z80file[10], z80file[25], z80file[26], z80file[23],
+				z80file[24], z80file[11], im, z80file[27] != 0, z80file[8], z80file[9], pc, ram, border);
 		
 		return (state);
 	}

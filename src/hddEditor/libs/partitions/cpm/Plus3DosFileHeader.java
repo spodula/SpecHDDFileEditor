@@ -127,7 +127,19 @@ public class Plus3DosFileHeader {
 					filetype = 3;
 				}
 
-				filelength = ((int) plus3BasicHeader[2] & 0xff) * 0x100 + ((int) plus3BasicHeader[1] & 0xff);
+				/**
+				 * Get-around for a niggle for basic headers.
+				 * They can only store a maximum of 65535 for the file length, so
+				 * if its more than that, fall back to the +3DOS header value.
+				 * 
+				 *  Not usually a problem, but can cause issues for large snapshots et al.
+				 */
+				if (fileSize > 0xffff) {
+					filelength = ((int) plus3BasicHeader[2] & 0xff) * 0x100 + ((int) plus3BasicHeader[1] & 0xff);					
+				} else {
+					filelength = fileSize;
+				}
+				
 
 				if (filetype == FILETYPE_BASIC) {
 					line = ((int) plus3BasicHeader[4] & 0xff) * 0x100 + ((int) plus3BasicHeader[3] & 0xff);

@@ -5,6 +5,9 @@ package hddEditor.ui.partitionPages.FileRenderers.RawRender;
  */
 
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
@@ -14,9 +17,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import hddEditor.libs.ASMLib;
-import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.IDEDosPartition;
-import hddEditor.libs.snapshots.CPUState;
+import hddEditor.libs.snapshots.MachineState;
 import hddEditor.libs.snapshots.readers.SNAfile;
 
 public class SNARenderer extends RamDump {
@@ -45,12 +47,6 @@ public class SNARenderer extends RamDump {
 		}
 	}
 	
-	
-	private String[] snaVars = { "I", "HL'", "DE'", "BC'", "AF'", "HL", "DE", "BC", "IY", "IX", "IFF2", "R", "AF", "SP",
-			"IM", "Border" };
-	private int[] snaLen = { 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 1, 1 };
-
-	
 	/**
 	 * Treat the file as a SNA style file.
 	 * 
@@ -60,50 +56,45 @@ public class SNARenderer extends RamDump {
 	 * @param filename - Filename
 	 */
 	public void Render(Composite TargetPage, byte[] data, int loadAddr, String filename, IDEDosPartition targetpart) {
+		SNAfile snafile = new SNAfile(data);
 		
 		labels = new ArrayList<Label>();
 		Renderers = new ArrayList<Renderer>();
-		boolean is128K = (data.length > 50000);
 		Label lbl = new Label(TargetPage, SWT.NONE);
 		labels.add(lbl);
 		FontData fontData = lbl.getFont().getFontData()[0];
 		Font boldFont = new Font(lbl.getShell().getDisplay(),
 				new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 
-		if (!is128K)
+		if (snafile.MachineClass == MachineState.MT_48K) 
 			lbl.setText("48K SNA snapshot file: ");
 		else
 			lbl.setText("128K SNA snapshot file: ");
+		
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 4;
 		lbl.setFont(boldFont);
 		lbl.setLayoutData(gd);
-		int fptr = 0;
+		
+		Hashtable<String, String> SnapshotRegisters = snafile.DetailsAsArray();
+		
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 1;
-		for (int i = 0; i < snaVars.length; i++) {
-			String varName = snaVars[i];
-			int varLength = snaLen[i];
-			String varval = String.format("%02X", data[fptr++] & 0xff);
-			if (varLength == 2) {
-				varval = String.format("%02X", data[fptr++] & 0xff) + varval;
-			}
-			if (varName.equals("Border"))
-				varval = varval + " (" + Speccy.SPECTRUM_COLOURS[(data[fptr - 1] & 0x07)] + ")";
-			if (varName.equals("IFF2")) {
-				int iff2 = (int) data[fptr - 1] & 0xff;
-				if ((iff2 & 0x04) == 0)
-					varval = varval + " (DI)";
-				else
-					varval = varval + " (EI)";
-			}
+		
+		Iterator<String> iterator = SnapshotRegisters.keySet().iterator();		
+		
+		while (iterator.hasNext()) {
+		    String key = iterator.next();
+		    String value = SnapshotRegisters.get(key);
+		    // Process key-value pair
 			lbl = new Label(TargetPage, SWT.NONE);
 			labels.add(lbl);
-			lbl.setText(varName + ": " + varval);
+			lbl.setText(key + ": " + value);
 			lbl.setLayoutData(gd);
-		}
 
-		String flags = ASMLib.GetFlagsAsString(data[0x15]);
+		}
+		
+		String flags = ASMLib.GetFlagsAsString(snafile.MainRegs.F);
 
 		lbl = new Label(TargetPage, SWT.NONE);
 		labels.add(lbl);
@@ -112,7 +103,7 @@ public class SNARenderer extends RamDump {
 		gd.horizontalSpan = 2;
 		lbl.setLayoutData(gd);
 
-		flags = ASMLib.GetFlagsAsString(data[0x07]);
+		flags = ASMLib.GetFlagsAsString(snafile.AltRegs.F);
 
 		lbl = new Label(TargetPage, SWT.NONE);
 		labels.add(lbl);
@@ -121,34 +112,21 @@ public class SNARenderer extends RamDump {
 		gd.horizontalSpan = 2;
 		lbl.setLayoutData(gd);
 
-		int IY = (int) ((data[0x10] & 0xff) * 0x100) + (data[0x0f] & 0xff);
+		int IY =  (snafile.IYH * 0x100) + snafile.IYL;
 
 		int RamBankOrder[] = new int[8];
-		CPUState cpustate = null;
 		
 		byte rawdata[] = null;
-		if (is128K) {
-			lbl = new Label(TargetPage, SWT.NONE);
-			labels.add(lbl);
-			lbl.setText("PC: " + ((data[49179] & 0xff) + (data[49179] & 0xff) * 256));
-			lbl.setLayoutData(gd);
-
-			
-			int pagedram = (data[49181] & 0x07);
-			lbl = new Label(TargetPage, SWT.NONE);
-			labels.add(lbl);
-			lbl.setText("7ffd: " + pagedram);
-			lbl.setLayoutData(gd);
-			
-			if ((pagedram==5) || (pagedram==2)) {
+		if (snafile.MachineClass != MachineState.MT_48K) {
+			if ((snafile.GetPagedRamNumber()==5) || (snafile.GetPagedRamNumber()==2)) {
 				RamBankOrder= new int[9];
 			}
 			RamBankOrder[0] = 5;
 			RamBankOrder[1] = 2;
-			RamBankOrder[2] = pagedram;
+			RamBankOrder[2] = snafile.GetPagedRamNumber();
 			int ptr=3;
 			for (int i=0;i<8;i++) {
-				if ((i!=2) && (i!=5) && (i!=pagedram)) {
+				if ((i!=2) && (i!=5) && (i!=snafile.GetPagedRamNumber())) {
 					RamBankOrder[ptr++] = i;
 				}
 			}
@@ -156,25 +134,20 @@ public class SNARenderer extends RamDump {
 			rawdata = new byte[8 * 0x4000];
 			//page 5 2 and paged...
 			System.arraycopy(data, 0x1b, rawdata, 0, 49152);
+			
 			int restbase = 0xc01f;
 			int targBase = 0xc000;
 			for(int i=0;i<5;i++) {	
 				if (data.length > restbase) {
-					System.arraycopy(data, restbase, rawdata, targBase , Math.min(data.length- restbase,16384));
+					System.arraycopy(data, restbase, rawdata, targBase , Math.min(data.length - restbase,16384));
 				}
 				restbase = restbase + 0x4000;
 				targBase = targBase + 0x4000;
 			}
 		} else {
-			rawdata = new byte[49152];
-			System.arraycopy(data, 0x1b, rawdata, 0, Math.min(data.length-0x1b,49152));
-			try {
-				cpustate = SNAfile.ParseSNAData(data);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			rawdata = snafile.RAM;
 		}
 		
-		super.Render(TargetPage, rawdata, loadAddr, is128K, IY, RamBankOrder, filename,cpustate,targetpart);
+		super.Render(TargetPage, rawdata, loadAddr, snafile.MachineClass != MachineState.MT_48K, IY, RamBankOrder, filename,snafile,targetpart);
 	}
 }

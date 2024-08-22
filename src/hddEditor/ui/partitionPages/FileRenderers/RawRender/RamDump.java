@@ -32,8 +32,8 @@ import org.eclipse.swt.graphics.ImageLoader;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.IDEDosPartition;
-import hddEditor.libs.snapshots.CPUState;
 import hddEditor.libs.snapshots.CPUStateToFiles;
+import hddEditor.libs.snapshots.MachineState;
 
 import org.eclipse.swt.widgets.Button;
 
@@ -89,7 +89,7 @@ public class RamDump implements Renderer {
 	 * @param targetpartition
 	 */
 	public void Render(Composite TargetPage, byte[] data, int loadAddr, boolean is128K, int IY, int i128BankOrder[],
-			String filename, CPUState cpustate, IDEDosPartition targetpartition) {
+			String filename, MachineState cpustate, IDEDosPartition targetpartition) {
 		labels = new ArrayList<Label>();
 		Renderers = new ArrayList<Renderer>();
 		Targetpg = TargetPage;
@@ -226,7 +226,7 @@ public class RamDump implements Renderer {
 		}
 	}
 
-	protected void doConvertSnaToLoadableFiles(CPUState cpustate, IDEDosPartition targetpartition, String filename) {
+	protected void doConvertSnaToLoadableFiles(MachineState cpustate, IDEDosPartition targetpartition, String filename) {
 		int i = filename.indexOf(".");
 		if (i > 0) {
 			filename = filename.substring(0, i).trim();
@@ -235,7 +235,10 @@ public class RamDump implements Renderer {
 			CPUStateToFiles.SaveToPartition(cpustate, targetpartition, filename);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		
 	}
 
 	protected void doExtractFiles128() {

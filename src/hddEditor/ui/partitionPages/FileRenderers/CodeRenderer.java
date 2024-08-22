@@ -59,6 +59,7 @@ public class CodeRenderer extends FileRenderer {
 	 */
 	public void RenderCode(Composite mainPage, byte data[], byte header [], String Filename, int fileSize,
 			int loadAddr, FileSelectDialog filesel, IDEDosPartition currentpart) {
+
 		super.Render(mainPage, data, Filename, filesel);
 		part = currentpart;
 		Renderers = new Vector<Renderer>();
@@ -255,6 +256,7 @@ public class CodeRenderer extends FileRenderer {
 	 * @param loadAddr
 	 */
 	private void DoChangeCodeType(String s, byte data[], int loadAddr) {
+
 		// Dispose of any items that are already on the form
 		for (Renderer r : Renderers) {
 			r.DisposeRenderer();
@@ -262,7 +264,6 @@ public class CodeRenderer extends FileRenderer {
 		Renderers.clear();
 
 		try {
-
 			// Render the appropriate type
 			if (s.equals(CODETYPES[1])) {
 				ScreenRenderer renderer = new ScreenRenderer();

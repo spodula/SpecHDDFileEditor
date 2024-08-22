@@ -3,7 +3,6 @@ package hddEditor.libs.snapshots;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -18,10 +17,13 @@ public class CPUStateToFiles {
 	 * @param cs
 	 * @param TargetPartition
 	 * @param fileprefix
-	 * @throws IOException
+	 * @throws Exception 
 	 */
-	public static void SaveToPartition(CPUState cs, IDEDosPartition TargetPartition, String fileprefix)
-			throws IOException {
+	public static void SaveToPartition(MachineState cs, IDEDosPartition TargetPartition, String fileprefix)
+			throws Exception {
+		if (cs.MachineClass!= MachineState.MT_48K) {
+			throw new Exception("Can only process 48k snapshots.");
+		}
 
 		InputStream document = null;
 		if (IsInJar()) {
@@ -129,7 +131,7 @@ public class CPUStateToFiles {
 				}
 			}
 			if (line.contains("--DIEI--")) {
-				if (cs.PC != 0) {
+				if (cs.PC > 0) {
 					int pcl = (cs.PC & 0xff);
 					int pch = (cs.PC / 0x100);
 					line = line.replace("201", "195," + pcl + "," + pch);

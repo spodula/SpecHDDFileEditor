@@ -1,7 +1,6 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
 //TODO: Terra cresta conversion doesnt work. Figure out why
 //TODO: Use Z80 object for z80 renderer
-//TODO: Use SNA object for SNA renderer
 
 import java.util.ArrayList;
 
@@ -14,7 +13,7 @@ import org.eclipse.swt.widgets.Label;
 
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.IDEDosPartition;
-import hddEditor.libs.snapshots.CPUState;
+import hddEditor.libs.snapshots.MachineState;
 import hddEditor.libs.snapshots.readers.Z80file;
 
 public class Z80SnapshotRenderer extends RamDump {
@@ -370,7 +369,7 @@ public class Z80SnapshotRenderer extends RamDump {
 				byte block[] = ExtractCompressedBlock(b48kRam, 49152);
 				System.arraycopy(block, 0, b48kRam, 0, Math.min(b48kRam.length, block.length));
 			}
-			CPUState cpustate = null;
+			MachineState cpustate = null;
 			try {
 				cpustate = Z80file.LoadZ80File(data);
 			} catch (Exception e) {
@@ -392,9 +391,12 @@ public class Z80SnapshotRenderer extends RamDump {
 					if (page.Pagenum == 8)
 						System.arraycopy(page.Data, 0, ram, 0x0000, 0x4000);
 				}
-				CPUState cpustate = null;
+				MachineState cpustate = null;
 				try {
 					cpustate = Z80file.LoadZ80File(data);
+					if (cpustate.MachineClass != MachineState.MT_48K) {
+						cpustate = null;
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
