@@ -2,7 +2,7 @@ package hddEditor.libs;
 //TODO: SAMSCREEN: Apply interrupt colour change
 //TODO: SAMSCREEN: Encode image.
 //TODO: SAMSCREEN: Support Mode 2
-//TODO: SAM Files seem to have a 9 byte header. Basic header? 
+//TODO: SAM Files seem to have a 9 byte header. Basic header. Include in SAM filetypes.
 //TODO: MGT/SAM filenames, trim out spaces.
 //TODO: MGT/SAM files: lots of "Warning, active sectors in Sector address map (0) doesnt match Dirent Count (8) for file" errors
 //TODO: MGT/SAM files: Sam defines additional file type flags. Bit 7=HIDDEN, bit7=PROTECTED. Implement in MGT

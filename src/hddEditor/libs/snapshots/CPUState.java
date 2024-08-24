@@ -40,6 +40,18 @@ public class CPUState {
 		SPH = sph;
 		PC = pc;
 	}
+	
+	public int IY() {
+		return (((IYH & 0xff) * 0x100) + IYL);
+	}
+	public int IX() {
+		return (((IXH & 0xff) * 0x100) + IXL);
+	}
+	public int SP() {
+		return (((SPH & 0xff) * 0x100) + SPL);
+	}
+
+	
 
 	private String outReg(String reg, byte dat) {
 		String result = reg + ": ";

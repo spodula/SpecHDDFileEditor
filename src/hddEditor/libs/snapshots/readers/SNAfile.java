@@ -133,6 +133,9 @@ public class SNAfile extends MachineState {
 
 		MachineClass = MachineState.MT_48K;
 		SOURCE = MachineState.SOURCE_SNA;
+		System.arraycopy(ram, 0x0000, RamBanks[5], 0, 0x4000);
+		System.arraycopy(ram, 0x4000, RamBanks[2], 0, 0x4000);
+		System.arraycopy(ram, 0x8000, RamBanks[0], 0, 0x4000);
 
 		/**
 		 * If the snapshot is a 128K snapshot, parse the second bit. Note, .SNA files
@@ -148,8 +151,6 @@ public class SNAfile extends MachineState {
 			last7ffd = (snafile[0xc01d] & 0xff);
 			SnapSpecific.put("TRDOS_PAGED", String.valueOf((snafile[0xc01e] & 0xff)));
 
-			System.arraycopy(ram, 0x0000, RamBanks[5], 0, 0x4000);
-			System.arraycopy(ram, 0x4000, RamBanks[2], 0, 0x4000);
 			System.arraycopy(ram, 0x8000, RamBanks[GetPagedRamNumber()], 0, 0x4000);
 
 			int ptr = 0xc01f;
@@ -161,7 +162,7 @@ public class SNAfile extends MachineState {
 			}
 		}
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -170,14 +171,12 @@ public class SNAfile extends MachineState {
 		Hashtable<String, String> result = super.DetailsAsArray();
 		String s = SnapSpecific.get("TRDOS_PAGED");
 		String tdpaged = "False";
-		if ((s!=null) && (!s.equals("0"))) {
+		if ((s != null) && (!s.equals("0"))) {
 			tdpaged = "True";
 		}
-		result.put("TRDOS Paged?",tdpaged);
-		
-		return(result);
-	}
+		result.put("TRDOS Paged?", tdpaged);
 
-	
+		return (result);
+	}
 
 }

@@ -7,7 +7,6 @@ package hddEditor.ui.partitionPages.FileRenderers.RawRender;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
@@ -112,8 +111,6 @@ public class SNARenderer extends RamDump {
 		gd.horizontalSpan = 2;
 		lbl.setLayoutData(gd);
 
-		int IY =  (snafile.IYH * 0x100) + snafile.IYL;
-
 		int RamBankOrder[] = new int[8];
 		
 		byte rawdata[] = null;
@@ -148,6 +145,6 @@ public class SNARenderer extends RamDump {
 			rawdata = snafile.RAM;
 		}
 		
-		super.Render(TargetPage, rawdata, loadAddr, snafile.MachineClass != MachineState.MT_48K, IY, RamBankOrder, filename,snafile,targetpart);
+		super.Render(TargetPage, rawdata, loadAddr, snafile.MachineClass != MachineState.MT_48K, snafile.IY(), RamBankOrder, filename,snafile,targetpart);
 	}
 }
