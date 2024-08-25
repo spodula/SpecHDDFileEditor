@@ -256,6 +256,7 @@ public class DirectoryEntry implements FileEntry {
 		for (int i:blocks) {
 			byte currentblock[] = ThisPartition.GetLogicalBlock(i);
 			System.arraycopy(currentblock, 0, result, resultptr, Math.min(result.length - resultptr,currentblock.length));
+			resultptr = resultptr + currentblock.length;
 		}
 		
 		return (result);
