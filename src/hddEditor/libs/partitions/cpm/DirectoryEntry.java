@@ -250,22 +250,14 @@ public class DirectoryEntry implements FileEntry {
 		// get all the blocks
 		int[] blocks = getBlocks();
 
-		// find the last valid byte
-		int eob = GetRawFileSize();
-
 		// iterate each block
 		int resultptr = 0;
-		for (int i = 0; i < blocks.length; i++) {
-			byte currentblock[] = ThisPartition.GetLogicalBlock(blocks[i]);
-			// copy the contents until we get to end last record in the block. (The rest of
-			// the data is invalid)
-			for (byte x : currentblock) {
-				if (resultptr < eob) {
-					result[resultptr++] = x;
-				}
-			}
+		
+		for (int i:blocks) {
+			byte currentblock[] = ThisPartition.GetLogicalBlock(i);
+			System.arraycopy(currentblock, 0, result, resultptr, Math.min(result.length - resultptr,currentblock.length));
 		}
-
+		
 		return (result);
 	}
 
