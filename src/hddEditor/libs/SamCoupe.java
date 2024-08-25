@@ -1,5 +1,4 @@
 package hddEditor.libs;
-//TODO: SAMSCREEN: Apply interrupt colour change
 //TODO: SAMSCREEN: Encode image.
 //TODO: SAMSCREEN: Support Mode 2
 //TODO: SAM Files seem to have a 9 byte header. Basic header. Include in SAM filetypes.
@@ -47,7 +46,7 @@ public class SamCoupe {
 				IsValid = false;
 			}
 			int ft =getFileType(); 
-			if (ft < MGT.MGTFT_SAMBASIC || ft < MGT.MGTFT_SAMSCREEN) {
+			if (ft < MGT.MGTFT_SAMBASIC || ft > MGT.MGTFT_SAMSCREEN) {
 				IsValid = false;
 			}
 		}
@@ -336,6 +335,17 @@ public class SamCoupe {
 		 * @return
 		 */
 		public ImageData GetImage() {
+			/*
+             * Duplicate the palette so we can modify it using interrupts
+             */
+			int P1[] = new int[Palette1.length];
+			int P2[] = new int[Palette2.length];
+			System.arraycopy(Palette1, 0, P1, 0, P1.length);
+			System.arraycopy(Palette2, 0, P2, 0, P1.length);
+			
+			/*
+             * Decode the appropriate screen type.
+             */ 
 			if (mode == SAMSCREEN_MODE2) {
 				System.out.println("MOde 2 screens not supported");
 				return (null);
@@ -348,14 +358,30 @@ public class SamCoupe {
 				int address = 0;
 				int xptn = 0;
 				for (int yptn = 0; yptn < height; yptn++) {
+					/*
+					 * Apply any interrupts.
+					 */
+					SamScreenInterrupt IntToApply = null;
+					for (SamScreenInterrupt inter:Interrupts) {
+						if (inter.GetYPtn() == yptn)
+							IntToApply = inter;
+					}
+					if (IntToApply!=null) {
+						P1[IntToApply.GetColourNum()] = IntToApply.GetPaletteACol(); 
+						P2[IntToApply.GetColourNum()] = IntToApply.GetPaletteBCol(); 
+					}
+					
+					/*
+					 * Pixels
+					 */
 					xptn = 0;
 					while (xptn < width) {
 						byte data = rawFrameBuffer[address++];
 						if (mode == SAMSCREEN_MODE4) {
 							int b2 = data & 0x0f;
 							int b1 = (data & 0xf0) >> 4;
-							int col1 = Palette1[b1];
-							int col2 = Palette1[b2];
+							int col1 = P1[b1];
+							int col2 = P1[b2];
 
 							imageData.setPixel(xptn++, yptn, SamToRGB(col1));
 							imageData.setPixel(xptn++, yptn, SamToRGB(col2));
@@ -365,10 +391,10 @@ public class SamCoupe {
 							int b3 = (data & 0x0c) >> 2;
 							int b2 = (data & 0x30) >> 4;
 							int b1 = (data & 0xc0) >> 6;
-							int col1 = Palette1[b1];
-							int col2 = Palette1[b2];
-							int col3 = Palette1[b3];
-							int col4 = Palette1[b4];
+							int col1 = P1[b1];
+							int col2 = P1[b2];
+							int col3 = P1[b3];
+							int col4 = P1[b4];
 
 							imageData.setPixel(xptn++, yptn, SamToRGB(col1));
 							imageData.setPixel(xptn++, yptn, SamToRGB(col2));
