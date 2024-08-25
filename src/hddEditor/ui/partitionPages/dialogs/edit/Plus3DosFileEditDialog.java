@@ -29,10 +29,6 @@ import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 
 public class Plus3DosFileEditDialog extends EditFileDialog {
-	// size of the data as as +3 Basic sees it (With +3Header)
-	// This is used to trim off excess records before rendering.
-	private int Plus3Size = 0;
-
 	/**
 	 * Constructor
 	 * 
@@ -88,11 +84,9 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 		lbl.setFont(boldFont);
 
 		if (p3d.IsPlusThreeDosFile) {
-			lbl.setText(String.format("+3DOS Length: %d bytes (%X)", p3d.fileSize, p3d.fileSize));
-			Plus3Size = p3d.fileSize + 0x80;
+			lbl.setText(String.format("+3DOS Length: %d bytes (%X)", p3d.filelength, p3d.filelength));
 		} else {
 			lbl.setText("Not a +3DOS file (Or header corrupt)");
-			Plus3Size = data.length;
 		}
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 4;
@@ -135,31 +129,19 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 	private void RenderAppropriatePage() {
 		Plus3DosFileHeader p3d = ((DirectoryEntry) ThisEntry).GetPlus3DosHeader();
 
-		
 		byte header[] = null;
 		byte newdata[] = data;
 		if (p3d.IsPlusThreeDosFile) {
 			// Separate the header and the file data.
 			header = new byte[0x80];
 			System.arraycopy(data, 0, header, 0, 0x80);
-			newdata = new byte[p3d.fileSize];
-			if (p3d.fileSize > data.length-0x80) {
+			newdata = new byte[p3d.filelength];
+			if (p3d.filelength > data.length-0x80) {
 				System.arraycopy(data, 0x80, newdata, 0, data.length-0x80);
 			} else {
 				System.arraycopy(data, 0x80, newdata, 0, newdata.length);
 			}
 		}		
-
-		/*
-		 * CPM saves file in 128 byte chunks. This trims the data down to the size that
-		 * Speccy basic sees.
-		 */
-		byte TrimmedData[] = newdata;
-		if (Plus3Size < newdata.length) {
-			TrimmedData = new byte[Plus3Size];
-			System.arraycopy(newdata, 0, TrimmedData, 0, Plus3Size);
-		}
-		newdata = TrimmedData;
 
 		/**
 		 * Render the page.

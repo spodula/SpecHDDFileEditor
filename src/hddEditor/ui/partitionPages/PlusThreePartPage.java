@@ -71,10 +71,10 @@ public class PlusThreePartPage extends GenericPage {
 	/**
 	 * Open a +3 Partition page
 	 * 
-	 * @param root	- The root object. used for global variables.
-	 * @param parent - Parent shell for the form. 
+	 * @param root      - The root object. used for global variables.
+	 * @param parent    - Parent shell for the form.
 	 * @param partition - Current partition.
-	 * @param filesel - File selection dialog object.
+	 * @param filesel   - File selection dialog object.
 	 */
 	public PlusThreePartPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
 		super(root, parent, partition, filesel);
@@ -105,7 +105,7 @@ public class PlusThreePartPage extends GenericPage {
 			l.setFont(font);
 			label("", 3);
 
-			if (pdp.DirectoryBlocks==0 || pdp.bam==null) {
+			if (pdp.DirectoryBlocks == 0 || pdp.bam == null) {
 				label("Partition does not contain a valid CPM/+3 filesystem.", 4);
 			} else {
 
@@ -151,23 +151,27 @@ public class PlusThreePartPage extends GenericPage {
 				tc5.setWidth(100);
 				DirectoryListing.setHeaderVisible(true);
 				/***********************************************************************************/
-			    Listener sortListener = new Listener() {
-			        public void handleEvent(Event e) {
-			        	TableColumn column = (TableColumn) e.widget;
-			        	CPMPartition p = (CPMPartition)partition;
-		                if (column == tc1) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_NAME);
-		                if (column == tc2) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_TYPE);
-		                if (column == tc3) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_SIZE);
-		                if (column == tc4) p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_SIZE);
-		                DirectoryListing.setSortColumn(column);
-		                PopulateDirectory();
-			        }
-			    };
-				tc1.addListener(SWT.Selection,sortListener);
-				tc2.addListener(SWT.Selection,sortListener);
-				tc3.addListener(SWT.Selection,sortListener);
-				tc4.addListener(SWT.Selection,sortListener);
-				
+				Listener sortListener = new Listener() {
+					public void handleEvent(Event e) {
+						TableColumn column = (TableColumn) e.widget;
+						CPMPartition p = (CPMPartition) partition;
+						if (column == tc1)
+							p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_NAME);
+						if (column == tc2)
+							p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_TYPE);
+						if (column == tc3)
+							p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_SIZE);
+						if (column == tc4)
+							p.SortDirectoryEntries(IDEDosPartition.SORTTYPE_SIZE);
+						DirectoryListing.setSortColumn(column);
+						PopulateDirectory();
+					}
+				};
+				tc1.addListener(SWT.Selection, sortListener);
+				tc2.addListener(SWT.Selection, sortListener);
+				tc3.addListener(SWT.Selection, sortListener);
+				tc4.addListener(SWT.Selection, sortListener);
+
 				/***********************************************************************************/
 
 				// Create the drop target
@@ -446,36 +450,38 @@ public class PlusThreePartPage extends GenericPage {
 	 * Populate the directory listing.
 	 */
 	private void PopulateDirectory() {
-		DirectoryListing.removeAll();
+		if (!DirectoryListing.isDisposed()) {
+			DirectoryListing.removeAll();
 
-		PLUS3DOSPartition pdp = (PLUS3DOSPartition) partition;
-		for (DirectoryEntry entry : pdp.DirectoryEntries) {
-			TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
-			item2.setData(entry);
-			String content[] = new String[5];
-			content[0] = entry.GetFilename();
-			Plus3DosFileHeader pfdh = entry.GetPlus3DosHeader();
-			if (pfdh.IsPlusThreeDosFile) {
-				content[1] = pfdh.getTypeDesc();
-				content[3] = String.valueOf(pfdh.fileSize - 0x80);
-			} else {
-				content[1] = "CPM/Invalid +3 Header";
+			PLUS3DOSPartition pdp = (PLUS3DOSPartition) partition;
+			for (DirectoryEntry entry : pdp.DirectoryEntries) {
+				TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
+				item2.setData(entry);
+				String content[] = new String[5];
+				content[0] = entry.GetFilename();
+				Plus3DosFileHeader pfdh = entry.GetPlus3DosHeader();
+				if (pfdh.IsPlusThreeDosFile) {
+					content[1] = pfdh.getTypeDesc();
+					content[3] = String.valueOf(pfdh.fileSize - 0x80);
+				} else {
+					content[1] = "CPM/Invalid +3 Header";
+				}
+				content[2] = String.valueOf(entry.GetRawFileSize());
+				String s = "";
+				if (entry.IsDeleted) {
+					s = s + ",Deleted";
+				}
+				if (!entry.IsComplete()) {
+					s = s + ",Incomplete";
+				} else {
+					s = s + ",Complete";
+				}
+				if (!s.isEmpty()) {
+					s = s.substring(1);
+				}
+				content[4] = s;
+				item2.setText(content);
 			}
-			content[2] = String.valueOf(entry.GetRawFileSize());
-			String s = "";
-			if (entry.IsDeleted) {
-				s = s + ",Deleted";
-			}
-			if (!entry.IsComplete()) {
-				s = s + ",Incomplete";
-			} else {
-				s = s + ",Complete";
-			}
-			if (!s.isEmpty()) {
-				s = s.substring(1);
-			}
-			content[4] = s;
-			item2.setText(content);
 		}
 
 	}
@@ -488,7 +494,7 @@ public class PlusThreePartPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 			DirectoryEntry entry = (DirectoryEntry) itms[0].getData();
 			try {
-				SpecFileEditDialog = new Plus3DosFileEditDialog(ParentComp.getDisplay(), fsd,partition);
+				SpecFileEditDialog = new Plus3DosFileEditDialog(ParentComp.getDisplay(), fsd, partition);
 
 				byte[] data = entry.GetFileRawData();
 
@@ -588,7 +594,7 @@ public class PlusThreePartPage extends GenericPage {
 	}
 
 	/**
-	 * Show the "Extract all files" form. 
+	 * Show the "Extract all files" form.
 	 */
 	protected void DoExtractAllFiles() {
 		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay());
