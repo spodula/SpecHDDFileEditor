@@ -22,7 +22,7 @@ import hddEditor.libs.partitions.NonCPMDiskImagePartition;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.SwapPartition;
 import hddEditor.libs.partitions.SystemPartition;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
+import hddEditor.libs.partitions.cpm.CPMDirectoryEntry;
 
 public class IDEDosHandler extends OSHandler {
 	/**
@@ -110,7 +110,7 @@ public class IDEDosHandler extends OSHandler {
 			System.out.println("---------------------");
 
 			String result = "";
-			for (DirectoryEntry de : p3d.DirectoryEntries) {
+			for (CPMDirectoryEntry de : p3d.DirectoryEntries) {
 				if (!de.IsDeleted) {
 					String fn = de.GetFilename();
 					while (fn.length() < 15) {

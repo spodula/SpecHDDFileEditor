@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.CPM;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
+import hddEditor.libs.partitions.cpm.CPMDirectoryEntry;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 
 public class DropFilestoPlus3Partition extends GenericDropForm {
@@ -232,7 +232,7 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 		/*
 		 * Add in the files on the disk..
 		 */
-		for (DirectoryEntry d : pfd.DirectoryEntries) {
+		for (CPMDirectoryEntry d : pfd.DirectoryEntries) {
 			String fname = d.GetFilename();
 			currentlist.add(fname);
 		}

@@ -17,7 +17,7 @@ import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.PlusIDEDosException;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
+import hddEditor.libs.partitions.cpm.CPMDirectoryEntry;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 import hddEditor.libs.partitions.mdf.MicrodriveDirectoryEntry;
 import hddEditor.libs.partitions.tap.TapDirectoryEntry;
@@ -433,7 +433,7 @@ public class ScriptRunner {
 						switch (part.GetPartType()) {
 						case PLUSIDEDOS.PARTITION_CPM:
 						case PLUSIDEDOS.PARTITION_PLUS3DOS:
-							DirectoryEntry de = (DirectoryEntry) entry;
+							CPMDirectoryEntry de = (CPMDirectoryEntry) entry;
 							rawdata = de.GetFileData();
 							Plus3DosFileHeader p3d = de.GetPlus3DosHeader();
 							if (p3d != null && p3d.IsPlusThreeDosFile) {

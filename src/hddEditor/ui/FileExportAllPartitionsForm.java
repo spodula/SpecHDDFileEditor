@@ -388,7 +388,7 @@ public class FileExportAllPartitionsForm {
 					for (FileEntry file : ThisDisk.GetFileList()) {
 						boolean deleted = false;
 						if (HasDeletedFiles) {
-							deleted = ((hddEditor.libs.partitions.cpm.DirectoryEntry) file).IsDeleted;
+							deleted = ((hddEditor.libs.partitions.cpm.CPMDirectoryEntry) file).IsDeleted;
 						}
 						if (!deleted || IncludeDeleted.getSelection()) {
 							String fn = file.GetFilename();
@@ -440,7 +440,7 @@ public class FileExportAllPartitionsForm {
 
 								Plus3DosFileHeader p3d = null;
 								if (PartClass.contains("PLUS3DOSPartition")) {
-									p3d = ((hddEditor.libs.partitions.cpm.DirectoryEntry) file).GetPlus3DosHeader();
+									p3d = ((hddEditor.libs.partitions.cpm.CPMDirectoryEntry) file).GetPlus3DosHeader();
 								}
 								boolean isUnknown = (sbd.BasicType < 0) || (sbd.BasicType > 3);
 

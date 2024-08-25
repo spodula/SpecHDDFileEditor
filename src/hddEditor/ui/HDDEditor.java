@@ -40,7 +40,7 @@ import hddEditor.libs.disks.Disk;
 import hddEditor.libs.handlers.OSHandler;
 import hddEditor.libs.partitions.CPMPartition;
 import hddEditor.libs.partitions.IDEDosPartition;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
+import hddEditor.libs.partitions.cpm.CPMDirectoryEntry;
 import hddEditor.ui.partitionPages.FloppyBootTrackPage;
 import hddEditor.ui.partitionPages.FloppyGenericPage;
 import hddEditor.ui.partitionPages.GenericPage;
@@ -645,7 +645,7 @@ public class HDDEditor {
 								if (partition.GetPartType() == PLUSIDEDOS.PARTITION_CPM
 										|| partition.GetPartType() == PLUSIDEDOS.PARTITION_PLUS3DOS) {
 									CPMPartition sp = (CPMPartition) partition;
-									for (DirectoryEntry de : sp.DirectoryEntries) {
+									for (CPMDirectoryEntry de : sp.DirectoryEntries) {
 										System.out.println("   " + de.GetFilename() + " " + de.GetFileTypeString() + " "
 												+ de.GetFileSize());
 									}

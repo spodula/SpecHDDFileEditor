@@ -41,7 +41,7 @@ import hddEditor.libs.CPM;
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
+import hddEditor.libs.partitions.cpm.CPMDirectoryEntry;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 
 public class AddFilesToPlus3Partition extends GenericAddPageDialog {
@@ -747,7 +747,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		/*
 		 * Add in the files on the disk..
 		 */
-		for (DirectoryEntry d : ((PLUS3DOSPartition) CurrentPartition).DirectoryEntries) {
+		for (CPMDirectoryEntry d : ((PLUS3DOSPartition) CurrentPartition).DirectoryEntries) {
 			String fname = d.GetFilename();
 			currentlist.add(fname);
 		}

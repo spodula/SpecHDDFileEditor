@@ -20,7 +20,7 @@ import java.io.IOException;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
+import hddEditor.libs.partitions.cpm.CPMDirectoryEntry;
 import hddEditor.libs.partitions.cpm.Dirent;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 
@@ -305,7 +305,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 			try {
 				SysConfig.write("<speccy>\n".toCharArray());
 				int entrynum = 0;
-				for (DirectoryEntry entry : DirectoryEntries) {
+				for (CPMDirectoryEntry entry : DirectoryEntries) {
 					if (progress != null) {
 						if (progress.Callback(DirectoryEntries.length, entrynum++, "File: " + entry.GetFilename()))
 							break;

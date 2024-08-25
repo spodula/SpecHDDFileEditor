@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Shell;
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.IDEDosPartition;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
+import hddEditor.libs.partitions.cpm.CPMDirectoryEntry;
 import hddEditor.libs.partitions.cpm.Dirent;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
@@ -65,7 +65,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 
 		String logblocks = "";
 		int BlockCount = 0;
-		for (Dirent dirent : ((DirectoryEntry) ThisEntry).dirents) {
+		for (Dirent dirent : ((CPMDirectoryEntry) ThisEntry).dirents) {
 			for (int blockNum : dirent.getBlocks()) {
 				logblocks = logblocks + ", " + blockNum;
 				BlockCount++;
@@ -127,7 +127,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 	 * Render the correct page for the file.
 	 */
 	private void RenderAppropriatePage() {
-		Plus3DosFileHeader p3d = ((DirectoryEntry) ThisEntry).GetPlus3DosHeader();
+		Plus3DosFileHeader p3d = ((CPMDirectoryEntry) ThisEntry).GetPlus3DosHeader();
 
 		byte header[] = null;
 		byte newdata[] = data;

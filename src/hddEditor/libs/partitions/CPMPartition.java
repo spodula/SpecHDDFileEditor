@@ -16,7 +16,7 @@ import hddEditor.libs.CPM;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
+import hddEditor.libs.partitions.cpm.CPMDirectoryEntry;
 import hddEditor.libs.partitions.cpm.Dirent;
 import hddEditor.ui.partitionPages.dialogs.AddressNote;
 
@@ -49,7 +49,7 @@ public class CPMPartition extends IDEDosPartition {
 	public Dirent[] Dirents;
 
 	// List of directory entries assembled from the Dirents.
-	public DirectoryEntry[] DirectoryEntries;
+	public CPMDirectoryEntry[] DirectoryEntries;
 
 	// Block availability map.
 	public boolean[] bam;
@@ -156,7 +156,7 @@ public class CPMPartition extends IDEDosPartition {
 	 */
 	public boolean AddCPMFile(String filename, byte[] file) throws IOException {
 		// firstly check to see if the file exists. delete the old one if found.
-		DirectoryEntry de = GetDirectoryEntry(filename);
+		CPMDirectoryEntry de = GetDirectoryEntry(filename);
 		if (de != null) {
 			de.SetDeleted(true);
 			updateDirentBlocks();
@@ -357,12 +357,12 @@ public class CPMPartition extends IDEDosPartition {
 	 * @param filename
 	 * @return
 	 */
-	public DirectoryEntry GetDirectoryEntry(String filename) {
-		DirectoryEntry result = null;
+	public CPMDirectoryEntry GetDirectoryEntry(String filename) {
+		CPMDirectoryEntry result = null;
 		if (filename.endsWith(".")) {
 			filename = filename.substring(0, filename.length() - 1);
 		}
-		for (DirectoryEntry d : DirectoryEntries) {
+		for (CPMDirectoryEntry d : DirectoryEntries) {
 			if (d.GetFilename().contentEquals(filename)) {
 				result = d;
 			}
@@ -403,7 +403,7 @@ public class CPMPartition extends IDEDosPartition {
 		RecalculateDirectoryListing();
 		int validdirents = 0;
 		int invalidDirents = 0;
-		for (DirectoryEntry d : DirectoryEntries) {
+		for (CPMDirectoryEntry d : DirectoryEntries) {
 			boolean valid = d.IsComplete();
 
 			if (d.dirents[0].GetUserNumber() > 16 && d.dirents[0].GetUserNumber() != 0xe5) {
@@ -435,7 +435,7 @@ public class CPMPartition extends IDEDosPartition {
 		IsValid = true;
 		bam = new boolean[MaxBlock];
 		// Convert the DIRENTS into a directory listing.
-		DirectoryEntry direntries[] = new DirectoryEntry[Dirents.length]; // number of directory entries cannot be more
+		CPMDirectoryEntry direntries[] = new CPMDirectoryEntry[Dirents.length]; // number of directory entries cannot be more
 		// than the DirEnts
 
 		usedDirEnts = 0;
@@ -447,7 +447,7 @@ public class CPMPartition extends IDEDosPartition {
 				if (dType == Dirent.DIRENT_FILE)
 					usedDirEnts++;
 				// do we have a file called that already?
-				DirectoryEntry file = null;
+				CPMDirectoryEntry file = null;
 				int Directorynum = nextdirentry;
 				for (int j = 0; j < nextdirentry; j++) {
 					// if we have found the file, record where it is.
@@ -458,7 +458,7 @@ public class CPMPartition extends IDEDosPartition {
 				}
 				// If we have not found a file, create a new one.
 				if (file == null) {
-					file = new DirectoryEntry(this, (dType == Dirent.DIRENT_DELETED), MaxBlock);
+					file = new CPMDirectoryEntry(this, (dType == Dirent.DIRENT_DELETED), MaxBlock);
 					Directorynum = nextdirentry++;
 				}
 				file.addDirent(dirent);
@@ -466,7 +466,7 @@ public class CPMPartition extends IDEDosPartition {
 			}
 		}
 		// now transfer the array to the object
-		DirectoryEntries = new DirectoryEntry[nextdirentry];
+		DirectoryEntries = new CPMDirectoryEntry[nextdirentry];
 		for (int i = 0; i < nextdirentry; i++) {
 			DirectoryEntries[i] = direntries[i];
 		}
@@ -544,7 +544,7 @@ public class CPMPartition extends IDEDosPartition {
 				result = result + d.toString() + "\n";
 		}
 		result = result + "\nDirectory entries:\n";
-		for (DirectoryEntry de : DirectoryEntries) {
+		for (CPMDirectoryEntry de : DirectoryEntries) {
 			if (!de.IsDeleted) {
 				String fn = de.GetFilename();
 				while (fn.length() < 15) {
@@ -593,7 +593,7 @@ public class CPMPartition extends IDEDosPartition {
 		AddressNote an = new AddressNote(DirBlockSize, MaxBlock * BlockSize, 0, "Unallocated space");
 		resultlist.add(an);
 
-		for (DirectoryEntry di : DirectoryEntries) {
+		for (CPMDirectoryEntry di : DirectoryEntries) {
 			int[] blocks = di.getBlocks();
 			for (int i = 0; i < blocks.length; i++) {
 				an = new AddressNote(blocks[i] * BlockSize, ((blocks[i] + 1) * BlockSize) - 1, i * BlockSize,
@@ -636,7 +636,7 @@ public class CPMPartition extends IDEDosPartition {
 			try {
 				SysConfig.write("<speccy>\n".toCharArray());
 				int entrynum = 0;
-				for (DirectoryEntry entry : DirectoryEntries) {
+				for (CPMDirectoryEntry entry : DirectoryEntries) {
 					if (progress != null) {
 						if (progress.Callback(DirectoryEntries.length, entrynum++, "File: " + entry.GetFilename())) {
 							break;
@@ -699,7 +699,7 @@ public class CPMPartition extends IDEDosPartition {
 	@Override
 	public void DeleteFile(String wildcard) throws IOException {
 		int numdeleted = 0;
-		for (DirectoryEntry de : DirectoryEntries) {
+		for (CPMDirectoryEntry de : DirectoryEntries) {
 			if (de.DoesMatch(wildcard)) {
 				de.SetDeleted(true);
 				numdeleted++;
@@ -718,7 +718,7 @@ public class CPMPartition extends IDEDosPartition {
 	 */
 	@Override
 	public void RenameFile(String filename, String newName) throws IOException {
-		DirectoryEntry de = GetDirectoryEntry(filename);
+		CPMDirectoryEntry de = GetDirectoryEntry(filename);
 		if (de != null) {
 			try {
 				de.SetFilename(newName);
@@ -772,6 +772,6 @@ public class CPMPartition extends IDEDosPartition {
 	 * @param SortType 0 = no sort, 1=name, 2 = file type, 3=file size,
 	 */
 	public void SortDirectoryEntries(int SortType) {
-		DirectoryEntries = (DirectoryEntry[]) SortFileEntry(SortType);
+		DirectoryEntries = (CPMDirectoryEntry[]) SortFileEntry(SortType);
 	}
 }

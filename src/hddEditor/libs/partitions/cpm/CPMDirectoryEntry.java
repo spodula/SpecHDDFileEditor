@@ -29,7 +29,7 @@ import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.CPMPartition;
 
-public class DirectoryEntry implements FileEntry {
+public class CPMDirectoryEntry implements FileEntry {
 	// the raw dirents associated with this entry
 	public Dirent[] dirents = null;
 
@@ -70,7 +70,7 @@ public class DirectoryEntry implements FileEntry {
 	 * @param filename
 	 * @param disk
 	 */
-	public DirectoryEntry(CPMPartition disk, boolean IsDeleted, int maxBlocks) {
+	public CPMDirectoryEntry(CPMPartition disk, boolean IsDeleted, int maxBlocks) {
 		this.ThisPartition = disk;
 		this.IsDeleted = IsDeleted;
 		dirents = new Dirent[0];
@@ -178,8 +178,8 @@ public class DirectoryEntry implements FileEntry {
 	 */
 	@Override
 	public int GetRawFileSize() {
-		// On a normal +3 disk, all dirents except the last one will be full.
-		// This doesn't seem to be the case for PLUSIDEPOS, so just get the number of
+		// On a normal +3 disk, all CPM dirents except the last one will be full.
+		// This doesn't seem to be the case for PLUSIDEDOS, so just get the number of
 		// blocks, and
 		// use that.
 		// GDS 25/12/2022 - The bytes in the last logical Dirent are the bytes for the
@@ -206,7 +206,7 @@ public class DirectoryEntry implements FileEntry {
 	}
 
 	/**
-	 * Get the size of a file as seen by BASIC. For +3DOS files, basiclly, if it has
+	 * Get the size of a file as seen by BASIC. For +3DOS files, basically, if it has
 	 * a valid header, subtract this. Otherwise just return the file size.
 	 */
 	@Override
@@ -241,14 +241,13 @@ public class DirectoryEntry implements FileEntry {
 	 * 
 	 * @return
 	 * @throws IOException
-	 * @throws BadDiskFileException
 	 */
 	@Override
 	public byte[] GetFileRawData() throws IOException {
 		byte result[] = new byte[GetRawFileSize()];
 
 		// get all the blocks
-		int[] blocks = getBlocks();
+		int blocks[] = getBlocks();
 
 		// iterate each block
 		int resultptr = 0;

@@ -16,7 +16,7 @@ import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.RawDiskData;
 import hddEditor.libs.partitions.SystemPartition;
 import hddEditor.libs.partitions.TrDosPartition;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
+import hddEditor.libs.partitions.cpm.CPMDirectoryEntry;
 import hddEditor.libs.partitions.MGTDosPartition;
 
 public class NonPartitionedDiskHandler extends OSHandler {
@@ -227,7 +227,7 @@ public class NonPartitionedDiskHandler extends OSHandler {
 			System.out.println(p3d);
 			System.out.println("---------------------");
 			String result = "";
-			for (DirectoryEntry de : p3d.DirectoryEntries) {
+			for (CPMDirectoryEntry de : p3d.DirectoryEntries) {
 				if (!de.IsDeleted) {
 					String fn = de.GetFilename();
 					while (fn.length() < 15) {

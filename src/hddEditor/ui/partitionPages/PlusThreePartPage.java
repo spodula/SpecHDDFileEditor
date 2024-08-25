@@ -45,7 +45,7 @@ import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
-import hddEditor.libs.partitions.cpm.DirectoryEntry;
+import hddEditor.libs.partitions.cpm.CPMDirectoryEntry;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 import hddEditor.libs.partitions.CPMPartition;
 import hddEditor.ui.FileExportAllPartitionsForm;
@@ -422,7 +422,7 @@ public class PlusThreePartPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 			try {
 				for (TableItem en : itms) {
-					DirectoryEntry ent = (DirectoryEntry) en.getData();
+					CPMDirectoryEntry ent = (CPMDirectoryEntry) en.getData();
 					if (ent.IsComplete()) {
 						ent.SetDeleted(false);
 					} else {
@@ -455,7 +455,7 @@ public class PlusThreePartPage extends GenericPage {
 			DirectoryListing.removeAll();
 
 			PLUS3DOSPartition pdp = (PLUS3DOSPartition) partition;
-			for (DirectoryEntry entry : pdp.DirectoryEntries) {
+			for (CPMDirectoryEntry entry : pdp.DirectoryEntries) {
 				TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 				item2.setData(entry);
 				String content[] = new String[5];
@@ -493,7 +493,7 @@ public class PlusThreePartPage extends GenericPage {
 	private void DoEditFile() {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
-			DirectoryEntry entry = (DirectoryEntry) itms[0].getData();
+			CPMDirectoryEntry entry = (CPMDirectoryEntry) itms[0].getData();
 			try {
 				SpecFileEditDialog = new Plus3DosFileEditDialog(ParentComp.getDisplay(), fsd, partition);
 
@@ -532,7 +532,7 @@ public class PlusThreePartPage extends GenericPage {
 	protected void DoEditRawFile() {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
-			DirectoryEntry entry = (DirectoryEntry) itms[0].getData();
+			CPMDirectoryEntry entry = (CPMDirectoryEntry) itms[0].getData();
 			try {
 				// Create the hex edit dialog and start it.
 				HxEditDialog = new HexEditDialog(ParentComp.getDisplay());
@@ -563,7 +563,7 @@ public class PlusThreePartPage extends GenericPage {
 	protected void DoDeleteSelectedFile() {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
-			DirectoryEntry entry = (DirectoryEntry) itms[0].getData();
+			CPMDirectoryEntry entry = (CPMDirectoryEntry) itms[0].getData();
 			try {
 				String filename = entry.GetFilename();
 				if (itms.length > 1) {
@@ -577,7 +577,7 @@ public class PlusThreePartPage extends GenericPage {
 					// This means the existing ones are invalidated. so we set a delayed reload and
 					// do it at the end.
 					for (TableItem en : itms) {
-						DirectoryEntry ent = (DirectoryEntry) en.getData();
+						CPMDirectoryEntry ent = (CPMDirectoryEntry) en.getData();
 						ent.DelayReload = true;
 						ent.SetDeleted(true);
 						ent.DelayReload = false;
@@ -612,7 +612,7 @@ public class PlusThreePartPage extends GenericPage {
 	protected void DoRenameFile() {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
-			DirectoryEntry entry = (DirectoryEntry) itms[0].getData();
+			CPMDirectoryEntry entry = (CPMDirectoryEntry) itms[0].getData();
 			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay());
 			if (RenFileDialog.Show(entry.GetFilename())) {
 				try {
