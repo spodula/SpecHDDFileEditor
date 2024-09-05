@@ -53,6 +53,7 @@ public class RamDump implements Renderer {
 	private SystemVariablesRenderer SVR;
 
 	private byte BasicData[];
+	private int VarsOffset;
 
 	@Override
 	public void DisposeRenderer() {
@@ -159,13 +160,14 @@ public class RamDump implements Renderer {
 		// some basic checking.
 		HasBasic = false;
 		BasicData = null;
+		VarsOffset = 0;
 		if ((VARS > PROG) && (E_LINE > VARS) && (PROG > 23754) && (PROG < 25000)) {
-
 			BasicData = new byte[E_LINE - PROG];
-			System.arraycopy(data, PROG - diff, BasicData, 0, BasicData.length);
+			VarsOffset = VARS - PROG;
+			System.arraycopy(data, PROG - diff, BasicData, 0, Math.min(BasicData.length, data.length - (PROG - diff)));
 			BR = new BasicRenderer();
 			Renderers.add(BR);
-			BR.AddBasicFile(TargetPage, BasicData, BasicData.length, VARS - PROG);
+			BR.AddBasicFile(TargetPage, BasicData, BasicData.length, VarsOffset, false);
 
 			byte SysVars[] = new byte[512];
 			System.arraycopy(data, 0x5b00 - diff, SysVars, 0, SysVars.length);
@@ -226,7 +228,8 @@ public class RamDump implements Renderer {
 		}
 	}
 
-	protected void doConvertSnaToLoadableFiles(MachineState cpustate, IDEDosPartition targetpartition, String filename) {
+	protected void doConvertSnaToLoadableFiles(MachineState cpustate, IDEDosPartition targetpartition,
+			String filename) {
 		int i = filename.indexOf(".");
 		if (i > 0) {
 			filename = filename.substring(0, i).trim();
@@ -238,7 +241,7 @@ public class RamDump implements Renderer {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	protected void doExtractFiles128() {
@@ -282,18 +285,21 @@ public class RamDump implements Renderer {
 
 			// save BASIC
 			if (HasBasic) {
-				if (BR != null) {
-					String basicdets = BR.GetBasicSummary();
-					GeneralUtils.WriteBlockToDisk(basicdets.getBytes(), RootFile.getAbsoluteFile() + ".basic");
+				if (BasicData != null) {
+					StringBuilder sb = new StringBuilder();
+					Speccy.DecodeBasicFromLoadedFile(BasicData, sb, VarsOffset, true, false);
+					GeneralUtils.WriteBlockToDisk(sb.toString().getBytes(), RootFile.getAbsoluteFile() + ".basic");
+
+					sb = new StringBuilder();
+					Speccy.DecodeBasicFromLoadedFile(BasicData, sb, VarsOffset, false, false);
+					GeneralUtils.WriteBlockToDisk(sb.toString().getBytes(), RootFile.getAbsoluteFile() + ".bas");
+					
+					GeneralUtils.WriteBlockToDisk(BasicData, RootFile.getAbsoluteFile() + ".rawbasic");
 				}
 				if (SVR != null) {
 					String Sysvars = SVR.getSystemVariableSummary();
 					GeneralUtils.WriteBlockToDisk(Sysvars.getBytes(), RootFile.getAbsoluteFile() + ".SYSVARS");
 				}
-				if (BasicData != null) {
-					GeneralUtils.WriteBlockToDisk(BasicData, RootFile.getAbsoluteFile() + ".rawbasic");
-				}
-
 			}
 		}
 	}
@@ -329,16 +335,20 @@ public class RamDump implements Renderer {
 
 			// save BASIC
 			if (HasBasic) {
-				if (BR != null) {
-					String basicdets = BR.GetBasicSummary();
-					GeneralUtils.WriteBlockToDisk(basicdets.getBytes(), RootFile.getAbsoluteFile() + ".basic");
+				if (BasicData != null) {
+					StringBuilder sb = new StringBuilder();
+					Speccy.DecodeBasicFromLoadedFile(BasicData, sb, VarsOffset, true, false);
+					GeneralUtils.WriteBlockToDisk(sb.toString().getBytes(), RootFile.getAbsoluteFile() + ".basic");
+
+					sb = new StringBuilder();
+					Speccy.DecodeBasicFromLoadedFile(BasicData, sb, VarsOffset, false, false);
+					GeneralUtils.WriteBlockToDisk(sb.toString().getBytes(), RootFile.getAbsoluteFile() + ".bas");
+
+					GeneralUtils.WriteBlockToDisk(BasicData, RootFile.getAbsoluteFile() + ".rawbasic");
 				}
 				if (SVR != null) {
 					String Sysvars = SVR.getSystemVariableSummary();
 					GeneralUtils.WriteBlockToDisk(Sysvars.getBytes(), RootFile.getAbsoluteFile() + ".SYSVARS");
-				}
-				if (BasicData != null) {
-					GeneralUtils.WriteBlockToDisk(BasicData, RootFile.getAbsoluteFile() + ".rawbasic");
 				}
 			}
 		}

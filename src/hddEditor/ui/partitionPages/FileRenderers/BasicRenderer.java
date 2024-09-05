@@ -147,8 +147,7 @@ public class BasicRenderer extends FileRenderer {
 
 		
 		hddEditor.ui.partitionPages.FileRenderers.RawRender.BasicRenderer br = new hddEditor.ui.partitionPages.FileRenderers.RawRender.BasicRenderer();
-		br.AddBasicFile(mainpage, data, filelength, VariablesOffset);
-		br.AddVariables(mainpage, data, filelength, VariablesOffset);
+		br.AddBasicFile(mainpage, data, filelength, VariablesOffset, false);
 
 		Listing = br.Listing;
 		Variables = br.Variables;

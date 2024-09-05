@@ -750,14 +750,19 @@ public class Speccy {
 		return (Address);
 	}
 
-	/**
+	/*-
 	 * Handler for type 4 variables (Numeric arrays) Variable name is parsed from
-	 * the original marker (first 5 bytes) + 0x40 format is: [0-1] data length (Used
-	 * to quickly skip over variable when searching) [2] Number of dimensions
-	 * (1-255) [3.4] First dimension size. (1-65535) .. [xx.yy] last dimension size
-	 * [ZZZZZ] Speccy FP representation of (1[,1[,1]]) [ZZZZZ] Speccy FP
-	 * representation of (2[,1[,1]]) ... [ZZZZZ] Speccy FP representation of
-	 * (<sz>[,1[,1]]) [ZZZZZ] Speccy FP representation of (1[,2[,1]]) and so on.
+	 * the original marker (first 5 bytes) + 0x40 format is: 
+	 * [0-1] data length (Used to quickly skip over variable when searching) 
+	 * [2] Number of dimensions (1-255) 
+	 * [3-4] First dimension size. (1-65535) 
+	 * .. 
+	 * [xx.yy] last dimension size
+	 * [ZZZZZ] Speccy FP representation of (1[,1[,1]]) 
+	 * [ZZZZZ] Speccy FP representation of (2[,1[,1]]) 
+	 * ... 
+	 * [ZZZZZ] Speccy FP representation of (<sz>[,1[,1]]) 
+	 * [ZZZZZ] Speccy FP representation of (1[,2[,1]]) and so on.
 	 * 
 	 * @param sb
 	 * @param keys

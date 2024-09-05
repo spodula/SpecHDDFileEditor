@@ -52,7 +52,7 @@ public class BasicRenderer implements Renderer {
 			result = result + lineno + " " + content + "\n";
 		}
 		result = result + "\nVariables:\n";
-		if (Variables != null && Variables.getItems() != null ) {
+		if (Variables != null && Variables.getItems() != null) {
 			for (TableItem line : Variables.getItems()) {
 				String varname = line.getText(0);
 				String type = line.getText(1);
@@ -72,38 +72,8 @@ public class BasicRenderer implements Renderer {
 	 * @param filelength
 	 * @param VariablesOffset
 	 */
-	public void AddVariables(Composite TargetPage, byte data[], int filelength, int VariablesOffset) {
-		if (VarLBL != null) {
-			VarLBL.dispose();
-		}
-		VarLBL = new Label(TargetPage, SWT.NONE);
-		VarLBL.setText("Variables: ");
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.horizontalSpan = 4;
-		VarLBL.setLayoutData(gd);
-
-		if (Variables != null) {
-			Variables.dispose();
-		}
-		Variables = new Table(TargetPage, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
-		Variables.setLinesVisible(true);
-
-		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.horizontalSpan = 4;
-		gd.heightHint = 100;
-		gd.widthHint = TargetPage.getSize().x;
-		Variables.setLayoutData(gd);
-
-		TableColumn vc1 = new TableColumn(Variables, SWT.LEFT);
-		vc1.setText("Variable");
-		vc1.setWidth(80);
-		TableColumn vc2 = new TableColumn(Variables, SWT.FILL);
-		vc2.setText("Type");
-		vc2.setWidth(100);
-		TableColumn vc3 = new TableColumn(Variables, SWT.FILL);
-		vc3.setText("Content");
-		vc3.setWidth(580);
-
+	private void PopulateVariables(Composite TargetPage, byte data[], int filelength, int VariablesOffset) {
+		Variables.removeAll();
 		int varlen = Math.min(filelength, data.length) - VariablesOffset;
 		if (varlen > 0) {
 			byte variables[] = new byte[varlen];
@@ -118,18 +88,14 @@ public class BasicRenderer implements Renderer {
 	 * @param filelength
 	 * @param VariablesOffset
 	 */
-	public void AddBasicFile(Composite TargetPage, byte data[], int filelength, int VariablesOffset) {
-		class RemDetails {
-			public int locationAddr;
-			public int size;
-			public byte data[];
-			public boolean valid = false;
-			public int line;
-		}
-
+	public void AddBasicFile(Composite TargetPage, byte data[], int filelength, int VariablesOffset, boolean IncludeRealValues) {
 		if (Listing != null) {
 			Listing.dispose();
 		}
+		if (Variables != null) {
+			Variables.dispose();
+		}
+		
 		Listing = new Table(TargetPage, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		Listing.setLinesVisible(true);
 
@@ -146,7 +112,48 @@ public class BasicRenderer implements Renderer {
 		tc2.setText("Line");
 		tc2.setWidth(600);
 
-		Font mono = new Font(TargetPage.getDisplay(), "Monospace", 10, SWT.NONE);
+		VarLBL = new Label(TargetPage, SWT.NONE);
+		VarLBL.setText("Variables: ");
+		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.horizontalSpan = 4;
+		VarLBL.setLayoutData(gd);
+
+		Variables = new Table(TargetPage, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		Variables.setLinesVisible(true);
+
+		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.horizontalSpan = 4;
+		gd.heightHint = 100;
+		//gd.widthHint = TargetPage.getSize().x;
+		Variables.setLayoutData(gd);
+
+		TableColumn vc1 = new TableColumn(Variables, SWT.LEFT);
+		vc1.setText("Variable");
+		vc1.setWidth(80);
+		TableColumn vc2 = new TableColumn(Variables, SWT.FILL);
+		vc2.setText("Type");
+		vc2.setWidth(100);
+		TableColumn vc3 = new TableColumn(Variables, SWT.FILL);
+		vc3.setText("Content");
+		vc3.setWidth(580);
+
+		PopulateBASIC(data, filelength, VariablesOffset,IncludeRealValues);
+		PopulateVariables(TargetPage, data, filelength, VariablesOffset);
+		TargetPage.pack();
+	}
+
+	private void PopulateBASIC(byte data[], int filelength, int VariablesOffset, boolean IncludeRealVals) {
+		class RemDetails {
+			public int locationAddr;
+			public int size;
+			public byte data[];
+			public boolean valid = false;
+			public int line;
+		}
+		Listing.clearAll();
+		Listing.removeAll();
+
+		Font mono = new Font(Listing.getDisplay(), "Monospace", 10, SWT.NONE);
 
 		ArrayList<RemDetails> RemLocations = new ArrayList<RemDetails>();
 
@@ -216,7 +223,7 @@ public class BasicRenderer implements Renderer {
 					if (rd.valid) {
 						RemLocations.add(rd);
 					}
-					Speccy.DecodeBasicLine(sb, line, 0, linelen, false);
+					Speccy.DecodeBasicLine(sb, line, 0, linelen, IncludeRealVals);
 				} catch (Exception E) {
 					sb.append("Bad line: " + E.getMessage());
 					ptr = 99999999;
@@ -305,6 +312,7 @@ public class BasicRenderer implements Renderer {
 			}
 
 		}
+
 	}
 
 	/**
