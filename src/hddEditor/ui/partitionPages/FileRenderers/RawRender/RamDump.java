@@ -1,14 +1,16 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
 
 /**
- * This object implements displaying of a dump of memory. from 16384 to 65535.
+ * This object implements displaying of a dump of memory from 16384 to 65535 or in the case of 
+ * 128k files, the currently paged-in memory followed by each individual page.
  * It will try to decode any BASIC if found. 
  * 
  * It is supposed to be used for the various snapshot formats, (SNA, MGT, Z80) which should
  * inherit from this and use the RENDER method once the memory is setup.
  * 
  * It has been expanded to 128K.  If this is set, there should be a list of pages provided so it knows
- * what order things are provided in. For best effect, the first 32k should be pages 5,2
+ * what order things are provided in. For best effect, the first 32k should be pages 5,2, although as long
+ * as the passed in values are correct, it will still render them.
  */
 
 import java.util.ArrayList;
@@ -55,6 +57,9 @@ public class RamDump implements Renderer {
 	private byte BasicData[];
 	private int VarsOffset;
 
+	/**
+	 * Dispose of any allocated visual components.
+	 */
 	@Override
 	public void DisposeRenderer() {
 		if (labels != null) {
@@ -77,17 +82,19 @@ public class RamDump implements Renderer {
 		}
 	}
 
-	/**
+	/*-
+	 * Render a given Ramdump
 	 * 
-	 * @param TargetPage
-	 * @param data
-	 * @param loadAddr
-	 * @param is128K
-	 * @param IY
-	 * @param i128BankOrder
-	 * @param filename
-	 * @param cpustate
-	 * @param targetpartition
+	 * 
+	 * @param TargetPage	- Page to parent to...
+	 * @param data			- Ram. The first 49152 bytes are the paged-in 48K ram followed by the other 16k pages in i128BankOrder Order.
+	 * @param loadAddr      - Unused here
+	 * @param is128K        - if TRUE, can expect i128KBankOrder to be populated and more than 48K in data
+	 * @param IY			- IY register. This is used to determine if the the BASIC is valid when saving.
+	 * @param i128BankOrder - If is128K, contains a list of the bank numbers in the order. This includes for the 48K section. 
+	 * @param filename      - Filename of the file. Used to determine a default filename when saving.
+	 * @param cpustate		- If not NULL, used to contain any CPU-Specific details for converting snapshots. 
+	 * @param targetpartition - Used as a default partition when saving. 
 	 */
 	public void Render(Composite TargetPage, byte[] data, int loadAddr, boolean is128K, int IY, int i128BankOrder[],
 			String filename, MachineState cpustate, IDEDosPartition targetpartition) {
@@ -228,6 +235,13 @@ public class RamDump implements Renderer {
 		}
 	}
 
+	/*-
+	 * Convert the current snapshot file to a series of 4 files which can be loaded on the +3E.
+	 * 
+	 * @param cpustate			- used to contain any CPU-Specific details for converting snapshots.
+	 * @param targetpartition   - Target partition to save the files to. 
+	 * @param filename			- default filename
+	 */
 	protected void doConvertSnaToLoadableFiles(MachineState cpustate, IDEDosPartition targetpartition,
 			String filename) {
 		int i = filename.indexOf(".");
@@ -244,6 +258,9 @@ public class RamDump implements Renderer {
 
 	}
 
+	/**
+	 * This extracts the current 128k Ram dump to a series to files on a disk.
+	 */
 	protected void doExtractFiles128() {
 		DirectoryDialog dialog = new DirectoryDialog(Targetpg.getShell());
 		dialog.setText("Select folder for target");
@@ -293,7 +310,7 @@ public class RamDump implements Renderer {
 					sb = new StringBuilder();
 					Speccy.DecodeBasicFromLoadedFile(BasicData, sb, VarsOffset, false, false);
 					GeneralUtils.WriteBlockToDisk(sb.toString().getBytes(), RootFile.getAbsoluteFile() + ".bas");
-					
+
 					GeneralUtils.WriteBlockToDisk(BasicData, RootFile.getAbsoluteFile() + ".rawbasic");
 				}
 				if (SVR != null) {
@@ -305,7 +322,7 @@ public class RamDump implements Renderer {
 	}
 
 	/**
-	 * 
+	 * This extracts the current 48k Ram dump to a series to files on a disk.
 	 */
 	protected void doExtractFiles() {
 		DirectoryDialog dialog = new DirectoryDialog(Targetpg.getShell());
@@ -354,6 +371,14 @@ public class RamDump implements Renderer {
 		}
 	}
 
+	/*-
+	 * Try to extract and save any BASIC portion of the current ramdump.
+	 * This is done in two files, the first one contains decoded numbers and
+	 * the second one contains just the ascii characters. 
+	 * 
+	 * @param RootFile	- File part of the filename.
+	 * @return - End of basic. 
+	 */
 	private int SaveBasicFile(File RootFile) {
 		// check for BASIC.
 		int diff = 0x4000;

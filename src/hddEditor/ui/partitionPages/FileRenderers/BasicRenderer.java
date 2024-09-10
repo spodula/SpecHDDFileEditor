@@ -1,5 +1,6 @@
 package hddEditor.ui.partitionPages.FileRenderers;
 //BUGFIX: GDS 22/01/2023 - Fixed error deciding when REM statements need to be disassembled. Was calculating with wrong values.
+//TODO: Basic text encoding doesnt do <> and (c) properly
 
 import java.io.File;
 
