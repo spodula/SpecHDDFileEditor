@@ -108,26 +108,34 @@ public class SNAfile extends MachineState {
 		 * Parse the first 48K file.
 		 */
 		byte ram[] = new byte[0xc000];
-		System.arraycopy(snafile, 0x1b, ram, 0, 0xc000);
+		if (snafile.length > 0x1b) {
+			System.arraycopy(snafile, 0x1b, ram, 0, Math.min(0xc000, snafile.length - 0x1b));
+		}
 		// a, f, b, c, d, e, h, l)
-		Registers AltRegs = new Registers(snafile[0x08], snafile[0x07], snafile[0x06], snafile[0x05], snafile[0x05],
-				snafile[0x03], snafile[0x02], snafile[0x01]);
-		Registers NormalRegs = new Registers(snafile[0x16], snafile[0x15], snafile[0x0e], snafile[0x0d], snafile[0x0c],
-				snafile[0x0d], snafile[0x0a], snafile[0x09]);
+		this.AltRegs = new Registers();
+		if (snafile.length > 7) {
+			this.AltRegs = new Registers(snafile[0x08], snafile[0x07], snafile[0x06], snafile[0x05], snafile[0x05],
+					snafile[0x03], snafile[0x02], snafile[0x01]);
+		}
 
-		this.MainRegs = NormalRegs;
-		this.AltRegs = AltRegs;
+		this.MainRegs = null;
+		if (snafile.length > 0x15) {
+			this.MainRegs = new Registers(snafile[0x16], snafile[0x15], snafile[0x0e], snafile[0x0d], snafile[0x0c],
+					snafile[0x0d], snafile[0x0a], snafile[0x09]);
+		}
 
-		this.I = snafile[0x00];
-		this.IXL = snafile[0x11];
-		this.IXH = snafile[0x12];
-		this.IYL = snafile[0x0F];
-		this.IYH = snafile[0x10];
-		this.R = snafile[0x14];
-		this.IM = snafile[0x19];
-		this.EI = snafile[0x13] != 0;
-		this.SPL = snafile[0x17];
-		this.SPH = snafile[0x18];
+		if (snafile.length > 0x1b) {
+			this.I = snafile[0x00];
+			this.IXL = snafile[0x11];
+			this.IXH = snafile[0x12];
+			this.IYL = snafile[0x0F];
+			this.IYH = snafile[0x10];
+			this.R = snafile[0x14];
+			this.IM = snafile[0x19];
+			this.EI = snafile[0x13] != 0;
+			this.SPL = snafile[0x17];
+			this.SPH = snafile[0x18];
+		}
 		this.PC = -1;
 		this.RAM = ram;
 

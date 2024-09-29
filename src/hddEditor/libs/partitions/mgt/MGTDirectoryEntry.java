@@ -66,7 +66,7 @@ public class MGTDirectoryEntry implements FileEntry {
 		if (RawDirectoryEntry[0] != MGT.MGTFT_ERASED) {
 			result = new String(RawDirectoryEntry, StandardCharsets.UTF_8).substring(1, 11).trim();
 		}
-		return (result);
+		return (result.trim());
 	}
 
 	@Override

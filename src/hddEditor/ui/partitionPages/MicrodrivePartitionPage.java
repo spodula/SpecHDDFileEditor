@@ -91,7 +91,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 			TableColumn tc3 = new TableColumn(DirectoryListing, SWT.LEFT);
 			TableColumn tc4 = new TableColumn(DirectoryListing, SWT.LEFT);
 			TableColumn tc5 = new TableColumn(DirectoryListing, SWT.LEFT);
-			tc1.setText("Fileame");
+			tc1.setText("Filename");
 			tc2.setText("Type");
 			tc3.setText("Length");
 			tc4.setText("Sectors");

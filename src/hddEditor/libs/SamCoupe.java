@@ -2,7 +2,6 @@ package hddEditor.libs;
 //TODO: SAMSCREEN: Encode image.
 //TODO: SAMSCREEN: Support Mode 2
 //TODO: SAM Files seem to have a 9 byte header. Basic header. Include in SAM filetypes.
-//TODO: MGT/SAM filenames, trim out spaces.
 //TODO: MGT/SAM files: lots of "Warning, active sectors in Sector address map (0) doesnt match Dirent Count (8) for file" errors
 //TODO: MGT/SAM files: Sam defines additional file type flags. Bit 7=HIDDEN, bit7=PROTECTED. Implement in MGT
 
@@ -677,21 +676,27 @@ public class SamCoupe {
 			"DEVICE","PROTECT","HIDE","ZAP","POW","BOOM","ZOOM","BACKUP","TIME","DATE","ALTER","SORT","JOIN","EDIT","",""
 	};
 	public static final String[] characters = {
+			//00-3f
 			"","","","","","","<PComma>","<edit>","<left>","<right>","<down>","<up>","<del>","<cr>","<num>","",
 			"<pen>","<paper>","<flash>","<bright>","<inverse>","<over>","<at>","<tab>","<lWord>","<rWord>","","","","","","",
 			" ","!","\"","#","$","%","&","'","(",")","*","+",",","-",".","/",
 			"0","1","2","3","4","5","6","7","8","9",":",";","<","=",">","?",
 
+			//40-7f
 			"@","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O",
 			"P","Q","R","S","T","U","V","W","X","Y","Z","[","\\","]","^","_",
 			"£","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o",
 			"p","q","r","s","t","u","v","w","x","y","z","{","|","}","~","" + (char) 0x24B8,
 
-			//TODO: complete Sam characters
-			"","","","","","","","","","","","","","","","",
-			"","","","","","","","","","","","","","","","",
-			"","","","","","","","","","","","","","","","",
-			"","","","","","","","","","","","","","","","",
+			//80-bf
+			""+(char)0xC7, ""+(char)0xFC,""+(char)0xE9,""+(char)0xE2,""+(char)0xE4,""+(char)0xE0,""+(char)0xE5,  ""+(char)0xE7,	
+			""+(char)0xEA, ""+(char)0xEB,""+(char)0xE8,""+(char)0xEF,""+(char)0xEE,""+(char)0xEC,""+(char)0xC4,  ""+(char)0xC2,
+			""+(char)0xC9, ""+(char)0xE6,""+(char)0xC6,""+(char)0xF4,""+(char)0xF6,""+(char)0xF2,""+(char)0xFB,  ""+(char)0xF4,
+			""+(char)0x178,""+(char)0xD6,""+(char)0xDC,""+(char)0xC7,""+(char)0xA3,""+(char)0xA5,""+(char)0x201A,""+(char)0x192,
+			""+(char)0xE1, ""+(char)0xED,""+(char)0xF3,""+(char)0xFA,""+(char)0x2C6,""+(char)0x2030,"a",""+(char)0xB0,
+			""+(char)0xBF,"","","","","","","",
+			"","","","","","","","",
+			"","","","","","","","",
 
 			"","","","","","","","","","","","","","","","",
 			"","","","","","","","","","","","","","","","",
