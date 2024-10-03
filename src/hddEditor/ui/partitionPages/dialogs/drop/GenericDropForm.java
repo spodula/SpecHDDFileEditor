@@ -542,6 +542,7 @@ public class GenericDropForm {
 					flags = "Code " + Details.fileheader.loadAddr + "," + Details.fileheader.filelength;
 				}
 			} else {
+
 				switch (Details.FileType) {
 				case FILETYPE_BASIC_TEXT:
 				case FILETYPE_BASIC_ENC:
@@ -1006,13 +1007,11 @@ public class GenericDropForm {
 	 * @param files
 	 */
 	protected void PopulateFiles(File files[]) {
-		System.out.println("Dropped " + files.length + " files.");
 		for (File f : files) {
 			if (f != null) {
 				TableItem item = new TableItem(DirectoryListing, SWT.NONE);
 				String content[] = new String[5];
 				NewFileListItem nfli = IdentifyFileType(f);
-
 				content[0] = nfli.OriginalFilename.getName();
 				content[1] = nfli.filename;
 				content[2] = nfli.GetFileTypeAsName();
@@ -1070,6 +1069,11 @@ public class GenericDropForm {
 				}
 			}
 		}
+		if (f.getName().toLowerCase().endsWith(".tap")
+				|| ((f.length() > 0xffff) && (nfli.FileType != FILETYPE_IMAGE))) {
+			nfli.FileType = FILETYPE_RAW;
+		} 
+		
 		return (nfli);
 	}
 

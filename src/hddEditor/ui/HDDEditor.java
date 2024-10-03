@@ -1,7 +1,5 @@
 package hddEditor.ui;
 
-//TODO: CPM: when file > 64k, automatically default to headerless.
-//TODO: For TAP files, dragged on to screen, automatically default to headerless.
 /**
  * Main UI.
  */
