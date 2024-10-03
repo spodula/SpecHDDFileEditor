@@ -182,7 +182,7 @@ public class IDEDosDisk extends RawHDDFile {
 	@Override
 	public Boolean IsMyFileType(File filename) throws IOException {
 		boolean result = false;
-		RandomAccessFile inFile = new RandomAccessFile(filename, "rw");
+		RandomAccessFile inFile = new RandomAccessFile(filename, "r");
 		try {
 			byte RawHeaderData[] = new byte[0x80];
 			inFile.seek(0);
