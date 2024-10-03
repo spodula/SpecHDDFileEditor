@@ -1,5 +1,7 @@
 package hddEditor.ui;
 
+//TODO: CPM: when file > 64k, automatically default to headerless.
+//TODO: For TAP files, dragged on to screen, automatically default to headerless.
 /**
  * Main UI.
  */
@@ -167,6 +169,28 @@ public class HDDEditor {
 				}
 			}
 		});
+
+		String os = System.getProperty("os.name");
+
+		if (os.toUpperCase().contains("LINUX") && GeneralUtils.IsLinuxRoot()) {
+			MenuItem deviceLoadItem = new MenuItem(fileMenu, SWT.PUSH);
+			deviceLoadItem.setText("&Select Physical disk");
+			deviceLoadItem.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					widgetDefaultSelected(arg0);
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					fileSelectDeviceLinux fdd = new fileSelectDeviceLinux(display);
+					File f = fdd.Show();
+					if (f != null) {
+						LoadFile(f, false);
+					}
+				}
+			});
+		}
 
 		MenuItem fileReLoadItem = new MenuItem(fileMenu, SWT.PUSH);
 		fileReLoadItem.setText("&Reload");
@@ -362,7 +386,7 @@ public class HDDEditor {
 		MainPage1.setExpandHorizontal(true);
 		MainPage1.setExpandVertical(true);
 		MainPage1.setAlwaysShowScrollBars(true);
-		
+
 		GridData gd = new GridData(GridData.FILL_BOTH);
 		gd.horizontalSpan = 4;
 		MainPage1.setLayoutData(gd);

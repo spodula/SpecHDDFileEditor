@@ -245,4 +245,14 @@ public class GeneralUtils {
 
 		return (results.toArray(new String[0]));
 	}
+	
+	/**
+	 * This is a very hacky method to figure out if we are running as root or not.
+	 * @return
+	 */
+	public static boolean IsLinuxRoot() {
+		//TODO: Fix getting if we are root using a less hacky method.
+		return(System.getProperty("user.home").toLowerCase().equals("/root"));
+	}
+	
 }
