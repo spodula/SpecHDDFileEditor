@@ -16,9 +16,9 @@ public class MDFMicrodriveFile implements Disk {
 	public File file;
 	// disk size in bytes
 	public long FileSize;
-	//Microdrive sector list
+	// Microdrive sector list
 	public MicrodriveSector Sectors[];
-	//last time modified on disk
+	// last time modified on disk
 	long LastModified;
 
 	public MDFMicrodriveFile(File file) throws IOException, BadDiskFileException {
@@ -306,18 +306,20 @@ public class MDFMicrodriveFile implements Disk {
 	 * @return
 	 */
 	public Boolean IsMyFileType(File filename) throws IOException {
-		inFile = new RandomAccessFile(filename, "r");
-		try {
-			byte FileData[] = new byte[0x21f];
-			inFile.seek(0);
-			inFile.read(FileData);
-			MicrodriveSector msh = new MicrodriveSector(FileData, 0);
-			if (msh.IsSectorChecksumValid()) {
-				return (true);
-			} 
-		} finally {
-			inFile.close();
-			inFile = null;
+		if (filename.getName().toUpperCase().endsWith(".MDR")) {
+			inFile = new RandomAccessFile(filename, "r");
+			try {
+				byte FileData[] = new byte[0x21f];
+				inFile.seek(0);
+				inFile.read(FileData);
+				MicrodriveSector msh = new MicrodriveSector(FileData, 0);
+				if (msh.IsSectorChecksumValid()) {
+					return (true);
+				}
+			} finally {
+				inFile.close();
+				inFile = null;
+			}
 		}
 		return (false);
 	}
@@ -402,8 +404,8 @@ public class MDFMicrodriveFile implements Disk {
 	 */
 	@Override
 	public boolean DiskOutOfDate() {
-		if (inFile!=null) {
-			return(LastModified < file.lastModified()); 
+		if (inFile != null) {
+			return (LastModified < file.lastModified());
 		}
 		return false;
 	}
@@ -413,9 +415,9 @@ public class MDFMicrodriveFile implements Disk {
 	 */
 	@Override
 	public void UpdateLastModified() {
-		if (inFile!=null) {
-			LastModified = file.lastModified(); 
+		if (inFile != null) {
+			LastModified = file.lastModified();
 		}
 	}
-	
+
 }
