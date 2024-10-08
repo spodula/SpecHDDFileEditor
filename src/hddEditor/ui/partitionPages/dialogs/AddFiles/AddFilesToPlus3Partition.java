@@ -527,7 +527,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 	 */
 	protected void DoAddCPMFiles() {
 		File selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Select files to add",
-				new String[] { "*" });
+				new String[] { "*.*" });
 		if ((selected != null) && (selected.length > 0)) {
 			for (File filename : selected) {
 

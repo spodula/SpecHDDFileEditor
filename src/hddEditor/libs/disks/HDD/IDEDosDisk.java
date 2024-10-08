@@ -1,6 +1,7 @@
 package hddEditor.libs.disks.HDD;
 
 import java.io.File;
+import java.io.FileInputStream;
 
 /**
  * This is a wrapper around an IDE dos raw disk, which extracts the disk parameters
@@ -25,7 +26,6 @@ import java.io.File;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 
 public class IDEDosDisk extends RawHDDFile {
@@ -182,11 +182,10 @@ public class IDEDosDisk extends RawHDDFile {
 	@Override
 	public Boolean IsMyFileType(File filename) throws IOException {
 		boolean result = false;
-		RandomAccessFile inFile = new RandomAccessFile(filename, "r");
+		FileInputStream FIS = new FileInputStream(filename); 
 		try {
-			byte RawHeaderData[] = new byte[0x80];
-			inFile.seek(0);
-			inFile.read(RawHeaderData);
+			byte RawHeaderData[] = new byte[4096];
+			FIS.read(RawHeaderData);
 
 			if (new String(RawHeaderData, StandardCharsets.UTF_8).startsWith(IDEDOSHEADER)) {
 				result = true;
@@ -197,7 +196,7 @@ public class IDEDosDisk extends RawHDDFile {
 				}
 			}
 		} finally {
-			inFile.close();
+			FIS.close();
 		}
 		return (result);
 

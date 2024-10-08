@@ -54,7 +54,7 @@ import hddEditor.ui.partitionPages.TZXPartitionPage;
 import hddEditor.ui.partitionPages.TrDosPartitionPage;
 
 public class HDDEditor {
-	public static String[] SUPPORTEDFILETYPES = { "*", "*.img", "*.hdf", "*.mgt", "*.trd", "*.scl", "*.mdr", "*.mgt",
+	public static String[] SUPPORTEDFILETYPES = { "*","*.*", "*.img", "*.hdf", "*.mgt", "*.trd", "*.scl", "*.mdr", "*.mgt",
 			"*.tap", "*.tzx" };
 
 	public static int DISKCHECKPERIOD = 2000;
@@ -189,7 +189,29 @@ public class HDDEditor {
 				}
 			});
 		}
+		if (os.toUpperCase().contains("WIN") && GeneralUtils.IsWindowsAdministrator()) {
+			MenuItem deviceLoadItem = new MenuItem(fileMenu, SWT.PUSH);
+			deviceLoadItem.setText("&Select Physical disk");
+			deviceLoadItem.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					widgetDefaultSelected(arg0);
+				}
 
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					fileSelectDeviceWindows fdw = new fileSelectDeviceWindows(display);
+					File f = fdw.Show();
+					if (f != null) {
+						LoadFile(f, false);
+					}
+				}
+			});
+			
+		}
+
+		
+		
 		MenuItem fileReLoadItem = new MenuItem(fileMenu, SWT.PUSH);
 		fileReLoadItem.setText("&Reload");
 		fileReLoadItem.addSelectionListener(new SelectionListener() {

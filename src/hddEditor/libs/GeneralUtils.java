@@ -240,7 +240,6 @@ public class GeneralUtils {
 					current.append(s.charAt(i));
 			}
 		}
-
 		results.add(new String(current));
 
 		return (results.toArray(new String[0]));
@@ -254,5 +253,15 @@ public class GeneralUtils {
 		//TODO: Fix getting if we are root using a less hacky method.
 		return(System.getProperty("user.home").toLowerCase().equals("/root"));
 	}
+	
+	public static boolean IsWindowsAdministrator() {
+	    String groups[] = (new com.sun.security.auth.module.NTSystem()).getGroupIDs();
+	    for (String group : groups) {
+	        if (group.equals("S-1-5-32-544"))
+	            return true;
+	    }
+	    return false;
+	}
+	
 	
 }

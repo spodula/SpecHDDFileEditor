@@ -1,4 +1,6 @@
 package hddEditor.libs.disks.HDD;
+//TODO: Drag/drop doesn't work on Windows?
+//TODO: For Linux, should default to "*", for Windows "*.*"
 
 /**
  * This is a wrapper around a file with no header acting as a disk. It can be any format.
@@ -9,6 +11,7 @@ package hddEditor.libs.disks.HDD;
  */
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,6 +26,10 @@ import hddEditor.ui.partitionPages.dialogs.ProgesssForm;
 public class RawHDDFile implements HardDisk {
 	// File handle
 	private RandomAccessFile inFile = null;
+	private FileInputStream inFileFIS = null;
+	//TODO: This should be populated from the drive details.
+	private int DiskBlockSize = 4096;
+
 	// filename of the currently open file
 	protected File file;
 	// default sector size
@@ -38,7 +45,7 @@ public class RawHDDFile implements HardDisk {
 	// Simple one sector cache
 	private byte[] cache;
 	private long cachedSector = -1;
-	
+
 	long LastModified;
 
 	/**
@@ -110,7 +117,14 @@ public class RawHDDFile implements HardDisk {
 	 * @throws FileNotFoundException
 	 */
 	public RawHDDFile(File file) throws FileNotFoundException {
-		inFile = new RandomAccessFile(file, "rw");
+		if (file.getAbsolutePath().startsWith("\\\\.\\PHYSICALDRIVE")) {
+			//TODO: disk details (chs) should be populated from the device.
+			inFileFIS = new FileInputStream(file);
+			inFile = null;
+		} else {
+			inFile = new RandomAccessFile(file, "rw");
+			inFileFIS = null;
+		}
 		this.file = file;
 		FileSize = file.length();
 		UpdateLastModified();
@@ -168,6 +182,15 @@ public class RawHDDFile implements HardDisk {
 			}
 			inFile = null;
 		}
+		if (inFileFIS != null) {
+			try {
+				inFileFIS.close();
+			} catch (IOException e) {
+				System.out.println("Failed to close file " + file.getName() + " with error " + e.getMessage());
+				e.printStackTrace();
+			}
+			inFileFIS = null;
+		}
 	}
 
 	/**
@@ -176,7 +199,7 @@ public class RawHDDFile implements HardDisk {
 	 * @return
 	 */
 	public boolean IsOpen() {
-		return (inFile != null);
+		return ((inFile != null) || (inFileFIS != null));
 	}
 
 	/**
@@ -187,7 +210,7 @@ public class RawHDDFile implements HardDisk {
 	public static void main(String[] args) {
 		RawHDDFile h;
 		try {
-			h = new RawHDDFile(new File("/data1/idedos.dsk"));
+			h = new RawHDDFile(new File("\\\\.\\PHYSICALDRIVE4"));
 			System.out.println(h);
 			h.close();
 		} catch (FileNotFoundException e) {
@@ -206,12 +229,51 @@ public class RawHDDFile implements HardDisk {
 		cachedSector = -1;
 
 		long location = SectorNum * SectorSize;
-		inFile.seek(location);
-		inFile.write(result);
-		cachedSector = -1;
 
-		inFile.seek(location);
-		inFile.read(result);
+		if (inFile != null) {
+			inFile.seek(location);
+			inFile.write(result);
+			cachedSector = -1;
+
+			inFile.seek(location);
+			inFile.read(result);
+		}
+		if (inFileFIS != null) {
+			/*
+			 * I cant get this to work writing disks. RandomAccessFile just doesnt work, and
+			 * NIO Channels appear to fail if there isnt a filesystem on the disk?
+			 * As such just leaving this code here for the moment. 
+			 */
+			throw new IOException("Cannot write to a raw device in Windows. Sorry.");
+			
+			//For block devices we have to read in multiples of block size and on block size boundaries.
+/*			int StartInBuffer = (int) (location % DiskBlockSize);	//Displacement within a raw disk block.
+			long ActualRdWrStart = location - StartInBuffer;		//Actual block start
+			long ActualResultLength = result.length + StartInBuffer;			//block length as a multiple of DiskBlockSize
+			ActualResultLength = ActualResultLength + (ActualResultLength % DiskBlockSize); 
+			byte tmpbuffer[] = new byte[(int)ActualResultLength];
+
+			inFileFIS.close();
+			inFileFIS = new FileInputStream(file);
+			inFileFIS.skip(ActualRdWrStart);
+			inFileFIS.read(tmpbuffer);
+			
+			System.arraycopy(result, 0, tmpbuffer, StartInBuffer, result.length);
+			inFileFIS.close();
+			
+			
+			Path diskRoot = file.toPath();
+
+			FileChannel fc = FileChannel.open( diskRoot, StandardOpenOption.READ,
+			      StandardOpenOption.WRITE );
+
+			ByteBuffer bb = ByteBuffer.allocate( tmpbuffer.length );
+			fc.position(ActualRdWrStart);
+			fc.write(bb);
+			fc.close();
+			
+			inFileFIS = new FileInputStream(file); */
+		}
 		UpdateLastModified();
 	}
 
@@ -231,10 +293,28 @@ public class RawHDDFile implements HardDisk {
 		// Note, this will restrict length for files of 128Mb.
 		long asz = Math.min(sz, 1024 * 1024 * 128);
 		byte result[] = new byte[(int) asz];
+		
 		long location = SectorNum * SectorSize;
 
-		inFile.seek(location);
-		inFile.read(result);
+		if (inFile != null) {
+			inFile.seek(location);
+			inFile.read(result);
+		}
+		if (inFileFIS != null) {
+			//For block devices we have to read in multiples of block size and on block size boundaries.
+			int StartInBuffer = (int) (location % DiskBlockSize);	//Displacement within a raw disk block.
+			long ActualRdWrStart = location - StartInBuffer;		//Actual block start
+			long ActualResultLength = asz + StartInBuffer;			//block length as a multiple of DiskBlockSize
+			ActualResultLength = ActualResultLength + (ActualResultLength % DiskBlockSize); 
+			byte tmpbuffer[] = new byte[(int)ActualResultLength];
+
+			inFileFIS.close();
+			inFileFIS = new FileInputStream(file);
+			inFileFIS.skip(ActualRdWrStart);
+			inFileFIS.read(tmpbuffer);
+			
+			System.arraycopy(tmpbuffer,StartInBuffer, result, 0, result.length);
+		}
 
 		cache = new byte[result.length];
 		System.arraycopy(result, 0, cache, 0, cache.length);
@@ -273,36 +353,38 @@ public class RawHDDFile implements HardDisk {
 		System.out.println(this.getClass().getName() + ": Resizing disk " + GetFilename() + " from " + GetFileSize()
 				+ " (" + GeneralUtils.GetSizeAsString(GetFileSize()) + ") " + " to " + String.valueOf(newsize) + " ("
 				+ GeneralUtils.GetSizeAsString(NewCyls) + ") ");
-		inFile.setLength(newsize);
-
-		SetNumCylinders(NewCyls);
-		UpdateLastModified();
+		if (inFile != null) {
+			inFile.setLength(newsize);
+			SetNumCylinders(NewCyls);
+			UpdateLastModified();
+		} else {
+			System.err.println("Cannot resize physical devices.");
+		}
 
 	}
 
 	/**
 	 * Create a blank Hard disk file with a system partition
 	 * 
-	 * @param file	- File to create
-	 * @param cyl	- Cylinders
-	 * @param head	- Heads
-	 * @param spt	- Sectors per track
+	 * @param file         - File to create
+	 * @param cyl          - Cylinders
+	 * @param head         - Heads
+	 * @param spt          - Sectors per track
 	 * @param IsTarget8Bit - 8 or 16 bit file type
-	 * @param pf	- Progress 
-	 * @return TRUE if creation successful 
+	 * @param pf           - Progress
+	 * @return TRUE if creation successful
 	 */
 	public boolean CreateBlankRawDisk(File file, int cyl, int head, int spt, boolean IsTarget8Bit, ProgesssForm pf) {
 		try {
 			boolean result = false;
 			System.out.println("Openning " + file.getName() + " for writing...");
-			
+
 			String s = "8-bit";
 			if (!IsTarget8Bit) {
 				s = "16-bit";
 			}
 
-			
-			pf.Show("Creating file...", "Creating "+s+" Raw disk image \"" + file.getName() + "\"");
+			pf.Show("Creating file...", "Creating " + s + " Raw disk image \"" + file.getName() + "\"");
 			try {
 				int sectorSz = 512;
 				if (IsTarget8Bit) {
@@ -368,14 +450,14 @@ public class RawHDDFile implements HardDisk {
 			return (false);
 		}
 	}
-	
+
 	/**
 	 * Return if the disk is out of sync with the one on disk.
 	 */
 	@Override
 	public boolean DiskOutOfDate() {
-		if (inFile!=null) {
-			return(LastModified < file.lastModified()); 
+		if (inFile != null) {
+			return (LastModified < file.lastModified());
 		}
 		return false;
 	}
@@ -385,8 +467,8 @@ public class RawHDDFile implements HardDisk {
 	 */
 	@Override
 	public void UpdateLastModified() {
-		if (inFile!=null) {
-			LastModified = file.lastModified(); 
+		if (inFile != null) {
+			LastModified = file.lastModified();
 		}
 	}
 
