@@ -70,7 +70,7 @@ public class DiskListLinux {
 	 * Constructor, load the drives
 	 */
 	public DiskListLinux() {
-		if (!System.getProperty("os.name").toUpperCase().contains("WIN")) {
+		if (!System.getProperty("os.name").toUpperCase().contains("LINUX")) {
 			String err = "Cannot use DiskListLinux, os.name returns " + System.getProperty("os.name");
 			System.err.println(err);
 			this.disks = new DiskInfo[0];
