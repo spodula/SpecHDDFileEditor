@@ -26,45 +26,7 @@ import java.util.ArrayList;
 
 public class DiskListLinux {
 	// list of partitions
-	public DiskInfo disks[];
-
-	/**
-	 * Class storage for the disk.
-	 */
-	public class DiskInfo {
-		public int major; // Major Id
-		public int minor; // Minor Id
-		public int blocksz; // Block size
-		public long blocks; // Number of blocks
-		public long realsz; // Real size in bytes
-		public String name; // Name of the disk, eg sda, sdb
-		public File dets; // FILE pointing to the drive
-		public String driveType; // Drive type, USB or ATA
-		public String model; // Model number
-		public String Vendor; // Vendor string
-
-		@Override
-		/**
-		 * Overriden TOSTRING method.
-		 */
-		public String toString() {
-			String result = name + ": " + major + "," + minor + " Blocksz:" + blocksz + " Blocks:" + blocks
-					+ " drivetype:" + driveType + " Vendor:" + Vendor + " " + model + " size:" + GetTextSz();
-			return (result.trim());
-		}
-
-		public String GetTextSz() {
-			String postfix[] = { "", "b", "Kb", "Mb", "Tb", "Pb" };
-			long v = realsz;
-			int pfptr = 0;
-			while (v > 1000) {
-				v = v / 1000;
-				pfptr++;
-			}
-			String result = String.format("%d%s", v, postfix[pfptr]);
-			return (result);
-		}
-	}
+	public RawDiskItem disks[];
 
 	/**
 	 * Constructor, load the drives
@@ -73,10 +35,10 @@ public class DiskListLinux {
 		if (!System.getProperty("os.name").toUpperCase().contains("LINUX")) {
 			String err = "Cannot use DiskListLinux, os.name returns " + System.getProperty("os.name");
 			System.err.println(err);
-			this.disks = new DiskInfo[0];
+			this.disks = new RawDiskItem[0];
 		} else {
 
-			ArrayList<DiskInfo> drives = new ArrayList<DiskInfo>();
+			ArrayList<RawDiskItem> drives = new ArrayList<RawDiskItem>();
 			try {
 				/*
 				 * /proc/partitions format: Major minor #blocks name
@@ -94,15 +56,12 @@ public class DiskListLinux {
 							}
 							if (!text.isBlank()) {
 								String cols[] = text.split(" ");
-								DiskInfo pi = new DiskInfo();
-								pi.major = Integer.valueOf(cols[0]);
-								pi.minor = Integer.valueOf(cols[1]);
-								pi.blocks = Long.valueOf(cols[2]);
+								RawDiskItem pi = new RawDiskItem();
 								pi.name = cols[3];
 								pi.dets = new File("/dev", pi.name);
 
 								boolean ParentPartFound = false;
-								for (DiskInfo p : drives) {
+								for (RawDiskItem p : drives) {
 									if (pi.name.startsWith(p.name)) {
 										ParentPartFound = true;
 									}
@@ -117,10 +76,10 @@ public class DiskListLinux {
 						line = br.readLine();
 					}
 					// convert the disk array into a static array.
-					disks = drives.toArray(new DiskInfo[drives.size()]);
+					disks = drives.toArray(new RawDiskItem[drives.size()]);
 
 					// try to populate more fieldss
-					for (DiskInfo p : disks) {
+					for (RawDiskItem p : disks) {
 						// model
 						byte data[] = GeneralUtils.ReadFileIntoArray("/sys/block/" + p.name + "/device/model");
 						p.model = new String(data).trim();
@@ -143,7 +102,7 @@ public class DiskListLinux {
 								NumbersOnly = NumbersOnly + c;
 						}
 						// and set it as block size.
-						p.blocksz = Integer.parseInt(NumbersOnly);
+						p.BlockSize = Integer.parseInt(NumbersOnly);
 
 						// Extract the symbolic link information. This will contain ATA or USB
 						// This is useful for telling USB drives from internal drives.

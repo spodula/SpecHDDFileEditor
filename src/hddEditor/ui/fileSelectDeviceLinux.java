@@ -16,11 +16,11 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
 import hddEditor.libs.DiskListLinux;
-import hddEditor.libs.DiskListLinux.DiskInfo;
+import hddEditor.libs.RawDiskItem;
 
 
 public class fileSelectDeviceLinux {
-	private DiskInfo disks[];
+	private RawDiskItem disks[];
 	// Form components
 	private Display display = null;
 	private Shell shell = null;
@@ -88,7 +88,7 @@ public class fileSelectDeviceLinux {
 		tc4.setWidth(200);
 		DeviceList.setHeaderVisible(true);
 		
-		for (DiskInfo disk:disks) {
+		for (RawDiskItem disk:disks) {
 			TableItem item = new TableItem(DeviceList, SWT.NONE);
 			item.setData(disk.dets);
 			String content[] = new String[4];

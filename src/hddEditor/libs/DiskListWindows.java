@@ -1,4 +1,5 @@
 package hddEditor.libs;
+//TODO: BlockSize for Windows devices
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -7,44 +8,15 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class DiskListWindows {
-	public WinDiskInfo disks[];
+	public RawDiskItem disks[];
 	public String errors[] = null;
 
-	public class WinDiskInfo {
-		public long realsz; // Real size in bytes
-		public String name; // Name of the disk, eg sda, sdb
-		public File dets; // FILE pointing to the drive
-		public String driveType; // Drive type, USB or ATA
-		public String model; // Model number
-		public String Vendor; // Vendor string
-
-		@Override
-		/**
-		 * Overriden TOSTRING method.
-		 */
-		public String toString() {
-			String result = "name:" + name + " drivetype:" + driveType + " model:" + model + " size:" + GetTextSz();
-			return (result.trim());
-		}
-
-		public String GetTextSz() {
-			String postfix[] = { "", "b", "Kb", "Mb", "Tb", "Pb" };
-			long v = realsz;
-			int pfptr = 0;
-			while (v > 1000) {
-				v = v / 1000;
-				pfptr++;
-			}
-			String result = String.format("%d%s", v, postfix[pfptr]);
-			return (result);
-		}
-	}
 
 	public DiskListWindows() {
 		if (!System.getProperty("os.name").toUpperCase().contains("WIN")) {
 			String err = "Cannot use DiskListWindows, os.name returns " + System.getProperty("os.name");
 			System.err.println(err);
-			this.disks = new WinDiskInfo[0];
+			this.disks = new RawDiskItem[0];
 			this.errors = new String[] { err };
 		} else {
 
@@ -120,7 +92,7 @@ public class DiskListWindows {
 					start = start + len;
 				}
 
-				ArrayList<WinDiskInfo> dis = new ArrayList<WinDiskInfo>();
+				ArrayList<RawDiskItem> dis = new ArrayList<RawDiskItem>();
 
 				for (int i = 1; i < output.length; i++) {
 					String dat = output[i];
@@ -135,7 +107,7 @@ public class DiskListWindows {
 						tmpLine.put(name.trim(), content.trim());
 					}
 
-					WinDiskInfo wdi = new WinDiskInfo();
+					RawDiskItem wdi = new RawDiskItem();
 					wdi.name = tmpLine.get("DeviceID");
 					wdi.dets = new File(wdi.name);
 					wdi.driveType = tmpLine.get("InterfaceType");
@@ -149,7 +121,7 @@ public class DiskListWindows {
 					dis.add(wdi);
 				}
 
-				this.disks = dis.toArray(new WinDiskInfo[0]);
+				this.disks = dis.toArray(new RawDiskItem[0]);
 			}
 		}
 
@@ -157,7 +129,7 @@ public class DiskListWindows {
 
 	public static void main(String args[]) {
 		DiskListWindows dlw = new DiskListWindows();
-		for (WinDiskInfo d : dlw.disks) {
+		for (RawDiskItem d : dlw.disks) {
 			System.out.println(d);
 		}
 	}
