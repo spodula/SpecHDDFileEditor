@@ -16,7 +16,7 @@ public class RawDiskItem {
 	 * Overriden TOSTRING method.
 	 */
 	public String toString() {
-		String result = "name:" + name + " drivetype:" + driveType + " model:" + model + " size:" + GetTextSz();
+		String result = "name:" + name + " Bs: "+BlockSize+" drivetype:" + driveType + " model:" + model + " size:" + GetTextSz();
 		return (result.trim());
 	}
 
