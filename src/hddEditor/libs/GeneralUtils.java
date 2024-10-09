@@ -1,11 +1,13 @@
 package hddEditor.libs;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import hddEditor.libs.partitions.IDEDosPartition;
@@ -246,12 +248,38 @@ public class GeneralUtils {
 	}
 	
 	/**
-	 * This is a very hacky method to figure out if we are running as root or not.
+	 * Figure out if we are running as root or not.
 	 * @return
 	 */
 	public static boolean IsLinuxRoot() {
-		//TODO: Fix getting if we are root using a less hacky method.
-		return(System.getProperty("user.home").toLowerCase().equals("/root"));
+		/*
+		 * This is a less hacky and more reliable method of finding if we are root
+		 * than the previous method of checking home. I would still prefer a method
+		 * using the Java API rather than an external program.
+		 */
+		String output = "";
+		try {
+			String line;
+			Process p = Runtime.getRuntime()
+					.exec(new String[] { "id","-u" });
+			BufferedReader brInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			BufferedReader brError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+			try {
+				p.waitFor();
+				while ((line = brInput.readLine()) != null) {
+					output = output + line.trim();
+				}
+				//eat the errors
+				while ((line = brError.readLine()) != null) {
+				}
+			} finally {
+				brInput.close();
+				brError.close();
+			}
+		} catch (Exception err) {
+			err.printStackTrace();
+		}
+		return (output.trim().equals("0"));
 	}
 	
 	public static boolean IsWindowsAdministrator() {
