@@ -35,8 +35,21 @@ public class IDEDosDisk extends RawHDDFile {
 	public static final String IDEDOSHEADER = "PLUSIDEDOS";
 	public boolean is8Bit = false;
 
-	/**
-	 * Constructor.
+	/** 
+	 * Constructor. This one overrides the block size.
+	 * 
+	 * @param filename
+	 * @param blocksize
+	 * @throws IOException
+	 */
+	public IDEDosDisk(File file, int blocksize) throws IOException {
+		super(file);
+		this.DiskBlockSize = blocksize;
+		parseDiskParameters();
+	}
+	
+	/** 
+	 * Constructor. This one uses the default block size.
 	 * 
 	 * @param filename
 	 * @throws IOException
@@ -46,6 +59,10 @@ public class IDEDosDisk extends RawHDDFile {
 		parseDiskParameters();
 	}
 
+	
+	/** 
+	 * Constructor. Dont open a file
+	 */
 	public IDEDosDisk() {
 		super();
 	}
@@ -190,7 +207,7 @@ public class IDEDosDisk extends RawHDDFile {
 	@Override
 	public Boolean IsMyFileType(File filename) throws IOException {
 		boolean result = false;
-
+		//Note, this wont work in Eclipse, but works fine stand-alone.
 		if (filename.toString().contains("\\\\.\\DEVICE")) {
 			FileInputStream FIS = new FileInputStream(filename);
 			try {

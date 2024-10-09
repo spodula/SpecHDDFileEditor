@@ -24,16 +24,16 @@ public class fileSelectDevice {
 	// Form components
 	private Display display = null;
 	private Shell shell = null;
-	private Table DeviceList = null;
-	
+	private Table DeviceList = null;	
 	private File SelectedDevice;
+	public int blocksize;
+	
 	
 	public fileSelectDevice(Display display) {
 		this.display = display;
 		
 		DiskListLinux dll = new DiskListLinux();
 		this.disks = dll.disks;
-
 	}
 	
 	/**
@@ -90,7 +90,7 @@ public class fileSelectDevice {
 		
 		for (RawDiskItem disk:disks) {
 			TableItem item = new TableItem(DeviceList, SWT.NONE);
-			item.setData(disk.dets);
+			item.setData(disk);
 			String content[] = new String[4];
 			content[0] = disk.name;
 			content[1] = disk.driveType;
@@ -112,7 +112,8 @@ public class fileSelectDevice {
 			public void widgetSelected(SelectionEvent arg0) {
 				TableItem itms[] = DeviceList.getSelection();
 				for (TableItem en : itms) {
-					SelectedDevice= (File) en.getData();
+					SelectedDevice = ((RawDiskItem) en.getData()).dets;
+					blocksize = ((RawDiskItem) en.getData()).BlockSize;
 				}
 				close();
 			}

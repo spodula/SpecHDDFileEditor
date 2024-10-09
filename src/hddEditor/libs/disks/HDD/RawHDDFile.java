@@ -27,8 +27,8 @@ public class RawHDDFile implements HardDisk {
 	// File handle
 	private RandomAccessFile inFile = null;
 	private FileInputStream inFileFIS = null;
-	//TODO: This should be populated from the drive details.
-	private int DiskBlockSize = 4096;
+
+	public int DiskBlockSize = 4096;
 
 	// filename of the currently open file
 	protected File file;

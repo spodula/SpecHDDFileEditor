@@ -37,6 +37,7 @@ import hddEditor.libs.DiskUtils;
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.disks.Disk;
+import hddEditor.libs.disks.HDD.RawHDDFile;
 import hddEditor.libs.handlers.OSHandler;
 import hddEditor.libs.partitions.CPMPartition;
 import hddEditor.libs.partitions.IDEDosPartition;
@@ -54,8 +55,8 @@ import hddEditor.ui.partitionPages.TZXPartitionPage;
 import hddEditor.ui.partitionPages.TrDosPartitionPage;
 
 public class HDDEditor {
-	public static String[] SUPPORTEDFILETYPES = { "*","*.*", "*.img", "*.hdf", "*.mgt", "*.trd", "*.scl", "*.mdr", "*.mgt",
-			"*.tap", "*.tzx" };
+	public static String[] SUPPORTEDFILETYPES = { "*", "*.*", "*.img", "*.hdf", "*.mgt", "*.trd", "*.scl", "*.mdr",
+			"*.mgt", "*.tap", "*.tzx" };
 
 	public static int DISKCHECKPERIOD = 2000;
 
@@ -182,12 +183,13 @@ public class HDDEditor {
 					fileSelectDevice fdd = new fileSelectDevice(display);
 					File f = fdd.Show();
 					if (f != null) {
-						LoadFile(f, false);
+						int blocksz = fdd.blocksize;
+						LoadFile(f, false, blocksz);
 					}
 				}
 			});
 		}
-				
+
 		MenuItem fileReLoadItem = new MenuItem(fileMenu, SWT.PUSH);
 		fileReLoadItem.setText("&Reload");
 		fileReLoadItem.addSelectionListener(new SelectionListener() {
@@ -439,10 +441,20 @@ public class HDDEditor {
 
 	/**
 	 * Load a named file.
-	 * 
-	 * @param selected
+	 * @param selected		- File to load
+	 * @param suppressdialog - if TRUE, output errors on the commandline only.
 	 */
 	public void LoadFile(File selected, boolean suppressdialog) {
+		LoadFile(selected, suppressdialog, 0);
+	}
+	
+	/**
+	 * Same as above, except force block size
+	 * @param selected		- File to load
+	 * @param suppressdialog - if TRUE, output errors on the commandline only.
+	 * @param ForceBlockSize - If >0, update the block load size for Hard disks. (Only useful for devices)
+	 */
+	public void LoadFile(File selected, boolean suppressdialog, int ForceBlockSize) {
 		System.out.println("Loading " + selected.getAbsolutePath());
 		try {
 			if (CurrentDisk != null) {
@@ -450,6 +462,10 @@ public class HDDEditor {
 			}
 			CurrentDisk = DiskUtils.GetCorrectDiskFromFile(selected);
 			if (CurrentDisk != null) {
+				if (RawHDDFile.class.isAssignableFrom(CurrentDisk.getClass()) && (ForceBlockSize!=0)) {
+					((RawHDDFile) CurrentDisk).DiskBlockSize = ForceBlockSize;
+					System.out.println("Overriding default block size with "+ForceBlockSize+" for raw device access");
+				}
 				CurrentHandler = DiskUtils.GetHandlerForDisk(CurrentDisk);
 				UpdateDropdown();
 				shell.setText(selected.getName());
