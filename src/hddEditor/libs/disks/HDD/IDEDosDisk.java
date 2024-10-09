@@ -26,7 +26,10 @@ import java.io.FileInputStream;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
+
+import hddEditor.libs.GeneralUtils;
 
 public class IDEDosDisk extends RawHDDFile {
 	public static final String IDEDOSHEADER = "PLUSIDEDOS";
@@ -127,9 +130,14 @@ public class IDEDosDisk extends RawHDDFile {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		String fName = "/dev/sde";
+		File ffName = new File(fName);
 		RawHDDFile h;
 		try {
-			h = new IDEDosDisk(new File ("/data1/IDEDOS/2gdeletedpart.img"));
+			System.out.println("Root? " + GeneralUtils.IsLinuxRoot());
+			h = new IDEDosDisk();
+			System.out.println("IDEDISK? " + h.IsMyFileType(ffName));
+			h = new IDEDosDisk(ffName);
 			System.out.println(h);
 			h.close();
 		} catch (FileNotFoundException e) {
@@ -182,24 +190,51 @@ public class IDEDosDisk extends RawHDDFile {
 	@Override
 	public Boolean IsMyFileType(File filename) throws IOException {
 		boolean result = false;
-		FileInputStream FIS = new FileInputStream(filename); 
-		try {
-			byte RawHeaderData[] = new byte[4096];
-			FIS.read(RawHeaderData);
 
-			if (new String(RawHeaderData, StandardCharsets.UTF_8).startsWith(IDEDOSHEADER)) {
-				result = true;
-			} else {
-				RawHeaderData = HalfSector(RawHeaderData);
+		if (filename.toString().contains("\\\\.\\DEVICE")) {
+			FileInputStream FIS = new FileInputStream(filename);
+			try {
+				byte RawHeaderData[] = new byte[4096];
+				FIS.read(RawHeaderData);
+
 				if (new String(RawHeaderData, StandardCharsets.UTF_8).startsWith(IDEDOSHEADER)) {
 					result = true;
+				} else {
+					RawHeaderData = HalfSector(RawHeaderData);
+					if (new String(RawHeaderData, StandardCharsets.UTF_8).startsWith(IDEDOSHEADER)) {
+						result = true;
+					}
 				}
+			} finally {
+				FIS.close();
 			}
-		} finally {
-			FIS.close();
+		} else {
+			System.out.println("loading "+filename);
+			RandomAccessFile inFile = new RandomAccessFile(filename, "rw");
+			try {
+				byte RawHeaderData[] = new byte[4096];
+				inFile.seek(0);
+				inFile.read(RawHeaderData);
+				
+				for (int i=0;i<16;i++) {
+					System.out.print(String.format("%02x ", RawHeaderData[i] & 0xff));
+				}
+				System.out.println();
+				
+				
+				if (new String(RawHeaderData, StandardCharsets.UTF_8).startsWith(IDEDOSHEADER)) {
+					result = true;
+				} else {
+					RawHeaderData = HalfSector(RawHeaderData);
+					if (new String(RawHeaderData, StandardCharsets.UTF_8).startsWith(IDEDOSHEADER)) {
+						result = true;
+					}
+				}
+			} finally {
+				inFile.close();
+			}
 		}
 		return (result);
-
 	}
 
 }

@@ -210,7 +210,7 @@ public class RawHDDFile implements HardDisk {
 	public static void main(String[] args) {
 		RawHDDFile h;
 		try {
-			h = new RawHDDFile(new File("\\\\.\\PHYSICALDRIVE4"));
+			h = new RawHDDFile(new File("/dev/sde"));
 			System.out.println(h);
 			h.close();
 		} catch (FileNotFoundException e) {

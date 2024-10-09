@@ -49,7 +49,7 @@ public class DiskListLinux {
 					while (line != null) {
 						String text = line;
 						try {
-							// remove extranious spaces
+							// remove extraneous spaces
 							text = text.trim();
 							while (text.contains("  ")) {
 								text = text.replace("  ", " ");
@@ -90,7 +90,7 @@ public class DiskListLinux {
 						data = GeneralUtils.ReadFileIntoArray("/sys/block/" + p.name + "/size");
 						p.realsz = Long.valueOf(new String(data).trim()) * 512;
 
-						// loglcal block size. Note, this sometimes had a header, so just extract the
+						// logical block size. Note, this sometimes had a header, so just extract the
 						// number in the file.
 						data = GeneralUtils
 								.ReadFileIntoArray("/sys/class/block/" + p.name + "/queue/logical_block_size");

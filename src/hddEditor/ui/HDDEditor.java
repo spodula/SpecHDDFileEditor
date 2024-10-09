@@ -168,8 +168,6 @@ public class HDDEditor {
 			}
 		});
 
-		String os = System.getProperty("os.name");
-
 		if (GeneralUtils.IsLinuxRoot() || GeneralUtils.IsWindowsAdministrator()) {
 			MenuItem deviceLoadItem = new MenuItem(fileMenu, SWT.PUSH);
 			deviceLoadItem.setText("&Select Physical disk");
