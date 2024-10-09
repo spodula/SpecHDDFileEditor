@@ -252,6 +252,9 @@ public class GeneralUtils {
 	 * @return
 	 */
 	public static boolean IsLinuxRoot() {
+		if (!System.getProperty("os.name").toUpperCase().contains("LINUX")) {
+			return(false);
+		}
 		/*
 		 * This is a less hacky and more reliable method of finding if we are root
 		 * than the previous method of checking home. I would still prefer a method
@@ -283,6 +286,10 @@ public class GeneralUtils {
 	}
 	
 	public static boolean IsWindowsAdministrator() {
+		if (!System.getProperty("os.name").toUpperCase().contains("WIN")) {
+			return(false);
+		}
+
 	    String groups[] = (new com.sun.security.auth.module.NTSystem()).getGroupIDs();
 	    for (String group : groups) {
 	        if (group.equals("S-1-5-32-544"))

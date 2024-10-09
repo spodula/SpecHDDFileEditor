@@ -15,10 +15,11 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
-import hddEditor.libs.DiskListWindows;
+import hddEditor.libs.DiskListLinux;
 import hddEditor.libs.RawDiskItem;
 
-public class fileSelectDeviceWindows {
+
+public class fileSelectDevice {
 	private RawDiskItem disks[];
 	// Form components
 	private Display display = null;
@@ -27,11 +28,12 @@ public class fileSelectDeviceWindows {
 	
 	private File SelectedDevice;
 	
-	public fileSelectDeviceWindows(Display display) {
+	public fileSelectDevice(Display display) {
 		this.display = display;
 		
-		DiskListWindows dlw = new DiskListWindows();
-		this.disks = dlw.disks;
+		DiskListLinux dll = new DiskListLinux();
+		this.disks = dll.disks;
+
 	}
 	
 	/**
@@ -93,7 +95,7 @@ public class fileSelectDeviceWindows {
 			content[0] = disk.name;
 			content[1] = disk.driveType;
 			content[2] = disk.GetTextSz();
-			content[3] = disk.model;
+			content[3] = disk.Vendor+" - "+disk.model;
 			item.setText(content);
 		}
 		

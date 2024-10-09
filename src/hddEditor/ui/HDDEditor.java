@@ -170,7 +170,7 @@ public class HDDEditor {
 
 		String os = System.getProperty("os.name");
 
-		if (os.toUpperCase().contains("LINUX") && GeneralUtils.IsLinuxRoot()) {
+		if (GeneralUtils.IsLinuxRoot() || GeneralUtils.IsWindowsAdministrator()) {
 			MenuItem deviceLoadItem = new MenuItem(fileMenu, SWT.PUSH);
 			deviceLoadItem.setText("&Select Physical disk");
 			deviceLoadItem.addSelectionListener(new SelectionListener() {
@@ -181,7 +181,7 @@ public class HDDEditor {
 
 				@Override
 				public void widgetDefaultSelected(SelectionEvent arg0) {
-					fileSelectDeviceLinux fdd = new fileSelectDeviceLinux(display);
+					fileSelectDevice fdd = new fileSelectDevice(display);
 					File f = fdd.Show();
 					if (f != null) {
 						LoadFile(f, false);
@@ -189,29 +189,7 @@ public class HDDEditor {
 				}
 			});
 		}
-		if (os.toUpperCase().contains("WIN") && GeneralUtils.IsWindowsAdministrator()) {
-			MenuItem deviceLoadItem = new MenuItem(fileMenu, SWT.PUSH);
-			deviceLoadItem.setText("&Select Physical disk");
-			deviceLoadItem.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					widgetDefaultSelected(arg0);
-				}
-
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					fileSelectDeviceWindows fdw = new fileSelectDeviceWindows(display);
-					File f = fdw.Show();
-					if (f != null) {
-						LoadFile(f, false);
-					}
-				}
-			});
-			
-		}
-
-		
-		
+				
 		MenuItem fileReLoadItem = new MenuItem(fileMenu, SWT.PUSH);
 		fileReLoadItem.setText("&Reload");
 		fileReLoadItem.addSelectionListener(new SelectionListener() {

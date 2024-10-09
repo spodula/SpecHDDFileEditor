@@ -1,5 +1,4 @@
 package hddEditor.libs;
-//TODO: BlockSize for Windows devices
 
 import java.io.BufferedReader;
 import java.io.File;

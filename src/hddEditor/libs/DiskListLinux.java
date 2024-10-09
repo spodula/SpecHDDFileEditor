@@ -54,7 +54,7 @@ public class DiskListLinux {
 							while (text.contains("  ")) {
 								text = text.replace("  ", " ");
 							}
-							if (!text.isBlank()) {
+							if (!text.isBlank() && !text.contains("major")) {
 								String cols[] = text.split(" ");
 								RawDiskItem pi = new RawDiskItem();
 								pi.name = cols[3];
