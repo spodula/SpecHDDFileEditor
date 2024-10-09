@@ -1,5 +1,4 @@
 package hddEditor.libs;
-//TODO: BlockSize for Windows devices
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class DiskListWindows {
+	public static String WMIC_COLUMNS = "BytesPerSector,DeviceID,model,size,interfaceType";
+	public static int NUM_WMIC_COLUMNS = 5;
+	
 	public RawDiskItem disks[];
 	public String errors[] = null;
 
@@ -25,7 +27,7 @@ public class DiskListWindows {
 			try {
 				String line;
 				Process p = Runtime.getRuntime()
-						.exec(new String[] { "wmic", "diskdrive", "get", "deviceID,model,size,interfaceType" });
+						.exec(new String[] { "wmic", "diskdrive", "get", WMIC_COLUMNS});
 				BufferedReader brInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
 				BufferedReader brError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 				try {
@@ -54,13 +56,14 @@ public class DiskListWindows {
 			} catch (Exception err) {
 				err.printStackTrace();
 			}
+			
 
 			if (output != null) {
 				// read the order from the first line.
 				String header = output[0];
 
-				String ColOrder[] = new String[4];
-				int ColOrderLength[] = new int[4];
+				String ColOrder[] = new String[NUM_WMIC_COLUMNS];
+				int ColOrderLength[] = new int[NUM_WMIC_COLUMNS];
 
 				boolean inspace = false;
 				int colnumber = 0;
@@ -112,6 +115,7 @@ public class DiskListWindows {
 					wdi.dets = new File(wdi.name);
 					wdi.driveType = tmpLine.get("InterfaceType");
 					wdi.model = tmpLine.get("Model");
+					wdi.BlockSize = Integer.parseInt(tmpLine.get("BytesPerSector"));
 					String sz = tmpLine.get("Size");
 					if (sz != null && !sz.isEmpty()) {
 						wdi.realsz = Long.valueOf(sz);
