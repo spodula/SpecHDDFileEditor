@@ -55,7 +55,7 @@ import hddEditor.ui.partitionPages.TZXPartitionPage;
 import hddEditor.ui.partitionPages.TrDosPartitionPage;
 
 public class HDDEditor {
-	public static String[] SUPPORTEDFILETYPES = { "*", "*.*", "*.img", "*.hdf", "*.mgt", "*.trd", "*.scl", "*.mdr",
+	public static String[] SUPPORTEDFILETYPES = { "*.*", "*.img", "*.hdf", "*.mgt", "*.trd", "*.scl", "*.mdr",
 			"*.mgt", "*.tap", "*.tzx" };
 
 	public static int DISKCHECKPERIOD = 2000;
@@ -442,7 +442,7 @@ public class HDDEditor {
 	/**
 	 * Load a named file.
 	 * @param selected		- File to load
-	 * @param suppressdialog - if TRUE, output errors on the commandline only.
+	 * @param suppressdialog - if TRUE, output errors on the command line only.
 	 */
 	public void LoadFile(File selected, boolean suppressdialog) {
 		LoadFile(selected, suppressdialog, 0);
@@ -451,7 +451,7 @@ public class HDDEditor {
 	/**
 	 * Same as above, except force block size
 	 * @param selected		- File to load
-	 * @param suppressdialog - if TRUE, output errors on the commandline only.
+	 * @param suppressdialog - if TRUE, output errors on the command line only.
 	 * @param ForceBlockSize - If >0, update the block load size for Hard disks. (Only useful for devices)
 	 */
 	public void LoadFile(File selected, boolean suppressdialog, int ForceBlockSize) {

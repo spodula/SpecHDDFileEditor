@@ -1,6 +1,5 @@
 package hddEditor.libs.disks.HDD;
 //TODO: Drag/drop doesn't work on Windows?
-//TODO: For Linux, should default to "*", for Windows "*.*"
 
 /**
  * This is a wrapper around a file with no header acting as a disk. It can be any format.

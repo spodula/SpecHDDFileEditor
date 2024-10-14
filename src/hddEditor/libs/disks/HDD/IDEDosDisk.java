@@ -233,12 +233,6 @@ public class IDEDosDisk extends RawHDDFile {
 				inFile.seek(0);
 				inFile.read(RawHeaderData);
 				
-				for (int i=0;i<16;i++) {
-					System.out.print(String.format("%02x ", RawHeaderData[i] & 0xff));
-				}
-				System.out.println();
-				
-				
 				if (new String(RawHeaderData, StandardCharsets.UTF_8).startsWith(IDEDOSHEADER)) {
 					result = true;
 				} else {

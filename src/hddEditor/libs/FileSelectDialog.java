@@ -157,8 +157,21 @@ public class FileSelectDialog {
 				return (chooser.getSelectedFile());
 			}
 		} else {
+			String search = "*.*";
+			String replace = "*";
+			if (System.getProperty("os.name").toUpperCase().contains("WIN")) {
+				search = "*";
+				replace = "*.*";
+			}
+			for (int i=0;i<supportedfiltypes.length;i++) {
+				if (supportedfiltypes[i].equals(search)) {
+					supportedfiltypes[i] = replace;
+				}
+			}
+			
 			FileDialog fd = new FileDialog(shell, SWT.OPEN);
 			fd.setText(title);
+			
 			fd.setFilterExtensions(supportedfiltypes);
 			fd.setFilterPath(DefaultFolders[filetype].getAbsolutePath());
 			fd.setFileName(defaultFilename);
@@ -187,11 +200,25 @@ public class FileSelectDialog {
 				return (chooser.getSelectedFile());
 			}
 		} else {
+			String search = "*.*";
+			String replace = "*";
+			if (System.getProperty("os.name").toUpperCase().contains("WIN")) {
+				search = "*";
+				replace = "*.*";
+			}
+			for (int i=0;i<extension.length;i++) {
+				if (extension[i].equals(search)) {
+					extension[i] = replace;
+				}
+			}
+			
+
 			FileDialog fd = new FileDialog(shell, SWT.SAVE);
 			fd.setText(title);
 			fd.setFilterExtensions(extension);
 			fd.setFilterPath(DefaultFolders[filetype].getAbsolutePath());
 			fd.setFileName(defaultFilename.trim());
+			
 			String selected = fd.open();
 			if (selected != null) {
 				return(new File(selected));
@@ -219,6 +246,18 @@ public class FileSelectDialog {
 				return (files);
 			}
 		} else {
+			String search = "*.*";
+			String replace = "*";
+			if (System.getProperty("os.name").toUpperCase().contains("WIN")) {
+				search = "*";
+				replace = "*.*";
+			}
+			for (int i=0;i<filetypes.length;i++) {
+				if (filetypes[i].equals(search)) {
+					filetypes[i] = replace;
+				}
+			}
+
 			FileDialog fd = new FileDialog(shell, SWT.OPEN|SWT.MULTI);
 			fd.setText(title);
 			fd.setFilterExtensions(filetypes);
