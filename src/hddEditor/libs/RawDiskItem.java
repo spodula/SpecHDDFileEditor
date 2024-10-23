@@ -10,13 +10,16 @@ public class RawDiskItem {
 	public String model; // Model number
 	public String Vendor; // Vendor string
 	public int BlockSize;
+	public int Cyls;
+	public int Heads;
+	public int Sectors;
 	
 	@Override
 	/**
 	 * Overriden TOSTRING method.
 	 */
 	public String toString() {
-		String result = "name:" + name + " Bs: "+BlockSize+" drivetype:" + driveType + " model:" + model + " size:" + GetTextSz();
+		String result = "name:" + name + " Bs: "+BlockSize+" drivetype:" + driveType +" C/H/S:"+Cyls+"/"+Heads+"/"+Sectors+" model:" + model + " size:" + GetTextSz();
 		return (result.trim());
 	}
 

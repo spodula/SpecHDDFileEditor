@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class DiskListWindows {
-	public static String WMIC_COLUMNS = "BytesPerSector,DeviceID,model,size,interfaceType";
-	public static int NUM_WMIC_COLUMNS = 5;
+	public static String WMIC_COLUMNS = "BytesPerSector,DeviceID,model,size,interfaceType,SectorsPerTrack,TotalCylinders,TotalHeads";
+	public static int NUM_WMIC_COLUMNS = 8;
 	
 	public RawDiskItem disks[];
 	public String errors[] = null;
@@ -116,6 +116,9 @@ public class DiskListWindows {
 					wdi.driveType = tmpLine.get("InterfaceType");
 					wdi.model = tmpLine.get("Model");
 					wdi.BlockSize = Integer.parseInt(tmpLine.get("BytesPerSector"));
+					wdi.Cyls = Integer.parseInt(tmpLine.get("TotalCylinders"));
+					wdi.Sectors = Integer.parseInt(tmpLine.get("SectorsPerTrack"));
+					wdi.Heads = Integer.parseInt(tmpLine.get("TotalHeads"));
 					String sz = tmpLine.get("Size");
 					if (sz != null && !sz.isEmpty()) {
 						wdi.realsz = Long.valueOf(sz);
