@@ -133,4 +133,11 @@ public class DiskListLinux {
 		}
 	}
 
+	public static void main(String args[]) {
+		DiskListLinux dll = new DiskListLinux();
+		for (RawDiskItem d : dll.disks) {
+			System.out.println(d);
+		}
+	}
+	
 }

@@ -566,7 +566,7 @@ public class TZXFile implements Disk {
 	}
 
 	/**
-	 * Create a blank TAP file. Pretty simple
+	 * Create a blank TZX file. Pretty simple
 	 * 
 	 * @param Filename
 	 * @throws IOException
@@ -623,6 +623,8 @@ public class TZXFile implements Disk {
 		if (args.length != 2) {
 			System.out.println("Expecting paramaters [Directory] [target file]");
 		} else {
+			int err=0;
+			int proc=0;
 
 			PrintWriter pr;
 			pr = new PrintWriter(new FileWriter(args[1]));
@@ -631,6 +633,7 @@ public class TZXFile implements Disk {
 				File contents[] = folder.listFiles();
 				for (File f : contents) {
 					if (f.getName().endsWith(".tzx")) {
+						proc++;
 						pr.println("=============================================");
 						pr.println(f.getName());
 						pr.println("=============================================");
@@ -676,6 +679,7 @@ public class TZXFile implements Disk {
 							mdt = null;
 						} catch (IOException | BadDiskFileException | NullPointerException
 								| ArrayIndexOutOfBoundsException e) {
+							err++;
 							pr.println(e.getMessage());
 							e.printStackTrace();
 						}
@@ -684,6 +688,7 @@ public class TZXFile implements Disk {
 			} finally {
 				pr.close();
 			}
+			System.out.println("Processed "+proc+" files with "+err+" Errors.");
 		}
 	}
 
