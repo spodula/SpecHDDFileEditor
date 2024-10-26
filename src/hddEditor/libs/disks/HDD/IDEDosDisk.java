@@ -42,8 +42,8 @@ public class IDEDosDisk extends RawHDDFile {
 	 * @param blocksize
 	 * @throws IOException
 	 */
-	public IDEDosDisk(File file, int blocksize) throws IOException {
-		super(file);
+	public IDEDosDisk(File file, int blocksize, int c, int h, int s) throws IOException {
+		super(file,c,h,s);
 		this.DiskBlockSize = blocksize;
 		parseDiskParameters();
 	}
@@ -54,8 +54,8 @@ public class IDEDosDisk extends RawHDDFile {
 	 * @param filename
 	 * @throws IOException
 	 */
-	public IDEDosDisk(File file) throws IOException {
-		super(file);
+	public IDEDosDisk(File file, int c, int h, int s) throws IOException {
+		super(file,c,h,s);
 		parseDiskParameters();
 	}
 
@@ -154,7 +154,7 @@ public class IDEDosDisk extends RawHDDFile {
 			System.out.println("Root? " + GeneralUtils.IsLinuxRoot());
 			h = new IDEDosDisk();
 			System.out.println("IDEDISK? " + h.IsMyFileType(ffName));
-			h = new IDEDosDisk(ffName);
+			h = new IDEDosDisk(ffName,0,0,0);
 			System.out.println(h);
 			h.close();
 		} catch (FileNotFoundException e) {

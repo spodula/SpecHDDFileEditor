@@ -102,7 +102,7 @@ public class IDEDosHandler extends OSHandler {
 	public static void main(String[] args) {
 		IDEDosHandler h;
 		try {
-			IDEDosDisk disk = new IDEDosDisk(new File("/data1/IDEDOS/2gtest.img"));
+			IDEDosDisk disk = new IDEDosDisk(new File("/data1/IDEDOS/2gtest.img"),0,0,0);
 			h = new IDEDosHandler(disk);
 			PLUS3DOSPartition p3d = (PLUS3DOSPartition) h.SystemPart.partitions[1];
 			System.out.println("---------------------");

@@ -236,7 +236,7 @@ public class FileConversionForm {
 		Disk result = null;
 		try {
 			if (new IDEDosDisk().IsMyFileType(f)) {
-				result = new IDEDosDisk(f);
+				result = new IDEDosDisk(f,0,0,0);
 			} else if (new RS_IDEDosDisk().IsMyFileType(f)) {
 				result = new RS_IDEDosDisk(f);
 			} else {

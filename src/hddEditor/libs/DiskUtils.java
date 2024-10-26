@@ -32,7 +32,7 @@ public class DiskUtils {
 		Disk result = null;
 		try {
 			if (new IDEDosDisk().IsMyFileType(file)) {
-				result = new IDEDosDisk(file);
+				result = new IDEDosDisk(file,0,0,0);
 			} else if (new RS_IDEDosDisk().IsMyFileType(file)) {
 				result = new RS_IDEDosDisk(file);
 			} else if (new AMSDiskFile().IsMyFileType(file)) {

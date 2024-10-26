@@ -46,7 +46,7 @@ public class OSHandler {
 	public static void main(String[] args) {
 		OSHandler h;
 		try {
-			Disk disk = new IDEDosDisk(new File("/data1/idedos.dsk"));
+			Disk disk = new IDEDosDisk(new File("/data1/idedos.dsk"),0,0,0);
 			h = new OSHandler(disk);
 			System.out.println(h);
 			disk.close();

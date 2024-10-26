@@ -115,7 +115,7 @@ public class RawHDDFile implements HardDisk {
 	 * @param filename
 	 * @throws FileNotFoundException
 	 */
-	public RawHDDFile(File file) throws FileNotFoundException {
+	public RawHDDFile(File file,int c,int h, int s) throws FileNotFoundException {
 		if (file.getAbsolutePath().startsWith("\\\\.\\PHYSICALDRIVE")) {
 			//TODO: disk details (chs) should be populated from the device.
 			inFileFIS = new FileInputStream(file);
@@ -124,6 +124,10 @@ public class RawHDDFile implements HardDisk {
 			inFile = new RandomAccessFile(file, "rw");
 			inFileFIS = null;
 		}
+		if (c!=0) this.SetNumCylinders(c);
+		if (h!=0) this.SetNumHeads(h);
+		if (s!=0) this.SetNumSectors(s);
+		
 		this.file = file;
 		FileSize = file.length();
 		UpdateLastModified();
@@ -209,7 +213,7 @@ public class RawHDDFile implements HardDisk {
 	public static void main(String[] args) {
 		RawHDDFile h;
 		try {
-			h = new RawHDDFile(new File("/dev/sde"));
+			h = new RawHDDFile(new File("/dev/sde"),0,0,0);
 			System.out.println(h);
 			h.close();
 		} catch (FileNotFoundException e) {
