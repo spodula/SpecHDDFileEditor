@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class DiskListLinux {
@@ -117,6 +118,10 @@ public class DiskListLinux {
 						} else {
 							p.driveType = "unknown";
 						}
+
+						if (GeneralUtils.IsLinuxRoot()) {
+							p = GetCHSLinux(p);
+						}
 					}
 				} catch (IOException e) {
 					System.out.println(e.getMessage());
@@ -131,6 +136,75 @@ public class DiskListLinux {
 				System.out.println("Error fetching drive list, cant open /proc/partitions. Is this linux?");
 			}
 		}
+		for (RawDiskItem d : disks) {
+			System.out.println(d);
+		}
+		
+	}
+
+	/**
+	 * This will only run under root. It requires hdparm.
+	 * What a hack.
+	 */
+	private RawDiskItem GetCHSLinux(RawDiskItem rdi) {
+		// Excecute the wmic command to get details
+		String output[] = null;
+		try {
+			String line;
+			Process p = Runtime.getRuntime().exec(new String[] { "sudo", "hdparm", "-I", "/dev/" + rdi.name });
+			BufferedReader brInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			BufferedReader brError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+			try {
+				p.waitFor();
+				ArrayList<String> al = new ArrayList<String>();
+				while ((line = brInput.readLine()) != null) {
+					line = line.trim();
+					if (!line.isBlank()) {
+						al.add(line);
+					}
+				}
+				output = al.toArray(new String[0]);
+
+				al.clear();
+				while ((line = brError.readLine()) != null) {
+					line = line.trim();
+					if (!line.isBlank()) {
+						al.add(line);
+					}
+				}
+				for (String s:al) {
+					System.out.println(s);
+				}
+			} finally {
+				brInput.close();
+				brError.close();
+			}
+		} catch (Exception err) {
+			err.printStackTrace();
+		}
+
+		for (String line : output) {
+			line = line.trim();
+			line = line.replace("\t", " ");
+			while (line.contains("  ")) {
+				line = line.replace("  ", " ");
+			}
+			String str[] = line.split(" ");
+			try {
+				if (str[0].toLowerCase().startsWith("cylinders")) {
+					rdi.Cyls = Integer.valueOf(str[1]); 
+				}
+				if (str[0].toLowerCase().startsWith("heads")) {
+					rdi.Heads = Integer.valueOf(str[1]); 
+				}
+				if (str[0].toLowerCase().startsWith("sectors")) {
+					rdi.Sectors = Integer.valueOf(str[1]); 
+				}
+			} catch (ArrayIndexOutOfBoundsException e) {
+				
+			}
+		}
+		return (rdi);
 	}
 
 	public static void main(String args[]) {
@@ -139,5 +213,5 @@ public class DiskListLinux {
 			System.out.println(d);
 		}
 	}
-	
+
 }
