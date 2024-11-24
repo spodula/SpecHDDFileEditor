@@ -531,37 +531,41 @@ public class Speccy {
 			ptr = 0;
 			EndOfBasicArea = Math.min(file.length, VariablesOffset);
 		}
-		while (ptr < EndOfBasicArea) {
-			int linenum = ((file[ptr++] & 0xff) * 256);
-			linenum = linenum + (file[ptr++] & 0xff);
-			int linelen = (int) file[ptr++] & 0xff;
-			linelen = linelen + ((int) (file[ptr++] & 0xff) * 256);
+		try {
+			while (ptr < EndOfBasicArea) {
+				int linenum = ((file[ptr++] & 0xff) * 256);
+				linenum = linenum + (file[ptr++] & 0xff);
+				int linelen = (int) file[ptr++] & 0xff;
+				linelen = linelen + ((int) (file[ptr++] & 0xff) * 256);
 
-			if (ptr >= VariablesOffset + 0x80) {
-				// now into the variables area. Ignoring for the moment.
-				ptr = file.length;
-			} else {
-				String sixdigit = String.valueOf(linenum);
-				while (sixdigit.length() < 6) {
-					sixdigit = sixdigit + " ";
-				}
-
-				sb.append(sixdigit);
-
-				byte line[] = new byte[linelen];
-				for (int i = 0; i < linelen; i++) {
-					if (ptr + i < file.length) {
-						line[i] = file[ptr + i];
+				if (ptr >= VariablesOffset + 0x80) {
+					// now into the variables area. Ignoring for the moment.
+					ptr = file.length;
+				} else {
+					String sixdigit = String.valueOf(linenum);
+					while (sixdigit.length() < 6) {
+						sixdigit = sixdigit + " ";
 					}
+
+					sb.append(sixdigit);
+
+					byte line[] = new byte[linelen];
+					for (int i = 0; i < linelen; i++) {
+						if (ptr + i < file.length) {
+							line[i] = file[ptr + i];
+						}
+					}
+
+					Speccy.DecodeBasicLine(sb, line, 0, linelen, DisplayValueOnly);
+
+					// point to next line.
+					ptr = ptr + linelen;
+
+					sb.append(System.lineSeparator());
 				}
-
-				Speccy.DecodeBasicLine(sb, line, 0, linelen, DisplayValueOnly);
-
-				// point to next line.
-				ptr = ptr + linelen;
-
-				sb.append(System.lineSeparator());
 			}
+		} catch (ArrayIndexOutOfBoundsException e) {
+			System.err.println("Ran out of data");
 		}
 	}
 

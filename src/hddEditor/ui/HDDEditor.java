@@ -8,6 +8,7 @@ import java.io.File;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -670,7 +671,11 @@ public class HDDEditor {
 			if (args[0].toLowerCase().startsWith("cat")) {
 				File folder = new File(args[1]);
 				System.out.println("Folder" + folder.getAbsolutePath());
-				for (File file : folder.listFiles()) {
+				
+				File f[] = folder.listFiles();
+				Arrays.sort(f);
+				
+				for (File file : f) {
 					try {
 						System.out.println("===============================================================");
 						System.out.println("Processing: " + file.getName());
