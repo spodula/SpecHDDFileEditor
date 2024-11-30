@@ -1,5 +1,4 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
-//TODO: MGT48snapshot - savetopart
 /**
  * Render an MGT 48K snapshot. This is incomplete at the moment.
  */
