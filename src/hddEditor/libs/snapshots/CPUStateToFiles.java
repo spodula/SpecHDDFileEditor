@@ -107,9 +107,7 @@ public class CPUStateToFiles {
 				}
 				
 				// If IM = 1 as in BASIC, just ignore it.
-				if (cs.IM != 1) {
-					line = line.replace("--IM--", String.valueOf(((cs.IM & 0xff) * 16) + 70));
-				} else {
+				if (cs.IM == 1) {
 					line = "";
 				}
 			}

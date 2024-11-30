@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.dialogs.edit; 
+//TODO: SCL files just dont seem to work.
 /**
  * Implementation of the Edit file page for a TR-DOS file.
  */
