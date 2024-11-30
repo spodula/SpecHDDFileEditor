@@ -117,7 +117,6 @@ public class RawHDDFile implements HardDisk {
 	 */
 	public RawHDDFile(File file,int c,int h, int s) throws FileNotFoundException {
 		if (file.getAbsolutePath().startsWith("\\\\.\\PHYSICALDRIVE")) {
-			//TODO: disk details (chs) should be populated from the device.
 			inFileFIS = new FileInputStream(file);
 			inFile = null;
 		} else {

@@ -110,6 +110,9 @@ public class Z80file extends MachineState {
 		}
 
 		PC = ((z80file[7] & 0xff) * 256) + (z80file[6] & 0xff);
+		SPH = (byte) (z80file[9] & 0xff);
+		SPL = (byte) (z80file[8] & 0xff);
+
 		I = (byte) (z80file[10] & 0xff);
 		R = (byte) (z80file[11] & 0xff);
 		if ((z80file[12] & 0x01) == 1) {
