@@ -94,6 +94,18 @@ public class CPUStateToFiles {
 				}
 			}
 			if (line.contains("237,--IM--")) {
+				switch(cs.IM) {
+				case 0:
+					line = line.replace("--IM--", String.valueOf(0x46));
+					break;
+				case 1:
+					line = line.replace("--IM--", String.valueOf(0x56));
+					break;
+				case 2:
+					line = line.replace("--IM--", String.valueOf(0x5E));
+					break;
+				}
+				
 				// If IM = 1 as in BASIC, just ignore it.
 				if (cs.IM != 1) {
 					line = line.replace("--IM--", String.valueOf(((cs.IM & 0xff) * 16) + 70));
