@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
+import hddEditor.libs.TZX;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
@@ -67,7 +68,9 @@ public class TZXPartition extends IDEDosPartition {
 				System.out.println("Processing block " + tb.BlockNumber);
 
 				if (tb.data != null) {
-					if (tb.data.length == Speccy.TAPE_HEADER_LEN) {
+					System.out.println(tb.blocktype);
+					if ((tb.blocktype == TZX.TZX_STANDARDSPEED_DATABLOCK) && ( tb.blockdata.length>0) && (tb.blockdata[0] == 0)) {
+						System.out.println( );
 						if (lastblock != null) {
 							// create orphan header block.
 							TzxDirectoryEntry tde = new TzxDirectoryEntry(lastblock, null);
