@@ -48,7 +48,7 @@ public class TZXBlock {
 	 */
 	public ExtendedSpeccyBasicDetails DecodeHeader() {
 		ExtendedSpeccyBasicDetails result = null;
-		if ((data != null) && (data.length == Speccy.TAPE_HEADER_LEN) && ValidChecksum()) {
+		if (IsValidHeader()) {
 			int type = data[0] & 0xff;
 			int filelen = GetDblByte(data, 11);
 			int param1 = GetDblByte(data, 13);
@@ -61,6 +61,19 @@ public class TZXBlock {
 		return (result);
 	}
 
+	public boolean IsValidHeader() {
+		boolean result = false;
+		if ((blocktype == TZX.TZX_STANDARDSPEED_DATABLOCK) && (blockdata!= null) && (blockdata.length>2) && (blockdata[0] == 0)) {
+			byte tmpblock[] = new byte[19];
+			System.arraycopy(blockdata, 0, tmpblock, 0, Math.min(blockdata.length, tmpblock.length));
+			int checksum = TZX.CalculateChecksumForBlock(tmpblock);
+			int chsum = (tmpblock[tmpblock.length - 1] & 0xff);
+			result = (chsum == checksum);
+		}
+		return (result);
+
+	}
+
 	/**
 	 * Check to see if the block has a valid checksum The Speccy rom loader puts a
 	 * checksum at the end of the block.
@@ -68,13 +81,19 @@ public class TZXBlock {
 	 * @return
 	 */
 	public boolean ValidChecksum() {
-		int checksum = -1;
-		int chsum = 0;
-		if (blockdata.length > 2) {
-			checksum = TZX.CalculateChecksumForBlock(blockdata);
-			chsum = (blockdata[blockdata.length - 1] & 0xff);
+		if ((blocktype == TZX.TZX_STANDARDSPEED_DATABLOCK) && (blockdata != null) && (blockdata[0] == 0)) {
+			return (IsValidHeader());
+		} else {
+
+			int checksum = -1;
+			int chsum = 0;
+
+			if (blockdata.length > 2) {
+				checksum = TZX.CalculateChecksumForBlock(blockdata);
+				chsum = (blockdata[blockdata.length - 1] & 0xff);
+			}
+			return (chsum == checksum);
 		}
-		return (chsum == checksum);
 	}
 
 	/**

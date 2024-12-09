@@ -28,7 +28,7 @@ public class Speccy {
 	// TAPE block types
 	public static int TAPE_HEADER = 0x00;
 	public static int TAPE_DATA = 0xff;
-	public static int TAPE_HEADER_LEN = 17;
+	public static int TAPE_HEADER_LEN = 20;
 
 	// Spectrum colours
 	public static int COLOUR_BLACK = 0;

@@ -68,9 +68,9 @@ public class TZXPartition extends IDEDosPartition {
 				System.out.println("Processing block " + tb.BlockNumber);
 
 				if (tb.data != null) {
-					System.out.println(tb.blocktype);
 					if ((tb.blocktype == TZX.TZX_STANDARDSPEED_DATABLOCK) && ( tb.blockdata.length>0) && (tb.blockdata[0] == 0)) {
-						System.out.println( );
+						System.out.println(GeneralUtils.HexDump(tb.data, 0, 19, 0));
+						
 						if (lastblock != null) {
 							// create orphan header block.
 							TzxDirectoryEntry tde = new TzxDirectoryEntry(lastblock, null);

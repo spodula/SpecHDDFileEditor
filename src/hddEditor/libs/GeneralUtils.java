@@ -118,6 +118,8 @@ public class GeneralUtils {
 	public static String HexDump(byte[] data, int start, int length, int Displacement) {
 		StringBuilder sb = new StringBuilder();
 		String cr = System.lineSeparator();
+		
+		length = Math.min(length, data.length-start);
 
 		char chars[] = new char[16];
 		for (int s = 0; s < chars.length; s++) {
