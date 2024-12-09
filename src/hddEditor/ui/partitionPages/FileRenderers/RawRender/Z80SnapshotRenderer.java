@@ -1,5 +1,4 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
-//TODO: Only about half of snapshots work when converted. Figure out why
 
 import java.util.ArrayList;
 import java.util.Hashtable;

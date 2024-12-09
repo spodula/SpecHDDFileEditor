@@ -10,10 +10,12 @@ import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.TZX;
 import hddEditor.libs.disks.Disk;
+import hddEditor.libs.disks.ExtendedSpeccyBasicDetails;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
 import hddEditor.libs.disks.LINEAR.TZXFile;
+import hddEditor.libs.disks.LINEAR.tzxblocks.StandardDataBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.TZXBlock;
 import hddEditor.libs.partitions.tzx.TzxDirectoryEntry;
 
@@ -69,7 +71,6 @@ public class TZXPartition extends IDEDosPartition {
 
 				if (tb.data != null) {
 					if ((tb.blocktype == TZX.TZX_STANDARDSPEED_DATABLOCK) && ( tb.blockdata.length>0) && (tb.blockdata[0] == 0)) {
-						System.out.println(GeneralUtils.HexDump(tb.data, 0, 19, 0));
 						
 						if (lastblock != null) {
 							// create orphan header block.
@@ -81,7 +82,45 @@ public class TZXPartition extends IDEDosPartition {
 						if (lastblock != null) {
 							// create merged block
 							TzxDirectoryEntry tde = new TzxDirectoryEntry(tb, lastblock);
+							/**
+							 * This is a a hack for the case when the actual data in a data block
+							 * is longer than what is reported in the header block. 
+							 * 
+							 * If this is left un-fixed, it will cause the checksums to fail (As the checksum byte
+							 * is the last byte in the REPORTED length rather the ACTUAL length).
+							 *  
+							 * This will cause the data in the file to be treated as raw data and the header and checksum bytes
+							 * wont be stripped off.
+							 * 
+							 *  This doesn't affect the rom loader as it just loads the correct amount of data from a block.
+							 */
+							if (lastblock.IsValidHeader()) {
+								ExtendedSpeccyBasicDetails ebd = (ExtendedSpeccyBasicDetails)lastblock.DecodeHeader();
+								if (ebd.filelength != tde.DataBlock.data.length) {
+									System.out.println("Warning: data block length of "+tde.DataBlock.data.length+" Does not match reported length of "+ebd.filelength+" Correcting");
+									//extract the data
+									byte data[] = new byte[ebd.filelength];
+									System.arraycopy(tde.DataBlock.data, 1, data, 0, ebd.filelength);
+									
+									byte blockdata[] = new byte[ebd.filelength+2];
+									System.arraycopy(tde.DataBlock.data, 0, blockdata, 0, ebd.filelength+2);
+									
+									// Now the raw block
+									byte rawdata[] = new byte[blockdata.length+ 5];
+									rawdata[0] = TZX.TZX_STANDARDSPEED_DATABLOCK;
+									rawdata[1] = lastblock.rawdata[1];
+									rawdata[2] = lastblock.rawdata[2];
+									rawdata[3] = (byte) (blockdata.length & 0xff);
+									rawdata[4] = (byte) ((blockdata.length / 0xff) & 0xff);
+									System.arraycopy(blockdata, 0, rawdata, 5, blockdata.length);
+									tb.rawdata = rawdata;
+									tb.blockdata = blockdata;
+									tb.data = data;									
+									tde = new TzxDirectoryEntry(tb, lastblock);
+								}
+							} 
 							dirents.add(tde);
+							
 
 							lastblock = null;
 						} else {
