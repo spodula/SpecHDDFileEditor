@@ -107,9 +107,9 @@ public class TzxDirectoryEntry implements FileEntry {
 	 */
 	public int GetRawFileSize() {
 		if (DataBlock.data == null) {
-			return(0);
+			return (0);
 		}
-		
+
 		return DataBlock.data.length;
 	}
 
@@ -124,7 +124,7 @@ public class TzxDirectoryEntry implements FileEntry {
 				return (epd.filelength);
 			}
 		}
-		if (DataBlock.data!=null) {		
+		if (DataBlock.data != null) {
 			return DataBlock.data.length;
 		} else {
 			return 0;
@@ -148,50 +148,49 @@ public class TzxDirectoryEntry implements FileEntry {
 			return (s);
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @return
 	 */
 	public int GetTZXFileType() {
-		if (DataBlock!=null) {
-			return(DataBlock.blocktype);
-		} else if (HeaderBlock!=null) {
-			return(HeaderBlock.blocktype);
+		if (DataBlock != null) {
+			return (DataBlock.blocktype);
+		} else if (HeaderBlock != null) {
+			return (HeaderBlock.blocktype);
 		}
-		return(0);
+		return (0);
 	}
-	
+
 	/**
 	 * 
 	 * @return
 	 */
 	public String GetTZXBlockString() {
-		if (DataBlock!=null && HeaderBlock!=null) {
-			return("Block "+HeaderBlock.BlockNumber+"/"+DataBlock.BlockNumber);
-		} else if (DataBlock!=null) {
-			return("Block "+DataBlock.BlockNumber);
-		} else if (HeaderBlock!=null) {
-			return("Block "+HeaderBlock.BlockNumber);
+		if (DataBlock != null && HeaderBlock != null) {
+			return ("Block " + HeaderBlock.BlockNumber + "/" + DataBlock.BlockNumber);
+		} else if (DataBlock != null) {
+			return ("Block " + DataBlock.BlockNumber);
+		} else if (HeaderBlock != null) {
+			return ("Block " + HeaderBlock.BlockNumber);
 		} else {
-			return("Invalid block");
-		}		
+			return ("Invalid block");
+		}
 	}
-	
+
 	/**
 	 * 
 	 * @return
 	 */
 	public byte[] GetTZXBlockData() {
-		if (DataBlock!=null) {
-			return(DataBlock.data);
-		} else if (HeaderBlock!=null) {
-			return(HeaderBlock.data);
+		if (DataBlock != null) {
+			return (DataBlock.data);
+		} else if (HeaderBlock != null) {
+			return (HeaderBlock.data);
 		} else {
-			return(new byte[0]);
-		}		
+			return (new byte[0]);
+		}
 	}
-	
 
 	@Override
 	/**
