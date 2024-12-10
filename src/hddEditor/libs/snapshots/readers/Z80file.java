@@ -125,6 +125,17 @@ package hddEditor.libs.snapshots.readers;
  * 	48K mode, pages 4,5,8 are saved. 
  *  128K snapshots/Pentagon 128, pages 0 to 7 are saved.
  * 	Scorpion, pages 0-7 are saved as above with pages 8-15 from z80 page 12-18
+ * 
+ * -----------------------------------------------------------------------------------
+ * Block compression:
+ * 
+ * Block compression is a simple RLE encoding.
+ * Repeated sequences of the same byte are stored as:
+ * 	[ED ED xx yy] where yy is the byte and xx is the repeat count.
+ * Only sequences > 4 are encoded this way.
+ * if the block ED ED is encontered, it is encoded as ED 00 ED 00
+ * 
+ * See the function ExtractCompressedBlock()  
  */
 
 import java.io.File;
