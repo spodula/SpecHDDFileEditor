@@ -1,5 +1,131 @@
 package hddEditor.libs.snapshots.readers;
-//SNAFile: support 128k
+/**
+ * Reader for Z80 files
+ * 
+ * This now supports both the 48k and 128k files.
+ * Note, only V3 files properly support +2a/+3 snapshots. 
+ * In reality, this probably wont make a difference as very little software was +3 exclusive. 
+ * 
+ * Z80 file Mercilessly nicked from from: 
+ * +---------------------------------------------------------+
+ * | https://worldofspectrum.org/faq/reference/z80format.htm |
+ * | and the comp.sys.sinclair FAQ                           |
+ * +---------------------------------------------------------+
+ * 
+ * Note, all values are LSB first EXCEPT for the AF registers. 
+ */
+/*
+ * To differentiate between variants, the following is used.
+ * if PC is set (bytes 6/7) to anything other than 0, the file type Is V1
+ * Otherwise the length of the additional block (offset 30/31) is 30 for V2, and 54/55 for V3. 
+ * 
+ *	The following block is common to all z80 file variants. 
+ *  Offset   Size   Description
+ *  ------------------------------------------------------------------------
+ *  0		1		A register
+ *  1       1 		F register
+ *  2		4		BC,HL (LSB first)
+ *  6		2		PC	  (LSB first) (V1 only, 0000 if V2/V3)
+ *  8		2		SP	  (LSB first)
+ *  10		2		I,R
+ *  12		1		Flags: 0: Bit 7 of the R-register,    1-3: Border colour
+ *                         4: 1=Basic SamRom switched in    5: 1=Block of data is compressed
+ *  13		8		DE,BC',DE',HL' (LSB first)
+ *  21		1		A'	
+ *  22		1		F'
+ *  23		4		IY,IX  (LSB first)
+ *  27		1		IFF	(0=DI, other=EI)
+ *  28		1		IFF2 
+ *  29		1		flags2: 0-1: IM (0,1 or 2)  			2: 1=Issue 2 emulation
+ *                       	  3: 1=Double interrupt frequency 4-5: Emu Vid Sync 1=High, 3 = low, 0,2=normal
+ *                           6-7: Joystick: 0=Curs/Prot/AGF 1=Kempston 2=if/2 Left 3=if/2 Right
+ *In Version 1 files, 49152 bytes of RAM follows. If compression bit (byte 12, bit 5) is set, data is compressed.
+ *
+ *In version 2 and V3 files, an additional header follows:
+ *  Offset   Size   Description
+ *  ------------------------------------------------------------------------
+ * 30      2       Length of additional header block (see below) (23 for V2, 55/56 for V3) 
+ * 32      2       Program counter
+ * 34      1       Hardware type(see below)
+ * 35      1       If SamRam, state of 74ls259, in 128K mode, contents of 0x7ffd, in timex mode, contents of 0xf4
+ * 36      1       if if/1 present, 0xff if if/1 rom paged, if timex, last out to 0xff
+ * 37      1       Emu/HW flags:  0: 1=R register emulation on, 			1: 1=LDIR emulation on
+ *								  2: AY sound in use, even on 48K machines  6: (if bit 2 set) Fuller Audio Box emulation
+ *								  7: Modify hardware (48k becomes 16k, 128k->+2, +3->+2a)
+ * 38      1       Last OUT to port 0xfffd (soundchip register number)
+ * 39      16      Contents of the sound chip registers (16 bytes)
+ *
+ *In V3 files there is another header. Most of this can be ignored as it relates to hardware paging for special hardware.
+ * Offset   Size   Description
+ * ------------------------------------------------------------------------
+ * 55      2       Low T state counter -Increments in t/states of 4
+ * 57      1       Hi T state counter
+ * 58      1       Flag byte used by Spectator (QL spec. emulator) (Ignore and write 0)
+ * 59      1       0xff if MGT Rom paged
+ * 60      1       0xff if Multiface Rom paged. Should always be 0.
+ * 61      1       0xff if 0-8191 is ROM, 0 if RAM
+ * 62      1       0xff if 8192-16383 is ROM, 0 if RAM
+ * 63      10      5 x keyboard mappings for user defined joystick 
+ * 73      10      5 x ASCII word: keys corresponding to mappings above (LRDUF)
+ * 83      1       MGT type: 0=Disciple+Epson,1=Disciple+HP,16=Plus D
+ * 84      1       Disciple inhibit button status: 0=out, 0ff=in
+ * 85      1       Disciple inhibit flag: 0=rom pageable, 0ff=not
+ * 
+ * An additional V3 flag is provided for +2A/+3 snapshots. (contents of byte 30 = 56)
+ * 86      1       Last OUT to port 0x1ffd
+ * 
+ * After this for V2 and V3 files, a number of memory blocks follows here. These are format:
+ * X+0	   2	   Length of compressed data starting at X+3 Note, 0 is valid)
+ * X+2     1	   z80 Page number (NOTE: THis differs from the 128K page number)
+ * X+3	   X	   Compressed data.
+ * 
+ *-----------------------------------------------------------------------
+ *List of hardware types referenced by byte 34: Note, some of these change between V2 and V3
+ *
+ *  #:  Meaning in v2           Meaning in v3
+ * -----------------------------------------------------
+ *  0   48k                     48k
+ *  1   48k + If.1              48k + If.1
+ *  2   SamRam                  SamRam
+ *  3   128k                    48k + M.G.T.
+ *  4   128k + If.1             128k
+ *  5   -                       128k + If.1
+ *  6   -                       128K + MGT
+ *  7			Spectrum +3
+ *  8			Spectrum +3 ?
+ *  9			Pentagon 128k
+ * 10			Pentagon 256k
+ * 11			Didaktik-Kompakt
+ * 12			Spectrum +2 (grey)
+ * 13			Spectrum +2A (Black)
+ * 14			TC2048
+ * 15			TC2068
+ * 128			TC2068
+ *
+ * z80 Page numbers and their meanings:
+ * 
+ * Page   In '48 mode     In '128 mode    In SamRam mode
+ * ------------------------------------------------------
+ * 0      48K rom         rom (basic)     48K rom
+ * 1      Interface I, Disciple or Plus D rom, according to setting
+ * 2      -               rom (reset)     samram rom (basic)
+ * 3      -               page 0          samram rom (monitor,..)
+ * 4      8000-bfff       page 1          Normal 8000-bfff
+ * 5      c000-ffff       page 2          Normal c000-ffff
+ * 6      -               page 3          Shadow 8000-bfff
+ * 7      -               page 4          Shadow c000-ffff
+ * 8      4000-7fff       page 5          4000-7fff
+ * 9      -               page 6          -
+ * 10     -               page 7          -
+ * 11     Multiface rom   Multiface rom   -
+ * 12+ 	  -				  page 8-15		  -
+ * 
+ * Note, for most pages which reference a ROM, The ROM isn't actually included in the file and the length is 0
+ * For V2 and V3 files: 
+ * 	48K mode, pages 4,5,8 are saved. 
+ *  128K snapshots/Pentagon 128, pages 0 to 7 are saved.
+ * 	Scorpion, pages 0-7 are saved as above with pages 8-15 from z80 page 12-18
+ */
 
 import java.io.File;
 import java.io.FileInputStream;
