@@ -1,7 +1,6 @@
 package hddEditor.libs.disks.LINEAR.tzxblocks;
 
 import hddEditor.libs.disks.ExtendedSpeccyBasicDetails;
-import hddEditor.libs.Speccy;
 import hddEditor.libs.TZX;
 
 public class TZXBlock {
