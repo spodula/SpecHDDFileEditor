@@ -1,4 +1,5 @@
 package hddEditor.libs.partitions;
+//TODO: archers.tzx returns errors when loading.
 
 import java.io.File;
 import java.io.FileWriter;
@@ -15,7 +16,6 @@ import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
 import hddEditor.libs.disks.LINEAR.TZXFile;
-import hddEditor.libs.disks.LINEAR.tzxblocks.StandardDataBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.TZXBlock;
 import hddEditor.libs.partitions.tzx.TzxDirectoryEntry;
 
@@ -607,18 +607,21 @@ public class TZXPartition extends IDEDosPartition {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		if (args.length != 1) {
+			System.out.println("Expecting: <testtzxfile>");
+		}
 		TZXFile tzx;
 		try {
-			tzx = new TZXFile(new File("/home/graham/x.tzx"));
+			tzx = new TZXFile(new File(args[0]));
 
 			TZXPartition tzp = new TZXPartition(0, tzx, new byte[64], 1, false);
-//			System.out.println(tzp);
+			System.out.println(tzp);
 			byte data[] = new byte[555];
 			tzp.AddCodeFile("CODEY.TST", 32000, data);
 
-			// trp.MoveDirectoryEntryUp(trp.DirectoryEntries[0]);
-//			System.out.println(tzp);
-			// trp.MoveDirectoryEntryDown(trp.DirectoryEntries[0]);
+			tzp.MoveDirectoryEntryUp(tzp.DirectoryEntries[0]);
+			System.out.println(tzp);
+			tzp.MoveDirectoryEntryDown(tzp.DirectoryEntries[0]);
 			System.out.println(tzp);
 
 		} catch (IOException | BadDiskFileException e) {
