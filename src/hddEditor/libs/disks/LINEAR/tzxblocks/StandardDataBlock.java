@@ -90,7 +90,7 @@ public class StandardDataBlock extends TZXBlock {
 		rawdata[4] = len[1];
 		System.arraycopy(blockdata, 0, rawdata, 5, blockLength);
 
-		if (blockdata.length==0) {
+		if (blockdata.length == 0) {
 			data = new byte[0];
 			IsBad = true;
 		} else {
@@ -100,10 +100,10 @@ public class StandardDataBlock extends TZXBlock {
 
 	@Override
 	public String toString() {
-		String result = super.toString() + " Pause " + blockpauseMS; 
+		String result = super.toString() + " Pause " + blockpauseMS;
 		if (!IsBad) {
-			result = result + " - BASIC Length:"
-				+ data.length + " raw length:" + blockdata.length + " TZX Block length:" + rawdata.length;
+			result = result + " - BASIC Length:" + data.length + " raw length:" + blockdata.length
+					+ " TZX Block length:" + rawdata.length;
 		} else {
 			result = result + " BAD BLOCK. No Data";
 		}
