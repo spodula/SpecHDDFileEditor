@@ -1,5 +1,4 @@
 package hddEditor.libs.partitions;
-//TODO: archers.tzx returns errors when loading.
 
 import java.io.File;
 import java.io.FileWriter;
@@ -100,10 +99,10 @@ public class TZXPartition extends IDEDosPartition {
 									System.out.println("Warning: data block length of "+tde.DataBlock.data.length+" Does not match reported length of "+ebd.filelength+" Correcting");
 									//extract the data
 									byte data[] = new byte[ebd.filelength];
-									System.arraycopy(tde.DataBlock.data, 1, data, 0, ebd.filelength);
+									System.arraycopy(tde.DataBlock.data, 1, data, 0, Math.min(ebd.filelength,tde.DataBlock.data.length-1));
 									
 									byte blockdata[] = new byte[ebd.filelength+2];
-									System.arraycopy(tde.DataBlock.data, 0, blockdata, 0, ebd.filelength+2);
+									System.arraycopy(tde.DataBlock.data, 0, blockdata, 0, Math.min(blockdata.length,tde.DataBlock.data.length));
 									
 									// Now the raw block
 									byte rawdata[] = new byte[blockdata.length+ 5];

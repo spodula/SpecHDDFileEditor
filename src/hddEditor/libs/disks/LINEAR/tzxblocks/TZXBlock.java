@@ -62,7 +62,7 @@ public class TZXBlock {
 
 	public boolean IsValidHeader() {
 		boolean result = false;
-		if ((blocktype == TZX.TZX_STANDARDSPEED_DATABLOCK) && (blockdata != null) && (blockdata.length > 2)
+		if ((blocktype == TZX.TZX_STANDARDSPEED_DATABLOCK) && (blockdata != null) && (blockdata.length > 16)
 				&& (blockdata[0] == 0)) {
 			byte tmpblock[] = new byte[19];
 			System.arraycopy(blockdata, 0, tmpblock, 0, Math.min(blockdata.length, tmpblock.length));
