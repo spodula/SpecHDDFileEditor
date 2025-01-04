@@ -56,8 +56,8 @@ import hddEditor.ui.partitionPages.TZXPartitionPage;
 import hddEditor.ui.partitionPages.TrDosPartitionPage;
 
 public class HDDEditor {
-	public static String[] SUPPORTEDFILETYPES = { "*.*", "*.img", "*.hdf", "*.mgt", "*.trd", "*.scl", "*.mdr",
-			"*.mgt", "*.tap", "*.tzx" };
+	public static String[] SUPPORTEDFILETYPES = { "*.*", "*.img", "*.hdf", "*.mgt", "*.trd", "*.scl", "*.mdr", "*.mgt",
+			"*.tap", "*.tzx" };
 
 	public static int DISKCHECKPERIOD = 2000;
 
@@ -88,6 +88,7 @@ public class HDDEditor {
 	private FileNewHDDForm fileNewHDDForm = null;
 	private FileNewFDDForm fileNewFDDForm = null;
 	private FileImportForm fileImportForm = null;
+	private FileImportZenobi fileImportZenobi = null;
 
 	private String helpcontext = "Main";
 
@@ -233,6 +234,20 @@ public class HDDEditor {
 			}
 		});
 
+		MenuItem fileImportZenobiItem = new MenuItem(fileMenu, SWT.PUSH);
+		fileImportZenobiItem.setText("&Import Zenobi tape");
+		fileImportZenobiItem.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				widgetDefaultSelected(arg0);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				ShowOpenZenobi();
+			}
+		});
+
 		MenuItem fileExitItem = new MenuItem(fileMenu, SWT.PUSH);
 		fileExitItem.setText("E&xit");
 		fileExitItem.addSelectionListener(new SelectionListener() {
@@ -300,6 +315,22 @@ public class HDDEditor {
 		});
 
 		shell.setMenuBar(menuBar);
+	}
+
+	protected void ShowOpenZenobi() {
+		String current = PartitionDropdown.getText();
+		if (current != null) {
+			current = current + "                     ";
+			current = current.substring(0, 20).trim();
+		}
+		fileImportZenobi = new FileImportZenobi(display, CurrentHandler, filesel);
+		try {
+			fileImportZenobi.Show(current);
+			// force a refresh
+			ComboChanged();
+		} finally {
+			fileImportZenobi = null;
+		}
 	}
 
 	/**
@@ -442,18 +473,21 @@ public class HDDEditor {
 
 	/**
 	 * Load a named file.
-	 * @param selected		- File to load
+	 * 
+	 * @param selected       - File to load
 	 * @param suppressdialog - if TRUE, output errors on the command line only.
 	 */
 	public void LoadFile(File selected, boolean suppressdialog) {
 		LoadFile(selected, suppressdialog, 0);
 	}
-	
+
 	/**
 	 * Same as above, except force block size
-	 * @param selected		- File to load
+	 * 
+	 * @param selected       - File to load
 	 * @param suppressdialog - if TRUE, output errors on the command line only.
-	 * @param ForceBlockSize - If >0, update the block load size for Hard disks. (Only useful for devices)
+	 * @param ForceBlockSize - If >0, update the block load size for Hard disks.
+	 *                       (Only useful for devices)
 	 */
 	public void LoadFile(File selected, boolean suppressdialog, int ForceBlockSize) {
 		System.out.println("Loading " + selected.getAbsolutePath());
@@ -463,9 +497,10 @@ public class HDDEditor {
 			}
 			CurrentDisk = DiskUtils.GetCorrectDiskFromFile(selected);
 			if (CurrentDisk != null) {
-				if (RawHDDFile.class.isAssignableFrom(CurrentDisk.getClass()) && (ForceBlockSize!=0)) {
+				if (RawHDDFile.class.isAssignableFrom(CurrentDisk.getClass()) && (ForceBlockSize != 0)) {
 					((RawHDDFile) CurrentDisk).DiskBlockSize = ForceBlockSize;
-					System.out.println("Overriding default block size with "+ForceBlockSize+" for raw device access");
+					System.out
+							.println("Overriding default block size with " + ForceBlockSize + " for raw device access");
 				}
 				CurrentHandler = DiskUtils.GetHandlerForDisk(CurrentDisk);
 				UpdateDropdown();
@@ -671,10 +706,10 @@ public class HDDEditor {
 			if (args[0].toLowerCase().startsWith("cat")) {
 				File folder = new File(args[1]);
 				System.out.println("Folder" + folder.getAbsolutePath());
-				
+
 				File f[] = folder.listFiles();
 				Arrays.sort(f);
-				
+
 				for (File file : f) {
 					try {
 						System.out.println("===============================================================");
