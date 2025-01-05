@@ -9,6 +9,8 @@ package hddEditor.libs;
 //QOLFIX: GDS 23/01/2023 - DoSaveFileAsAsm: Now uses fixed format strings so data export looks better.
 //QOLFIX: GDS 23/01/2023 - Added progress bar for export.
 
+//TODO: For Zenobi import - handle tapes with more than one part.
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -28,7 +30,7 @@ public class Speccy {
 	// TAPE block types
 	public static int TAPE_HEADER = 0x00;
 	public static int TAPE_DATA = 0xff;
-	public static int TAPE_HEADER_LEN = 20;
+	public static int TAPE_HEADER_LEN = 17;
 
 	// Spectrum colours
 	public static int COLOUR_BLACK = 0;

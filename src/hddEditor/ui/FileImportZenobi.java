@@ -1,4 +1,5 @@
 package hddEditor.ui;
+//TODO: Font files
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +27,6 @@ import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
-import hddEditor.libs.SpeccyFileEncoders;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;

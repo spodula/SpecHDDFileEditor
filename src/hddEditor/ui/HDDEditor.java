@@ -235,7 +235,7 @@ public class HDDEditor {
 		});
 
 		MenuItem fileImportZenobiItem = new MenuItem(fileMenu, SWT.PUSH);
-		fileImportZenobiItem.setText("&Import Zenobi tape");
+		fileImportZenobiItem.setText("&Import 48k PAWS tape");
 		fileImportZenobiItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
