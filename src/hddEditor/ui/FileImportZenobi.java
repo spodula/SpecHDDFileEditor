@@ -46,6 +46,8 @@ public class FileImportZenobi {
 		public boolean ScreenUncompress = false;
 		public int ScreenUncompressAddress = 0;
 		public String errors = "";
+		public int extvec = 0;
+		public String excveclines[] = null;
 
 		/**
 		 * return details as a string.
@@ -509,12 +511,12 @@ public class FileImportZenobi {
 				int entrynum = 1;
 				for (ZenobiDetails z : zDets) {
 					String basefilename = TargFilename.getText().toUpperCase().trim();
-					if ((zDets.length>0) && (entrynum>1)) {
-						basefilename = basefilename+String.valueOf(entrynum++);
+					if ((zDets.length > 0) && (entrynum > 1)) {
+						basefilename = basefilename + String.valueOf(entrynum++);
 					} else {
 						entrynum++;
 					}
- 
+
 					// Assemble and save BIN file
 					byte ram[] = new byte[0x10000];
 					int startaddress = 0xffff;
@@ -566,8 +568,18 @@ public class FileImportZenobi {
 					newbasic.add("50 POKE " + z.loaderpoke + ",0");
 					newbasic.add("60 POKE " + (z.loaderpoke + 1) + ",0");
 					newbasic.add("70 POKE " + (z.loaderpoke + 2) + ",0");
-					// randomize usr
-					newbasic.add("80 RANDOMISE USR " + z.startaddress);
+
+					//If we have found any EXTVEC sections, use those instead of the last randomize usr.
+					if (z.excveclines != null) {
+						int lineNo=80;
+						for(String line:z.excveclines) {
+							newbasic.add(lineNo+" "+line);
+							lineNo = lineNo +10;
+						}
+					} else {
+						// randomize usr
+						newbasic.add("80 RANDOMISE USR " + z.startaddress);
+					}
 
 					// Encode basic:
 					byte BasicAsBytes[] = new byte[0xffff];
@@ -604,8 +616,8 @@ public class FileImportZenobi {
 	 * @return
 	 */
 	private String[] GetNotes(FileEntry[] directory) {
-		ArrayList<ZenobiDetails> zdl = new ArrayList<ZenobiDetails>(); 
-		
+		ArrayList<ZenobiDetails> zdl = new ArrayList<ZenobiDetails>();
+
 		ZenobiDetails currentzd = new ZenobiDetails();
 		int entrynum = 1;
 
@@ -627,14 +639,15 @@ public class FileImportZenobi {
 				try {
 					String filename = f.GetFilename();
 					if (f.GetFileData() != null && f.GetFileData().length == 6912) {
-						result[dirIndex] = entrynum+".Uncompressed screen";
+						// uncompressed screens will always override an attempt at a compressed
+						result[dirIndex] = entrynum + ".Uncompressed screen";
 						currentzd.screen = f;
+						currentzd.ScreenUncompress = false;
 					} else if (f.GetFileData() != null && f.GetFileData().length == 768) {
-						result[dirIndex] = entrynum+".Font file";
+						result[dirIndex] = entrynum + ".Font file";
 						currentzd.Font = f;
 					} else if (filename.endsWith("@")) {
 						currentzd.binfile[0] = f;
-
 						// Now to search for loader hack...
 						int baseaddress = f.GetSpeccyBasicDetails().LoadAddress;
 						byte data[] = f.GetFileData();
@@ -642,70 +655,72 @@ public class FileImportZenobi {
 						int foundaddress = locate_bytestream(data,
 								new int[] { 0xDD, 0xE5, 0xCD, 0x08, 0x07, 0xDD, 0xE1 }, 0);
 						if (foundaddress == -1) {
-							result[dirIndex] = entrynum+".Bin part 1 (Cant find loader)";
+							result[dirIndex] = entrynum + ".Bin part 1 (Cant find loader)";
 						} else {
-							result[dirIndex] = entrynum+".Bin part 1 (Loader poke:" + (foundaddress + 2 + baseaddress) + ")";
+							result[dirIndex] = entrynum + ".Bin part 1 (Loader poke:" + (foundaddress + 2 + baseaddress)
+									+ ")";
 							currentzd.loaderpoke = foundaddress + 2 + baseaddress;
 						}
 
 					} else if (filename.endsWith("A")) {
-						result[dirIndex] = entrynum+".Bin part 2";
+						result[dirIndex] = entrynum + ".Bin part 2";
 						currentzd.binfile[1] = f;
 					} else if (filename.endsWith("B")) {
-						result[dirIndex] = entrynum+".Bin part 3";
+						result[dirIndex] = entrynum + ".Bin part 3";
 						currentzd.binfile[2] = f;
-						//as this will be the end of the section, restart with a new one.
+						// as this will be the end of the section, restart with a new one.
 						try {
-							result = ParseBasicFile(currentzd, directory[lastBasic].GetFileData(), result, lastBasic,StartOfBlock,entrynum++);
+							result = ParseBasicFile(currentzd, directory[lastBasic].GetFileData(), result, lastBasic,
+									StartOfBlock, entrynum++);
 							zdl.add(currentzd);
 							currentzd = new ZenobiDetails();
 							StartOfBlock = dirIndex;
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
-						
+
 					} else if (filename.endsWith("C")) {
 						result[dirIndex] = "128K file";
 						currentzd.errors = currentzd.errors + "Looks like a 128K PAWS file. not currently supported.";
 					} else {
-						// unidentified BIN file...
-						result[dirIndex] = entrynum+". Compressed screen? (uses basic: " + directory[lastBasic].GetFilename()
-								+ ")";
-						currentzd.screen = f;
-						currentzd.ScreenUncompress = true;
+						// unidentified BIN file... If we havent found a screen, see if this is it.
+						if (currentzd.screen == null) {
+							result[dirIndex] = entrynum + ". Compressed screen? (uses basic: "
+									+ directory[lastBasic].GetFilename() + ")";
+							currentzd.screen = f;
+							currentzd.ScreenUncompress = true;
+						} else {
+							result[dirIndex] = "Unknown file";
+						}
 
 					}
 				} catch (IOException E) {
 					currentzd.errors = currentzd.errors + E.getMessage() + System.lineSeparator();
 				}
 		}
-	
 
 		zDets = zdl.toArray(new ZenobiDetails[zdl.size()]);
 
 		return result;
 	}
-	
+
 	/**
-	 * This parses the identified BASIC loader, Fills out Compression RANDOMIZE USR and the game start RANDOMIZE USR.
-	 * and the notes associated with the files.
+	 * This parses the identified BASIC loader, Fills out Compression RANDOMIZE USR
+	 * and the game start RANDOMIZE USR. and the notes associated with the files.
 	 * 
-	 * @param currentzd
-	 * 		Current ZenobiDetails object being populated 
-	 * @param basicdata
-	 * 		Raw file data of the BASIC file.
-	 * @param currentnotes
-	 * 		Array of the current notes for the current file
-	 * @param lastbasic
-	 * 		index of the BASIC loader in the Notes
-	 * @param blockstart
-	 * 		index of the start of the current block within the file. Note, this is not necessarily the loader being parsed
-	 * 		some files have two basic files, the first one loading the screen. 
-	 * @return
-	 * 		new notes
+	 * @param currentzd    Current ZenobiDetails object being populated
+	 * @param basicdata    Raw file data of the BASIC file.
+	 * @param currentnotes Array of the current notes for the current file
+	 * @param lastbasic    index of the BASIC loader in the Notes
+	 * @param blockstart   index of the start of the current block within the file.
+	 *                     Note, this is not necessarily the loader being parsed
+	 *                     some files have two basic files, the first one loading
+	 *                     the screen.
+	 * @return new notes
 	 */
-	private String[] ParseBasicFile(ZenobiDetails currentzd, byte basicdata[], String currentnotes[], int lastbasic, int blockstart, int entrynum ) {
-		currentnotes[lastbasic] = entrynum+".Real loader";
+	private String[] ParseBasicFile(ZenobiDetails currentzd, byte basicdata[], String currentnotes[], int lastbasic,
+			int blockstart, int entrynum) {
+		currentnotes[lastbasic] = entrynum + ".Real loader";
 		int address = 0;
 		double finalru = -1;
 		double firstru = -1;
@@ -723,14 +738,14 @@ public class FileImportZenobi {
 				}
 				numru++;
 				if (numru > 2) {
-					currentzd.errors = currentzd.errors
-							+ entrynum+".More than 2 RANDOMIZE USR statements found. May meed manual intervention."
+					currentzd.errors = currentzd.errors + entrynum
+							+ ".More than 2 RANDOMIZE USR statements found. May meed manual intervention."
 							+ System.lineSeparator();
 				}
 			}
 		}
 		// Updates the notes screen.
-		currentnotes[lastbasic] = entrynum+".Real loader - Start address:" + finalru;
+		currentnotes[lastbasic] = entrynum + ".Real loader - Start address:" + finalru;
 		currentzd.startaddress = (int) Math.floor(finalru);
 		if (numru > 1) {
 			for (int i = blockstart; i < currentnotes.length; i++) {
@@ -771,9 +786,45 @@ public class FileImportZenobi {
 			}
 			address++;
 		}
+		// check for the extvec.
+		if (currentzd.startaddress < 0x4000) {
+			// locate LET extvec=
+			// This should be 0xFD <up to 5 bytes between '0' and '9'> 0x0E <5 bytes FP
+			// number>
+			address = locate_bytestream(basicdata, new int[] { 0xF1, 0x65, 0x78, 0x74, 0x76, 0x65, 0x63, 0x3D },0);
+			if (address != -1) {
+				// Decode the following number
+				while (basicdata[address] != 0x0e) {
+					address++;
+				}
+				currentzd.extvec = (int) Speccy.GetNumberAtByte(basicdata, address + 1);
+			}
+			//if we have found the "let extvec=xxxx", update the RU. 
+			if (currentzd.extvec != 0) {
+				currentzd.startaddress = currentzd.startaddress + currentzd.extvec;
+				//extract any POKEs. Usually something like poke extvec+12,20
+				//Convert the file into text...
+				StringBuilder sb = new StringBuilder();
+				Speccy.DecodeBasicFromLoadedFile(basicdata, sb,basicdata.length,true,false);
+				String basiclines[] = sb.toString().split("\n");
+				ArrayList<String> newlines = new ArrayList<String>();
+				for (String s:basiclines) {
+					if (s.contains("extvec")) {
+						int i=s.indexOf(' ');
+						if (i>0) {
+							s = s.substring(i).trim();
+						}
+						
+						newlines.add(s);
+					}
+				}
+				currentzd.excveclines = newlines.toArray(new String[newlines.size()]);
+			}
+
+		}
+
 		return (currentnotes);
 	}
-	
 
 	/**
 	 * This is a helper function because comparing two bytes is annoying because of
