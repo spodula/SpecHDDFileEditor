@@ -575,11 +575,18 @@ public class PlusThreePartPage extends GenericPage {
 					// for +3dos files, deleting deleted files causes a reload of the dirents.
 					// This means the existing ones are invalidated. so we set a delayed reload and
 					// do it at the end.
-					for (TableItem en : itms) {
-						CPMDirectoryEntry ent = (CPMDirectoryEntry) en.getData();
-						ent.DelayReload = true;
-						ent.SetDeleted(true);
-						ent.DelayReload = false;
+					if (DirectoryListing != null && !DirectoryListing.isDisposed()) {
+						itms = DirectoryListing.getSelection();
+						if (itms != null) {
+							for (TableItem en : itms) {
+								CPMDirectoryEntry ent = (CPMDirectoryEntry) en.getData();
+								if (ent != null) {
+									ent.DelayReload = true;
+									ent.SetDeleted(true);
+									ent.DelayReload = false;
+								}
+							}
+						}
 					}
 					((CPMPartition) partition).updateDirentBlocks();
 					((CPMPartition) partition).ExtractDirectoryListing();
