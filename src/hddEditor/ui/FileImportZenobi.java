@@ -70,7 +70,7 @@ public class FileImportZenobi {
 		}
 
 		public boolean CanImport() {
-			boolean result = (binfile[0] != null) && (binfile[1] != null) && (binfile[2] != null) && (startaddress > 0)
+			boolean result = (binfile[0] != null) && (binfile[1] != null) && (binfile[2] != null) /*&& (startaddress > 0)*/
 					&& (loaderpoke > 0);// && (errors.isBlank());
 
 			return (result);
@@ -476,6 +476,13 @@ public class FileImportZenobi {
 					ErrorText.setText(z.errors);
 				} else {
 					String s = "File does not seem to be a Zenobi PAWS file...";
+					if (zDets[0].loaderpoke == 0) {
+						s = s + "\nLoader patch cannot be found.";
+					}
+					if (zDets[0].startaddress == -1) {
+						s = s + "\nCannot find start address";
+					}
+
 					ErrorText.setText(s);
 				}
 			}
@@ -569,12 +576,13 @@ public class FileImportZenobi {
 					newbasic.add("60 POKE " + (z.loaderpoke + 1) + ",0");
 					newbasic.add("70 POKE " + (z.loaderpoke + 2) + ",0");
 
-					//If we have found any EXTVEC sections, use those instead of the last randomize usr.
+					// If we have found any EXTVEC sections, use those instead of the last randomize
+					// usr.
 					if (z.excveclines != null) {
-						int lineNo=80;
-						for(String line:z.excveclines) {
-							newbasic.add(lineNo+" "+line);
-							lineNo = lineNo +10;
+						int lineNo = 80;
+						for (String line : z.excveclines) {
+							newbasic.add(lineNo + " " + line);
+							lineNo = lineNo + 10;
 						}
 					} else {
 						// randomize usr
@@ -791,7 +799,7 @@ public class FileImportZenobi {
 			// locate LET extvec=
 			// This should be 0xFD <up to 5 bytes between '0' and '9'> 0x0E <5 bytes FP
 			// number>
-			address = locate_bytestream(basicdata, new int[] { 0xF1, 0x65, 0x78, 0x74, 0x76, 0x65, 0x63, 0x3D },0);
+			address = locate_bytestream(basicdata, new int[] { 0xF1, 0x65, 0x78, 0x74, 0x76, 0x65, 0x63, 0x3D }, 0);
 			if (address != -1) {
 				// Decode the following number
 				while (basicdata[address] != 0x0e) {
@@ -799,22 +807,22 @@ public class FileImportZenobi {
 				}
 				currentzd.extvec = (int) Speccy.GetNumberAtByte(basicdata, address + 1);
 			}
-			//if we have found the "let extvec=xxxx", update the RU. 
+			// if we have found the "let extvec=xxxx", update the RU.
 			if (currentzd.extvec != 0) {
 				currentzd.startaddress = currentzd.startaddress + currentzd.extvec;
-				//extract any POKEs. Usually something like poke extvec+12,20
-				//Convert the file into text...
+				// extract any POKEs. Usually something like poke extvec+12,20
+				// Convert the file into text...
 				StringBuilder sb = new StringBuilder();
-				Speccy.DecodeBasicFromLoadedFile(basicdata, sb,basicdata.length,true,false);
+				Speccy.DecodeBasicFromLoadedFile(basicdata, sb, basicdata.length, true, false);
 				String basiclines[] = sb.toString().split("\n");
 				ArrayList<String> newlines = new ArrayList<String>();
-				for (String s:basiclines) {
+				for (String s : basiclines) {
 					if (s.contains("extvec")) {
-						int i=s.indexOf(' ');
-						if (i>0) {
+						int i = s.indexOf(' ');
+						if (i > 0) {
 							s = s.substring(i).trim();
 						}
-						
+
 						newlines.add(s);
 					}
 				}

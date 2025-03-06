@@ -1,4 +1,5 @@
 package hddEditor.ui;
+
 /**
  * Import files from another supported file type to the current partition.
  */
@@ -38,37 +39,36 @@ public class FileImportForm {
 	private Display display = null;
 	private Shell shell = null;
 
-	//Source file to import
+	// Source file to import
 	private Label Sourcefile = null;
-	
-	//Button to set this
+
+	// Button to set this
 	private Button SelectSourceFileBtn = null;
 
-	//Source partition within the file.
+	// Source partition within the file.
 	private Combo SourcePartition = null;
-	
-	//Close and import buttons
+
+	// Close and import buttons
 	private Button CloseBtn = null;
 	private Button ImportBtn = null;
-	
-	//table of files to import
+
+	// table of files to import
 	private Table SourceList = null;
 
-	//Source disk
+	// Source disk
 	private Disk CurrentSourceDisk = null;
-	
-	//Source Handler
+
+	// Source Handler
 	private OSHandler CurrentSourceHandler = null;
-	
-	//Target handler
+
+	// Target handler
 	private OSHandler CurrentTargetHandler;
 
-	//Target partition
+	// Target partition
 	private Combo TargetPartition = null;
 
-	
 	private FileSelectDialog fsd = null;
-	
+
 	/**
 	 * Constructor
 	 * 
@@ -127,7 +127,8 @@ public class FileImportForm {
 		SelectSourceFileBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				File selected = fsd.AskForSingleFileOpen(FileSelectDialog.FILETYPE_IMPORTDRIVE, "Select file to import.",HDDEditor.SUPPORTEDFILETYPES,"");
+				File selected = fsd.AskForSingleFileOpen(FileSelectDialog.FILETYPE_IMPORTDRIVE,
+						"Select file to import.", HDDEditor.SUPPORTEDFILETYPES, "");
 				if (selected != null) {
 					Sourcefile.setText(selected.getAbsolutePath());
 					DoLoadFile(selected);
@@ -157,60 +158,62 @@ public class FileImportForm {
 				DoPopulateFileList();
 			}
 		});
-		
+
 		Button btn = new Button(shell, SWT.BORDER);
 		btn.setText("Select all");
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				if (SourceList!=null) {
-					for (TableItem itm: SourceList.getItems()) {
+				if (SourceList != null) {
+					for (TableItem itm : SourceList.getItems()) {
 						itm.setChecked(true);
 					}
 				}
 			}
+
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 				widgetSelected(arg0);
 			}
 		});
-		
+
 		btn = new Button(shell, SWT.BORDER);
 		btn.setText("Select None");
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				if (SourceList!=null) {
-					for (TableItem itm: SourceList.getItems()) {
+				if (SourceList != null) {
+					for (TableItem itm : SourceList.getItems()) {
 						itm.setChecked(false);
 					}
 				}
 			}
+
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 				widgetSelected(arg0);
 			}
 		});
-		
+
 		btn = new Button(shell, SWT.BORDER);
 		btn.setText("Invert selection");
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				if (SourceList!=null) {
-					for (TableItem itm: SourceList.getItems()) {
+				if (SourceList != null) {
+					for (TableItem itm : SourceList.getItems()) {
 						itm.setChecked(!itm.getChecked());
 					}
 				}
 			}
+
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
 				widgetSelected(arg0);
 			}
 		});
-		
+
 		lbl = new Label(shell, SWT.NONE);
-		
 
 		SourceList = new Table(shell, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.SINGLE);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -390,24 +393,27 @@ public class FileImportForm {
 						SpeccyBasicDetails sbd = fe.GetSpeccyBasicDetails();
 						String filename = fe.GetFilename();
 
-						filename =  TargetPartition.UniqueifyFileNameIfRequired(filename);
-						switch (sbd.BasicType) {
-						case Speccy.BASIC_BASIC:
-							TargetPartition.AddBasicFile(filename, fe.GetFileData(), sbd.LineStart ,
-									sbd.VarStart);
-							break;
-						case Speccy.BASIC_NUMARRAY:
-							TargetPartition.AddNumericArray(filename, fe.GetFileData(), sbd.VarName + "");
-							break;
-						case Speccy.BASIC_CHRARRAY:
-							TargetPartition.AddCharArray(filename, fe.GetFileData(), sbd.VarName + "");
-							break;
-						case Speccy.BASIC_CODE:
-							TargetPartition.AddCodeFile(filename, sbd.LoadAddress, fe.GetFileData());
-							break;
-						default:
+						filename = TargetPartition.UniqueifyFileNameIfRequired(filename);
+						if (sbd != null) {
+							switch (sbd.BasicType) {
+							case Speccy.BASIC_BASIC:
+								TargetPartition.AddBasicFile(filename, fe.GetFileData(), sbd.LineStart, sbd.VarStart);
+								break;
+							case Speccy.BASIC_NUMARRAY:
+								TargetPartition.AddNumericArray(filename, fe.GetFileData(), sbd.VarName + "");
+								break;
+							case Speccy.BASIC_CHRARRAY:
+								TargetPartition.AddCharArray(filename, fe.GetFileData(), sbd.VarName + "");
+								break;
+							case Speccy.BASIC_CODE:
+								TargetPartition.AddCodeFile(filename, sbd.LoadAddress, fe.GetFileData());
+								break;
+							default:
+								TargetPartition.AddCodeFile(filename, 0, fe.GetFileData());
+								break;
+							}
+						} else {
 							TargetPartition.AddCodeFile(filename, 0, fe.GetFileData());
-							break;
 						}
 					}
 				}
