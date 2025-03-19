@@ -622,7 +622,8 @@ public class PlusThreePartPage extends GenericPage {
 			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay());
 			if (RenFileDialog.Show(entry.GetFilename())) {
 				try {
-					entry.SetFilename(RenFileDialog.NewName);
+					if (RenFileDialog!=null)
+						entry.SetFilename(RenFileDialog.NewName);
 					// refresh the screen.
 					AddComponents();
 				} catch (IOException e) {
