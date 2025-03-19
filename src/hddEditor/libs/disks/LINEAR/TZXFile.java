@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.util.Arrays;
 import java.util.Vector;
 
 import hddEditor.libs.PLUSIDEDOS;
@@ -631,6 +632,9 @@ public class TZXFile implements Disk {
 			try {
 				File folder = new File(args[0]);
 				File contents[] = folder.listFiles();
+				
+				Arrays.sort(contents);
+				
 				for (File f : contents) {
 					if (f.getName().endsWith(".tzx")) {
 						proc++;
