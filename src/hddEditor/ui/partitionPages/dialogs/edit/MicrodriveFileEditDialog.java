@@ -1,6 +1,11 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
 /**
  * Implementation of the file edit page for a Microdrive file.
+ * 
+ * TODO: Saves for MDR BASIC/Start line  BASIC/VARSTART
+ * TODO: Saves for MDR Variable name for Variables.
+ * TODO: Saves for MDR Code load address
+
  */
 
 import org.eclipse.swt.SWT;

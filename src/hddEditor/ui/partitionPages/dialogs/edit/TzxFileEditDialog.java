@@ -1,6 +1,10 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
 /**
  * Implementation of the Edit file(block?) page for a TZX file.
+ *
+ * TODO: Saves for TZX BASIC/Start line  BASIC/VARSTART
+ * TODO: Saves for TZX Variable name for Variables.
+ * TODO: Saves for TZX Code load address
  */
 
 import org.eclipse.swt.SWT;

@@ -1,6 +1,10 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
 /**
  * Implementation of the Edit file page for an TAP file.
+ * 
+ * TODO: Saves for TAP BASIC/Start line  BASIC/VARSTART
+ * TODO: Saves for TAP Variable name for Variables.
+ * TODO: Saves for TAP Code load address
  */
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;

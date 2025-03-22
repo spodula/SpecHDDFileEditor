@@ -2,6 +2,11 @@ package hddEditor.ui.partitionPages.dialogs.edit;
 //TODO: SCL files just dont seem to work.
 /**
  * Implementation of the Edit file page for a TR-DOS file.
+ * 
+ * TODO: Saves for TR-DOS BASIC/Start line  BASIC/VARSTART
+ * TODO: Saves for TR-DOS Variable name for Variables.
+ * TODO: Saves for TR-DOS Code load address
+
  */
 
 import org.eclipse.swt.SWT;

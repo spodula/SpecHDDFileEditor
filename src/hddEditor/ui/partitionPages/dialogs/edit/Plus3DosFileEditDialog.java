@@ -1,5 +1,10 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
-
+/**
+ * Implementation of a File/edit page for +3DOS files.
+ * 
+ * TODO: Saves for +3DOS BASIC/Start line  BASIC/VARSTART
+ * TODO: Saves for +3DOS Variable name for Variables.
+ */
 import java.io.IOException;
 
 /**
@@ -173,6 +178,9 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 		}
 	}
 	
+	/**
+	 * Save for CODE files. Only the LOAD address is save-able.
+	 */
 	private class CodeSave implements GenericSaveEvent {
 		@Override
 		public boolean DoSave(int valtype, String sValue, int Value) {

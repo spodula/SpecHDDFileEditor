@@ -1,6 +1,11 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
 /**
  * Implementation of the Edit file page for an MGT file.
+ * 
+ * TODO: Saves for MGT BASIC/Start line  BASIC/VARSTART
+ * TODO: Saves for MGT Variable name for Variables.
+ * TODO: Saves for MGT Code load address
+ *
  */
 
 import org.eclipse.swt.SWT;
