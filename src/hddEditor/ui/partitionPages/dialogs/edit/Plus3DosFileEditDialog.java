@@ -196,7 +196,6 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 					p3dPart.AddCPMFile(direntry.GetFilename(), rawdata);
 					return true;
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			} else {
@@ -232,7 +231,6 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 					p3dPart.AddCPMFile(direntry.GetFilename(), rawdata);
 					return true;
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			} else {
@@ -261,7 +259,6 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 					p3dPart.AddCPMFile(direntry.GetFilename(), rawdata);
 					return true;
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			} else {

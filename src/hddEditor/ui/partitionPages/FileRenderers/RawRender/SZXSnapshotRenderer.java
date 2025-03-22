@@ -185,7 +185,6 @@ public class SZXSnapshotRenderer extends RamDump {
 			super.Render(TargetPage, rawdata, loadAddr, szxfile.MachineClass != MachineState.MT_48K, szxfile.IY(),
 					RamBankOrder, filename, szxfile, targetpart);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
