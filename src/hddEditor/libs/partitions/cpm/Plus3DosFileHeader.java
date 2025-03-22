@@ -93,7 +93,7 @@ public class Plus3DosFileHeader {
 				if (GetFileType() == FILETYPE_CHRARRAY) {
 					VarName = VarName + "$";
 				}
-				return (VarName);
+				return (VarName.toUpperCase());
 			} else {
 				return ("");
 			}

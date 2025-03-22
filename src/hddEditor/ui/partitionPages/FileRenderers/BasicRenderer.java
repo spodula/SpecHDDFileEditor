@@ -13,6 +13,7 @@ import java.io.UnsupportedEncodingException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -23,6 +24,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.ui.partitionPages.dialogs.edit.callbacks.GenericSaveEvent;
 
 public class BasicRenderer extends FileRenderer {
 	// Components
@@ -31,6 +33,8 @@ public class BasicRenderer extends FileRenderer {
 	public Table Listing = null;
 	public Table Variables = null;
 	public Label VarLBL = null;
+	
+	private Color DefaultBackgroundColor;
 	
 	/**
 	 * Version of Render that doesn't rely on the +3DOS header
@@ -45,7 +49,7 @@ public class BasicRenderer extends FileRenderer {
 	 * @param Startline
 	 */
 	public void RenderBasic(Composite mainPage, byte data[], byte header[], String Filename, int filelength,
-			int VariablesOffset, int Startline, FileSelectDialog filesel) {
+			int VariablesOffset, int Startline, FileSelectDialog filesel, GenericSaveEvent saveevent) {
 		super.Render(mainPage, data, Filename, filesel);
 
 		Label lbl = new Label(this.MainPage, SWT.NONE);
@@ -62,6 +66,43 @@ public class BasicRenderer extends FileRenderer {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.minimumWidth = 50;
 		StartLineEdit.setLayoutData(gd);
+		
+		Button btn;
+		DefaultBackgroundColor = lbl.getBackground();
+		if (saveevent != null) {
+			btn = new Button(mainPage, SWT.NONE);
+			btn.setText("Update Start line");
+			btn.setLayoutData(gd);
+			btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					if (saveevent != null) {
+						try {
+							String sa = StartLineEdit.getText();
+							Integer sai = Integer.valueOf(sa);
+
+							if (!saveevent.DoSave(0, sa, sai)) {
+								StartLineEdit.setBackground(new Color(mainPage.getDisplay(), 255,0,0));
+							} else {
+								StartLineEdit.setBackground(DefaultBackgroundColor);
+							}
+							
+						} catch (NumberFormatException e) {
+							StartLineEdit.setBackground(new Color(mainPage.getDisplay(), 255,0,0));
+						}
+					}
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+		} else {
+			lbl = new Label(mainPage, 0);
+		}
+		lbl = new Label(mainPage, 0);
+		
 
 		lbl = new Label(this.MainPage, SWT.NONE);
 		lbl.setText("Variable start: ");
@@ -71,11 +112,46 @@ public class BasicRenderer extends FileRenderer {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.minimumWidth = 50;
 		VariableStartEdit.setLayoutData(gd);
+		
+		if (saveevent != null) {
+			btn = new Button(mainPage, SWT.NONE);
+			btn.setText("Update Vaiable Start");
+			btn.setLayoutData(gd);
+			btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					if (saveevent != null) {
+						try {
+							String sa = StartLineEdit.getText();
+							Integer sai = Integer.valueOf(sa);
+
+							if (!saveevent.DoSave(1, sa, sai)) {
+								VariableStartEdit.setBackground(new Color(mainPage.getDisplay(), 255,0,0));
+							} else {
+								VariableStartEdit.setBackground(DefaultBackgroundColor);
+							}
+							
+						} catch (NumberFormatException e) {
+							VariableStartEdit.setBackground(new Color(mainPage.getDisplay(), 255,0,0));
+						}
+					}
+				}
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+		} else {
+			lbl = new Label(mainPage, 0);
+		}
+		lbl = new Label(mainPage, 0);
+		
+		
 
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
 
-		Button btn = new Button(this.MainPage, SWT.NONE);
+		btn = new Button(this.MainPage, SWT.NONE);
 		btn.setText("Extract file as text");
 		btn.setLayoutData(gd);
 		Composite mainpage = this.MainPage;

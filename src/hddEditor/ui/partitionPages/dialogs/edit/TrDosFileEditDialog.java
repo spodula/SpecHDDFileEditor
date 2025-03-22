@@ -112,7 +112,7 @@ public class TrDosFileEditDialog extends EditFileDialog {
 			if (ftype == 'B') {
 				BasicRenderer CurrentRenderer = new BasicRenderer();
 				CurrentRenderer.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), ThisEntry.GetFileSize(), 
-						trde.GetVar2(), trde.startline, filesel);
+						trde.GetVar2(), trde.startline, filesel, null);
 			} else if (ftype != 'D') {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
 				//TODO: implement TRDosFileEdit.saveevent for CODE
@@ -121,10 +121,10 @@ public class TrDosFileEditDialog extends EditFileDialog {
 						trde.GetVar1(), filesel,CurrentPartition,null);
 			} else if (trde.IsCharArray()) {
 				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
-				CurrentRenderer.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);
+				CurrentRenderer.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel, null);
 			} else {
 				NumericArrayRenderer CurrentRenderer = new NumericArrayRenderer();
-				CurrentRenderer.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);
+				CurrentRenderer.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel, null);
 			}
 		} catch (Exception E) {
 			System.out.println("Error Showing " + ThisEntry.GetFilename() + ": " + E.getMessage());

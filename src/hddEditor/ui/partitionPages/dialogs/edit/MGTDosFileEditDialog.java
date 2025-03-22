@@ -101,18 +101,18 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 			if (ftype == MGT.MGTFT_ZXBASIC) {
 				BasicRenderer CurrentRenderer = new BasicRenderer();
 				CurrentRenderer.RenderBasic(MainPage, data, null, mEnt.GetFilename(), mEnt.GetFileSize(),
-						mEnt.GetSpeccyBasicDetails().VarStart, mEnt.GetSpeccyBasicDetails().LineStart,filesel);
+						mEnt.GetSpeccyBasicDetails().VarStart, mEnt.GetSpeccyBasicDetails().LineStart,filesel, null);
 			} else if (ftype == MGT.MGTFT_ZXNUMARRAY) {
 				NumericArrayRenderer CurrentRenderer = new NumericArrayRenderer();
 				CurrentRenderer.RenderNumericArray(MainPage, data, null, mEnt.GetFilename(),
-						"" + mEnt.GetSpeccyBasicDetails().VarName,filesel);
+						"" + mEnt.GetSpeccyBasicDetails().VarName,filesel, null);
 			} else if (ftype == MGT.MGTFT_SAMSCREEN) {
 				MGTScreenRenderer CurrentRenderer = new MGTScreenRenderer();
 				CurrentRenderer.RenderScreen(MainPage, data, mEnt.GetFilename(),mEnt, filesel); 
 			} else if (ftype == MGT.MGTFT_ZXSTRARRAY) {
 				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
 				CurrentRenderer.RenderCharArray(MainPage, data, null, mEnt.GetFilename(),
-						"" + mEnt.GetSpeccyBasicDetails().VarName,filesel);
+						"" + mEnt.GetSpeccyBasicDetails().VarName,filesel, null);
 			} else if (ftype == MGT.MGTFT_ZX48SNA) {
 				MGT48kSnapshotRenderer CurrentRenderer = new MGT48kSnapshotRenderer();
 				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt,filesel);

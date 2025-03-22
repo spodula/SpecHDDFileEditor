@@ -116,7 +116,7 @@ public class MicrodriveFileEditDialog extends EditFileDialog {
 			BasicRenderer BR = new BasicRenderer();
 			SpeccyBasicDetails sbd = ThisEntry.GetSpeccyBasicDetails();
 			BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, 
-					sbd.VarStart, sbd.LineStart, filesel);
+					sbd.VarStart, sbd.LineStart, filesel, null);
 			break;
 		case Speccy.BASIC_CODE:
 				CodeRenderer CR = new CodeRenderer();
@@ -126,11 +126,11 @@ public class MicrodriveFileEditDialog extends EditFileDialog {
 				break;
 		case Speccy.BASIC_NUMARRAY:
 				NumericArrayRenderer NR = new NumericArrayRenderer();
-				NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);
+				NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel, null);
 				break;
 		case Speccy.BASIC_CHRARRAY:	
 				CharArrayRenderer CAR = new CharArrayRenderer();
-				CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);
+				CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel, null);
 		default:
 				FileRenderer FR = new FileRenderer();
 				FR.Render(MainPage, data, ThisEntry.GetFilename(), filesel);

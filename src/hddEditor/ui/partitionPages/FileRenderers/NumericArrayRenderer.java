@@ -1,14 +1,14 @@
 package hddEditor.ui.partitionPages.FileRenderers;
+/**
+ * Renderer for Numeric array file types.
+ */
 
 import java.io.File;
-
-/**
- * Render a numeric array
- */
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -19,11 +19,13 @@ import org.eclipse.swt.widgets.Text;
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
+import hddEditor.ui.partitionPages.dialogs.edit.callbacks.GenericSaveEvent;
 
 public class NumericArrayRenderer extends FileRenderer {
 	// Variable name edit box.
-	Text VariableEdit = null;
-
+	private Text VariableEdit = null;
+	
+	private Color DefaultBackgroundColor;
 	/**
 	 * render the array to the given composite.
 	 */
@@ -42,8 +44,9 @@ public class NumericArrayRenderer extends FileRenderer {
 			System.arraycopy(data, 0x80, newdata, 0, newdata.length);
 		} 
 
-		RenderNumericArray(mainPage, newdata, header, Filename, Varname, filesel);
+		RenderNumericArray(mainPage, newdata, header, Filename, Varname, filesel,null);
 	}
+
 
 	/**
 	 * Render a numeric array page. 
@@ -53,8 +56,9 @@ public class NumericArrayRenderer extends FileRenderer {
 	 * @param header - Header if appropriate. (If this is null, "Save with header" button will not be shown)
 	 * @param Filename - Filename
 	 * @param varname - Variable name.
+	 * @param saveevent - If not null, called when the variable name changes.
 	 */
-	public void RenderNumericArray(Composite mainPage, byte data[], byte header[], String Filename, String varname, FileSelectDialog filesel) {
+	public void RenderNumericArray(Composite mainPage, byte data[], byte header[], String Filename, String varname, FileSelectDialog filesel, GenericSaveEvent saveevent) {
 		super.Render(mainPage, data, Filename, filesel);
 
 
@@ -130,6 +134,42 @@ public class NumericArrayRenderer extends FileRenderer {
 		gd.minimumWidth = 50;
 		VariableEdit.setLayoutData(gd);
 		VariableEdit.setText(varname);
+		
+		
+		DefaultBackgroundColor = lbl.getBackground();
+		if (saveevent != null) {
+			btn = new Button(mainPage, SWT.NONE);
+			btn.setText("Update Variable name");
+			btn.setLayoutData(gd);
+			btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					if (saveevent != null) {
+						try {
+							String sa = VariableEdit.getText();
+							if (!saveevent.DoSave(0, sa, 0)) {
+								VariableEdit.setBackground(new Color(mainPage.getDisplay(), 255,0,0));
+							} else {
+								VariableEdit.setBackground(DefaultBackgroundColor);
+								VariableEdit.setText(sa.toUpperCase().substring(0,1));
+							}
+							
+						} catch (NumberFormatException e) {
+							VariableEdit.setBackground(new Color(mainPage.getDisplay(), 255,0,0));
+						}
+					}
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+		} else {
+			lbl = new Label(mainPage, 0);
+		}
+		lbl = new Label(mainPage, 0);
+
 
 		int location = 0x00;
 

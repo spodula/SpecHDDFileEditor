@@ -1,13 +1,13 @@
 package hddEditor.ui.partitionPages.FileRenderers;
-import java.io.File;
-
-//Fixed bug with rendering.
 /**
- * Render a character array
+ * Renderer for Character array file types.
  */
+
+import java.io.File;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -18,9 +18,13 @@ import org.eclipse.swt.widgets.Text;
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
+import hddEditor.ui.partitionPages.dialogs.edit.callbacks.GenericSaveEvent;
 
 public class CharArrayRenderer extends FileRenderer {
-	Text VariableEdit = null;
+	private Text VariableEdit = null;
+	
+	private Color DefaultBackgroundColor; 
+	
 
 	/**
 	 * Render the character array to the composite.
@@ -40,8 +44,9 @@ public class CharArrayRenderer extends FileRenderer {
 			System.arraycopy(data, 0x80, newdata, 0, newdata.length);
 		} 
 
-		RenderCharArray(mainPage, newdata, header, Filename, Varname,filesel);
+		RenderCharArray(mainPage, newdata, header, Filename, Varname,filesel,null);
 	}
+
 
 	/**
 	 * Render a character array to the given page
@@ -52,8 +57,9 @@ public class CharArrayRenderer extends FileRenderer {
 	 *                 button not shown)
 	 * @param Filename - filename
 	 * @param varname  - variable name
+     * @param saveevent - If not null, called when the variable name changes.
 	 */
-	public void RenderCharArray(Composite mainPage, byte data[], byte header[], String Filename, String varname, FileSelectDialog filesel) {
+	public void RenderCharArray(Composite mainPage, byte data[], byte header[], String Filename, String varname, FileSelectDialog filesel, GenericSaveEvent saveevent) {
 		Label lbl = new Label(mainPage, SWT.NONE);
 		lbl.setText("Character array: ");
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -125,6 +131,41 @@ public class CharArrayRenderer extends FileRenderer {
 		gd.minimumWidth = 50;
 		VariableEdit.setLayoutData(gd);
 		VariableEdit.setText(varname);
+		
+		DefaultBackgroundColor = lbl.getBackground();
+		if (saveevent != null) {
+			btn = new Button(mainPage, SWT.NONE);
+			btn.setText("Update Variable name");
+			btn.setLayoutData(gd);
+			btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					if (saveevent != null) {
+						try {
+							String sa = VariableEdit.getText();
+							if (!saveevent.DoSave(0, sa, 0)) {
+								VariableEdit.setBackground(new Color(mainPage.getDisplay(), 255,0,0));
+							} else {
+								VariableEdit.setBackground(DefaultBackgroundColor);
+								VariableEdit.setText(sa.toUpperCase().substring(0,1)+"$");
+							}
+						} catch (NumberFormatException e) {
+							VariableEdit.setBackground(new Color(mainPage.getDisplay(), 255,0,0));
+						}
+					}
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+		} else {
+			lbl = new Label(mainPage, 0);
+		}
+		lbl = new Label(mainPage, 0);
+		
+		
 
 		int location = 0x00;
 
