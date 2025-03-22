@@ -110,8 +110,10 @@ public class TrDosFileEditDialog extends EditFileDialog {
 						trde.GetVar2(), trde.startline, filesel);
 			} else if (ftype != 'D') {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
+				//TODO: implement TRDosFileEdit.saveevent for CODE
+
 				CurrentRenderer.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length,
-						trde.GetVar1(), filesel,CurrentPartition);
+						trde.GetVar1(), filesel,CurrentPartition,null);
 			} else if (trde.IsCharArray()) {
 				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
 				CurrentRenderer.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);

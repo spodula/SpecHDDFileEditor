@@ -469,7 +469,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 							HeaderBuffer = newbuffer;
 						}
 						p3d = new Plus3DosFileHeader(HeaderBuffer);
-						data = new byte[p3d.filelength];
+						data = new byte[p3d.GetBasicFileLength()];
 						numRead = is.read(data);
 						if (numRead < data.length) {
 							System.out.println("File terminated before +3DOS header says it should.");
@@ -482,7 +482,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 					 * Try to identify the file type.
 					 */
 					// Check for a +3DOS header
-					if (p3d.IsPlusThreeDosFile) {
+					if (p3d.IsPlus3DosFile()) {
 						String DosFileName = UniqueifyName(filename.getName());
 						String filetypeName = p3d.getTypeDesc() + "(+3Dos Header)";
 
@@ -491,7 +491,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 						values[0] = filename.getAbsolutePath();
 						values[1] = DosFileName;
 						values[2] = filetypeName;
-						values[3] = String.valueOf(p3d.filelength);
+						values[3] = String.valueOf(p3d.GetBasicFileLength());
 						values[4] = "";
 
 						byte newdata[] = new byte[data.length + 0x80];
@@ -504,7 +504,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 						listitem.filename = DosFileName;
 						listitem.fileheader = p3d;
 						listitem.FileType = FILETYPE_CPM;
-						listitem.LoadAddress = p3d.loadAddr;
+						listitem.LoadAddress = p3d.GetLoadAddress();
 						listitem.data = newdata;
 
 						item2.setText(values);
@@ -666,10 +666,10 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 					data = newdata;
 
 					// We will treat it as the type of file in the +3DOS header
-					treatAs = pfd.filetype;
+					treatAs = pfd.GetFileType();
 
 					// If the file is CODE, and length 6912, treat as a screen.
-					if ((pfd.filetype == FILETYPE_CODE) && (pfd.filelength == 6912)) {
+					if ((pfd.GetFileType() == FILETYPE_CODE) && (pfd.GetBasicFileLength() == 6912)) {
 						treatAs = FILETYPE_SCREEN;
 					}
 				}

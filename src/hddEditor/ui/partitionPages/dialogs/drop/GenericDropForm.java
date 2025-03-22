@@ -535,11 +535,11 @@ public class GenericDropForm {
 		String flags = "";
 		if (Details != null) {
 			if (Details.fileheader != null) {
-				switch (Details.fileheader.filetype) {
+				switch (Details.fileheader.GetFileType()) {
 				case 0:
-					flags = "BASIC line " + Details.fileheader.line;
+					flags = "BASIC line " + Details.fileheader.GetLine();
 				case 3:
-					flags = "Code " + Details.fileheader.loadAddr + "," + Details.fileheader.filelength;
+					flags = "Code " + Details.fileheader.GetLoadAddress() + "," + Details.fileheader.GetBasicFileLength();
 				}
 			} else {
 
@@ -684,11 +684,11 @@ public class GenericDropForm {
 		if (pfd == null) {
 			byte tmpbyte[] = new byte[0x80];
 			pfd = new Plus3DosFileHeader(tmpbyte);
-			pfd.VariablesOffset = details.data.length;
+			pfd.SetVarsOffset(details.data.length);
 		}
 		byte data[] = ExtractData(details);
 		StringBuilder sb = new StringBuilder();
-		Speccy.DecodeBasicFromLoadedFile(data, sb, pfd.VariablesOffset, false, false);
+		Speccy.DecodeBasicFromLoadedFile(data, sb, pfd.GetVarsOffset(), false, false);
 
 		Text t = new Text(MainPage, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
 		GridData gd = new GridData(GridData.FILL_BOTH);

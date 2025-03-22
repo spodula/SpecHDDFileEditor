@@ -48,8 +48,9 @@ public class CPMDirectoryEntry implements FileEntry {
 	// Any errors parsing the Directory entry.
 	public String Errors = "";
 
-	//if deleting multiple items, delay the reload of the directory.
+	// if deleting multiple items, delay the reload of the directory.
 	public boolean DelayReload = false;
+
 	/**
 	 * Parse and return the filename from the first DIRENT.
 	 * 
@@ -206,12 +207,12 @@ public class CPMDirectoryEntry implements FileEntry {
 	}
 
 	/**
-	 * Get the size of a file as seen by BASIC. For +3DOS files, basically, if it has
-	 * a valid header, subtract this. Otherwise just return the file size.
+	 * Get the size of a file as seen by BASIC. For +3DOS files, basically, if it
+	 * has a valid header, subtract this. Otherwise just return the file size.
 	 */
 	@Override
 	public int GetFileSize() {
-		if (GetPlus3DosHeader().IsPlusThreeDosFile) {
+		if (GetPlus3DosHeader().IsPlus3DosFile()) {
 			return (GetRawFileSize() - 0x80);
 		} else {
 			return (GetRawFileSize());
@@ -251,13 +252,14 @@ public class CPMDirectoryEntry implements FileEntry {
 
 		// iterate each block
 		int resultptr = 0;
-		
-		for (int i:blocks) {
+
+		for (int i : blocks) {
 			byte currentblock[] = ThisPartition.GetLogicalBlock(i);
-			System.arraycopy(currentblock, 0, result, resultptr, Math.min(result.length - resultptr,currentblock.length));
+			System.arraycopy(currentblock, 0, result, resultptr,
+					Math.min(result.length - resultptr, currentblock.length));
 			resultptr = resultptr + currentblock.length;
 		}
-		
+
 		return (result);
 	}
 
@@ -267,10 +269,10 @@ public class CPMDirectoryEntry implements FileEntry {
 	@Override
 	public byte[] GetFileData() throws IOException {
 		byte data[] = GetFileRawData();
-		Plus3DosFileHeader p3d = GetPlus3DosHeader(); 
-		if (p3d.IsPlusThreeDosFile) {
+		Plus3DosFileHeader p3d = GetPlus3DosHeader();
+		if (p3d.IsPlus3DosFile()) {
 			// Remove the +3DOS header
-			byte newdata[] = new byte[Math.min(p3d.filelength, data.length - 0x80)];
+			byte newdata[] = new byte[Math.min(p3d.GetBasicFileLength(), data.length - 0x80)];
 			System.arraycopy(data, 0x80, newdata, 0, newdata.length);
 			data = newdata;
 		}
@@ -353,7 +355,7 @@ public class CPMDirectoryEntry implements FileEntry {
 				ThisPartition.bam[blocknum] = false;
 			}
 			for (Dirent d : dirents) {
-				for (int i=0;i<32;i++) 
+				for (int i = 0; i < 32; i++)
 					d.rawdirent[i] = (byte) (0xe5 & 0xff);
 			}
 			if (!DelayReload) {
@@ -545,7 +547,7 @@ public class CPMDirectoryEntry implements FileEntry {
 	@Override
 	public String GetFileTypeString() {
 		Plus3DosFileHeader p3d = GetPlus3DosHeader();
-		if (p3d.IsPlusThreeDosFile) {
+		if (p3d.IsPlus3DosFile()) {
 			return (p3d.getTypeDesc());
 		} else {
 			return ("Raw CPM");
@@ -555,14 +557,11 @@ public class CPMDirectoryEntry implements FileEntry {
 	@Override
 	public SpeccyBasicDetails GetSpeccyBasicDetails() {
 		Plus3DosFileHeader p3d = GetPlus3DosHeader();
-		int FileType = p3d.filetype;
-		if (!p3d.IsPlusThreeDosFile) {
-			FileType = -1;
-		}
-		int VarStart = p3d.VariablesOffset;
-		int LineStart = p3d.line;
-		int LoadAddress = p3d.loadAddr;
-		char ArrayVar = (p3d.VarName + "A").charAt(0);
+		int FileType = p3d.GetFileType();
+		int VarStart = p3d.GetVarsOffset();
+		int LineStart = p3d.GetLine();
+		int LoadAddress = p3d.GetLoadAddress();
+		char ArrayVar = (p3d.GetVarName() + "A").charAt(0);
 
 		SpeccyBasicDetails result = new SpeccyBasicDetails(FileType, VarStart, LineStart, LoadAddress, ArrayVar);
 		return (result);

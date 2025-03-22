@@ -34,8 +34,8 @@ public class NumericArrayRenderer extends FileRenderer {
 		String Varname ="A";
 		byte header[] = null;
 		byte newdata[] = data;
-		if (p3d.IsPlusThreeDosFile && p3d.ChecksumValid) {
-			Varname = p3d.VarName;
+		if (p3d.IsPlus3DosFile()) {
+			Varname = p3d.GetVarName();
 			newdata = new byte[data.length - 0x80];
 			header = new byte[0x80];
 			System.arraycopy(data, 0, header, 0, 0x80);

@@ -115,7 +115,9 @@ public class MicrodriveFileEditDialog extends EditFileDialog {
 			break;
 		case Speccy.BASIC_CODE:
 				CodeRenderer CR = new CodeRenderer();
-				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, ((MicrodriveDirectoryEntry)ThisEntry).GetVar2(), filesel,CurrentPartition);
+				//TODO: implement MicroDriveFileEdit.saveevent for CODE
+
+				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, ((MicrodriveDirectoryEntry)ThisEntry).GetVar2(), filesel,CurrentPartition, null);
 				break;
 		case Speccy.BASIC_NUMARRAY:
 				NumericArrayRenderer NR = new NumericArrayRenderer();

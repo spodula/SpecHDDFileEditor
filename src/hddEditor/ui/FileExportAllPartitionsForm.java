@@ -451,17 +451,17 @@ public class FileExportAllPartitionsForm {
 								int codeLoadAddress = 0;
 								int filelength = 0;
 								String arrayVarName = "";
-								if (p3d == null || !p3d.IsPlusThreeDosFile) {
+								if (p3d == null || !p3d.IsPlus3DosFile()) {
 									SpeccyFileType = Speccy.BASIC_CODE;
 									codeLoadAddress = 0x10000 - data.length;
 									filelength = data.length;
 								} else {
-									filelength = p3d.filelength;
-									SpeccyFileType = p3d.filetype;
-									basicLine = p3d.line;
-									basicVarsOffset = p3d.VariablesOffset;
-									codeLoadAddress = p3d.loadAddr;
-									arrayVarName = p3d.VarName;
+									filelength = p3d.GetBasicFileLength();
+									SpeccyFileType = p3d.GetFileType();
+									basicLine = p3d.GetLine();
+									basicVarsOffset = p3d.GetVarsOffset();
+									codeLoadAddress = p3d.GetLoadAddress();
+									arrayVarName = p3d.GetVarName();
 								}
 								try {
 									int actiontype = GeneralUtils.EXPORT_TYPE_RAW;
@@ -497,7 +497,7 @@ public class FileExportAllPartitionsForm {
 											SysConfigp
 													.println("   <filelength>" + file.GetFileSize() + "</filelength>");
 
-											if (p3d == null || !p3d.IsPlusThreeDosFile) {
+											if (p3d == null || !p3d.IsPlus3DosFile()) {
 												// Treat CPM files as raw files.
 												SysConfigp.println("   <origfiletype>TAP</origfiletype>");
 												SysConfigp.println("   <specbasicinfo>");
@@ -509,19 +509,19 @@ public class FileExportAllPartitionsForm {
 											} else {
 												SysConfigp.println("   <origfiletype>TAP</origfiletype>");
 												SysConfigp.println("   <specbasicinfo>");
-												SysConfigp.println("       <filetype>" + p3d.filetype + "</filetype>");
+												SysConfigp.println("       <filetype>" + p3d.GetFileType()+ "</filetype>");
 												SysConfigp.println("       <filetypename>"
-														+ Speccy.FileTypeAsString(p3d.filetype) + "</filetypename>");
+														+ Speccy.FileTypeAsString(p3d.GetFileType()) + "</filetypename>");
 												SysConfigp.println(
-														"       <basicsize>" + p3d.filelength + "</basicsize>");
+														"       <basicsize>" + p3d.GetBasicFileLength() + "</basicsize>");
 												SysConfigp.println(
-														"       <basicstartline>" + p3d.line + "</basicstartline>");
+														"       <basicstartline>" + p3d.GetLine() + "</basicstartline>");
 												SysConfigp.println(
-														"       <codeloadaddr>" + p3d.loadAddr + "</codeloadaddr>");
-												SysConfigp.println("       <basicvarsoffset>" + p3d.VariablesOffset
+														"       <codeloadaddr>" + p3d.GetLoadAddress() + "</codeloadaddr>");
+												SysConfigp.println("       <basicvarsoffset>" + p3d.GetVarsOffset()
 														+ "</basicvarsoffset>");
 												SysConfigp.println(
-														"       <arrayvarname>" + p3d.VarName + "</arrayvarname>");
+														"       <arrayvarname>" + p3d.GetVarName() + "</arrayvarname>");
 												SysConfigp.println("   </specbasicinfo>");
 											}
 											if (file.getClass().getName().endsWith("TapDirectoryEntry")) {

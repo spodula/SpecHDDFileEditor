@@ -315,7 +315,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 						Plus3DosFileHeader p3d = entry.GetPlus3DosHeader();
 						byte entrydata[] = entry.GetFileData();
 						byte Rawentrydata[] = entry.GetFileRawData();
-						boolean isUnknown = !p3d.IsPlusThreeDosFile;
+						boolean isUnknown = !p3d.IsPlus3DosFile();
 
 						int SpeccyFileType = 0;
 						int basicLine = 0;
@@ -323,17 +323,17 @@ public class PLUS3DOSPartition extends CPMPartition {
 						int codeLoadAddress = 0;
 						int filelength = 0;
 						String arrayVarName = "";
-						if (p3d == null || !p3d.IsPlusThreeDosFile) {
+						if (p3d == null || !p3d.IsPlus3DosFile()) {
 							SpeccyFileType = Speccy.BASIC_CODE;
 							codeLoadAddress = 0x10000 - entrydata.length;
 							filelength = entrydata.length;
 						} else {
-							filelength = p3d.filelength;
-							SpeccyFileType = p3d.filetype;
-							basicLine = p3d.line;
-							basicVarsOffset = p3d.VariablesOffset;
-							codeLoadAddress = p3d.loadAddr;
-							arrayVarName = p3d.VarName;
+							filelength = p3d.GetBasicFileLength();
+							SpeccyFileType = p3d.GetFileType();
+							basicLine = p3d.GetLine();
+							basicVarsOffset = p3d.GetVarsOffset();
+							codeLoadAddress = p3d.GetLoadAddress();
+							arrayVarName = p3d.GetVarName();
 						}
 						try {
 							int actiontype = GeneralUtils.EXPORT_TYPE_RAW;
@@ -381,7 +381,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 						}
 						SysConfig.write("   </cpm:dirents>\n".toCharArray());
 
-						if (p3d == null || !p3d.IsPlusThreeDosFile) {
+						if (p3d == null || !p3d.IsPlus3DosFile()) {
 							// Treat CPM files as raw files.
 							SysConfig.write("   <origfiletype>CPM</origfiletype>\n".toCharArray());
 							SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
@@ -393,26 +393,26 @@ public class PLUS3DOSPartition extends CPMPartition {
 						} else {
 							SysConfig.write("   <origfiletype>PLUS3DOS</origfiletype>\n".toCharArray());
 							SysConfig.write(("   <specbasicinfo>\n".toCharArray()));
-							SysConfig.write(("       <filetype>" + p3d.filetype + "</filetype>\n").toCharArray());
-							SysConfig.write(("       <filetypename>" + Speccy.FileTypeAsString(p3d.filetype)
+							SysConfig.write(("       <filetype>" + p3d.GetFileType() + "</filetype>\n").toCharArray());
+							SysConfig.write(("       <filetypename>" + Speccy.FileTypeAsString(p3d.GetFileType())
 									+ "</filetypename>\n").toCharArray());
-							SysConfig.write(("       <basicsize>" + p3d.filelength + "</basicsize>\n").toCharArray());
+							SysConfig.write(("       <basicsize>" + p3d.GetBasicFileLength() + "</basicsize>\n").toCharArray());
 							SysConfig.write(
-									("       <basicstartline>" + p3d.line + "</basicstartline>\n").toCharArray());
+									("       <basicstartline>" + p3d.GetLine() + "</basicstartline>\n").toCharArray());
 							SysConfig.write(
-									("       <codeloadaddr>" + p3d.loadAddr + "</codeloadaddr>\n").toCharArray());
-							SysConfig.write(("       <basicvarsoffset>" + p3d.VariablesOffset + "</basicvarsoffset>\n")
+									("       <codeloadaddr>" + p3d.GetLoadAddress() + "</codeloadaddr>\n").toCharArray());
+							SysConfig.write(("       <basicvarsoffset>" + p3d.GetVarsOffset() + "</basicvarsoffset>\n")
 									.toCharArray());
 							SysConfig
-									.write(("       <arrayvarname>" + p3d.VarName + "</arrayvarname>\n").toCharArray());
+									.write(("       <arrayvarname>" + p3d.GetVarName()+ "</arrayvarname>\n").toCharArray());
 							SysConfig.write(("   </specbasicinfo>\n".toCharArray()));
 							SysConfig.write(("   <specplus3>\n".toCharArray()));
-							SysConfig.write(("       <signature>" + p3d.Signature + "</signature>\n").toCharArray());
-							SysConfig.write(("       <softEOF>" + p3d.SoftEOF + "</softEOF>\n").toCharArray());
-							SysConfig.write(("       <iss>" + p3d.IssueNo + "</iss>\n").toCharArray());
-							SysConfig.write(("       <ver>" + p3d.VersionNo + "</ver>\n").toCharArray());
-							SysConfig.write(("       <rawsize>" + p3d.fileSize + "</rawsize>\n").toCharArray());
-							SysConfig.write(("       <checksum>" + p3d.CheckSum + "</checksum>\n").toCharArray());
+							SysConfig.write(("       <signature>" + p3d.GetSignature() + "</signature>\n").toCharArray());
+							SysConfig.write(("       <softEOF>" + p3d.GetSoftEOF() + "</softEOF>\n").toCharArray());
+							SysConfig.write(("       <iss>" + p3d.GetIssueNo() + "</iss>\n").toCharArray());
+							SysConfig.write(("       <ver>" + p3d.GetVersionNo() + "</ver>\n").toCharArray());
+							SysConfig.write(("       <rawsize>" + p3d.GetDOSFileSize() + "</rawsize>\n").toCharArray());
+							SysConfig.write(("       <checksum>" + p3d.CalculateChecksum() + "</checksum>\n").toCharArray());
 							SysConfig.write(("   </specplus3>\n".toCharArray()));
 						}
 

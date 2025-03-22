@@ -460,9 +460,9 @@ public class PlusThreePartPage extends GenericPage {
 				String content[] = new String[5];
 				content[0] = entry.GetFilename();
 				Plus3DosFileHeader pfdh = entry.GetPlus3DosHeader();
-				if (pfdh.IsPlusThreeDosFile) {
+				if (pfdh.IsPlus3DosFile()) {
 					content[1] = pfdh.getTypeDesc();
-					content[3] = String.valueOf(pfdh.fileSize - 0x80);
+					content[3] = String.valueOf(pfdh.GetDOSFileSize() - 0x80);
 				} else {
 					content[1] = "CPM/Invalid +3 Header";
 				}

@@ -140,10 +140,10 @@ public class GenericAddPageDialog {
 		if (pfd == null) {
 			byte tmpbyte[] = new byte[0x80];
 			pfd = new Plus3DosFileHeader(tmpbyte);
-			pfd.VariablesOffset = data.length;
+			pfd.SetVarsOffset(data.length);
 		}
 		StringBuilder sb = new StringBuilder();
-		Speccy.DecodeBasicFromLoadedFile(data, sb, pfd.VariablesOffset, false, false);
+		Speccy.DecodeBasicFromLoadedFile(data, sb, pfd.GetVarsOffset(), false, false);
 
 		Text t = new Text(MainPage, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
 		GridData gd = new GridData(GridData.FILL_BOTH);

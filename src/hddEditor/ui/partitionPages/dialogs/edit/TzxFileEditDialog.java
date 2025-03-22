@@ -180,7 +180,7 @@ public class TzxFileEditDialog extends EditFileDialog {
 		} else if ((TzxFileType == TZX.TZX_CUSTOMINFO)) {
 			CustomInfoBlock cib = (CustomInfoBlock) te.DataBlock;
 			CR = new CodeRenderer();
-			CR.RenderCode(MainPage, cib.data, null, cib.ID, cib.data.length, 0, filesel,CurrentPartition);
+			CR.RenderCode(MainPage, cib.data, null, cib.ID, cib.data.length, 0, filesel,CurrentPartition,null);
 		} else if ((TzxFileType == TZX.TZX_SNAPSHOT)) {
 			SnapshotBlock sb = (SnapshotBlock) te.DataBlock;
 			CR = new CodeRenderer();
@@ -190,7 +190,7 @@ public class TzxFileEditDialog extends EditFileDialog {
 			} else {
 				filename = filename +".Z80";
 			}
-			CR.RenderCode(MainPage, sb.data, null, filename, sb.data.length, 0, filesel,CurrentPartition);
+			CR.RenderCode(MainPage, sb.data, null, filename, sb.data.length, 0, filesel,CurrentPartition,null);
 		} else if ((TzxFileType == TZX.TZX_ARCHIVEINFO)) {
 			ArchiveInfoBlock aab = (ArchiveInfoBlock) te.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
@@ -261,8 +261,10 @@ public class TzxFileEditDialog extends EditFileDialog {
 				BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.VarStart, sbd.LineStart, filesel);
 				break;
 			case Speccy.BASIC_CODE:
+				//TODO: implement TZXFileEdit.saveevent for CODE
+
 				CR = new CodeRenderer();
-				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress, filesel,CurrentPartition);
+				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress, filesel,CurrentPartition,null);
 				break;
 			case Speccy.BASIC_NUMARRAY:
 				NumericArrayRenderer NR = new NumericArrayRenderer();
@@ -273,7 +275,7 @@ public class TzxFileEditDialog extends EditFileDialog {
 				CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);
 			default:
 				CR = new CodeRenderer();
-				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, 0x0000, filesel,CurrentPartition);
+				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, 0x0000, filesel,CurrentPartition,null);
 			}
 		}
 	}

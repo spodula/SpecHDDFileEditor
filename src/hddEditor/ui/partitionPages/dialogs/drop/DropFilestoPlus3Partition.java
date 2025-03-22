@@ -43,7 +43,7 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 	protected NewFileListItem IdentifyFileType(File f) {
 		NewFileListItem nfli = super.IdentifyFileType(f);
 		nfli.fileheader = new Plus3DosFileHeader(nfli.data);
-		if (nfli.fileheader.IsPlusThreeDosFile) {
+		if (nfli.fileheader.IsPlus3DosFile()) {
 			nfli.FileType = FILETYPE_PLUS3DOS;
 		} else {
 			nfli.fileheader = null;
@@ -115,29 +115,29 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 		if (details != null) {
 			if (details.fileheader == null) {
 				Plus3DosFileHeader pfd = new Plus3DosFileHeader(details.data);
-				if (pfd.IsPlusThreeDosFile) {
+				if (pfd.IsPlus3DosFile()) {
 					details.fileheader = pfd;
 				}
 			}
 
 			if (details.fileheader != null) {
 				str = "Valid +3Dos Header: \n" + "File type: " + details.fileheader.getTypeDesc() + " ("
-						+ details.fileheader.filetype + ")\n" + "+3DOS file length: " + details.fileheader.filelength
-						+ "\n" + "Disk file length: " + details.fileheader.fileSize + "\n" + "Dos version: "
-						+ details.fileheader.VersionNo + " Dos Issue:" + details.fileheader.IssueNo + "\n";
-				switch (details.fileheader.filetype) {
+						+ details.fileheader.GetFileType() + ")\n" + "+3DOS file length: " + details.fileheader.GetBasicFileLength()
+						+ "\n" + "Disk file length: " + details.fileheader.GetDOSFileSize() + "\n" + "Dos version: "
+						+ details.fileheader.GetVersionNo() + " Dos Issue:" + details.fileheader.GetIssueNo() + "\n";
+				switch (details.fileheader.GetFileType()) {
 				case 0:
-					str = str + "Start line: " + details.fileheader.line + "\n";
-					str = str + "Variables offset: " + details.fileheader.VariablesOffset + "\n";
+					str = str + "Start line: " + details.fileheader.GetLine() + "\n";
+					str = str + "Variables offset: " + details.fileheader.GetVarsOffset() + "\n";
 					break;
 				case 1:
-					str = str + "Variable name: " + details.fileheader.VarName + "\n";
+					str = str + "Variable name: " + details.fileheader.GetVarName() + "\n";
 					break;
 				case 2:
-					str = str + "Variable name: " + details.fileheader.VarName + "\n";
+					str = str + "Variable name: " + details.fileheader.GetVarName() + "\n";
 					break;
 				case 3:
-					str = str + "Load address: " + details.fileheader.loadAddr + "\n";
+					str = str + "Load address: " + details.fileheader.GetLoadAddress() + "\n";
 					break;
 				}
 
@@ -152,8 +152,8 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 		t.setLayoutData(gd);
 		t.setText(str);
 
-		if (details.fileheader != null && details.fileheader.ChecksumValid) {
-			switch (details.fileheader.filetype) {
+		if (details.fileheader != null && details.fileheader.ChecksumValid()) {
+			switch (details.fileheader.GetFileType()) {
 			case 0:
 				RenderBasic(details);
 				break;
@@ -164,7 +164,7 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 				RenderNumArray(details);
 				break;
 			case 3:
-				if (details.fileheader.filelength == 6912) {
+				if (details.fileheader.GetBasicFileLength() == 6912) {
 					RenderScreen(details);
 				} else {
 					RenderCode(details);

@@ -1,5 +1,7 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
 
+import java.io.IOException;
+
 /**
  * FIle edit dialog for the +3DOS partition page
  */
@@ -20,11 +22,13 @@ import org.eclipse.swt.widgets.Shell;
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.IDEDosPartition;
+import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.cpm.CPMDirectoryEntry;
 import hddEditor.libs.partitions.cpm.Dirent;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
+import hddEditor.ui.partitionPages.dialogs.edit.callbacks.GenericSaveEvent;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 
@@ -83,8 +87,8 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 		lbl = new Label(shell, SWT.NONE);
 		lbl.setFont(boldFont);
 
-		if (p3d.IsPlusThreeDosFile) {
-			lbl.setText(String.format("+3DOS Length: %d bytes (%X)", p3d.filelength, p3d.filelength));
+		if (p3d.IsPlus3DosFile()) {
+			lbl.setText(String.format("+3DOS Length: %d bytes (%X)", p3d.GetBasicFileLength(), p3d.GetBasicFileLength()));
 		} else {
 			lbl.setText("Not a +3DOS file (Or header corrupt)");
 		}
@@ -131,12 +135,12 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 
 		byte header[] = null;
 		byte newdata[] = data;
-		if (p3d.IsPlusThreeDosFile) {
+		if (p3d.IsPlus3DosFile()) {
 			// Separate the header and the file data.
 			header = new byte[0x80];
 			System.arraycopy(data, 0, header, 0, 0x80);
-			newdata = new byte[p3d.filelength];
-			if (p3d.filelength > data.length-0x80) {
+			newdata = new byte[p3d.GetBasicFileLength()];
+			if (p3d.GetBasicFileLength() > data.length-0x80) {
 				System.arraycopy(data, 0x80, newdata, 0, data.length-0x80);
 			} else {
 				System.arraycopy(data, 0x80, newdata, 0, newdata.length);
@@ -146,24 +150,55 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 		/**
 		 * Render the page.
 		 */
-		if (!p3d.IsPlusThreeDosFile) {
+		if (!p3d.IsPlus3DosFile()) {
 			CodeRenderer CR = new CodeRenderer();
 			CR.RenderCode(MainPage, newdata, null, ThisEntry.GetFilename(), newdata.length, 0x0000, filesel,
-					CurrentPartition);
-		} else if (p3d.filetype == Speccy.BASIC_BASIC) {
+					CurrentPartition,null);
+		} else if (p3d.GetFileType() == Speccy.BASIC_BASIC) {
 			BasicRenderer BR = new BasicRenderer();
-			BR.RenderBasic(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.filelength, p3d.VariablesOffset,
-					p3d.line, filesel);
-		} else if (p3d.filetype == Speccy.BASIC_CODE) {
+			BR.RenderBasic(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.GetBasicFileLength(), p3d.GetVarsOffset(),
+					p3d.GetLine(), filesel);
+		} else if (p3d.GetFileType() == Speccy.BASIC_CODE) {
+			//TODO: implement Plus3DosFileEdit.saveevent for CODE
+
 			CodeRenderer CR = new CodeRenderer();
-			CR.RenderCode(MainPage, newdata, header, ThisEntry.GetFilename(), newdata.length, p3d.loadAddr, filesel,
-					CurrentPartition);
-		} else if (p3d.filetype == Speccy.BASIC_NUMARRAY) {
+			CR.RenderCode(MainPage, newdata, header, ThisEntry.GetFilename(), newdata.length, p3d.GetLoadAddress(), filesel,
+					CurrentPartition, new CodeSave());
+		} else if (p3d.GetFileType() == Speccy.BASIC_NUMARRAY) {
 			NumericArrayRenderer NR = new NumericArrayRenderer();
-			NR.RenderNumericArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.VarName, filesel);
+			NR.RenderNumericArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.GetVarName(), filesel);
 		} else { // Char array
 			CharArrayRenderer CR = new CharArrayRenderer();
-			CR.RenderCharArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.VarName, filesel);
+			CR.RenderCharArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.GetVarName(), filesel);
 		}
 	}
+	
+	private class CodeSave implements GenericSaveEvent {
+		@Override
+		public boolean DoSave(int valtype, String sValue, int Value) {
+			CPMDirectoryEntry direntry = (CPMDirectoryEntry)ThisEntry;
+			Plus3DosFileHeader p3d = direntry.GetPlus3DosHeader();
+			if (p3d!= null && p3d.IsPlus3DosFile()) {
+				System.out.print("Load address: "+p3d.GetLoadAddress()+" -> ");
+				p3d.SetLoadAddress(Value);
+				System.out.println(p3d.GetLoadAddress());
+				PLUS3DOSPartition p3dPart = (PLUS3DOSPartition)CurrentPartition;
+				try {
+					direntry.SetDeleted(true);
+					byte rawdata[] = direntry.GetFileRawData();
+					System.arraycopy(p3d.RawHeader, 0, rawdata, 0, 0x80);
+					p3dPart.AddCPMFile(direntry.GetFilename(), rawdata);
+					return true;
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
+				System.err.println("Update ignored, No +3DOS Basic header to update.");
+			}
+			return false;
+		}
+		
+	}
+	
 }

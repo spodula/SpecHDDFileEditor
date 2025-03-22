@@ -436,15 +436,15 @@ public class ScriptRunner {
 							CPMDirectoryEntry de = (CPMDirectoryEntry) entry;
 							rawdata = de.GetFileData();
 							Plus3DosFileHeader p3d = de.GetPlus3DosHeader();
-							if (p3d != null && p3d.IsPlusThreeDosFile) {
+							if (p3d != null && p3d.IsPlus3DosFile()) {
 								filedata = new byte[rawdata.length - 0x80];
 								System.arraycopy(rawdata, 0x80, filedata, 0, filedata.length);
-								filelength = p3d.filelength;
-								SpeccyFileType = p3d.filetype;
-								basicline = p3d.line;
-								basicVarsOffset = p3d.VariablesOffset;
-								codeLoadAddress = p3d.loadAddr;
-								arrayVarName = (p3d.VarName + "A").substring(0, 1);
+								filelength = p3d.GetBasicFileLength();
+								SpeccyFileType = p3d.GetFileType();
+								basicline = p3d.GetLine();
+								basicVarsOffset = p3d.GetVarsOffset();
+								codeLoadAddress = p3d.GetLoadAddress();
+								arrayVarName = (p3d.GetVarName() + "A").substring(0, 1);
 							} else {
 								filedata = rawdata;
 								filelength = rawdata.length;

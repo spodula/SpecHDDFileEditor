@@ -94,8 +94,9 @@ public class TapFileEditDialog extends EditFileDialog {
 			BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.VarStart, sbd.LineStart, filesel);
 			break;
 		case Speccy.BASIC_CODE:
+			//TODO: implement TapFileEdit.saveevent for CODE
 			CR = new CodeRenderer();
-			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress, filesel,CurrentPartition);
+			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress, filesel,CurrentPartition,null);
 			break;
 		case Speccy.BASIC_NUMARRAY:
 			NumericArrayRenderer NR = new NumericArrayRenderer();
@@ -106,7 +107,7 @@ public class TapFileEditDialog extends EditFileDialog {
 			CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel);
 		default:
 			CR = new CodeRenderer();
-			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, 0x0000, filesel,CurrentPartition);
+			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, 0x0000, filesel,CurrentPartition,null);
 		}
 	}
 

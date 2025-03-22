@@ -119,8 +119,9 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 				CurrentRenderer.Render(MainPage, data, mEnt.GetFilename(),filesel);
 			} else {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
+				//TODO: implement MGTDOSFileEdit.saveevent for CODE
 				CurrentRenderer.RenderCode(MainPage, data, null, mEnt.GetFilename(), data.length,
-						mEnt.GetVar1(),filesel,CurrentPartition);
+						mEnt.GetVar1(),filesel,CurrentPartition,null);
 			}
 		} catch (Exception E) {
 			System.out.println("Error Showing " + ThisEntry.GetFilename()+ ": " + E.getMessage());

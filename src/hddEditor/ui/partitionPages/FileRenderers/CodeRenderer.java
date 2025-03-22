@@ -15,6 +15,7 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.layout.GridData;
@@ -38,6 +39,7 @@ import hddEditor.ui.partitionPages.FileRenderers.RawRender.ScreenRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.SpriteRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.TextRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.Z80SnapshotRenderer;
+import hddEditor.ui.partitionPages.dialogs.edit.callbacks.GenericSaveEvent;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.AssemblyRenderer;
 
 public class CodeRenderer extends FileRenderer {
@@ -46,6 +48,7 @@ public class CodeRenderer extends FileRenderer {
 	private Combo CodeTypeDropDown = null;
 	private Vector<Renderer> Renderers = null;
 	private IDEDosPartition part;
+	private Color DefaultBackgroundColor;
 
 	// Rendering options
 	private String[] CODETYPES = { "Binary", "Screen", "Assembly", "SNA file", "Z80 file", "48k Ram Dump", ".SP file",
@@ -61,7 +64,7 @@ public class CodeRenderer extends FileRenderer {
 	 * @param loadAddr
 	 */
 	public void RenderCode(Composite mainPage, byte data[], byte header[], String Filename, int fileSize, int loadAddr,
-			FileSelectDialog filesel, IDEDosPartition currentpart) {
+			FileSelectDialog filesel, IDEDosPartition currentpart, GenericSaveEvent saveevent) {
 
 		super.Render(mainPage, data, Filename, filesel);
 		part = currentpart;
@@ -100,9 +103,42 @@ public class CodeRenderer extends FileRenderer {
 		gd.heightHint = 20;
 		StartAddress.setLayoutData(gd);
 
-		lbl = new Label(mainPage, SWT.NONE);
+		Button btn;
+		DefaultBackgroundColor = lbl.getBackground();
+		if (saveevent != null) {
+			btn = new Button(mainPage, SWT.NONE);
+			btn.setText("Update Start address");
+			btn.setLayoutData(gd);
+			btn.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					if (saveevent != null) {
+						try {
+							String sa = StartAddress.getText();
+							Integer sai = Integer.valueOf(sa);
 
-		Button btn = new Button(mainPage, SWT.NONE);
+							if (!saveevent.DoSave(0, sa, sai)) {
+								StartAddress.setBackground(new Color(mainPage.getDisplay(), 255,0,0));
+							} else {
+								StartAddress.setBackground(DefaultBackgroundColor);
+							}
+							
+						} catch (NumberFormatException e) {
+							StartAddress.setBackground(new Color(mainPage.getDisplay(), 255,0,0));
+						}
+					}
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+		} else {
+			lbl = new Label(mainPage, 0);
+		}
+
+		btn = new Button(mainPage, SWT.NONE);
 		btn.setText("Extract file as Hex");
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
