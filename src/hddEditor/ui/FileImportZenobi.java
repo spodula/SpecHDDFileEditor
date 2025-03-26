@@ -1,5 +1,4 @@
 package hddEditor.ui;
-//TODO: Zenobi Clear/Randomize usr using VAL
 
 import java.io.File;
 import java.io.IOException;
@@ -35,18 +34,38 @@ import hddEditor.libs.partitions.IDEDosPartition;
 
 public class FileImportZenobi {
 	public class ZenobiDetails {
+		// Files containing the main binary data (usually three of them)
 		public FileEntry binfile[] = null;
+
+		// Start address decoded from the BASIC loader
 		public int startaddress = 0;
+
+		// Address of the bytes identified as the main loader to 0807 to be poked out.
 		public int loaderpoke = 0;
+
+		// Value of the CLEAR...
 		public int clear = 0;
 
+		// Font file is any
 		public FileEntry Font = null;
 
+		// Screen file if any
 		public FileEntry screen = null;
+
+		// if TRUE, the screen is compressed and need to put in a RANDOMIZE USR to
+		// decompress it.
 		public boolean ScreenUncompress = false;
+		
+		//Address of the Randomize usr to decompress the screen
 		public int ScreenUncompressAddress = 0;
+		
+		//Any errors when decoding tape file.
 		public String errors = "";
+		
+		//Some versions use EXTVEL+xx to start the program. This stores it if required
 		public int extvec = 0;
+		
+		//any EXTVEC lines
 		public String excveclines[] = null;
 
 		/**
@@ -69,13 +88,20 @@ public class FileImportZenobi {
 			return (result);
 		}
 
+		/**
+		 * Do we have enough information to create a loader?
+		 * @return
+		 */
 		public boolean CanImport() {
-			boolean result = (binfile[0] != null) && (binfile[1] != null) && (binfile[2] != null) /*&& (startaddress > 0)*/
-					&& (loaderpoke > 0);// && (errors.isBlank());
+			boolean result = (binfile[0] != null) && (binfile[1] != null) && (binfile[2] != null)
+					&& (loaderpoke > 0);
 
 			return (result);
 		}
 
+		/**
+		 * Constructor
+		 */
 		public ZenobiDetails() {
 			binfile = new FileEntry[3];
 			errors = "";
