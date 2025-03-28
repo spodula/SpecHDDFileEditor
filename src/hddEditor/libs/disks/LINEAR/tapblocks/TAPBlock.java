@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.ExtendedSpeccyBasicDetails;
+import hddEditor.libs.disks.SpeccyBasicDetails;
 
 /*
  * Storage for individual tape blocks.
@@ -152,4 +153,39 @@ public class TAPBlock {
 		}
 		return (result);
 	}
+	
+	/**
+	 * Set the file as if its a BASIC header...
+	 * @param sbd
+	 */
+	public void SetHeader(SpeccyBasicDetails sbd) {
+		int param1 = 0;
+		int param2 = 0;
+		switch (sbd.BasicType) {
+		case Speccy.BASIC_BASIC:
+			param1 = sbd.LineStart;
+			param2 = sbd.VarStart;
+			break;
+		case Speccy.BASIC_NUMARRAY:
+			param1 = ((((sbd.VarName+"A").toUpperCase().charAt(0)-0x40) | 0x80) & 0xff) << 8;
+			break;
+		case Speccy.BASIC_CHRARRAY: 
+			param1 = ((((sbd.VarName+"A").toUpperCase().charAt(0)-0x40) | 0xC0) & 0xff) << 8;
+				break;
+		case Speccy.BASIC_CODE:
+			param1 = sbd.LoadAddress;
+			param2 = 0x8000;
+		default:
+				break;
+		}
+		
+		data[0] = (byte) sbd.BasicType;
+		data[13] = (byte) (param1 & 0xff);
+		data[14] = (byte) (((param1 & 0xff00) >> 8) & 0xff);
+		data[15] = (byte) (param2 & 0xff);
+		data[16] = (byte) (((param2 & 0xff00) >> 8) & 0xff);
+		UpdateChecksum();
+	}
+	
+	
 }

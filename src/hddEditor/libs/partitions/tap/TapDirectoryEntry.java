@@ -173,5 +173,5 @@ public class TapDirectoryEntry implements FileEntry {
 	public byte[] GetFileRawData() throws IOException {
 		return DataBlock.data;
 	}
-
+	
 }

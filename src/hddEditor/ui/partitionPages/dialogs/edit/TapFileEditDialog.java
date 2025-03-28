@@ -1,10 +1,11 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
+
+import java.io.IOException;
+
 /**
  * Implementation of the Edit file page for an TAP file.
  * 
- * TODO: Saves for TAP BASIC/Start line  BASIC/VARSTART
  * TODO: Saves for TAP Variable name for Variables.
- * TODO: Saves for TAP Code load address
  */
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -22,20 +23,26 @@ import org.eclipse.swt.widgets.Shell;
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.SpeccyBasicDetails;
+import hddEditor.libs.disks.LINEAR.TAPFile;
+import hddEditor.libs.disks.LINEAR.tapblocks.TAPBlock;
 import hddEditor.libs.partitions.IDEDosPartition;
+import hddEditor.libs.partitions.TAPPartition;
+
+import hddEditor.libs.partitions.tap.TapDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
+import hddEditor.ui.partitionPages.dialogs.edit.callbacks.GenericSaveEvent;
 
 public class TapFileEditDialog extends EditFileDialog {
-	public TapFileEditDialog(Display display,FileSelectDialog filesel,IDEDosPartition CurrentPartition) {
-		super(display, filesel,CurrentPartition);
+	public TapFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition) {
+		super(display, filesel, CurrentPartition);
 	}
 
 	/**
 	 * Create the form
-	 */	
+	 */
 	@Override
 	protected void Createform() {
 		shell = new Shell(display);
@@ -91,29 +98,133 @@ public class TapFileEditDialog extends EditFileDialog {
 		 * Render the page.
 		 */
 		CodeRenderer CR;
-		SpeccyBasicDetails sbd = ThisEntry.GetSpeccyBasicDetails();
+		TapDirectoryEntry tde = (TapDirectoryEntry) ThisEntry;
+		SpeccyBasicDetails sbd = tde.GetSpeccyBasicDetails();
 		switch (sbd.BasicType) {
 		case Speccy.BASIC_BASIC:
 			BasicRenderer BR = new BasicRenderer();
-			BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.VarStart, sbd.LineStart, filesel, null);
+			BR.RenderBasic(MainPage, data, null, tde.GetFilename(), data.length, sbd.VarStart, sbd.LineStart, filesel,
+					new TapBasicSave());
 			break;
 		case Speccy.BASIC_CODE:
-			//TODO: implement TapFileEdit.saveevent for CODE
 			CR = new CodeRenderer();
-			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress, filesel,CurrentPartition,null);
+			CR.RenderCode(MainPage, data, null, tde.GetFilename(), data.length, sbd.LoadAddress, filesel,
+					CurrentPartition, new TapCodeSave());
 			break;
 		case Speccy.BASIC_NUMARRAY:
 			NumericArrayRenderer NR = new NumericArrayRenderer();
-			NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel, null);
+			NR.RenderNumericArray(MainPage, data, null, tde.GetFilename(), sbd.VarName + "", filesel,
+					new TapArraySave());
 			break;
 		case Speccy.BASIC_CHRARRAY:
 			CharArrayRenderer CAR = new CharArrayRenderer();
-			CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel, null);
+			CAR.RenderCharArray(MainPage, data, null, tde.GetFilename(), sbd.VarName + "", filesel, new TapArraySave());
 		default:
 			CR = new CodeRenderer();
-			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, 0x0000, filesel,CurrentPartition,null);
+			CR.RenderCode(MainPage, data, null, tde.GetFilename(), data.length, 0x0000, filesel, CurrentPartition,
+					null);
+		}
+	}
+
+	/**
+	 * Save for CODE files. Only the LOAD address is save-able.
+	 */
+	private class TapCodeSave implements GenericSaveEvent {
+		@Override
+		public boolean DoSave(int valtype, String sValue, int Value) {
+			TapDirectoryEntry direntry = (TapDirectoryEntry) ThisEntry;
+			TAPBlock header = direntry.HeaderBlock;
+			if (header != null) {
+				SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
+				System.out.print("Load address: " + sbd.LoadAddress + " -> ");
+				sbd.LoadAddress = Value;
+
+				TAPPartition TapPart = (TAPPartition) CurrentPartition;
+				TAPFile tapfile = (TAPFile) TapPart.CurrentDisk;
+				try {
+					header.SetHeader(sbd);
+					tapfile.RewriteFile();
+					TapPart.LoadPartitionSpecificInformation();
+					System.out.println(direntry.GetSpeccyBasicDetails().LoadAddress);
+					return true;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				System.err.println("Update ignored, No Basic header to update.");
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Save for BASIC files. Start line(0) and Vars(1) offset are save-able.
+	 */
+	private class TapBasicSave implements GenericSaveEvent {
+		@Override
+		public boolean DoSave(int valtype, String sValue, int Value) {
+			TapDirectoryEntry direntry = (TapDirectoryEntry) ThisEntry;
+			TAPBlock header = direntry.HeaderBlock;
+			if (header != null) {
+				SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
+				if (valtype == 0) {
+					System.out.print("Start Line: " + sbd.LineStart + " -> ");
+					sbd.LineStart = Value;
+					System.out.println(sbd.LineStart);
+				} else {
+					System.out.print("Vars Offset: " + sbd.VarStart + " -> ");
+					sbd.VarStart = Value;
+					System.out.println(sbd.VarStart);
+				}
+
+				TAPPartition TapPart = (TAPPartition) CurrentPartition;
+				TAPFile tapfile = (TAPFile) TapPart.CurrentDisk;
+				try {
+					header.SetHeader(sbd);
+					tapfile.RewriteFile();
+					TapPart.LoadPartitionSpecificInformation();
+					System.out.println(direntry.GetSpeccyBasicDetails().LoadAddress);
+					return true;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				System.err.println("Update ignored, No Basic header to update.");
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Save for BASIC files. Start line(0) and Vars(1) offset are save-able.
+	 */
+	private class TapArraySave implements GenericSaveEvent {
+		@Override
+		public boolean DoSave(int valtype, String sValue, int Value) {
+			TapDirectoryEntry direntry = (TapDirectoryEntry) ThisEntry;
+			TAPBlock header = direntry.HeaderBlock;
+			if (header != null) {
+				SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
+				System.out.print("Array name: " + sbd.VarName + " -> ");
+				sbd.VarName = (sValue + "A").charAt(0);
+				System.out.println(sbd.VarName);
+
+				TAPPartition TapPart = (TAPPartition) CurrentPartition;
+				TAPFile tapfile = (TAPFile) TapPart.CurrentDisk;
+				try {
+					header.SetHeader(sbd);
+					tapfile.RewriteFile();
+					TapPart.LoadPartitionSpecificInformation();
+					System.out.println(direntry.GetSpeccyBasicDetails().LoadAddress);
+					return true;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				System.err.println("Update ignored, No Basic header to update.");
+			}
+			return false;
 		}
 	}
 
 }
-

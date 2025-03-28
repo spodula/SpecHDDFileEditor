@@ -261,6 +261,9 @@ public class CodeRenderer extends FileRenderer {
 		lbl = new Label(mainPage, SWT.NONE);
 		lbl = new Label(mainPage, SWT.NONE);
 
+		/*
+		 * Default the code type depending on the file extension. 
+		 */
 		if (Filename.toUpperCase().endsWith(".SNA")) {
 			CodeTypeDropDown.setText(CODETYPES[3]);
 		}

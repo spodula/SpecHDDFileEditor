@@ -1,5 +1,4 @@
 package hddEditor.ui;
-//TODO: add support for szx files
 
 import java.io.File;
 import java.io.FileWriter;
