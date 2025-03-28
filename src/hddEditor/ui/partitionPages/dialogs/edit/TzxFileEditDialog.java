@@ -2,9 +2,6 @@ package hddEditor.ui.partitionPages.dialogs.edit;
 /**
  * Implementation of the Edit file(block?) page for a TZX file.
  *
- * TODO: Saves for TZX BASIC/Start line  BASIC/VARSTART
- * TODO: Saves for TZX Variable name for Variables.
- * TODO: Saves for TZX Code load address
  */
 
 import java.io.IOException;
@@ -275,8 +272,6 @@ public class TzxFileEditDialog extends EditFileDialog {
 				BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.VarStart, sbd.LineStart, filesel, new TzxBasicSave());
 				break;
 			case Speccy.BASIC_CODE:
-				//TODO: implement TZXFileEdit.saveevent for CODE
-
 				CR = new CodeRenderer();
 				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress, filesel,CurrentPartition,new TzxCodeSave());
 				break;
