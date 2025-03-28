@@ -147,9 +147,11 @@ public class TAPBlock {
 			int param1 = (data[13] & 0xff) + ((data[14] & 0xff) * 0x100);
 			int param2 = (data[15] & 0xff) + ((data[16] & 0xff) * 0x100);
 			byte filename[] = new byte[10];
+			char varname = (char) ((data[14] & 0x3f) + 0x40); 
+			
 			System.arraycopy(data, 1, filename, 0, 10);
 
-			result = new ExtendedSpeccyBasicDetails(type, param2, param1, param1, 'A', new String(filename), filelen);
+			result = new ExtendedSpeccyBasicDetails(type, param2, param1, param1, varname, new String(filename), filelen);
 		}
 		return (result);
 	}

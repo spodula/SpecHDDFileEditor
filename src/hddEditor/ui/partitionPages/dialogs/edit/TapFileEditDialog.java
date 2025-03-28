@@ -5,7 +5,6 @@ import java.io.IOException;
 /**
  * Implementation of the Edit file page for an TAP file.
  * 
- * TODO: Saves for TAP Variable name for Variables.
  */
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -207,15 +206,14 @@ public class TapFileEditDialog extends EditFileDialog {
 				SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
 				System.out.print("Array name: " + sbd.VarName + " -> ");
 				sbd.VarName = (sValue + "A").charAt(0);
-				System.out.println(sbd.VarName);
+				header.SetHeader(sbd);
+				System.out.println(direntry.GetSpeccyBasicDetails().VarName);
 
 				TAPPartition TapPart = (TAPPartition) CurrentPartition;
 				TAPFile tapfile = (TAPFile) TapPart.CurrentDisk;
 				try {
-					header.SetHeader(sbd);
 					tapfile.RewriteFile();
 					TapPart.LoadPartitionSpecificInformation();
-					System.out.println(direntry.GetSpeccyBasicDetails().LoadAddress);
 					return true;
 				} catch (IOException e) {
 					e.printStackTrace();
