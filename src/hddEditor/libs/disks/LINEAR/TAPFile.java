@@ -19,6 +19,7 @@ public class TAPFile implements Disk {
 	public TAPBlock Blocks[];
 
 	public long LastModified;
+
 	/**
 	 * Constructor, load a TAP file.
 	 * 
@@ -476,8 +477,8 @@ public class TAPFile implements Disk {
 	 */
 	@Override
 	public boolean DiskOutOfDate() {
-		if (inFile!=null) {
-			return(LastModified < file.lastModified()); 
+		if (inFile != null) {
+			return (LastModified < file.lastModified());
 		}
 		return false;
 	}
@@ -487,8 +488,8 @@ public class TAPFile implements Disk {
 	 */
 	@Override
 	public void UpdateLastModified() {
-		if (inFile!=null) {
-			LastModified = file.lastModified(); 
+		if (inFile != null) {
+			LastModified = file.lastModified();
 		}
 	}
 }
