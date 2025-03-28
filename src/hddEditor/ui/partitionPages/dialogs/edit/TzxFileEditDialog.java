@@ -7,6 +7,8 @@ package hddEditor.ui.partitionPages.dialogs.edit;
  * TODO: Saves for TZX Code load address
  */
 
+import java.io.IOException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlEvent;
@@ -24,6 +26,9 @@ import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.TZX;
 import hddEditor.libs.disks.SpeccyBasicDetails;
+import hddEditor.libs.disks.LINEAR.TAPFile;
+import hddEditor.libs.disks.LINEAR.TZXFile;
+import hddEditor.libs.disks.LINEAR.tapblocks.TAPBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.ArchiveInfoBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.CallSequenceBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.CustomInfoBlock;
@@ -40,7 +45,11 @@ import hddEditor.libs.disks.LINEAR.tzxblocks.PureToneBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.SelectBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.SetSignalLevelBlock;
 import hddEditor.libs.disks.LINEAR.tzxblocks.SnapshotBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.TZXBlock;
 import hddEditor.libs.partitions.IDEDosPartition;
+import hddEditor.libs.partitions.TAPPartition;
+import hddEditor.libs.partitions.TZXPartition;
+import hddEditor.libs.partitions.tap.TapDirectoryEntry;
 import hddEditor.libs.partitions.tzx.TzxDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
@@ -48,6 +57,7 @@ import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.StaticTextsBlockRender;
 import hddEditor.ui.partitionPages.FileRenderers.TextDescRenderer;
+import hddEditor.ui.partitionPages.dialogs.edit.callbacks.GenericSaveEvent;
 
 public class TzxFileEditDialog extends EditFileDialog {
 	public TzxFileEditDialog(Display display,FileSelectDialog filesel,IDEDosPartition CurrentPartition) {
@@ -262,25 +272,126 @@ public class TzxFileEditDialog extends EditFileDialog {
 			switch (sbd.BasicType) {
 			case Speccy.BASIC_BASIC:
 				BasicRenderer BR = new BasicRenderer();
-				BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.VarStart, sbd.LineStart, filesel, null);
+				BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.VarStart, sbd.LineStart, filesel, new TzxBasicSave());
 				break;
 			case Speccy.BASIC_CODE:
 				//TODO: implement TZXFileEdit.saveevent for CODE
 
 				CR = new CodeRenderer();
-				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress, filesel,CurrentPartition,null);
+				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress, filesel,CurrentPartition,new TzxCodeSave());
 				break;
 			case Speccy.BASIC_NUMARRAY:
 				NumericArrayRenderer NR = new NumericArrayRenderer();
-				NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel, null);
+				NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(),  sbd.VarName + "", filesel, new TzxArraySave());
 				break;
 			case Speccy.BASIC_CHRARRAY:
 				CharArrayRenderer CAR = new CharArrayRenderer();
-				CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel, null);
+				CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(),  sbd.VarName + "", filesel, new TzxArraySave());
 			default:
 				CR = new CodeRenderer();
 				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, 0x0000, filesel,CurrentPartition,null);
 			}
+		}
+	}
+	
+	/**
+	 * Save for CODE files. Only the LOAD address is save-able.
+	 */
+	private class TzxCodeSave implements GenericSaveEvent {
+		@Override
+		public boolean DoSave(int valtype, String sValue, int Value) {
+			TzxDirectoryEntry direntry = (TzxDirectoryEntry) ThisEntry;
+			TZXBlock header = direntry.HeaderBlock;
+			if (header != null) {
+				SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
+				System.out.print("Load address: " + sbd.LoadAddress + " -> ");
+				sbd.LoadAddress = Value;
+
+				TZXPartition TzxPart = (TZXPartition) CurrentPartition;
+				TZXFile tzxfile = (TZXFile) TzxPart.CurrentDisk;
+				try {
+					header.SetHeader(sbd);
+					tzxfile.RewriteFile();
+					TzxPart.LoadPartitionSpecificInformation();
+					System.out.println(direntry.GetSpeccyBasicDetails().LoadAddress);
+					return true;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				System.err.println("Update ignored, No Basic header to update.");
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Save for BASIC files. Start line(0) and Vars(1) offset are save-able.
+	 */
+	private class TzxBasicSave implements GenericSaveEvent {
+		@Override
+		public boolean DoSave(int valtype, String sValue, int Value) {
+			TzxDirectoryEntry direntry = (TzxDirectoryEntry) ThisEntry;
+			TZXBlock header = direntry.HeaderBlock;
+			if (header != null) {
+				SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
+				if (valtype == 0) {
+					System.out.print("Start Line: " + sbd.LineStart + " -> ");
+					sbd.LineStart = Value;
+					System.out.println(sbd.LineStart);
+				} else {
+					System.out.print("Vars Offset: " + sbd.VarStart + " -> ");
+					sbd.VarStart = Value;
+					System.out.println(sbd.VarStart);
+				}
+
+				TZXPartition TzxPart = (TZXPartition) CurrentPartition;
+				TZXFile tzxfile = (TZXFile) TzxPart.CurrentDisk;
+				try {
+					header.SetHeader(sbd);
+
+					tzxfile.RewriteFile();
+					TzxPart.LoadPartitionSpecificInformation();
+					System.out.println(direntry.GetSpeccyBasicDetails().LoadAddress);
+					return true;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				System.err.println("Update ignored, No Basic header to update.");
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Save for BASIC files. Start line(0) and Vars(1) offset are save-able.
+	 */
+	private class TzxArraySave implements GenericSaveEvent {
+		@Override
+		public boolean DoSave(int valtype, String sValue, int Value) {
+			TzxDirectoryEntry direntry = (TzxDirectoryEntry) ThisEntry;
+			TZXBlock header = direntry.HeaderBlock;
+			if (header != null) {
+				SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
+				System.out.print("Array name: " + sbd.VarName + " -> ");
+				sbd.VarName = (sValue + "A").charAt(0);
+				header.SetHeader(sbd);
+				System.out.println(direntry.GetSpeccyBasicDetails().VarName);
+
+				TZXPartition TzxPart = (TZXPartition) CurrentPartition;
+				TZXFile tzxfile = (TZXFile) TzxPart.CurrentDisk;
+				try {
+					tzxfile.RewriteFile();
+					TzxPart.LoadPartitionSpecificInformation();
+					return true;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				System.err.println("Update ignored, No Basic header to update.");
+			}
+			return false;
 		}
 	}
 

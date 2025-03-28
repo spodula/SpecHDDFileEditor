@@ -1,6 +1,8 @@
 package hddEditor.libs.disks.LINEAR.tzxblocks;
 
 import hddEditor.libs.disks.ExtendedSpeccyBasicDetails;
+import hddEditor.libs.disks.SpeccyBasicDetails;
+import hddEditor.libs.Speccy;
 import hddEditor.libs.TZX;
 
 public class TZXBlock {
@@ -54,10 +56,10 @@ public class TZXBlock {
 			int param2 = GetDblByte(data, 15);
 			byte filename[] = new byte[10];
 			System.arraycopy(data, 1, filename, 0, 10);
-			char varname = (char) ((data[14] & 0x3f) + 0x40); 
+			char varname = (char) ((data[14] & 0x3f) + 0x40);
 
-
-			result = new ExtendedSpeccyBasicDetails(type, param2, param1, param1, varname, new String(filename), filelen);
+			result = new ExtendedSpeccyBasicDetails(type, param2, param1, param1, varname, new String(filename),
+					filelen);
 		}
 		return (result);
 	}
@@ -73,7 +75,6 @@ public class TZXBlock {
 			result = (chsum == checksum);
 		}
 		return (result);
-
 	}
 
 	/**
@@ -96,6 +97,16 @@ public class TZXBlock {
 			}
 			return (chsum == checksum);
 		}
+	}
+
+	public void UpdateChecksum() {
+		if ((blocktype == TZX.TZX_STANDARDSPEED_DATABLOCK) && (blockdata != null) && (blockdata[0] == 0)) {
+			if (blockdata.length > 2) {
+				int checksum = TZX.CalculateChecksumForBlock(blockdata);
+				blockdata[blockdata.length - 1] = (byte) (checksum & 0xff);
+			}
+		}
+
 	}
 
 	/**
@@ -165,4 +176,40 @@ public class TZXBlock {
 		return (result);
 	}
 
+	/**
+	 * Set the file as if its a BASIC header...
+	 * 
+	 * @param sbd
+	 */
+	public void SetHeader(SpeccyBasicDetails sbd) {
+		int param1 = 0;
+		int param2 = 0;
+		switch (sbd.BasicType) {
+		case Speccy.BASIC_BASIC:
+			param1 = sbd.LineStart;
+			param2 = sbd.VarStart;
+			break;
+		case Speccy.BASIC_NUMARRAY:
+			param1 = ((((sbd.VarName + "A").toUpperCase().charAt(0) - 0x40) | 0x80) & 0xff) << 8;
+			break;
+		case Speccy.BASIC_CHRARRAY:
+			param1 = ((((sbd.VarName + "A").toUpperCase().charAt(0) - 0x40) | 0xC0) & 0xff) << 8;
+			break;
+		case Speccy.BASIC_CODE:
+			param1 = sbd.LoadAddress;
+			param2 = 0x8000;
+		default:
+			break;
+		}
+
+		data[0] = (byte) sbd.BasicType;
+		data[13] = (byte) (param1 & 0xff);
+		data[14] = (byte) (((param1 & 0xff00) >> 8) & 0xff);
+		data[15] = (byte) (param2 & 0xff);
+		data[16] = (byte) (((param2 & 0xff00) >> 8) & 0xff);
+		
+		System.arraycopy(data, 0, blockdata, 1, data.length);
+		UpdateChecksum();
+		System.arraycopy(blockdata, 0, rawdata, 5, blockdata.length);
+	}
 }
