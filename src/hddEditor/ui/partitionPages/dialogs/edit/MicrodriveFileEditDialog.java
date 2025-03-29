@@ -1,12 +1,11 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
+
 /**
  * Implementation of the file edit page for a Microdrive file.
  * 
- * TODO: Saves for MDR BASIC/Start line  BASIC/VARSTART
- * TODO: Saves for MDR Variable name for Variables.
- * TODO: Saves for MDR Code load address
-
  */
+
+import java.io.IOException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -24,6 +23,7 @@ import org.eclipse.swt.widgets.Shell;
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.SpeccyBasicDetails;
+import hddEditor.libs.disks.LINEAR.MDFMicrodriveFile;
 import hddEditor.libs.disks.LINEAR.MicrodriveSector;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.mdf.MicrodriveDirectoryEntry;
@@ -32,12 +32,12 @@ import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.FileRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
+import hddEditor.ui.partitionPages.dialogs.edit.callbacks.GenericSaveEvent;
 
+public class MicrodriveFileEditDialog extends EditFileDialog {
 
-public class MicrodriveFileEditDialog extends EditFileDialog {     
-
-	public MicrodriveFileEditDialog(Display display,FileSelectDialog filesel,IDEDosPartition CurrentPartition) {
-		super(display,filesel, CurrentPartition);
+	public MicrodriveFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition) {
+		super(display, filesel, CurrentPartition);
 	}
 
 	/**
@@ -53,16 +53,18 @@ public class MicrodriveFileEditDialog extends EditFileDialog {
 		gridLayout.marginLeft = 20;
 		gridLayout.marginRight = 20;
 		shell.setLayout(gridLayout);
-		
-		MicrodriveDirectoryEntry mde = (MicrodriveDirectoryEntry)ThisEntry;
 
-		Label lbl = label(ThisEntry.GetSpeccyBasicDetails().BasicTypeString()+" file",4);
+		MicrodriveDirectoryEntry mde = (MicrodriveDirectoryEntry) ThisEntry;
+
+		Label lbl = label(ThisEntry.GetSpeccyBasicDetails().BasicTypeString() + " file", 4);
 		FontData fontData = lbl.getFont().getFontData()[0];
 		Font boldFont = new Font(display, new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 		lbl.setFont(boldFont);
-		
-		label(String.format("Length Inc Header: %d bytes (%X)", ThisEntry.GetRawFileSize(), ThisEntry.GetRawFileSize()),2);
-		label(String.format("Length without Header: %d bytes (%X)", ThisEntry.GetFileSize(), ThisEntry.GetFileSize()),2);
+
+		label(String.format("Length Inc Header: %d bytes (%X)", ThisEntry.GetRawFileSize(), ThisEntry.GetRawFileSize()),
+				2);
+		label(String.format("Length without Header: %d bytes (%X)", ThisEntry.GetFileSize(), ThisEntry.GetFileSize()),
+				2);
 
 		String logblocks = "";
 		for (MicrodriveSector mds : mde.sectors) {
@@ -71,9 +73,9 @@ public class MicrodriveFileEditDialog extends EditFileDialog {
 		if (logblocks.length() > 2) {
 			logblocks = logblocks.substring(2);
 		}
-		
-		label("Used sectors: " + mde.sectors.length + " (" + logblocks + ")",2);
-		
+
+		label("Used sectors: " + mde.sectors.length + " (" + logblocks + ")", 2);
+
 		MainPage1 = new ScrolledComposite(shell, SWT.V_SCROLL);
 		MainPage1.setExpandHorizontal(true);
 		MainPage1.setExpandVertical(true);
@@ -82,58 +84,157 @@ public class MicrodriveFileEditDialog extends EditFileDialog {
 		gd.horizontalSpan = 4;
 		MainPage1.setLayoutData(gd);
 
-		
 		MainPage = new Composite(MainPage1, SWT.NONE);
 		MainPage1.setContent(MainPage);
-		
+
 		gridLayout = new GridLayout();
 		gridLayout.numColumns = 4;
 		gridLayout.makeColumnsEqualWidth = true;
 		MainPage.setLayout(gridLayout);
-		
+
 		MainPage1.addControlListener(new ControlListener() {
-			
+
 			@Override
 			public void controlResized(ControlEvent arg0) {
 				MainPage1.setMinSize(MainPage.computeSize(MainPage1.getClientArea().width, SWT.DEFAULT));
 			}
-			
+
 			@Override
 			public void controlMoved(ControlEvent arg0) {
 			}
 		});
-				
+
 		RenderAppropriatePage();
 		shell.pack();
 	}
-	
+
 	private void RenderAppropriatePage() {
 		/**
 		 * Render the page.
 		 */
-		switch (ThisEntry.GetSpeccyBasicDetails().BasicType) {
-		case Speccy.BASIC_BASIC: 
+		MDFMicrodriveFile mdf = (MDFMicrodriveFile) CurrentPartition.CurrentDisk;
+
+		SpeccyBasicDetails sbd = ThisEntry.GetSpeccyBasicDetails();
+		switch (sbd.BasicType) {
+		case Speccy.BASIC_BASIC:
 			BasicRenderer BR = new BasicRenderer();
-			SpeccyBasicDetails sbd = ThisEntry.GetSpeccyBasicDetails();
-			BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, 
-					sbd.VarStart, sbd.LineStart, filesel, null);
+			BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.VarStart, sbd.LineStart,
+					filesel, new MDRBasicSave(mdf));
 			break;
 		case Speccy.BASIC_CODE:
-				CodeRenderer CR = new CodeRenderer();
-				//TODO: implement MicroDriveFileEdit.saveevent for CODE
-
-				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, ((MicrodriveDirectoryEntry)ThisEntry).GetVar2(), filesel,CurrentPartition, null);
-				break;
+			CodeRenderer CR = new CodeRenderer();
+			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length,
+					((MicrodriveDirectoryEntry) ThisEntry).GetVar2(), filesel, CurrentPartition, new MDRCodeSave(mdf));
+			break;
 		case Speccy.BASIC_NUMARRAY:
-				NumericArrayRenderer NR = new NumericArrayRenderer();
-				NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel, null);
-				break;
-		case Speccy.BASIC_CHRARRAY:	
-				CharArrayRenderer CAR = new CharArrayRenderer();
-				CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel, null);
+			NumericArrayRenderer NR = new NumericArrayRenderer();
+			NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), sbd.VarName + "", filesel,
+					new MDRArraySave(mdf));
+			break;
+		case Speccy.BASIC_CHRARRAY:
+			CharArrayRenderer CAR = new CharArrayRenderer();
+			CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), sbd.VarName + "", filesel,
+					new MDRArraySave(mdf));
 		default:
-				FileRenderer FR = new FileRenderer();
-				FR.Render(MainPage, data, ThisEntry.GetFilename(), filesel);
+			FileRenderer FR = new FileRenderer();
+			FR.Render(MainPage, data, ThisEntry.GetFilename(), filesel);
+		}
+	}
+
+	/**
+	 * Unlike most classes, the MDF needs to be supplied seperately. Should probably
+	 * fix this at some stage for consistancy. but for now....
+	 */
+	private class MDRSpecial implements GenericSaveEvent {
+		public MDFMicrodriveFile file;
+
+		public MDRSpecial(MDFMicrodriveFile mdf) {
+			this.file = mdf;
+		}
+
+		@Override
+		public boolean DoSave(int valtype, String sValue, int Value) {
+			return true;
+		}
+
+	}
+
+	/**
+	 * Save for CODE files. Only the LOAD address is save-able.
+	 */
+	private class MDRCodeSave extends MDRSpecial {
+		public MDRCodeSave(MDFMicrodriveFile mdf) {
+			super(mdf);
+		}
+
+		@Override
+		public boolean DoSave(int valtype, String sValue, int Value) {
+			MicrodriveDirectoryEntry direntry = (MicrodriveDirectoryEntry) ThisEntry;
+			SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
+			System.out.print("Load address: " + sbd.LoadAddress + " -> ");
+			sbd.LoadAddress = Value;
+			try {
+				direntry.SetHeader(sbd, file);
+				System.out.println(direntry.GetSpeccyBasicDetails().LoadAddress);
+				return true;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Save for BASIC files. Start line(0) and Vars(1) offset are save-able.
+	 */
+	private class MDRBasicSave extends MDRSpecial {
+		public MDRBasicSave(MDFMicrodriveFile mdf) {
+			super(mdf);
+		}
+
+		@Override
+		public boolean DoSave(int valtype, String sValue, int Value) {
+			MicrodriveDirectoryEntry direntry = (MicrodriveDirectoryEntry) ThisEntry;
+			SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
+			if (valtype == 0) {
+				sbd.LineStart = Value;
+			} else {
+				sbd.VarStart = Value;
+			}
+			try {
+				direntry.SetHeader(sbd, file);
+				System.out.println(direntry.GetSpeccyBasicDetails().LoadAddress);
+				return true;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Save for BASIC Array files. Array name is saveable
+	 */
+	private class MDRArraySave extends MDRSpecial {
+		public MDRArraySave(MDFMicrodriveFile mdf) {
+			super(mdf);
+		}
+
+		@Override
+		public boolean DoSave(int valtype, String sValue, int Value) {
+			MicrodriveDirectoryEntry direntry = (MicrodriveDirectoryEntry) ThisEntry;
+			SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
+			System.out.print("Array name: " + sbd.VarName + " -> ");
+			sbd.VarName = (sValue + "A").charAt(0);
+
+			try {
+				direntry.SetHeader(sbd, file);
+				System.out.println(direntry.GetSpeccyBasicDetails().VarName);
+				return true;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return false;
 		}
 	}
 

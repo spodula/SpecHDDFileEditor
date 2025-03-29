@@ -43,8 +43,6 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	public static void main(String[] args) {
 		MDFMicrodriveFile tdf;
 		try {
-//			tdf = new MDFMicrodriveFile("/home/graham/rothi.mdr");
-//			tdf = new MDFMicrodriveFile("/home/graham/DEMO.MDR");
 			tdf = new MDFMicrodriveFile(new File("/home/graham/demo.mdr"));
 			SinclairMicrodrivePartition trp = new SinclairMicrodrivePartition(0, tdf, new byte[64], 1, false);
 			System.out.println(tdf);

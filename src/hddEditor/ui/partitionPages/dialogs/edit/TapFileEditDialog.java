@@ -195,7 +195,7 @@ public class TapFileEditDialog extends EditFileDialog {
 	}
 
 	/**
-	 * Save for BASIC files. Start line(0) and Vars(1) offset are save-able.
+	 * Save for Array files. Array name is saveable
 	 */
 	private class TapArraySave implements GenericSaveEvent {
 		@Override

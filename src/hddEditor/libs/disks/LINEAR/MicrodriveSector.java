@@ -116,11 +116,17 @@ public class MicrodriveSector {
 		}
 	}
 
+	/**
+	 * re-write a sector to the microdrive file
+	 * 
+	 * @param cart
+	 * @throws IOException
+	 */
 	public void UpdateSectorOnDisk(MDFMicrodriveFile cart) throws IOException {
-		// Write the sector to disk.
 		cart.inFile.seek(SectorLocation);
 		cart.inFile.write(SectorHeader);
 		cart.inFile.write(SectorData);
+		cart.UpdateLastModified();
 	}
 
 	/**
@@ -360,5 +366,4 @@ public class MicrodriveSector {
 	public boolean IsHeaderChecksumValid() {
 		return (getHeaderChecksum() == CalculateHeaderChecksum());
 	}
-
 }

@@ -2,6 +2,7 @@ package hddEditor.libs.partitions.mdf;
 
 import java.io.IOException;
 
+import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
@@ -117,6 +118,7 @@ public class MicrodriveDirectoryEntry implements FileEntry {
 	}
 
 	/**
+	 * Get the file size from the basic header.
 	 * 
 	 * @return
 	 */
@@ -126,6 +128,11 @@ public class MicrodriveDirectoryEntry implements FileEntry {
 		return ((int) (s0.SectorData[1] & 0xff) + ((s0.SectorData[2] & 0xff) * 0x100));
 	}
 
+	/**
+	 * Set the file size
+	 * 
+	 * @param size
+	 */
 	public void SetFileSize(int size) {
 		MicrodriveSector s0 = GetSectorByFilePartNumber(0);
 		s0.SectorData[1] = (byte) ((size % 0x100) & 0xff);
@@ -142,6 +149,12 @@ public class MicrodriveDirectoryEntry implements FileEntry {
 		return ((int) (s0.SectorData[3] & 0xff) + ((s0.SectorData[4] & 0xff) * 0x100));
 	}
 
+	/**
+	 * Rename the file.
+	 * 
+	 * @param to
+	 * @param CurrentDisk
+	 */
 	public void RenameMicrodriveFile(String to, Disk CurrentDisk) {
 		MDFMicrodriveFile mdf = (MDFMicrodriveFile) CurrentDisk;
 
@@ -259,9 +272,14 @@ public class MicrodriveDirectoryEntry implements FileEntry {
 		MicrodriveSector Sector = GetSectorByFilePartNumber(0);
 		Sector.UpdateFileChecksum();
 		Sector.UpdateSectorOnDisk(mdf);
-
 	}
 
+	/**
+	 * Check if the given wildcard matches the filename
+	 * 
+	 * @param wildcard
+	 * @return TRUE if matches
+	 */
 	@Override
 	public boolean DoesMatch(String wildcard) {
 		String StringToMatch = GetFilename().toUpperCase();
@@ -304,24 +322,65 @@ public class MicrodriveDirectoryEntry implements FileEntry {
 	}
 
 	/**
+	 * Get a string representation of the current file type.
 	 * 
+	 * @return String containing file type
 	 */
 	@Override
 	public String GetFileTypeString() {
-		return(GetSpeccyBasicDetails().BasicTypeString());
+		return (GetSpeccyBasicDetails().BasicTypeString());
 	}
 
+	/**
+	 * Get the Spectrum file header details for this file.
+	 * 
+	 * return SpeccyBasicDetails
+	 */
 	@Override
 	public SpeccyBasicDetails GetSpeccyBasicDetails() {
 		MicrodriveSector s0 = GetSectorByFilePartNumber(0);
-		int ArrayVar = (s0.SectorData[5] & 0x2f) + 'A';
+		int ArrayVar = (s0.SectorData[5] & 0x3f) + 'A';
 		int VarStart = (int) (s0.SectorData[5] & 0xff) + ((s0.SectorData[6] & 0xff) * 0x100);
-		int LineStart =(int) (s0.SectorData[7] & 0xff) + ((s0.SectorData[8] & 0xff) * 0x100);
+		int LineStart = (int) (s0.SectorData[7] & 0xff) + ((s0.SectorData[8] & 0xff) * 0x100);
 		int FileType = (int) (s0.SectorData[0] & 0xff);
-		SpeccyBasicDetails result = new SpeccyBasicDetails(FileType, VarStart, LineStart, GetVar2(), (char) ArrayVar );
+		SpeccyBasicDetails result = new SpeccyBasicDetails(FileType, VarStart, LineStart, GetVar2(), (char) ArrayVar);
 		return (result);
 	}
-	
 
-	
+	/**
+	 * Set the header from the given SpeccyBasicDetails
+	 * 
+	 * @param sbd
+	 * @throws IOException 
+	 */
+	public void SetHeader(SpeccyBasicDetails sbd, MDFMicrodriveFile mdf) throws IOException {
+		MicrodriveSector s0 = GetSectorByFilePartNumber(0);
+		s0.SectorData[0] = (byte) sbd.BasicType;
+		//Defaults for unused params
+		for (int i=0x05;i<0x09;i++) {
+			s0.SectorData[i] = (byte) 0xff;
+		}
+		
+		switch (sbd.BasicType) {
+		case Speccy.BASIC_BASIC:
+			s0.SectorData[0x05] = (byte) (sbd.VarStart & 0xff);
+			s0.SectorData[0x06] = (byte) (((sbd.VarStart & 0xff00) >> 8) & 0xff);
+			s0.SectorData[0x07] = (byte) (sbd.LineStart & 0xff);
+			s0.SectorData[0x08] = (byte) (((sbd.LineStart & 0xff00) >> 8) & 0xff);
+			break;
+		case Speccy.BASIC_NUMARRAY:
+			s0.SectorData[0x05] = (byte) ((((sbd.VarName + "A").toUpperCase().charAt(0) - 0x40) | 0x80) & 0xff);
+			break;
+		case Speccy.BASIC_CHRARRAY:
+			s0.SectorData[0x05] = (byte) ((((sbd.VarName + "A").toUpperCase().charAt(0) - 0x40) | 0xC0) & 0xff);
+			break;
+		case Speccy.BASIC_CODE:
+			s0.SectorData[0x03] = (byte) (sbd.LoadAddress & 0xff);
+			s0.SectorData[0x04] = (byte) (((sbd.LoadAddress & 0xff00) >> 8) & 0xff);
+		default:
+			break;
+		}
+		s0.UpdateFileChecksum();
+		s0.UpdateSectorOnDisk(mdf);
+	}
 }
