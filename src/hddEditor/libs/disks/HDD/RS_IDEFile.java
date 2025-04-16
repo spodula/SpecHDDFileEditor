@@ -31,8 +31,9 @@ public class RS_IDEFile implements HardDisk {
 	public int NumCylinders = 0;
 	public int NumHeads = 0;
 	public int NumSectors = 0;
-	
+
 	long LastModified;
+
 	/**
 	 * Get and set the filename
 	 */
@@ -130,7 +131,7 @@ public class RS_IDEFile implements HardDisk {
 	public RS_IDEFile() {
 		super();
 	}
-	
+
 	/**
 	 * Parse the RS_IDE disk and check the header
 	 * 
@@ -299,20 +300,21 @@ public class RS_IDEFile implements HardDisk {
 			return (cache);
 		}
 
-		//Note, this will restrict length for files of 128Mb. 
-		long asz = Math.min(sz,1024*1024*128);
-		byte result[] = new byte[(int)asz];
+		// Note, this will restrict length for files of 128Mb.
+		long asz = Math.min(sz, 1024 * 1024 * 128);
+		byte result[] = new byte[(int) asz];
 
 		long location = SectorNum * SectorSize;
 
 		location = location + GetHDDataOffset();
 
-		inFile.seek(location);
-		inFile.read(result);
-
-		cache = new byte[result.length];
-		System.arraycopy(result, 0, cache, 0, cache.length);
-		cachedSector = SectorNum;
+		if (inFile != null) {
+			inFile.seek(location);
+			inFile.read(result);
+			cache = new byte[result.length];
+			System.arraycopy(result, 0, cache, 0, cache.length);
+			cachedSector = SectorNum;
+		}
 
 		return (result);
 	}
@@ -350,20 +352,21 @@ public class RS_IDEFile implements HardDisk {
 
 	@Override
 	public void ResizeDisk(int NewCyls) throws IOException {
-		Long newsize = (((long) NewCyls) * ((long) (GetNumHeads() * GetNumSectors() * GetSectorSize()))) + (long) GetHDDataOffset();
+		Long newsize = (((long) NewCyls) * ((long) (GetNumHeads() * GetNumSectors() * GetSectorSize())))
+				+ (long) GetHDDataOffset();
 		System.out.println(this.getClass().getName() + ": Resizing disk " + GetFilename() + " from " + GetFileSize()
 				+ " to " + String.valueOf(newsize));
 		inFile.setLength(newsize);
 		UpdateLastModified();
 	}
-	
+
 	/**
 	 * Return if the disk is out of sync with the one on disk.
 	 */
 	@Override
 	public boolean DiskOutOfDate() {
-		if (inFile!=null) {
-			return(LastModified < file.lastModified()); 
+		if (inFile != null) {
+			return (LastModified < file.lastModified());
 		}
 		return false;
 	}
@@ -373,9 +376,9 @@ public class RS_IDEFile implements HardDisk {
 	 */
 	@Override
 	public void UpdateLastModified() {
-		if (inFile!=null) {
-			LastModified = file.lastModified(); 
+		if (inFile != null) {
+			LastModified = file.lastModified();
 		}
 	}
-	
+
 }

@@ -29,10 +29,10 @@ public class LinearTapeHandler extends OSHandler {
 				(long) (CurrentDisk.GetNumCylinders() * CurrentDisk.GetNumHeads() * CurrentDisk.GetNumSectors()));
 
 		String cn = CurrentDisk.getClass().getName();
-		
+
 		if (cn.endsWith("MDFMicrodriveFile")) {
 			rawData = PLUSIDEDOS.GetSystemPartition(CurrentDisk.GetNumCylinders(), CurrentDisk.GetNumHeads(),
-					CurrentDisk.GetNumSectors(),CurrentDisk.GetSectorSize() , false);
+					CurrentDisk.GetNumSectors(), CurrentDisk.GetSectorSize(), false);
 			SinclairMicrodrivePartition smp = new SinclairMicrodrivePartition(1, CurrentDisk, rawData, 1, false);
 			smp.SetPartType(PLUSIDEDOS.PARTITION_TAPE_SINCLAIRMICRODRIVE);
 			smp.SetName("Microdrive Cartrige");
@@ -44,8 +44,8 @@ public class LinearTapeHandler extends OSHandler {
 			SystemPart.partitions[1] = smp;
 		} else if (cn.endsWith("TAPFile")) {
 			rawData = PLUSIDEDOS.GetSystemPartition(CurrentDisk.GetNumCylinders(), CurrentDisk.GetNumHeads(),
-					CurrentDisk.GetNumSectors(),CurrentDisk.GetSectorSize() , false);
-	
+					CurrentDisk.GetNumSectors(), CurrentDisk.GetSectorSize(), false);
+
 			TAPPartition tap = new TAPPartition(1, CurrentDisk, rawData, 1, false);
 			tap.SetPartType(PLUSIDEDOS.PARTITION_TAPE_TAP);
 			tap.SetName("TAP file");
@@ -57,8 +57,8 @@ public class LinearTapeHandler extends OSHandler {
 			SystemPart.partitions[1] = tap;
 		} else if (cn.endsWith("TZXFile")) {
 			rawData = PLUSIDEDOS.GetSystemPartition(CurrentDisk.GetNumCylinders(), CurrentDisk.GetNumHeads(),
-					CurrentDisk.GetNumSectors(),CurrentDisk.GetSectorSize() , false);
-	
+					CurrentDisk.GetNumSectors(), CurrentDisk.GetSectorSize(), false);
+
 			TZXPartition tzx = new TZXPartition(1, CurrentDisk, rawData, 1, false);
 			tzx.SetPartType(PLUSIDEDOS.PARTITION_TAPE_TZX);
 			tzx.SetName("TZX file");

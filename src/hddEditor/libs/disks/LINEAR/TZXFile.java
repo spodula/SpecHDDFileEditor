@@ -624,17 +624,17 @@ public class TZXFile implements Disk {
 		if (args.length != 2) {
 			System.out.println("Expecting paramaters [Directory] [target file]");
 		} else {
-			int err=0;
-			int proc=0;
+			int err = 0;
+			int proc = 0;
 
 			PrintWriter pr;
 			pr = new PrintWriter(new FileWriter(args[1]));
 			try {
 				File folder = new File(args[0]);
 				File contents[] = folder.listFiles();
-				
+
 				Arrays.sort(contents);
-				
+
 				for (File f : contents) {
 					if (f.getName().endsWith(".tzx")) {
 						proc++;
@@ -692,7 +692,7 @@ public class TZXFile implements Disk {
 			} finally {
 				pr.close();
 			}
-			System.out.println("Processed "+proc+" files with "+err+" Errors.");
+			System.out.println("Processed " + proc + " files with " + err + " Errors.");
 		}
 	}
 
