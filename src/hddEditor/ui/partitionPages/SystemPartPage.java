@@ -352,6 +352,8 @@ public class SystemPartPage extends GenericPage {
 			TableColumn tc5 = new TableColumn(PartitionTable, SWT.LEFT);
 			if (partition.CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_HDD) {
 				tc1.setText("Partition name");
+			} else if (partition.CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_LINEAR) {
+				tc1.setText("Tape section:");
 			} else {
 				tc1.setText("FDD Section:");
 			}
