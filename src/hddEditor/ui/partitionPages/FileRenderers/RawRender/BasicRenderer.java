@@ -138,7 +138,11 @@ public class BasicRenderer implements Renderer {
 		vc3.setWidth(580);
 
 		PopulateBASIC(data, filelength, VariablesOffset,IncludeRealValues);
-		PopulateVariables(TargetPage, data, filelength, VariablesOffset);
+		try {
+			PopulateVariables(TargetPage, data, filelength, VariablesOffset);
+		} catch (Exception E) {
+			
+		}
 		TargetPage.pack();
 	}
 
