@@ -1,6 +1,5 @@
 package hddEditor.libs.partitions;
 
-
 /**
  * This is the implementation of a TR_DOS partition. Note that this actually duplicates
  * some of the code in the TRD disk handler code, due to the fact it requires the same
@@ -432,6 +431,20 @@ public class TrDosPartition extends IDEDosPartition {
 	}
 
 	/**
+	 * Update all the dirents.
+	 * 
+	 * @throws IOException
+	 */
+	public void UpdateDirentsOnDisk() throws IOException {
+		byte dirents[] = CurrentDisk.GetBytesStartingFromSector(0, CurrentDisk.GetSectorSize() * 9);
+		for (TrdDirectoryEntry trd : DirectoryEntries) {
+			System.arraycopy(trd.DirEntryDescriptor, 0, dirents, trd.DirentLoc, 0x10);
+		}
+		CurrentDisk.SetLogicalBlockFromSector(0, dirents);
+
+	}
+
+	/**
 	 * Add a basic file, note we have to hack the LINE variable at the end.
 	 * 
 	 * @param filename
@@ -760,13 +773,14 @@ public class TrDosPartition extends IDEDosPartition {
 	 * 
 	 * @return
 	 */
-	@Override	
+	@Override
 	public FileEntry[] GetFileList() {
 		return DirectoryEntries;
 	}
 
 	/**
 	 * Uniquify a filename if required. (IE, a disk)
+	 * 
 	 * @param filename
 	 * @return
 	 */
@@ -774,14 +788,14 @@ public class TrDosPartition extends IDEDosPartition {
 	public String UniqueifyFileNameIfRequired(String filename) {
 		String ofilename = filename.trim();
 		if (ofilename.length() > 6) {
-			ofilename = ofilename.substring(0,6);
+			ofilename = ofilename.substring(0, 6);
 		}
-		
-		int index=1;
+
+		int index = 1;
 		FileEntry existingEntries[] = GetFileList(filename);
 		while (existingEntries.length > 0) {
 			filename = ofilename + String.format("%02d", index++);
-			existingEntries = GetFileList(filename);			
+			existingEntries = GetFileList(filename);
 		}
 		return filename;
 	}
@@ -793,7 +807,6 @@ public class TrDosPartition extends IDEDosPartition {
 	 */
 	public void SortDirectoryEntries(int SortType) {
 		DirectoryEntries = (TrdDirectoryEntry[]) SortFileEntry(SortType);
-	}	
-	
-	
+	}
+
 }

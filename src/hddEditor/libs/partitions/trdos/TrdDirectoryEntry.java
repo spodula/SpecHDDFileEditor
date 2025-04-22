@@ -1,4 +1,5 @@
 package hddEditor.libs.partitions.trdos;
+
 /**
  * Implementation of TR-DOS directory entry.
  * File system entries are 16 bytes long:
@@ -31,9 +32,11 @@ package hddEditor.libs.partitions.trdos;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
+import hddEditor.libs.partitions.TrDosPartition;
 
 public class TrdDirectoryEntry implements FileEntry {
 	public byte DirEntryDescriptor[] = null;
@@ -48,9 +51,10 @@ public class TrdDirectoryEntry implements FileEntry {
 	 * @param DirentNum
 	 * @param Dirent
 	 * @param initialise
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	public TrdDirectoryEntry(Disk CurrentDisk,  int DirentNum, byte Dirent[], boolean initialise, int DirentLoc) throws IOException {
+	public TrdDirectoryEntry(Disk CurrentDisk, int DirentNum, byte Dirent[], boolean initialise, int DirentLoc)
+			throws IOException {
 		super();
 		if (initialise) {
 			DirEntryDescriptor = new byte[0x0f];
@@ -63,22 +67,23 @@ public class TrdDirectoryEntry implements FileEntry {
 		/**
 		 * For BASIC files, extract the line from the file.
 		 */
-		if ((CurrentDisk!=null) && (this.GetFileType()=='B')) {
+		if ((CurrentDisk != null) && (this.GetFileType() == 'B')) {
 			long startsector = (GetStartTrack() * CurrentDisk.GetNumSectors()) + GetStartSector();
-			//Want the 10 bytes past the EOF
-			int itemlength = GetFileSize()+0x10;
-			//Reduce the amount we have to read. Keep incrementing the sector until there is only one or two sectors left. 
+			// Want the 10 bytes past the EOF
+			int itemlength = GetFileSize() + 0x10;
+			// Reduce the amount we have to read. Keep incrementing the sector until there
+			// is only one or two sectors left.
 			while (itemlength > 512) {
 				itemlength = itemlength - CurrentDisk.GetSectorSize();
 				startsector++;
-			} 
-			
+			}
+
 			byte result[] = CurrentDisk.GetBytesStartingFromSector(startsector, itemlength);
-			
-			int ptr = itemlength-0x10;
-			startline = (result[ptr+2] & 0xff) + ((result[ptr+3] & 0xff) * 0x100);			
+
+			int ptr = itemlength - 0x10;
+			startline = (result[ptr + 2] & 0xff) + ((result[ptr + 3] & 0xff) * 0x100);
 		}
-		
+
 	}
 
 	/**
@@ -138,7 +143,7 @@ public class TrdDirectoryEntry implements FileEntry {
 			case 'D':
 				result = "Data";
 				if (IsCharArray()) {
-					result = "Data (Char)";					
+					result = "Data (Char)";
 				} else {
 					result = "Data (numeric)";
 				}
@@ -150,7 +155,6 @@ public class TrdDirectoryEntry implements FileEntry {
 		}
 		return (result);
 	}
-	
 
 	/**
 	 * Set the file type
@@ -285,17 +289,19 @@ public class TrdDirectoryEntry implements FileEntry {
 	 * Get a textual representation of the directory entry
 	 */
 	public String toString() {
-		String result = "#" + DirentNum + " File: " + PadTo( GetFilename(),8) + " Typ:" + PadTo( GetFileType() + "(" + GetFileTypeString()
-				+ ") ",9)+" Var1:" + PadTo(String.valueOf(GetVar1()),5) + " var2:" + PadTo(String.valueOf(GetVar2()),5) + " sectors: " + PadTo(String.valueOf(GetFileLengthSectors()),3)
-				+ " start:" + GetStartTrack() + "/" + GetStartSector();
+		String result = "#" + DirentNum + " File: " + PadTo(GetFilename(), 8) + " Typ:"
+				+ PadTo(GetFileType() + "(" + GetFileTypeString() + ") ", 9) + " Var1:"
+				+ PadTo(String.valueOf(GetVar1()), 5) + " var2:" + PadTo(String.valueOf(GetVar2()), 5) + " sectors: "
+				+ PadTo(String.valueOf(GetFileLengthSectors()), 3) + " start:" + GetStartTrack() + "/"
+				+ GetStartSector();
 		return (result);
 	}
-	
+
 	public String PadTo(String s, int num) {
 		while (s.length() < num) {
 			s = s + " ";
 		}
-		return(s);
+		return (s);
 	}
 
 	/**
@@ -321,18 +327,18 @@ public class TrdDirectoryEntry implements FileEntry {
 			}
 		}
 	}
-	
+
 	/**
 	 * Get the file data.
 	 * 
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	@Override
 	public byte[] GetFileData() throws IOException {
-		return(GetFileRawData());
+		return (GetFileRawData());
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -341,66 +347,63 @@ public class TrdDirectoryEntry implements FileEntry {
 		int startsector = (GetStartTrack() * CurrentDisk.GetNumSectors()) + GetStartSector();
 
 		long length = GetFileSize();
-		//check to see if this value is reasonable.
+		// check to see if this value is reasonable.
 		long FileSizeSectors = GetFileLengthSectors() * 256;
 		long diff = Math.abs(FileSizeSectors - length);
-		if (diff > 266) { //difference is out of range. (1 sector + 10 BASIC fiddle bytes)
-			//fiddle the file length.
+		if (diff > 266) { // difference is out of range. (1 sector + 10 BASIC fiddle bytes)
+			// fiddle the file length.
 			length = FileSizeSectors;
-			System.out.println("GetFileData(): File: "+GetFilename()+" bad length. Fiddling.");
+			System.out.println("GetFileData(): File: " + GetFilename() + " bad length. Fiddling.");
 		}
-		
+
 		byte result[] = CurrentDisk.GetBytesStartingFromSector(startsector, length);
-		return(result);		 
+		return (result);
 	}
 
-	
 	/**
 	 * 
 	 */
 	@Override
 	public int GetRawFileSize() {
-		return(GetFileSize());
+		return (GetFileSize());
 	}
-	
 
 	/**
-	 * Get the Speccy file length. 
-	 * Note that for BASIC files
-	 * - this is in the first byte pair rather than the second one.
-	 * - This value does not include the bytes at the end containing the start line.   
+	 * Get the Speccy file length. Note that for BASIC files - this is in the first
+	 * byte pair rather than the second one. - This value does not include the bytes
+	 * at the end containing the start line.
 	 * 
 	 * @return
 	 */
 	@Override
 	public int GetFileSize() {
 		int length = GetVar2();
-		if (GetFileType()=='B') {
+		if (GetFileType() == 'B') {
 			length = GetVar1();
 		}
 		return length;
 	}
-	
+
 	/**
-	 * Return if a given file is a character array. 
-	 * This is provided because the "D" file type can be either. 
+	 * Return if a given file is a character array. This is provided because the "D"
+	 * file type can be either.
 	 * 
 	 * @return
 	 */
 	public boolean IsCharArray() {
 		boolean result = false;
-		if (GetFileType()=='D') {
+		if (GetFileType() == 'D') {
 			byte dtyp = (byte) (DirEntryDescriptor[0x09] & 0xff);
 			result = (dtyp & 0x40) == 0;
 		}
-		return(result);
+		return (result);
 	}
-	
+
 	/**
 	 * This performs a CPM-style file match except matching is 10.1 rather than 8.3
 	 */
 	@Override
-	public boolean DoesMatch(String wildcard) {		
+	public boolean DoesMatch(String wildcard) {
 		// convert the wildcard into a search array:
 		// Split into filename and extension. pad out with spaces.
 		String fname = wildcard.trim().toUpperCase();
@@ -451,18 +454,17 @@ public class TrdDirectoryEntry implements FileEntry {
 			}
 		}
 
-		
 		int HasDot = StringToMatch.indexOf('.');
 		String preDot = StringToMatch;
 		String PostDot = "";
-		if (HasDot>-1) {
-			preDot = StringToMatch.substring(0,HasDot);
-			PostDot = StringToMatch.substring(HasDot+1);
+		if (HasDot > -1) {
+			preDot = StringToMatch.substring(0, HasDot);
+			PostDot = StringToMatch.substring(HasDot + 1);
 		}
-		preDot = (preDot+"            ").substring(0,10);
-		PostDot = (PostDot+" ").substring(0,1);
-		
-		StringToMatch = preDot+PostDot;
+		preDot = (preDot + "            ").substring(0, 10);
+		PostDot = (PostDot + " ").substring(0, 1);
+
+		StringToMatch = preDot + PostDot;
 		// now search.
 		// check the filename
 		boolean match = true;
@@ -473,15 +475,86 @@ public class TrdDirectoryEntry implements FileEntry {
 				match = false;
 			}
 		}
-		return(match);
+		return (match);
 	}
 
 	@Override
 	public SpeccyBasicDetails GetSpeccyBasicDetails() {
 		int VarStart = GetVar1();
 		int LoadAddress = GetVar1();
-		char ArrayVar = 'A';		
-		SpeccyBasicDetails result = new SpeccyBasicDetails(GetFileType(), VarStart, startline, LoadAddress, ArrayVar );
+		char ArrayVar = 'A';
+		int filetype = Speccy.BASIC_CODE;
+		switch (GetFileType()) {
+		case 'B':
+			filetype = Speccy.BASIC_BASIC;
+			break;
+		case 'D':
+			if (IsCharArray()) {
+				filetype = Speccy.BASIC_CHRARRAY;
+			} else {
+				filetype = Speccy.BASIC_NUMARRAY;
+			}
+			break;
+		}
+
+		SpeccyBasicDetails result = new SpeccyBasicDetails(filetype, VarStart, startline, LoadAddress, ArrayVar);
+
 		return (result);
 	}
+
+	public void SetSpeccyBasicDetails(SpeccyBasicDetails sbd, TrDosPartition Part) {
+		switch (sbd.BasicType) {
+		case Speccy.BASIC_BASIC:
+			SetVar2(sbd.VarStart);
+			startline = sbd.LineStart;
+			SetStartLine();
+			break;
+		case Speccy.BASIC_NUMARRAY:
+			break;
+		case Speccy.BASIC_CHRARRAY:
+			break;
+		case Speccy.BASIC_CODE:
+			SetVar1(sbd.LoadAddress);
+		default:
+			break;
+		}
+		try {
+			Part.UpdateDirentsOnDisk();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void SetStartLine() {
+		/**
+		 * For BASIC files, extract the line from the file.
+		 */
+		if ((CurrentDisk != null) && (this.GetFileType() == 'B')) {
+			long startsector = (GetStartTrack() * CurrentDisk.GetNumSectors()) + GetStartSector();
+			// Want the 10 bytes past the EOF
+			int itemlength = GetFileSize() + 0x10;
+			// Reduce the amount we have to read. Keep incrementing the sector until there
+			// is only one or two sectors left.
+			while (itemlength > 512) {
+				itemlength = itemlength - CurrentDisk.GetSectorSize();
+				startsector++;
+			}
+
+			byte result[];
+			try {
+				result = CurrentDisk.GetBytesStartingFromSector(startsector, itemlength);
+				int ptr = itemlength - 0x10;
+				int lsb = startline & 0xff;
+				int msb = startline / 0x100;
+				
+				result[ptr+2] = (byte) (lsb & 0xff);
+				result[ptr+3] = (byte) (msb & 0xff);
+				CurrentDisk.SetLogicalBlockFromSector(startsector,result);
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 }

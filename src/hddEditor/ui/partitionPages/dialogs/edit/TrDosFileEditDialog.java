@@ -1,15 +1,5 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
 
-//TODO: SCL files just dont seem to work.
-/**
- * Implementation of the Edit file page for a TR-DOS file.
- * 
- * TODO: Saves for TR-DOS BASIC/Start line  BASIC/VARSTART
- * TODO: Saves for TR-DOS Variable name for Variables.
- * TODO: Saves for TR-DOS Code load address
-
- */
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlEvent;
@@ -24,13 +14,15 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.FileSelectDialog;
-import hddEditor.libs.disks.FileEntry;
+import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.IDEDosPartition;
+import hddEditor.libs.partitions.TrDosPartition;
 import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
+import hddEditor.ui.partitionPages.dialogs.edit.callbacks.GenericSaveEvent;
 
 public class TrDosFileEditDialog extends EditFileDialog {
 	/**
@@ -109,13 +101,11 @@ public class TrDosFileEditDialog extends EditFileDialog {
 			if (ftype == 'B') {
 				BasicRenderer CurrentRenderer = new BasicRenderer();
 				CurrentRenderer.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), ThisEntry.GetFileSize(),
-						trde.GetVar2(), trde.startline, filesel, null);
+						trde.GetVar2(), trde.startline, filesel, new BasicSave());
 			} else if (ftype != 'D') {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
-				// TODO: implement TRDosFileEdit.saveevent for CODE
-
 				CurrentRenderer.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, trde.GetVar1(),
-						filesel, CurrentPartition, null);
+						filesel, CurrentPartition, new CodeSave());
 			} else if (trde.IsCharArray()) {
 				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
 				CurrentRenderer.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel, null);
@@ -127,4 +117,47 @@ public class TrDosFileEditDialog extends EditFileDialog {
 			System.out.println("Error Showing " + ThisEntry.GetFilename() + ": " + E.getMessage());
 		}
 	}
+	
+	/**
+	 * Save for BASIC files. Only the LOAD address is save-able.
+	 */
+	private class BasicSave  implements GenericSaveEvent {
+		@Override
+		public boolean DoSave(int valtype, String sValue, int Value) {
+			TrdDirectoryEntry trde = (TrdDirectoryEntry) ThisEntry;
+			SpeccyBasicDetails sbd = trde.GetSpeccyBasicDetails();
+			if (valtype == 0) {
+				System.out.print("Start Line: " + sbd.LineStart + " -> ");
+				sbd.LineStart = Value;
+				System.out.println(sbd.LineStart);
+			} else {
+				System.out.print("Vars Offset: " + sbd.VarStart + " -> ");
+				sbd.VarStart = Value;
+				System.out.println(sbd.VarStart);
+			}
+		
+			trde.SetSpeccyBasicDetails(sbd,(TrDosPartition) CurrentPartition);
+
+			return true;
+		}
+	}
+
+	/**
+	 * Save for SAVE files. Start line(0) and Vars(1) offset are save-able.
+	 */
+	private class CodeSave implements GenericSaveEvent {
+		@Override
+		public boolean DoSave(int valtype, String sValue, int Value) {
+			TrdDirectoryEntry trde = (TrdDirectoryEntry) ThisEntry;
+			SpeccyBasicDetails sbd = trde.GetSpeccyBasicDetails();
+			System.out.print("Code start: " + sbd.LoadAddress+ " -> ");
+			sbd.LoadAddress = Value;
+			System.out.println(sbd.LoadAddress);
+			
+			trde.SetSpeccyBasicDetails(sbd,(TrDosPartition) CurrentPartition);
+			return true;
+		}
+	}
+
+	
 }

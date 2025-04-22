@@ -8,6 +8,15 @@ package hddEditor.libs;
 //BUGFIX: GDS 23/01/2023 - Better handling of arrays with lots of dimensions.
 //QOLFIX: GDS 23/01/2023 - DoSaveFileAsAsm: Now uses fixed format strings so data export looks better.
 //QOLFIX: GDS 23/01/2023 - Added progress bar for export.
+//TODO: parsing still seems to be broken. EG: 
+/*
+50 let a=32771
+60 for b=1 to 16
+70 print peek a;" ";peek (a+1);" ";peek (a+2);" ";peek (a+3);" ";peek (a+4)
+80 let a=a+12
+90 next b
+ */
+
 
 import java.io.File;
 import java.io.FileNotFoundException;
