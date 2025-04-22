@@ -257,7 +257,7 @@ public class CPMDirectoryEntry implements FileEntry {
 			byte currentblock[] = ThisPartition.GetLogicalBlock(i);
 			System.arraycopy(currentblock, 0, result, resultptr,
 					Math.min(result.length - resultptr, currentblock.length));
-			resultptr = resultptr + currentblock.length;
+			resultptr = resultptr + Math.min(result.length - resultptr, currentblock.length);
 		}
 
 		return (result);
