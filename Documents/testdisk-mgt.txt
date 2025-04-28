@@ -1,0 +1,144 @@
+MGT / Disciple / +D / file format
+
+For more information see: https://sinclair.wiki.zxnet.co.uk/wiki/MGT_filesystem
+User manual for the Disciple: https://worldofspectrum.net/item/1000117/
+USer manual for the MGT/+D    https://worldofspectrum.net/item/1000246/
+
+ Disks are 10 sectors/track 512 byte sectors Numbered 1-10
+ SS or DS
+ 40 or 80 tracks. only 80 tracks, DS disks are supported.
+ 
+ logical tracks are HC format
+ Tracks are logically labelled 0-79 (side 0) 128-207 (side 1)
+ 
+ The root directory consists of of at least 4 tracks on side 1. Each directory entry is 256 bytes, most of which is unused for most files.
+ There are no disk identification headers unfortunately.
+ 
+ The disk attached is a MGT System disk.
+ 
+First directory entry:
+
+ 00000000   04 53 79 73  20 33 62 20  20 20 20 00  0E 04 01 FF  |.Sys 3b    .....|
+ 00000010   3F 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  |?...............|
+   ....
+ 000000D0   00 00 00 03  00 1A 00 00  FF FF 00 00  00 00 00 00  |................|
+ 000000E0   00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  |................|
+ 000000F0   00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  |................|
+
+ 
+ Byte:	Example 		 Use
+ +-----+----------------+---------------------------------------------------------------------------------------
+ |00   | 04				| File type. (04=ZX-CODE) (See https://sinclair.wiki.zxnet.co.uk/wiki/MGT_filesystem)
+ |01-0A| 53 79 73 20 33 |
+ |     | 62 20 20 20 20 | Filename, padded with spaces "Sys 3b    "
+ |0B-0C| 00 0E			| Number of sectors used by the file, MSB first ($000E = 14)
+ |0D-0E| 04 01			| Start of the file on the disk, T/S, so Track 4, Sector 1
+ |0F-D1| ......			| Sector map. 11111111 0011 1111 00000->end
+ |D2-DB| 00 03 00 1A 00 | Disciple/+d file information. 
+ |     | 00 FF FF 00 00 |
+ |DC-E7| ......			| SAM File information.       
+ |E8-Eb| ......         | Unused
+ |Ec-F4| ......         | Sam Start/length information
+ |F5-FF| ......			| Unused outside MasterDOs/SAMDOS/UNIDOS
+ +-----+---------------+---------------------------------------------------------------------------------------
+ 
+ Disciple/+d file information:
+ Byte:	Example 		 Use
+ +-----+----------------+---------------------------------------------------------------------------------------
+ |d2   | 0			    | For opentype files, number of 64K blocks in the file
+ |d3   | 3				| Sinclair ID block (0=basic, 1=Numarray, 2=Chrarray, 3=code)
+ |d4-d5| 00 1A          | BASIC File length, MSB first (26 bytes)
+ |d6-d7| 00 00			| Start address. Note, in this case, its invalid for Boot code
+ |d8-d9| ff ff			| Variable 1, (basic: Variables start)
+ |da-db| 00 00          | Variable 2 (code=load address), Note BASIC autostart is stored after the main file
+ +-----+----------------+---------------------------------------------------------------------------------------
+ 
+ 
+ 
+ After the 4 tracks (80 directory entries), the remaining sectors are just raw binary data.
+ 
+The test files in entries 6 to 9
+
+
+00000500   01 62 61 73  69 63 20 20  20 20 20 00  01 08 05 00  .basic     .....
+00000510   00 00 00 00  10 00 00 00  00 00 00 00  00 00 00 00  ................
+....
+000005D0   00 00 00 00  C4 01 CB 5C  3D 01 2C 01  00 00 00 00  .......\=.,.....
+000005E0   00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  ................
+000005F0   00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  ................
+
+ 500       Type 1 (ZX BASIC)
+ 501-50A   filename "basic     "
+ 50b-50c   1 sector used by the file
+ 50d-50e   First sector: = Track 8 Sector 5
+ 50f-5d1   Sector map. 
+ 5d2       unused (Not an opentype file)
+ 5d3       ZX file type (0=BASIC)
+ 5d4-5d5   File length, ($01c4 = 452 bytes)
+ 5d6-5d7   Unused
+ 5d8-5d9   for BASIC, adddress of the VARS area (+$012C =300 bytes in the file) 
+ 5da-5db   Unused
+ 5dc-5ff   Unused
+ 
+
+00000600   04 63 6F 64  65 20 20 20  20 20 20 00  04 08 06 00  .code      .....
+00000610   00 00 00 00  E0 01 00 00  00 00 00 00  00 00 00 00  ................
+ ....
+000006D0   00 00 00 03  D0 07 30 75  FF FF 00 00  00 00 00 00  ......0u........
+000006E0   00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  ................
+000006F0   00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  ................
+
+ 500       Type 4 (ZX CODE)
+ 501-50A   filename "code      "
+ 50b-50c   4 sectors used by the file
+ 50d-50e   First sector: = Track 8 Sector 6
+ 50f-5d1   Sector map. 
+ 5d2       unused (Not an opentype file)
+ 5d3       ZX file type (3=CODE)
+ 5d4-5d5   File length, ($07D0 = 2000 bytes)
+ 5d6-5d7   Load address, ($7530 = 30000)
+ 5d8-5d9   Unused 
+ 5da-5db   Unused
+ 5dc-5ff   Unused
+
+00000700   03 63 64 61  74 61 20 20  20 20 20 00  01 08 0A 00  .cdata     .....
+00000710   00 00 00 00  00 02 00 00  00 00 00 00  00 00 00 00  ................
+ ....
+000007D0   00 00 00 02  37 00 0B 5E  C1 FF FF FF  00 00 00 00  ....7..^........
+000007E0   00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  ................
+000007F0   00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  ................
+
+ 500       Type 3 (ZX Character Array)
+ 501-50A   filename "cdata     "
+ 50b-50c   1 sector used by the file
+ 50d-50e   First sector: = Track 8 Sector 10
+ 50f-5d1   Sector map. 
+ 5d2       unused (Not an opentype file)
+ 5d3       ZX file type (2=Char array)
+ 5d4-5d5   File length, ($0037 = 55 bytes)
+ 5d6-5d7   Unused
+ 5d8-5d9   Unused 
+ 5da-5db   Unused
+ 5dc-5ff   Unused
+
+
+00000800   02 6E 64 61  74 61 20 20  20 20 20 00  01 09 01 00  .ndata     .....
+00000810   00 00 00 00  00 04 00 00  00 00 00 00  00 00 00 00  ................
+ ....
+000008D0   00 00 00 01  23 00 45 5E  82 FF FF FF  00 00 00 00  ....#.E^........
+000008E0   00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  ................
+000008F0   00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  ................
+
+ 500       Type 2 (ZX Numeric Array)
+ 501-50A   filename "ndata     "
+ 50b-50c   1 sector used by the file
+ 50d-50e   First sector: = Track 9 Sector 1
+ 50f-5d1   Sector map. 
+ 5d2       unused (Not an opentype file)
+ 5d3       ZX file type (1=Numeric array)
+ 5d4-5d5   File length, ($0033 = 23 bytes)
+ 5d6-5d7   Unused
+ 5d8-5d9   Unused 
+ 5da-5db   Unused
+ 5dc-5ff   Unused
+
