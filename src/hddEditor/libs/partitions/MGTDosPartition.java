@@ -602,7 +602,7 @@ public class MGTDosPartition extends IDEDosPartition {
 	 * @param currentfile
 	 * @throws IOException
 	 */
-	private void SaveDirectoryEntry(MGTDirectoryEntry currentfile) throws IOException {
+	public void SaveDirectoryEntry(MGTDirectoryEntry currentfile) throws IOException {
 		// locate the sector containing the dirent.
 		int direntSector = currentfile.DirentNum * 256 / CurrentDisk.GetSectorSize();
 		int LocationInSector = (currentfile.DirentNum * 256) % CurrentDisk.GetSectorSize();

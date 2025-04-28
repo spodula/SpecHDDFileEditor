@@ -1,6 +1,7 @@
 package hddEditor.libs.disks.FDD;
 /*
- * MGT disk files. There are a couple of limitations to this object:
+ * MGT disk files (AKA DISCiPLE/+d/Sam Coupé Disk format). 
+ * There are a couple of limitations to this object:
  * o Will only create disks of 80 tracks, 2 sides
  * o Will only detect disks of 80 tracks, 2 sides
  * 
@@ -130,7 +131,7 @@ public class MGTDiskFile extends FloppyDisk {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String filename = "/home/graham/Retro/mgt/Artist2.mgt";
+		String filename = "/home/graham/Desktop/testdisk-mgt.mgt";
 		MGTDiskFile mdf;
 		try {
 			mdf = new MGTDiskFile(new File(filename));
@@ -380,6 +381,7 @@ public class MGTDiskFile extends FloppyDisk {
 	@Override
 	public Boolean IsMyFileType(File filename) throws IOException {
 		boolean result = false;
+		
 		if ((filename.length() == 0xC8000) && filename.getName().toLowerCase().endsWith(".mgt")) { // length of 819200
 			byte dirents[] = new byte[4 * 512 * 10]; // Load first 4 sectors...
 			inFile = new RandomAccessFile(filename, "r");

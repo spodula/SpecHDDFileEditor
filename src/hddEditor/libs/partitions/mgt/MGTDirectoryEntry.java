@@ -37,9 +37,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import hddEditor.libs.MGT;
+import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
+import hddEditor.libs.partitions.TrDosPartition;
 
 public class MGTDirectoryEntry implements FileEntry {
 	public byte RawDirectoryEntry[] = null;
@@ -167,13 +169,27 @@ public class MGTDirectoryEntry implements FileEntry {
 	public int GetVar1() {
 		return (RawDirectoryEntry[217] & 0xff) * 256 + (RawDirectoryEntry[216] & 0xff);
 	}
-
-	private int GetLoadAddress() {
-		return (RawDirectoryEntry[215] & 0xff) * 256 + (RawDirectoryEntry[214] & 0xff);
+	public void SetVar1(int var1) {
+		RawDirectoryEntry[217] = (byte) ((var1 & 0xff00) >> 8);
+		RawDirectoryEntry[216] = (byte) (var1 & 0xff);		
 	}
 
-	private int GetStartLine() {
+	public int GetLoadAddress() {
+		return (RawDirectoryEntry[215] & 0xff) * 256 + (RawDirectoryEntry[214] & 0xff);
+	}
+	
+	public void SetLoadAddress(int LoadAddress) {
+		RawDirectoryEntry[215] = (byte) ((LoadAddress & 0xff00) >> 8);
+		RawDirectoryEntry[214] = (byte) (LoadAddress & 0xff);		
+	}
+
+	public int GetStartLine() {
 		return (RawDirectoryEntry[219] & 0xff) * 256 + (RawDirectoryEntry[218] & 0xff);
+	}
+	
+	public void SetStartLine(int newsl) {
+		RawDirectoryEntry[219] = (byte) ((newsl & 0xff00) >> 8);
+		RawDirectoryEntry[218] = (byte) (newsl & 0xff);
 	}
 
 	public boolean GetProtected() {
@@ -285,7 +301,6 @@ public class MGTDirectoryEntry implements FileEntry {
 			System.arraycopy(data, 0, rawdata, ptr, CurrentDisk.GetSectorSize() - 2);
 			ptr = ptr + CurrentDisk.GetSectorSize() - 2;
 		}
-//		System.out.println(GeneralUtils.HexDump(rawdata, 0, 256, 0));
 
 		return rawdata;
 	}
@@ -297,5 +312,35 @@ public class MGTDirectoryEntry implements FileEntry {
 	public int GetStartTrack() {
 		return (int) (RawDirectoryEntry[0x0d] & 0xff);
 	}
-
+	
+	/**
+	 * Update the dirent from the SpeccyBasicDetails.
+	 * Note that this will not change filesize
+	 * 
+	 * @param sbd
+	 * @param Part
+	 */
+	public void SetSpeccyBasicDetails(SpeccyBasicDetails sbd, TrDosPartition Part) {
+		switch (sbd.BasicType) {
+		case Speccy.BASIC_BASIC:
+			SetVar1(sbd.VarStart);
+			SetStartLine(sbd.VarStart);
+			break;
+		case Speccy.BASIC_NUMARRAY:
+			break;
+		case Speccy.BASIC_CHRARRAY:
+			break;
+		case Speccy.BASIC_CODE:
+			SetLoadAddress(sbd.LoadAddress);
+		default:
+			break;
+		}
+		try {
+			Part.UpdateDirentsOnDisk();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 }
+

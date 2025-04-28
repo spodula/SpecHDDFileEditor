@@ -1,12 +1,10 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
 /**
  * Implementation of the Edit file page for an MGT file.
- * 
- * TODO: Saves for MGT BASIC/Start line  BASIC/VARSTART
- * TODO: Saves for MGT Variable name for Variables.
- * TODO: Saves for MGT Code load address
  *
  */
+
+import java.io.IOException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -23,7 +21,12 @@ import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.MGT;
+import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.IDEDosPartition;
+import hddEditor.libs.partitions.MGTDosPartition;
+import hddEditor.libs.partitions.PLUS3DOSPartition;
+import hddEditor.libs.partitions.cpm.CPMDirectoryEntry;
+import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.BasicRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
@@ -31,6 +34,7 @@ import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.MGT48kSnapshotRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.MGT128kSnapshotRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
+import hddEditor.ui.partitionPages.dialogs.edit.callbacks.GenericSaveEvent;
 import hddEditor.ui.partitionPages.FileRenderers.MGTExecuteRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.MGTScreenRenderer;
 
@@ -101,7 +105,7 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 			if (ftype == MGT.MGTFT_ZXBASIC) {
 				BasicRenderer CurrentRenderer = new BasicRenderer();
 				CurrentRenderer.RenderBasic(MainPage, data, null, mEnt.GetFilename(), mEnt.GetFileSize(),
-						mEnt.GetSpeccyBasicDetails().VarStart, mEnt.GetSpeccyBasicDetails().LineStart,filesel, null);
+						mEnt.GetSpeccyBasicDetails().VarStart, mEnt.GetSpeccyBasicDetails().LineStart,filesel, new BasicSave());
 			} else if (ftype == MGT.MGTFT_ZXNUMARRAY) {
 				NumericArrayRenderer CurrentRenderer = new NumericArrayRenderer();
 				CurrentRenderer.RenderNumericArray(MainPage, data, null, mEnt.GetFilename(),
@@ -124,13 +128,65 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 				CurrentRenderer.Render(MainPage, data, mEnt.GetFilename(),filesel);
 			} else {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
-				//TODO: implement MGTDOSFileEdit.saveevent for CODE
 				CurrentRenderer.RenderCode(MainPage, data, null, mEnt.GetFilename(), data.length,
-						mEnt.GetVar1(),filesel,CurrentPartition,null);
+						mEnt.GetLoadAddress(),filesel,CurrentPartition,new CodeSave());
 			}
 		} catch (Exception E) {
 			System.out.println("Error Showing " + ThisEntry.GetFilename()+ ": " + E.getMessage());
 		}
 	}
 
+	/**
+	 * Save for CODE files. Only the LOAD address is save-able.
+	 */
+	private class CodeSave implements GenericSaveEvent {
+		@Override
+		public boolean DoSave(int valtype, String sValue, int Value) {
+			MGTDirectoryEntry direntry = (MGTDirectoryEntry) ThisEntry;
+			
+			System.out.print("Load address: " + direntry.GetLoadAddress() + " -> ");
+			direntry.SetLoadAddress(Value);			
+			System.out.println(direntry.GetLoadAddress());
+			
+			try {
+				((MGTDosPartition)CurrentPartition).SaveDirectoryEntry(direntry);
+				return true;
+			} catch (IOException e) {
+				System.out.println("Error updating directory entry");
+				e.printStackTrace();
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Save for BASIC files. Start line(0) and Vars(1) offset are save-able.
+	 */
+	private class BasicSave implements GenericSaveEvent {
+		@Override
+		public boolean DoSave(int valtype, String sValue, int Value) {
+			MGTDirectoryEntry direntry = (MGTDirectoryEntry) ThisEntry;
+			
+			if (valtype == 0) {
+				System.out.print("Start Line: " + direntry.GetStartLine() + " -> ");
+				direntry.SetStartLine(Value);
+				System.out.println(direntry.GetStartLine());
+			} else {
+				System.out.print("Vars Offset: " + direntry.GetVar1() + " -> ");
+				direntry.SetVar1(Value);
+				System.out.println(direntry.GetVar1());
+			}
+			
+			try {
+				((MGTDosPartition)CurrentPartition).SaveDirectoryEntry(direntry);
+				return true;
+
+			} catch (IOException e) {
+				System.out.println("Error updating directory entry");
+				e.printStackTrace();
+			}
+			return false;
+		}
+	}
+	
 }

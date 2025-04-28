@@ -16,17 +16,17 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class TrDosDiskFile extends FloppyDisk {
-	private byte[] DiskInfoBlock = null;
+	private byte[] DiskInfoBlock;
 
-	public boolean IsValid = false;
-	public int FirstFreeSectorS = 0;
-	public int FirstFreeSectorT = 0;
-	public int LogicalDiskType = 0;
-	public int NumFiles = 0;
-	public int NumDeletedFiles = 0;
-	public int NumFreeSectors = 0;
-	public int TRDOSID = 0;
-	public String Disklabel = "";
+	public boolean IsValid;
+	public int FirstFreeSectorS;
+	public int FirstFreeSectorT;
+	public int LogicalDiskType;
+	public int NumFiles;
+	public int NumDeletedFiles;
+	public int NumFreeSectors;
+	public int TRDOSID;
+	public String Disklabel;
 
 	public TrDosDiskFile(File file) throws IOException, BadDiskFileException {
 		super(file);
@@ -49,14 +49,14 @@ public class TrDosDiskFile extends FloppyDisk {
 	}
 
 	/**
-	 * Load the sector data. 
-	 * Note, this assumes the disk is valid. 
-	 * @throws IOException 
+	 * Load the sector data. Note, this assumes the disk is valid.
+	 * 
+	 * @throws IOException
 	 */
 	private void LoadData() throws IOException {
 		diskTracks = new TrackInfo[GetNumHeads() * GetNumCylinders()];
 		inFile.seek(0);
-		
+
 		int headNum = 0;
 		int trackNum = 0;
 		while (trackNum < GetNumCylinders()) {
@@ -68,23 +68,23 @@ public class TrDosDiskFile extends FloppyDisk {
 			NewTrack.side = headNum;
 			NewTrack.tracknum = trackNum;
 			NewTrack.TrackStartPtr = (int) inFile.getFilePointer();
-			NewTrack.datarate = 1; //SS
+			NewTrack.datarate = 1; // SS
 			if (GetNumHeads() > 1) {
-				NewTrack.datarate = 2; //DS (Alternating sides)
+				NewTrack.datarate = 2; // DS (Alternating sides)
 			}
-			
-			//Read each sector
+
+			// Read each sector
 			NewTrack.Sectors = new Sector[GetNumSectors()];
-			for (int sNum=0;sNum<GetNumSectors();sNum++) {
+			for (int sNum = 0; sNum < GetNumSectors(); sNum++) {
 				Sector newsect = new Sector();
 				newsect.FDCsr1 = 0;
 				newsect.FDCsr2 = 0;
-				newsect.sectorID = sNum+1;
+				newsect.sectorID = sNum + 1;
 				newsect.SectorStart = (int) inFile.getFilePointer();
 				newsect.Sectorsz = GetSectorSize();
 				newsect.side = headNum;
 				newsect.track = trackNum;
-						
+
 				byte sect[] = new byte[GetSectorSize()];
 				inFile.read(sect);
 
@@ -93,10 +93,10 @@ public class TrDosDiskFile extends FloppyDisk {
 
 				NewTrack.Sectors[sNum] = newsect;
 			}
-			
+
 			diskTracks[(GetNumHeads() * trackNum) + headNum] = NewTrack;
-			
-			//Point to the next track. 
+
+			// Point to the next track.
 			headNum++;
 			if (headNum == GetNumHeads()) {
 				trackNum++;
@@ -106,12 +106,12 @@ public class TrDosDiskFile extends FloppyDisk {
 	}
 
 	private void LoadDPB() throws IOException {
-		// TRD disks are just basically arrays of sectors arranged in C/H/S order. 
+		// TRD disks are just basically arrays of sectors arranged in C/H/S order.
 		// 0/0/9 contains the disk information. Load these first
-		//these values are common to all TR-DOS disks. 
-		SetNumSectors(16);
+		// these values are common to all TR-DOS disks.
+		SetNumSectors(10);
 		SetSectorSize(256);
-		
+
 		DiskInfoBlock = new byte[0x100];
 		inFile.seek(8 * SectorSize);
 		inFile.read(DiskInfoBlock);
@@ -155,7 +155,7 @@ public class TrDosDiskFile extends FloppyDisk {
 		}
 
 		// Check some of the disk parameters for stupid values.
-		if ((DiskInfoBlock[0] != 0x00) || (TRDOSID != 0x10)|| (DiskInfoBlock[0xff] != 0))
+		if ((DiskInfoBlock[0] != 0x00) || (TRDOSID != 0x10) || (DiskInfoBlock[0xff] != 0))
 			IsValid = false;
 		if ((LogicalDiskType < 0x16) || (LogicalDiskType > 0x19)) {
 			IsValid = false;
@@ -184,9 +184,10 @@ public class TrDosDiskFile extends FloppyDisk {
 	 */
 	@Override
 	public byte[] GetBytesStartingFromSector(long SectorNum, long sz) throws IOException {
-		//Note, this will restrict length for AMS files of 128Mb. This probably shouldnt be an issue. 
-		long asz = Math.min(sz,1024*1024*128);
-		byte result[] = new byte[(int)asz];
+		// Note, this will restrict length for AMS files of 128Mb. This probably
+		// shouldnt be an issue.
+		long asz = Math.min(sz, 1024 * 1024 * 128);
+		byte result[] = new byte[(int) asz];
 		// Find the track and sector...
 		int TrStart = 0;
 		int TrackNum = 0;
@@ -203,7 +204,7 @@ public class TrDosDiskFile extends FloppyDisk {
 		int ptr = 0;
 		byte sector[] = new byte[1];
 		while ((ptr < sz) && (sector.length > 0)) {
-			sector = Track.GetSectorBySectorID((int)FirstSector).data;
+			sector = Track.GetSectorBySectorID((int) FirstSector).data;
 			System.arraycopy(sector, 0, result, ptr, Math.min(sector.length, result.length - ptr));
 
 			ptr = ptr + sector.length;
@@ -211,7 +212,7 @@ public class TrDosDiskFile extends FloppyDisk {
 			FirstSector++;
 			if (FirstSector > Track.maxsectorID) {
 				TrackNum++;
-				if (TrackNum < diskTracks.length ) {
+				if (TrackNum < diskTracks.length) {
 					Track = diskTracks[TrackNum];
 					FirstSector = Track.minsectorID;
 				} else {
@@ -243,7 +244,7 @@ public class TrDosDiskFile extends FloppyDisk {
 		int ptr = 0;
 		byte sectorData[] = new byte[1];
 		while ((ptr < result.length)) {
-			Sector sect = Track.GetSectorBySectorID((int)FirstSector);
+			Sector sect = Track.GetSectorBySectorID((int) FirstSector);
 			sectorData = sect.data;
 			System.arraycopy(result, ptr, sectorData, 0, Math.min(sectorData.length, result.length - ptr));
 			WriteSector(sect);
@@ -271,7 +272,7 @@ public class TrDosDiskFile extends FloppyDisk {
 			inFile.seek(sect.SectorStart);
 			inFile.write(sect.data);
 		} catch (IOException e) {
-			System.out.println("Failed writing sector...."+e.getMessage());
+			System.out.println("Failed writing sector...." + e.getMessage());
 			e.printStackTrace();
 		}
 		UpdateLastModified();
@@ -300,14 +301,18 @@ public class TrDosDiskFile extends FloppyDisk {
 	@Override
 	public Boolean IsMyFileType(File filename) throws IOException {
 		boolean result = false;
-
-		inFile = new RandomAccessFile(filename, "rw");
+		TrDosDiskFile trd = null;
 		try {
-			LoadDPB();
-			result = IsValid;
+			trd = new TrDosDiskFile(filename);
+			result = trd.IsValid;
+		} catch (Exception E) {
+			result = false;
 		} finally {
-			inFile.close();
+			if (trd!=null) {
+				trd.close();
+			}
 		}
+		
 		return (result);
 	}
 
@@ -321,65 +326,64 @@ public class TrDosDiskFile extends FloppyDisk {
 	public void CreateBlankTRDOSDisk(File file, int cyls, int heads, String DiskLabel) throws IOException {
 		FileOutputStream NewFile = new FileOutputStream(file);
 		try {
-		    /*
-		     * Create and write the first track (Blank directory entries + disk descriptor
-		     */
-			int DiskType= 0x16;
-			if (heads == 1) 
+			/*
+			 * Create and write the first track (Blank directory entries + disk descriptor
+			 */
+			int DiskType = 0x16;
+			if (heads == 1)
 				DiskType = DiskType + 2;
-			if (cyls == 40) 
+			if (cyls == 40)
 				DiskType = DiskType + 1;
-			
-			int NumFreeSectors = ((cyls * heads) -1) * 16;
 
-			
-			byte track[] = new byte[256*16];
-			//Blank the track
-			for(int i=0;i<track.length;i++) {
+			int NumFreeSectors = ((cyls * heads) - 1) * 16;
+
+			byte track[] = new byte[256 * 16];
+			// Blank the track
+			for (int i = 0; i < track.length; i++) {
 				track[i] = 0x00;
 			}
 			int DiskInfoLoc = 8 * 256;
-			track[DiskInfoLoc+0] = 0x00; // end of catalog
-			track[DiskInfoLoc+0xe1] = 0x01; //first free sector
-			track[DiskInfoLoc+0xe2] = 0x01; //first free track.
-			track[DiskInfoLoc+0xe3] = (byte) DiskType; //disk type
-			track[DiskInfoLoc+0xe4] = 0x00; //Number of files on disk
-			track[DiskInfoLoc+0xe5] = (byte) ((NumFreeSectors % 0x100) & 0xff);  //Free sectors.
-			track[DiskInfoLoc+0xe6] = (byte) ((NumFreeSectors / 0x100) & 0xff);
-			track[DiskInfoLoc+0xe7] = 0x10; //TR-DOS marker
-			for(int i=0;i<9;i++) {  //blank with spaces. No idea why
-				track[DiskInfoLoc+0xe9+i] = 0x20;
+			track[DiskInfoLoc + 0] = 0x00; // end of catalog
+			track[DiskInfoLoc + 0xe1] = 0x01; // first free sector
+			track[DiskInfoLoc + 0xe2] = 0x01; // first free track.
+			track[DiskInfoLoc + 0xe3] = (byte) DiskType; // disk type
+			track[DiskInfoLoc + 0xe4] = 0x00; // Number of files on disk
+			track[DiskInfoLoc + 0xe5] = (byte) ((NumFreeSectors % 0x100) & 0xff); // Free sectors.
+			track[DiskInfoLoc + 0xe6] = (byte) ((NumFreeSectors / 0x100) & 0xff);
+			track[DiskInfoLoc + 0xe7] = 0x10; // TR-DOS marker
+			for (int i = 0; i < 9; i++) { // blank with spaces. No idea why
+				track[DiskInfoLoc + 0xe9 + i] = 0x20;
 			}
-			track[DiskInfoLoc+0xf4] = 0x00; //number of deleted files
+			track[DiskInfoLoc + 0xf4] = 0x00; // number of deleted files
 			DiskLabel = DiskLabel + "        ";
 			byte DiskLabelBytes[] = DiskLabel.getBytes();
-			for(int i=0;i<8;i++) {
-				track[DiskInfoLoc+0xf5+i] = DiskLabelBytes[i];
+			for (int i = 0; i < 8; i++) {
+				track[DiskInfoLoc + 0xf5 + i] = DiskLabelBytes[i];
 			}
-			//Write the first track
+			// Write the first track
 			NewFile.write(track);
 
 			/*
 			 * Write the rest of the tracks.
 			 */
-			track = new byte[256*16];
-			//Blank the track
-			for(int i=0;i<track.length;i++) {
+			track = new byte[256 * 16];
+			// Blank the track
+			for (int i = 0; i < track.length; i++) {
 				track[i] = 0x00;
 			}
-			//Write all the tracks.
-			int NumDataTracks = ((cyls * heads) -1);
-			for(int tracknum = 0;tracknum < NumDataTracks;tracknum++) {
-				NewFile.write(track);				
+			// Write all the tracks.
+			int NumDataTracks = ((cyls * heads) - 1);
+			for (int tracknum = 0; tracknum < NumDataTracks; tracknum++) {
+				NewFile.write(track);
 			}
-			
+
 		} finally {
 			NewFile.close();
 			NewFile = null;
 		}
-		
+
 		/*
-		 *  Load the newly created file.
+		 * Load the newly created file.
 		 */
 		this.file = file;
 		inFile = new RandomAccessFile(this.file, "rw");
@@ -387,5 +391,5 @@ public class TrDosDiskFile extends FloppyDisk {
 		IsValid = false;
 		ParseDisk();
 	}
-	
+
 }
