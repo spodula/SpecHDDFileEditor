@@ -221,8 +221,8 @@ public class MGTDirectoryEntry implements FileEntry {
 		for (int BlkUsageMap = 0x0f; BlkUsageMap < 0xd2; BlkUsageMap++) {
 			int sectormask = RawDirectoryEntry[BlkUsageMap] & 0xff;
 			for (int bit = 0; bit < 8; bit++) {
-				if ((sectormask & 0x01) != 0) {
-					if (sectors.length <sPtr) {
+				if ((sectormask & 0x01) == 0x01) {
+					if (sectors.length >= sPtr) {
 						sectors[sPtr++] = CurrentLogicalSector;
 					}
 				}
