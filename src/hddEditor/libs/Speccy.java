@@ -8,14 +8,6 @@ package hddEditor.libs;
 //BUGFIX: GDS 23/01/2023 - Better handling of arrays with lots of dimensions.
 //QOLFIX: GDS 23/01/2023 - DoSaveFileAsAsm: Now uses fixed format strings so data export looks better.
 //QOLFIX: GDS 23/01/2023 - Added progress bar for export.
-//TODO: parsing still seems to be broken. EG: 
-/*
-50 let a=32771
-60 for b=1 to 16
-70 print peek a;" ";peek (a+1);" ";peek (a+2);" ";peek (a+3);" ";peek (a+4)
-80 let a=a+12
-90 next b
- */
 
 
 import java.io.File;
@@ -93,18 +85,17 @@ public class Speccy {
 
 		// Test for line tokenisation and encoding
 		System.out.println("===============Line tokenisation test================");
-		// String line = "10 print at 21,0;PAPER 6;INK 0;\"Loading BAK2SCL2\"";
-		String line = "10 if a<=10 then goto 100";
+		String line = "70 print peek a;\" \";peek (a+1);\" \";peek (a+2);\" \";peek (a+3);\" \";peek (a+4)";
+		//String line = "10 if a<=10 then goto 100";
 		System.out.println("Line to decode: " + line);
 		byte target[] = new byte[1024];
 		int last = DecodeBasicLine(line, target, 0);
 
 		System.out.println("Result:");
 		for (int i = 0; i < last; i++) {
-			String s = String.format("%2d %3d (%2x)", i, target[i], target[i]);
-			if (target[i] >= ' ' && target[i] < 0x7f) {
-				s = s + " " + String.valueOf((char) target[i]);
-			}
+			int chr = target[i] & 0xff;
+			String s = String.format("%2d %3d (%2x)", i, chr, chr);
+			s = s + " "+tokens[chr];
 			System.out.println(s);
 		}
 	}
@@ -1191,7 +1182,11 @@ public class Speccy {
 		String err = "";
 		// split line
 		ArrayList<String> TokenList = SplitLine(Line);
-
+		for (int i=0;i<TokenList.size();i++) {
+			System.out.println(i+" "+TokenList.get(i));
+		}
+		
+		
 		// read the line number
 		if (TokenList.size() > 0) {
 			// get the initial token Should be the line number
@@ -1245,7 +1240,7 @@ public class Speccy {
 		int STATE_STRING = 2;
 		int STATE_MISC = 3;
 		int STATE_OPERATOR = 4;
-		int STATE_REM = 5;
+		int STATE_REM = 6;
 
 		// some preprocessing
 		line = CISreplace(line, "GO SUB", "GOSUB");
@@ -1273,10 +1268,16 @@ public class Speccy {
 				} else if (chr == '"') {
 					state = STATE_STRING;
 					curritem = curritem + '"';
+				} else if (IsSeperator(chr)) {
+					state = STATE_NONE;
+					result.add(curritem);
+					result.add(""+chr);
+					curritem = "";
 				} else if (chr != ' ') {
 					state = STATE_MISC;
 					curritem = curritem + chr;
 				}
+
 			} else if (state == STATE_NUMBER) {
 				if (IsNumber(chr)) {
 					curritem = curritem + chr;
@@ -1285,8 +1286,10 @@ public class Speccy {
 					curritem = "";
 					// ok we are not a number, Lets decide the next state
 					if (IsSeperator(chr)) {
-						result.add("" + chr);
-						state = STATE_MISC;
+						state = STATE_NONE;
+						result.add(curritem);
+						result.add(""+chr);
+						curritem = "";
 					} else if (IsOperator(chr)) {
 						state = STATE_OPERATOR;
 						curritem = curritem + chr;
@@ -1331,10 +1334,10 @@ public class Speccy {
 					result.add(curritem);
 					curritem = "\"";
 				} else if (IsSeperator(chr)) {
+					state = STATE_NONE;
 					result.add(curritem);
-					result.add("" + chr);
+					result.add(""+chr);
 					curritem = "";
-
 				} else if (chr != ' ') {
 					curritem = curritem + chr;
 				} else { // is space
@@ -1349,7 +1352,10 @@ public class Speccy {
 					curritem = "";
 					// ok we are not a number, Lets decide the next state
 					if (IsSeperator(chr)) {
-						result.add("" + chr);
+						state = STATE_NONE;
+						result.add(curritem);
+						result.add(""+chr);
+						curritem = "";
 					} else if (IsNumber(chr)) {
 						state = STATE_NUMBER;
 						curritem = curritem + chr;
