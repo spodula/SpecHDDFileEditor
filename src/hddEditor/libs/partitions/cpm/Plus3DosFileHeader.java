@@ -459,6 +459,12 @@ public class Plus3DosFileHeader {
 	}
 
 	public boolean ChecksumValid() {
+		if(RawHeader==null) {
+			return false;
+		}
+		if (RawHeader.length < 128) {
+			return false;
+		}
 		byte csum = CalculateChecksum();
 
 		return ((csum == (byte) (RawHeader[127] & 0xff)));
