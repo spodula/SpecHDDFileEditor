@@ -14,14 +14,18 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Button;
 
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.Speccy;
@@ -37,6 +41,9 @@ import hddEditor.ui.partitionPages.FileRenderers.CharArrayRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 
 public class Plus3DosFileEditDialog extends EditFileDialog {
+	public boolean FileTypeHasChanged;
+	public int NewFileType;
+	
 	/**
 	 * Constructor
 	 * 
@@ -44,8 +51,9 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 	 */
 	public Plus3DosFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition) {
 		super(display, filesel, CurrentPartition);
+		FileTypeHasChanged = false;
 	}
-
+	
 	/**
 	 * Create the form
 	 */
@@ -100,6 +108,47 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 4;
 		lbl.setLayoutData(gd);
+
+		String filetypes[] = new String[Speccy.filetypeNames.length + 1];
+		System.arraycopy(Speccy.filetypeNames, 0, filetypes, 0, Speccy.filetypeNames.length);
+		filetypes[Speccy.filetypeNames.length] = "Raw CPM File";
+
+		// Only display file type change for valid +3DOS files
+		// to avoid hilarious consequences for changing Raw CPM files.
+		if (p3d.IsPlus3DosFile()) {
+			Combo filetype = new Combo(shell, SWT.NONE);
+			filetype.setItems(filetypes);
+			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.horizontalSpan = 1;
+			filetype.setLayoutData(gd);
+
+			Button SetFileType = new Button(shell, SWT.NONE);
+			SetFileType.setText("Update file type");
+			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.horizontalSpan = 1;
+			SetFileType.setLayoutData(gd);
+
+			lbl = new Label(shell, SWT.NONE);
+			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.horizontalSpan = 2;
+			lbl.setLayoutData(gd);
+
+			filetype.select(p3d.GetFileType());
+
+			SetFileType.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					NewFileType = filetype.getSelectionIndex();
+					FileTypeHasChanged = true;
+					close();
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+		}
 
 		MainPage1 = new ScrolledComposite(shell, SWT.V_SCROLL);
 		MainPage1.setExpandHorizontal(true);
@@ -169,10 +218,12 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 					filesel, CurrentPartition, new CodeSave());
 		} else if (p3d.GetFileType() == Speccy.BASIC_NUMARRAY) {
 			NumericArrayRenderer NR = new NumericArrayRenderer();
-			NR.RenderNumericArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.GetVarName(), filesel, new ArraySave());
+			NR.RenderNumericArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.GetVarName(), filesel,
+					new ArraySave());
 		} else { // Char array
 			CharArrayRenderer CR = new CharArrayRenderer();
-			CR.RenderCharArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.GetVarName(), filesel, new ArraySave());
+			CR.RenderCharArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.GetVarName(), filesel,
+					new ArraySave());
 		}
 	}
 
@@ -239,6 +290,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 			return false;
 		}
 	}
+
 	/**
 	 * Save for BASIC files. Start line(0) and Vars(1) offset are save-able.
 	 */
@@ -249,7 +301,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 			Plus3DosFileHeader p3d = direntry.GetPlus3DosHeader();
 			if (p3d != null && p3d.IsPlus3DosFile()) {
 				System.out.print("Array name: " + p3d.GetVarName() + " -> ");
-				p3d.SetVarName(sValue); 
+				p3d.SetVarName(sValue);
 				System.out.println(p3d.GetVarName());
 				PLUS3DOSPartition p3dPart = (PLUS3DOSPartition) CurrentPartition;
 				try {

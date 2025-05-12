@@ -381,6 +381,15 @@ public class Plus3DosFileHeader {
 		}
 		return (filetype);
 	}
+	
+	public void SetFileType(int newtype) {
+		if (IsPlus3DosFile()) {
+			byte hdr[] = GetPlus3BasicHeader();
+			hdr[0] = (byte) (newtype & 0xff);
+			SetPlus3BasicHeader(hdr);
+		}
+	}
+	
 
 	/**
 	 * Create the object and populated from the passed block. This block must be >
@@ -458,6 +467,11 @@ public class Plus3DosFileHeader {
 		return ((byte) (csum & 0xff));
 	}
 
+	/**
+	 * Check if the currently loaded header has a correct checksum
+	 * 
+	 * @return
+	 */
 	public boolean ChecksumValid() {
 		if(RawHeader==null) {
 			return false;
@@ -471,6 +485,10 @@ public class Plus3DosFileHeader {
 
 	}
 
+	/**
+	 * Check if the file is a valid +3DOS file rather than a generic CPM file.
+	 * @return
+	 */
 	public boolean IsPlus3DosFile() {
 		return (ChecksumValid() && GetSignature().equals("PLUS3DOS"));
 	}

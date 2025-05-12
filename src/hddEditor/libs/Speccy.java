@@ -1182,9 +1182,9 @@ public class Speccy {
 		String err = "";
 		// split line
 		ArrayList<String> TokenList = SplitLine(Line);
-		for (int i=0;i<TokenList.size();i++) {
-			System.out.println(i+" "+TokenList.get(i));
-		}
+//		for (int i=0;i<TokenList.size();i++) {
+//			System.out.println(i+" "+TokenList.get(i));
+//		}
 		
 		
 		// read the line number

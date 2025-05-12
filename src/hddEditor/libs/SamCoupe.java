@@ -28,6 +28,8 @@ public class SamCoupe {
 	 *	5-6	Unused
 	 *	7	Number of pages
 	 *	8	Starting page number
+	 *
+	 * https://sam.speccy.cz/systech/sam-coupe_tech-man_v3-0.pdf
 	 */
 	public class SamFileWrapper {
 		public boolean IsValid;

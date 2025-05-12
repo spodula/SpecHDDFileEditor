@@ -490,25 +490,67 @@ public class PlusThreePartPage extends GenericPage {
 	 * The EDIT FILE button has been pressed.
 	 */
 	private void DoEditFile() {
-		TableItem itms[] = DirectoryListing.getSelection();
-		if ((itms != null) && (itms.length != 0)) {
-			CPMDirectoryEntry entry = (CPMDirectoryEntry) itms[0].getData();
-			try {
-				SpecFileEditDialog = new Plus3DosFileEditDialog(ParentComp.getDisplay(), fsd, partition);
+		boolean DoAgain = true;
 
-				byte[] data = entry.GetFileRawData();
+		while (DoAgain==true) {
+			DoAgain = false;
+			TableItem itms[] = DirectoryListing.getSelection();
+			if ((itms != null) && (itms.length != 0)) {
+				CPMDirectoryEntry entry = (CPMDirectoryEntry) itms[0].getData();
+				String filename = entry.GetFilename();
+				try {
+					SpecFileEditDialog = new Plus3DosFileEditDialog(ParentComp.getDisplay(), fsd, partition);
 
-				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
-					entry.SetDeleted(true);
-					((PLUS3DOSPartition) partition).AddCPMFile(entry.GetFilename(), SpecFileEditDialog.data);
-					// refresh the screen.
-					AddComponents();
+					byte[] data = entry.GetFileRawData();
+
+					if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
+						entry.SetDeleted(true);
+						((PLUS3DOSPartition) partition).AddCPMFile(entry.GetFilename(), SpecFileEditDialog.data);
+						// refresh the screen.
+						AddComponents();
+					} else {
+						// There are two cases for SHOW returning false,
+						// 1: Just closed, no changes
+						// 2: File type change
+						if (SpecFileEditDialog.FileTypeHasChanged) {
+							Plus3DosFileHeader p3d = entry.GetPlus3DosHeader();
+							if (p3d != null && p3d.IsPlus3DosFile()) {
+								System.out.print("File type: " + p3d.GetFileType() + "("
+										+ Speccy.SpecFileTypeToString(p3d.GetFileType()) + ") -> ");
+								p3d.SetFileType(SpecFileEditDialog.NewFileType);
+								System.out.println(p3d.GetFileType() + "("
+										+ Speccy.SpecFileTypeToString(p3d.GetFileType()) + ")");
+
+								PLUS3DOSPartition p3dPart = (PLUS3DOSPartition) partition;
+								try {
+									entry.SetDeleted(true);
+									byte rawdata[] = entry.GetFileRawData();
+									System.arraycopy(p3d.RawHeader, 0, rawdata, 0, 0x80);
+									p3dPart.AddCPMFile(filename, rawdata);
+									DoAgain = true;
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+							} else {
+								System.err.println("Update ignored, No +3DOS Basic header to update.");
+							}
+						}
+					}
+					PopulateDirectory();
+					SpecFileEditDialog = null;
+					//Re-select the current file. 
+					int index=0;
+					for (TableItem ti:DirectoryListing.getItems()) {
+						entry = (CPMDirectoryEntry) ti.getData();
+						if (entry.GetFilename().trim().equals(filename.trim())) {
+							DirectoryListing.select(index);
+						}
+						index++;
+					}
+				} catch (IOException e) {
+					ErrorBox("Error reading partition: " + e.getMessage());
+					e.printStackTrace();
 				}
-				SpecFileEditDialog = null;
-				PopulateDirectory();
-			} catch (IOException e) {
-				ErrorBox("Error reading partition: " + e.getMessage());
-				e.printStackTrace();
 			}
 		}
 	}
@@ -622,7 +664,7 @@ public class PlusThreePartPage extends GenericPage {
 			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay());
 			if (RenFileDialog.Show(entry.GetFilename())) {
 				try {
-					if (RenFileDialog!=null)
+					if (RenFileDialog != null)
 						entry.SetFilename(RenFileDialog.NewName);
 					// refresh the screen.
 					AddComponents();
