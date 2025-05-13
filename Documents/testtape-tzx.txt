@@ -1,0 +1,137 @@
+ZX Spectrum TZX format.
+A Wrapper for Tape files that use either the ROM or custom loaders. It is generally the
+preferred emulator format as it can contain Custom loaders like Alkatraz or Speedlock. 
+
+Details:
+https://worldofspectrum.net/TZXformat.html
+
+The file consists of a number of blocks and starts with the header "ZXTape!",0x1a followed by the version number.
+
+Header Block:
++-------+--------------------+
+| 00-06 | "ZXTape!"          |
+| 07    | 0x1A   Marker byte |
+| 08    | Major version      |
+| 09    | Minor version      |
++-------+--------------------+
+
+Following this is a number of blocks.
+The first byte in the block is a byte containing the BLock type. 
+The length of the data in the block is dependent on the block type and must be
+determined from the block ID.
+
+For more details see the website above.
+
+Details of the tape:
+
+Header:
+00-06   5A 58 54 61 70 65 21	"ZXTape!"
+07      1A                      Marker byte  
+08-09   01 01	                V1.1
+
+Block 1:
+	0A		30						Block type: Text Description
+	0B      1E                      Length of text description 1E(30)  
+	0C-13     43 72 65 61 74 65 64 20  
+	14-1b     77 69 74 68 20 53 70 65  
+	1c-23     63 48 44 44 46 69 6C 65  
+	24-29     45 64 69 74 6F 72		"Created with SpecHDD FileEditor"
+
+Block 2:
+	2a		10						Block type: Standard speed data block 
+	2b-2c   BA 03					Pause after block:  03BA (954)ms
+	2d-2e   13 00 					Data length 13 (19)
+	-Start of actual data.
+	2f      00						ROM Block type: 00 (Header)
+	-Content (header for a BASIC file)
+	30		00						header for a BASIC file.
+	30-3a   62 61 73 69 63 20 20 20 20 20  "basic     "
+	3b-3c   A0 01 					Data length of the following block
+	3d-3e   2C 01                   Param 1: Autostart at line 012C (300)
+	3f-40   19 01                   Param 2: Start of Variables area: 0119 (start+281)
+	-End
+	41		CE						Rom block checksum (Used by the ROM loader)
+
+Block 3:
+	42		10						Block type: Standard speed data block 
+	43-44   BA 03					Pause after block:  03BA (418)
+	45-46	A2 01					Data length 01A2 (418)
+	-Start of actual data.
+	47		FF						Rom Block type: FF (Data)
+	48..1E7	.....					File data	
+	1e8		32						Rom block Checksum (Used by the ROM loader)
+	
+Block 4:
+	1e9	  10 						Block type: Standard speed data block 
+	1ea-1eb BA 03 					Pause after block:  03BA (954)ms
+	1ec-1ed 13 00 					Data length 13 (19)
+	-Start of actual data.
+	1ee     00						ROM Block type: 00 (Header)
+	-Content (header for a CODE file)
+	1ef		03						header for a CODE file
+	1f0-1f9 03 63 6F 64 65 20 20 20 20 20 20 "code      " 
+	1fa-1fb D0 07 					Data length of the following block 07D0 (2000)
+	1fc-1fe 30 75 					Param 1: Start address 7530 (30000)
+	1ff-200 00 80 					Param 2: Unused.
+	-End
+	201 1C						Rom block checksum (Used by the ROM loader) 					
+
+block 5:
+	202		10						Block type: Standard speed data block 
+	203-204 03 D2					Pause after block:  03D2 (978)
+	205-206	07 D2                   Data length 07D2 (2002)
+	-Start of actual data.
+	207		FF						Rom Block type: FF (Data)
+	48..1E7	.....					File data	
+	9d7		FF						Rom block Checksum (Used by the ROM loader)
+
+block 6:
+	9d8	  10 						Block type: Standard speed data block 
+	9d9-9da BA 03 					Pause after block:  03BA (954)ms
+	9db-9dc 13 00 					Data length 13 (19)
+	-Start of actual data.
+	9dd		00						ROM Block type: 00 (Header)
+	-Content (header for a CODE file)
+	9de     02						header for a Character array file				
+	9df-9e8 63 64 61 74 61 20 20 20 20 20  "cdata     " 
+	9e9-9ea 37 00 					Data length of the following block 37 (55)
+	9eb-9ec 00 A1 					Param 1: Encoded Variable
+	9ed-9ee 00 00 					Param 2: Unused.
+	-End
+	9ef 	C7						Rom block checksum (Used by the ROM loader) 					
+	
+BLock 7:
+	9f0			10					Block type: Standard speed data block 
+	9f1-9f2 	03 D2				Pause after block:  03D2 (978)
+	9f3-9f4	39 	00                  Data length 39 (57)
+	-Start of actual data.
+	9f5			FF					Rom Block type: FF (Data)
+	9f6..A2C	.....				File data	
+	a2d			F2					Rom block Checksum (Used by the ROM loader)
+	
+Block 8:
+	a2e	  10 						Block type: Standard speed data block 
+	a2f-a30 BA 03 					Pause after block:  03BA (954)ms
+	a31-a32 13 00 					Data length 13 (19)
+	-Start of actual data.
+	a33		00						ROM Block type: 00 (Header)
+	-Content (header for a CODE file)
+	a34     01						header for a Numeric array file				
+	a35-a3e 6E 64 61 74 61 20 20 20 20 20  "ndata     " 
+	a3f-a40 23 00 					Data length of the following block 23 (25)
+	a41-a42 00 62 					Param 1: Encoded Variable
+	a43-a44 00 1F 					Param 2: Unused.
+	-End
+	a45 	1E						Rom block checksum (Used by the ROM loader) 
+
+BLock 9:
+	a46			10					Block type: Standard speed data block 
+	a47-a48 	BA 03				Pause after block:  03ba (954)
+	a49-a4a		25 00               Data length 25 (37)
+	-Start of actual data.
+	a4b			FF					Rom Block type: FF (Data)
+	a4c..a6e	.....				File data	
+	a6f			FC					Rom block Checksum (Used by the ROM loader)
+	
+
+

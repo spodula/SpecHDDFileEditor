@@ -31,8 +31,12 @@ import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
+import hddEditor.libs.disks.LINEAR.TAPFile;
 import hddEditor.libs.disks.LINEAR.TZXFile;
+import hddEditor.libs.disks.LINEAR.tapblocks.TAPBlock;
+import hddEditor.libs.disks.LINEAR.tzxblocks.TZXBlock;
 import hddEditor.libs.partitions.IDEDosPartition;
+import hddEditor.libs.partitions.TAPPartition;
 import hddEditor.libs.partitions.TZXPartition;
 import hddEditor.libs.partitions.tzx.TzxDirectoryEntry;
 import hddEditor.ui.FileExportAllPartitionsForm;
@@ -380,19 +384,19 @@ public class TZXPartitionPage extends GenericPage {
 				String content[] = new String[5];
 
 				content[0] = entry.GetFilename();
-				String blocknum="";
-				if (entry.HeaderBlock!=null) {
+				String blocknum = "";
+				if (entry.HeaderBlock != null) {
 					blocknum = String.valueOf(entry.HeaderBlock.BlockNumber);
 				}
-				if (entry.DataBlock !=null) {
+				if (entry.DataBlock != null) {
 					if (!blocknum.isBlank()) {
-						blocknum = blocknum+", ";						
+						blocknum = blocknum + ", ";
 					}
-					
-					blocknum = blocknum +String.valueOf(entry.DataBlock.BlockNumber);
+
+					blocknum = blocknum + String.valueOf(entry.DataBlock.BlockNumber);
 				}
-				content[1]= blocknum;
-				
+				content[1] = blocknum;
+
 				content[2] = entry.GetFileTypeString();
 				content[3] = String.valueOf(entry.GetFileSize());
 
@@ -403,10 +407,10 @@ public class TZXPartitionPage extends GenericPage {
 				} else {
 					notes = entry.DataBlock.toString();
 					int i = notes.indexOf(')');
-					if (i>4) {
-						notes = notes.substring(i+1).trim();
+					if (i > 4) {
+						notes = notes.substring(i + 1).trim();
 					}
-					
+
 				}
 
 				content[4] = notes.trim();
@@ -420,36 +424,75 @@ public class TZXPartitionPage extends GenericPage {
 	 * Implementation of DoEditFile
 	 */
 	protected void DoEditFile() {
-		TableItem itms[] = DirectoryListing.getSelection();
-		if ((itms != null) && (itms.length != 0)) {
-			TzxDirectoryEntry entry = (TzxDirectoryEntry) itms[0].getData();
-			SpecFileEditDialog = new TzxFileEditDialog(ParentComp.getDisplay(), fsd,partition);
+		boolean DoAgain = true;
 
-			byte data[];
-			try {
-				data = entry.GetFileRawData();
+		while (DoAgain == true) {
+			DoAgain = false;
+			TableItem itms[] = DirectoryListing.getSelection();
+			if ((itms != null) && (itms.length != 0)) {
+				TzxDirectoryEntry entry = (TzxDirectoryEntry) itms[0].getData();
+				SpecFileEditDialog = new TzxFileEditDialog(ParentComp.getDisplay(), fsd, partition);
 
-				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
-					TZXFile tap = (TZXFile) partition.CurrentDisk;
-					if (entry.HeaderBlock != null) {
-						byte headerData[] = entry.HeaderBlock.data;
-						headerData[11] = (byte) (data.length & 0xff);
-						headerData[12] = (byte) ((data.length / 0x100) & 0xff);
-						entry.HeaderBlock.UpdateBlockData(headerData);
+				byte data[];
+				try {
+					data = entry.GetFileRawData();
+
+					if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
+						TZXFile tap = (TZXFile) partition.CurrentDisk;
+						if (entry.HeaderBlock != null) {
+							byte headerData[] = entry.HeaderBlock.data;
+							headerData[11] = (byte) (data.length & 0xff);
+							headerData[12] = (byte) ((data.length / 0x100) & 0xff);
+							entry.HeaderBlock.UpdateBlockData(headerData);
+						}
+
+						entry.DataBlock.UpdateBlockData(data);
+						tap.RewriteFile();
+						tap.ParseTZXFile();
+						((TZXPartition) partition).LoadPartitionSpecificInformation();
+						// refresh the screen.
+						AddComponents();
+					} else {
+						// There are two cases for SHOW returning false,
+						// 1: Just closed, no changes
+						// 2: File type change
+						if (SpecFileEditDialog.FileTypeHasChanged) {
+							SpeccyBasicDetails sbd = entry.GetSpeccyBasicDetails();
+							if (sbd != null && sbd.IsValidFileType()) {
+								TZXBlock header = entry.HeaderBlock;
+								if (header != null) {
+									System.out.print("File type: " + sbd.BasicType + "("
+											+ Speccy.SpecFileTypeToString(sbd.BasicType) + ") -> ");
+									sbd.BasicType = SpecFileEditDialog.NewFileType;
+
+									header.SetHeader(sbd);
+									System.out.println(
+											sbd.BasicType + "(" + Speccy.SpecFileTypeToString(sbd.BasicType) + ")");
+
+									TZXPartition TzxPart = (TZXPartition) partition;
+									TZXFile tzxfile = (TZXFile) TzxPart.CurrentDisk;
+									try {
+										tzxfile.RewriteFile();
+										TzxPart.LoadPartitionSpecificInformation();
+										DoAgain = true;
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+								} else {
+									System.err.println("Update ignored, No Basic header to update.");
+								}
+							} else {
+								System.err.println("Update ignored, No +3DOS Basic header to update.");
+							}
+						}
 					}
 
-					entry.DataBlock.UpdateBlockData(data);
-					tap.RewriteFile();
-					tap.ParseTZXFile();
-					((TZXPartition) partition).LoadPartitionSpecificInformation();
-					// refresh the screen.
-					AddComponents();
-				}
-				SpecFileEditDialog = null;
-				UpdateDirectoryEntryList();
+					SpecFileEditDialog = null;
+					UpdateDirectoryEntryList();
 
-			} catch (IOException e1) {
-				e1.printStackTrace();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
 		}
 	}

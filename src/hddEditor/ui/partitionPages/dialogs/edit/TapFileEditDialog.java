@@ -68,8 +68,7 @@ public class TapFileEditDialog extends EditFileDialog {
 
 		label(String.format("Length : %d bytes (%X)", ThisEntry.GetRawFileSize(), ThisEntry.GetRawFileSize()), 2);
 
-		// Only display file type change for valid +3DOS files
-		// to avoid hilarious consequences for changing Raw CPM files.
+		// Only display file type change for Tap files with headers.
 		TapDirectoryEntry tde = (TapDirectoryEntry) ThisEntry;
 		SpeccyBasicDetails sbd = tde.GetSpeccyBasicDetails();
 		if (tde.HeaderBlock != null && sbd.IsValidFileType()) {
