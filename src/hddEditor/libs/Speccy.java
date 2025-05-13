@@ -1,14 +1,9 @@
 package hddEditor.libs;
 
-//QOLFIX: GDS 22/01/2023 - Removed the HTML elements from the token tables - This was a hangover from the old disk image reader than rendered using HTML.
-//QOLFIX: GDS 22/01/2023 - Changed to use System.lineseperator rather than hardcoding \r\n
-//BUGFIX: GDS 23/01/2023 - Now handles bad basic files a bit better when the +3Size> CPMsize 
-//QOLFIX: GDS 23/01/2023 - Changed to output XML to write to file
-//BUGFIX: GDS 23/01/2023 - Better exception handling, stopping bad variables corrupting whole file.
-//BUGFIX: GDS 23/01/2023 - Better handling of arrays with lots of dimensions.
-//QOLFIX: GDS 23/01/2023 - DoSaveFileAsAsm: Now uses fixed format strings so data export looks better.
-//QOLFIX: GDS 23/01/2023 - Added progress bar for export.
-
+//TODO: Allow editing of file type for MDR
+//TODO: Allow editing of file type for TZX
+//TODO: Allow editing of file type for MGT
+//TODO: Allow editing of file type for TRD
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -57,8 +52,15 @@ public class Speccy {
 	public static final int BASIC_CHRARRAY = 0x02;
 	public static final int BASIC_CODE = 0x03;
 
+	//File type names.
 	public static final String[] filetypeNames = { "Basic", "Numeric array", "Character array", "Code" };
 
+	/**
+	 * Decode the given speccy filetype into its name. 
+	 * 
+	 * @param filetype
+	 * @return
+	 */
 	public static String SpecFileTypeToString(int filetype) {
 		String result = "Unknown";
 		if (filetype > -1 && filetype < filetypeNames.length) {
@@ -86,7 +88,7 @@ public class Speccy {
 		// Test for line tokenisation and encoding
 		System.out.println("===============Line tokenisation test================");
 		String line = "70 print peek a;\" \";peek (a+1);\" \";peek (a+2);\" \";peek (a+3);\" \";peek (a+4)";
-		//String line = "10 if a<=10 then goto 100";
+		// String line = "10 if a<=10 then goto 100";
 		System.out.println("Line to decode: " + line);
 		byte target[] = new byte[1024];
 		int last = DecodeBasicLine(line, target, 0);
@@ -95,7 +97,7 @@ public class Speccy {
 		for (int i = 0; i < last; i++) {
 			int chr = target[i] & 0xff;
 			String s = String.format("%2d %3d (%2x)", i, chr, chr);
-			s = s + " "+tokens[chr];
+			s = s + " " + tokens[chr];
 			System.out.println(s);
 		}
 	}
@@ -255,6 +257,7 @@ public class Speccy {
 	}
 
 	/**
+	 * Set the bytes from the given value into the given character array At position "loc". 
 	 * 
 	 * @param data
 	 * @param loc
@@ -586,6 +589,14 @@ public class Speccy {
 		}
 	}
 
+	/**
+	 * From above...
+	 * 
+	 * Returns if a given number is a valid HEX number.
+	 * 
+	 * @param str
+	 * @return
+	 */
 	public static boolean isHex(String str) {
 		try {
 			Integer.parseInt(str, 16);
@@ -689,9 +700,10 @@ public class Speccy {
 	}
 
 	/**
-	 * Handler for type 2 variables (Strings) Variable name is parsed from the
-	 * original marker (first 5 bytes) + 0x40 [1..2] String length lsb first [3..x]
-	 * Characters making up the string.
+	 * Handler for type 2 variables (Strings) 
+	 * Variable name is parsed from the original marker (first 5 bytes) + 0x40 
+	 * [1..2] String length lsb first 
+	 * [3..x] Characters making up the string.
 	 * 
 	 * @param sb
 	 * @param keys
@@ -725,9 +737,9 @@ public class Speccy {
 	}
 
 	/**
-	 * Handler for type 3 variables (Numbers with a one character name) Variable
-	 * name is parsed from the original marker (first 5 bytes) + 0x40 [12345] Speccy
-	 * floating point representation of the value.
+	 * Handler for type 3 variables (Numbers with a one character name) 
+	 * Variable name is parsed from the original marker (first 5 bytes) + 0x40 
+	 * [01-05] Speccy floating point representation of the value.
 	 * 
 	 * @param sb
 	 * @param keys
@@ -882,11 +894,12 @@ public class Speccy {
 		return (Address);
 	}
 
-	/**
-	 * Handler for type 5 variables (Number with a name > 1) Format: (Original char)
-	 * [101XXXXX] where XXXXX = char of name - 0x40 [0] [000XXXXX] where XXXXX =
-	 * char of name - 0x40 ... [Y] [100XXXXX] where XXXXX = char of name - 0x40 (Bit
-	 * 7 is set to terminate string) [N1..N5] Speccy Floating point number
+	/*-
+	 * Handler for type 5 variables (Number with a name > 1) 
+	 * Format: (Original char)  [101XXXXX] where XXXXX = char of name - 0x40 
+	 * [0] [000XXXXX] where XXXXX = char of name - 0x40 ...  
+	 * [Y] [100XXXXX] where XXXXX = char of name - 0x40 (Bit 7 is set to terminate string) 
+	 * [N1..N5] Speccy Floating point number
 	 * 
 	 * @param sb
 	 * @param keys
@@ -923,13 +936,19 @@ public class Speccy {
 		return (Address);
 	}
 
-	/**
+	/*-
 	 * Handler for type 6 variables (Character arrays) Variable name is parsed from
-	 * the original marker (first 5 bytes) + 0x40 format is: [0-1] data length (Used
-	 * to quickly skip over variable when searching) [2] Number of dimensions
-	 * (1-255) [3.4] First dimension size.(1-65535) .. [xx.yy] last dimension size
-	 * [z] char for (1,0) [z] char for (2,0) ... [z] char for (<sz>,0) [z] char for
-	 * (1,1) and so on.
+	 * the original marker (first 5 bytes) + 0x40 
+	 * format is: 
+	 * [0-1] data length (Used to quickly skip over variable when searching) 
+	 * [2] Number of dimensions
+	 * (1-255) 
+	 * [3.4] First dimension size.(1-65535) 
+	 *   .. 
+	 * [xx.xx+1] last dimension size
+	 * [z] char for (1,0) 
+	 * [z] char for (2,0) ... 
+	 * [z] char for (<sz>,0) [z] char for (1,1) and so on.
 	 * 
 	 * @param sb
 	 * @param keys
@@ -1046,16 +1065,18 @@ public class Speccy {
 		return (Address);
 	}
 
-	/**
-	 * Handler for type 7 variables (FOR/NEXT variables) Variable name is parsed
-	 * from the original marker (first 5 bytes) + 0x40 format is: byte: [0-4]
-	 * Current Value of variable (Speccy FP representation) [5-9] TO value (Speccy
-	 * FP representation) [10-14] STEP value (Speccy FP representation) [15]
-	 * statement within FOR line to start looping from. (integer)
+	/*-
+	 * Handler for type 7 variables (FOR/NEXT variables) 
+	 * Variable name is parsed from the original marker (first 5 bytes) + 0x40 
+	 * format is: 
+	 * byte: 
+	 * [0-4] Current Value of variable (Speccy FP representation) 
+	 * [5-9] TO value (Speccy FP representation) 
+	 * [10-14] STEP value (Speccy FP representation) 
+	 * [15] statement within FOR line to start looping from. (integer)
 	 * 
 	 * Like the previous ones, this is similar to the ZX81 8k Rom equivelent, except
-	 * the addition of byte 15 (As the zx81 does not allow multiple statements on a
-	 * line)
+	 * the addition of byte 15 (As the zx81 does not allow multiple statements on a line)
 	 * 
 	 * @param sb
 	 * @param keys
@@ -1185,8 +1206,7 @@ public class Speccy {
 //		for (int i=0;i<TokenList.size();i++) {
 //			System.out.println(i+" "+TokenList.get(i));
 //		}
-		
-		
+
 		// read the line number
 		if (TokenList.size() > 0) {
 			// get the initial token Should be the line number
@@ -1271,7 +1291,7 @@ public class Speccy {
 				} else if (IsSeperator(chr)) {
 					state = STATE_NONE;
 					result.add(curritem);
-					result.add(""+chr);
+					result.add("" + chr);
 					curritem = "";
 				} else if (chr != ' ') {
 					state = STATE_MISC;
@@ -1288,7 +1308,7 @@ public class Speccy {
 					if (IsSeperator(chr)) {
 						state = STATE_NONE;
 						result.add(curritem);
-						result.add(""+chr);
+						result.add("" + chr);
 						curritem = "";
 					} else if (IsOperator(chr)) {
 						state = STATE_OPERATOR;
@@ -1336,7 +1356,7 @@ public class Speccy {
 				} else if (IsSeperator(chr)) {
 					state = STATE_NONE;
 					result.add(curritem);
-					result.add(""+chr);
+					result.add("" + chr);
 					curritem = "";
 				} else if (chr != ' ') {
 					curritem = curritem + chr;
@@ -1354,7 +1374,7 @@ public class Speccy {
 					if (IsSeperator(chr)) {
 						state = STATE_NONE;
 						result.add(curritem);
-						result.add(""+chr);
+						result.add("" + chr);
 						curritem = "";
 					} else if (IsNumber(chr)) {
 						state = STATE_NUMBER;
@@ -1685,6 +1705,19 @@ public class Speccy {
 
 	}
 
+	/**
+	 * Save the given data as a CODE file to the disk. 
+	 * If this is a screen file, will save as a PNG file.
+	 * Otherwise, it will saved as either RAW binary data (OutAsHex=false) 
+	 * or as a HEX dump, indexed to codeLoadAddress, (OutAsHex=true)
+	 * 
+	 * @param targetFilename
+	 * @param data
+	 * @param codeLoadAddress
+	 * @param filelength
+	 * @param OutAsHex
+	 * @throws IOException
+	 */
 	private static void SaveCodeFile(File targetFilename, byte[] data, int codeLoadAddress, int filelength,
 			boolean OutAsHex) throws IOException {
 		if ((filelength == 6912) && (codeLoadAddress == 16384)) {
@@ -1694,7 +1727,7 @@ public class Speccy {
 			int filetyp = SWT.IMAGE_PNG;
 			FileOutputStream file;
 			try {
-				file = new FileOutputStream(targetFilename);
+				file = new FileOutputStream(targetFilename+".png");
 				imageLoader.save(file, filetyp);
 				file.close();
 			} catch (FileNotFoundException e) {
@@ -1716,6 +1749,7 @@ public class Speccy {
 	}
 
 	/**
+	 * Save a file as a text file containing the decoded BASIC and Variables.
 	 * 
 	 * @param targetFilename
 	 * @param data

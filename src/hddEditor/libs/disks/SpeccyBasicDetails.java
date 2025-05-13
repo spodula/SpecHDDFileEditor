@@ -55,5 +55,14 @@ public class SpeccyBasicDetails {
 		}
 		return (result);
 	}
+	
+	public boolean IsValidFileType() {
+		boolean result = true;
+		if (BasicType < 0 || BasicType > 3) {
+			result = false;
+		}
+		return(result);
+	}
+	
 
 }

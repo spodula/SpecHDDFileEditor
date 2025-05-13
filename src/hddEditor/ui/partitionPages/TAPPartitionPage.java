@@ -32,6 +32,7 @@ import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.LINEAR.TAPFile;
+import hddEditor.libs.disks.LINEAR.tapblocks.TAPBlock;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.TAPPartition;
 import hddEditor.libs.partitions.tap.TapDirectoryEntry;
@@ -51,7 +52,7 @@ public class TAPPartitionPage extends GenericPage {
 	AddFilesToTAPPartition AddFilesDialog = null;
 
 	/**
-	 * 
+	 * Constructor
 	 * 
 	 * @param root
 	 * @param parent
@@ -63,7 +64,7 @@ public class TAPPartitionPage extends GenericPage {
 	}
 
 	/**
-	 * 
+	 * Add components to the form
 	 */
 	private void AddComponents() {
 		if (ParentComp != null) {
@@ -339,6 +340,10 @@ public class TAPPartitionPage extends GenericPage {
 		}
 	}
 
+	/**
+	 * Drop a file onto the form
+	 * @param filenames
+	 */
 	protected void DoDropFile(String[] filenames) {
 		File fFiles[] = new File[filenames.length];
 		int i = 0;
@@ -393,35 +398,73 @@ public class TAPPartitionPage extends GenericPage {
 	 * Implementation of DoEditFile
 	 */
 	protected void DoEditFile() {
-		TableItem itms[] = DirectoryListing.getSelection();
-		if ((itms != null) && (itms.length != 0)) {
-			TapDirectoryEntry entry = (TapDirectoryEntry) itms[0].getData();
-			SpecFileEditDialog = new TapFileEditDialog(ParentComp.getDisplay(), fsd,partition);
+		boolean DoAgain = true;
 
-			byte data[];
-			try {
-				data = entry.GetFileRawData();
+		while (DoAgain == true) {
+			DoAgain = false;
+			TableItem itms[] = DirectoryListing.getSelection();
+			if ((itms != null) && (itms.length != 0)) {
+				TapDirectoryEntry entry = (TapDirectoryEntry) itms[0].getData();
+				SpecFileEditDialog = new TapFileEditDialog(ParentComp.getDisplay(), fsd, partition);
 
-				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
-					TAPFile tap = (TAPFile) partition.CurrentDisk;
-					if (entry.HeaderBlock != null) {
-						byte headerData[] = entry.HeaderBlock.data;
-						headerData[11] = (byte) (data.length & 0xff);
-						headerData[12] = (byte) ((data.length / 0x100) & 0xff);
-						entry.HeaderBlock.UpdateBlockData(headerData);
+				byte data[];
+				try {
+					data = entry.GetFileRawData();
+
+					if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
+						TAPFile tap = (TAPFile) partition.CurrentDisk;
+						if (entry.HeaderBlock != null) {
+							byte headerData[] = entry.HeaderBlock.data;
+							headerData[11] = (byte) (data.length & 0xff);
+							headerData[12] = (byte) ((data.length / 0x100) & 0xff);
+							entry.HeaderBlock.UpdateBlockData(headerData);
+						}
+
+						entry.DataBlock.UpdateBlockData(data);
+						tap.RewriteFile();
+						tap.ParseTAPFile();
+						((TAPPartition) partition).LoadPartitionSpecificInformation();
+						// refresh the screen.
+						AddComponents();
+					} else {
+						// There are two cases for SHOW returning false,
+						// 1: Just closed, no changes
+						// 2: File type change
+						if (SpecFileEditDialog.FileTypeHasChanged) {
+							SpeccyBasicDetails sbd = entry.GetSpeccyBasicDetails();
+							if (sbd != null && sbd.IsValidFileType()) {
+								TAPBlock header = entry.HeaderBlock;
+								if (header != null) {
+									System.out.print("File type: " + sbd.BasicType + "("
+											+ Speccy.SpecFileTypeToString(sbd.BasicType) + ") -> ");
+									sbd.BasicType = SpecFileEditDialog.NewFileType;
+
+									header.SetHeader(sbd);
+									System.out.println(
+											sbd.BasicType + "(" + Speccy.SpecFileTypeToString(sbd.BasicType) + ")");
+
+									TAPPartition TapPart = (TAPPartition) partition;
+									TAPFile tapfile = (TAPFile) TapPart.CurrentDisk;
+									try {
+										tapfile.RewriteFile();
+										TapPart.LoadPartitionSpecificInformation();
+										DoAgain = true;
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+								} else {
+									System.err.println("Update ignored, No Basic header to update.");
+								}
+							} else {
+								System.err.println("Update ignored, No +3DOS Basic header to update.");
+							}
+						}
 					}
-
-					entry.DataBlock.UpdateBlockData(data);
-					tap.RewriteFile();
-					tap.ParseTAPFile();
-					((TAPPartition) partition).LoadPartitionSpecificInformation();
-					// refresh the screen.
-					AddComponents();
+					SpecFileEditDialog = null;
+					UpdateDirectoryEntryList();
+				} catch (IOException e1) {
+					e1.printStackTrace();
 				}
-				SpecFileEditDialog = null;
-				UpdateDirectoryEntryList();
-			} catch (IOException e1) {
-				e1.printStackTrace();
 			}
 		}
 	}

@@ -10,10 +10,14 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -35,8 +39,12 @@ import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 import hddEditor.ui.partitionPages.dialogs.edit.callbacks.GenericSaveEvent;
 
 public class TapFileEditDialog extends EditFileDialog {
+	public int NewFileType;
+	public boolean FileTypeHasChanged;
+
 	public TapFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition) {
 		super(display, filesel, CurrentPartition);
+		FileTypeHasChanged = false;
 	}
 
 	/**
@@ -60,6 +68,46 @@ public class TapFileEditDialog extends EditFileDialog {
 
 		label(String.format("Length : %d bytes (%X)", ThisEntry.GetRawFileSize(), ThisEntry.GetRawFileSize()), 2);
 
+		// Only display file type change for valid +3DOS files
+		// to avoid hilarious consequences for changing Raw CPM files.
+		TapDirectoryEntry tde = (TapDirectoryEntry) ThisEntry;
+		SpeccyBasicDetails sbd = tde.GetSpeccyBasicDetails();
+		if (tde.HeaderBlock != null && sbd.IsValidFileType()) {
+			Combo filetype = new Combo(shell, SWT.NONE);
+			filetype.setItems(Speccy.filetypeNames);
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.horizontalSpan = 1;
+			filetype.setLayoutData(gd);
+
+			Button SetFileType = new Button(shell, SWT.NONE);
+			SetFileType.setText("Update file type");
+			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.horizontalSpan = 1;
+			SetFileType.setLayoutData(gd);
+
+			lbl = new Label(shell, SWT.NONE);
+			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.horizontalSpan = 2;
+			lbl.setLayoutData(gd);
+
+			filetype.select(sbd.BasicType);
+
+			SetFileType.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					NewFileType = filetype.getSelectionIndex();
+					FileTypeHasChanged = true;
+					close();
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+		}
+		
+		
 		MainPage1 = new ScrolledComposite(shell, SWT.V_SCROLL);
 		MainPage1.setExpandHorizontal(true);
 		MainPage1.setExpandVertical(true);
@@ -87,6 +135,9 @@ public class TapFileEditDialog extends EditFileDialog {
 			public void controlMoved(ControlEvent arg0) {
 			}
 		});
+		
+		
+		
 
 		RenderAppropriatePage();
 		shell.pack();
