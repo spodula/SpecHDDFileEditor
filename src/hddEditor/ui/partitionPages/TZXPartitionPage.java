@@ -482,7 +482,7 @@ public class TZXPartitionPage extends GenericPage {
 									System.err.println("Update ignored, No Basic header to update.");
 								}
 							} else {
-								System.err.println("Update ignored, No +3DOS Basic header to update.");
+								System.err.println("Update ignored, Basic header to update.");
 							}
 						}
 					}
