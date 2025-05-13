@@ -33,8 +33,11 @@ import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.LINEAR.MDFMicrodriveFile;
 import hddEditor.libs.disks.LINEAR.MicrodriveSector;
+import hddEditor.libs.disks.LINEAR.TAPFile;
+import hddEditor.libs.disks.LINEAR.tapblocks.TAPBlock;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.SinclairMicrodrivePartition;
+import hddEditor.libs.partitions.TAPPartition;
 import hddEditor.libs.partitions.mdf.MicrodriveDirectoryEntry;
 import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;
@@ -59,7 +62,8 @@ public class MicrodrivePartitionPage extends GenericPage {
 	 * @param parent
 	 * @param partition
 	 */
-	public MicrodrivePartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
+	public MicrodrivePartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition,
+			FileSelectDialog filesel) {
 		super(root, parent, partition, filesel);
 		AddComponents();
 	}
@@ -142,7 +146,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 				}
 			});
 			/***********************************************************************************/
-			DragSource source = new DragSource(DirectoryListing, DND.DROP_MOVE | DND.DROP_COPY );
+			DragSource source = new DragSource(DirectoryListing, DND.DROP_MOVE | DND.DROP_COPY);
 			source.setTransfer(new Transfer[] { FileTransfer.getInstance() });
 			source.addDragListener(new DragSourceListener() {
 				File tempfiles[];
@@ -157,10 +161,10 @@ public class MicrodrivePartitionPage extends GenericPage {
 							try {
 								File f = File.createTempFile("YYYY", "xxx");
 								int exporttype = RootPage.dragindex;
-								
+
 								FileEntry entry = (FileEntry) item.getData();
-								System.out.println("Exporttype:" +exporttype);
-								if (exporttype==HDDEditor.DRAG_TYPE) {
+								System.out.println("Exporttype:" + exporttype);
+								if (exporttype == HDDEditor.DRAG_TYPE) {
 									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
 									int actiontype = GeneralUtils.EXPORT_TYPE_HEX;
 									switch (sd.BasicType) {
@@ -174,7 +178,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 										actiontype = GeneralUtils.EXPORT_TYPE_CSV;
 										break;
 									case (Speccy.BASIC_CODE):
-										System.out.println("CODE: "+entry.GetFileSize());
+										System.out.println("CODE: " + entry.GetFileSize());
 										if (entry.GetFileSize() == 0x1b00) {
 											actiontype = GeneralUtils.EXPORT_TYPE_PNG;
 										} else {
@@ -184,18 +188,17 @@ public class MicrodrivePartitionPage extends GenericPage {
 									default:
 										actiontype = GeneralUtils.EXPORT_TYPE_HEX;
 									}
-									
-									
-									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(), entry.GetFileData().length,
-											sd.BasicType, sd.LineStart, sd.VarStart, sd.LoadAddress, sd.VarName+"",
-											actiontype);								
-								} else if (exporttype==HDDEditor.DRAG_RAW) {
-									GeneralUtils.WriteBlockToDisk(entry.GetFileData(), f);									
+
+									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(),
+											entry.GetFileData().length, sd.BasicType, sd.LineStart, sd.VarStart,
+											sd.LoadAddress, sd.VarName + "", actiontype);
+								} else if (exporttype == HDDEditor.DRAG_RAW) {
+									GeneralUtils.WriteBlockToDisk(entry.GetFileData(), f);
 								} else {
 									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
-									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(), entry.GetFileData().length,
-											sd.BasicType, sd.LineStart, sd.VarStart, sd.LoadAddress, sd.VarName+"",
-											GeneralUtils.EXPORT_TYPE_HEX);								
+									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(),
+											entry.GetFileData().length, sd.BasicType, sd.LineStart, sd.VarStart,
+											sd.LoadAddress, sd.VarName + "", GeneralUtils.EXPORT_TYPE_HEX);
 								}
 								File f1 = new File(f.getParent(), entry.GetFilename());
 								f.renameTo(f1);
@@ -215,7 +218,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 					if (FileTransfer.getInstance().isSupportedType(event.dataType)) {
 						if (tempfiles != null && tempfiles.length > 0) {
 							String data[] = new String[tempfiles.length];
-							for (int i=0;i<tempfiles.length;i++) {
+							for (int i = 0; i < tempfiles.length; i++) {
 								File fle = tempfiles[i];
 								data[i] = fle.getAbsolutePath();
 							}
@@ -229,9 +232,9 @@ public class MicrodrivePartitionPage extends GenericPage {
 
 					}
 				}
-			}); 
+			});
 			/***********************************************************************************/
-			
+
 			UpdateDirectoryEntryList();
 
 			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -345,7 +348,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 			ParentComp.pack();
 		}
 	}
-	
+
 	protected void DoDropFile(String[] filenames) {
 		File fFiles[] = new File[filenames.length];
 		int i = 0;
@@ -417,43 +420,69 @@ public class MicrodrivePartitionPage extends GenericPage {
 	 * Implementation of DoEditFile
 	 */
 	protected void DoEditFile() {
-		TableItem itms[] = DirectoryListing.getSelection();
-		if ((itms != null) && (itms.length != 0)) {
+		boolean DoAgain = true;
 
-			MicrodriveDirectoryEntry entry = (MicrodriveDirectoryEntry) itms[0].getData();
-			SpecFileEditDialog = new MicrodriveFileEditDialog(ParentComp.getDisplay(), fsd,partition);
+		while (DoAgain == true) {
+			DoAgain = false;
+			TableItem itms[] = DirectoryListing.getSelection();
+			if ((itms != null) && (itms.length != 0)) {
 
-			byte data[];
-			try {
-				data = entry.GetFileRawData();
-				byte newdata[] = new byte[data.length - 0x09];
-				System.arraycopy(data, 0x09, newdata, 0, newdata.length);
+				MicrodriveDirectoryEntry entry = (MicrodriveDirectoryEntry) itms[0].getData();
+				SpecFileEditDialog = new MicrodriveFileEditDialog(ParentComp.getDisplay(), fsd, partition);
 
-				if (SpecFileEditDialog.Show(newdata, "Editing " + entry.GetFilename(), entry)) {
-					byte NewRawData[] = new byte[newdata.length + 0x09];
-					System.arraycopy(data, 0, NewRawData, 0, 0x09);
-					System.arraycopy(newdata, 0, NewRawData, 0x09, newdata.length);
-					NewRawData[1] = (byte) ((newdata.length % 0x100) & 0xff);
-					NewRawData[2] = (byte) ((newdata.length / 0x100) & 0xff);
-					try {
-						entry.SetFileRawData(NewRawData, (MDFMicrodriveFile) partition.CurrentDisk);
-					} catch (IOException e) {
-						MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
-						messageBox
-								.setMessage("Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
-						messageBox.setText("Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
-						messageBox.open();
-						e.printStackTrace();
+				byte data[];
+				try {
+					data = entry.GetFileRawData();
+					byte newdata[] = new byte[data.length - 0x09];
+					System.arraycopy(data, 0x09, newdata, 0, newdata.length);
+
+					if (SpecFileEditDialog.Show(newdata, "Editing " + entry.GetFilename(), entry)) {
+						byte NewRawData[] = new byte[newdata.length + 0x09];
+						System.arraycopy(data, 0, NewRawData, 0, 0x09);
+						System.arraycopy(newdata, 0, NewRawData, 0x09, newdata.length);
+						NewRawData[1] = (byte) ((newdata.length % 0x100) & 0xff);
+						NewRawData[2] = (byte) ((newdata.length / 0x100) & 0xff);
+						try {
+							entry.SetFileRawData(NewRawData, (MDFMicrodriveFile) partition.CurrentDisk);
+						} catch (IOException e) {
+							MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
+							messageBox.setMessage(
+									"Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
+							messageBox
+									.setText("Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
+							messageBox.open();
+							e.printStackTrace();
+						}
+						// refresh the screen.
+						AddComponents();
+					} else {
+						// There are two cases for SHOW returning false,
+						// 1: Just closed, no changes
+						// 2: File type change
+						SinclairMicrodrivePartition smp = (SinclairMicrodrivePartition) partition;
+						
+						MDFMicrodriveFile mdf = (MDFMicrodriveFile) smp.CurrentDisk;
+
+						if (SpecFileEditDialog.FileTypeHasChanged) {
+							SpeccyBasicDetails sbd = entry.GetSpeccyBasicDetails();
+							if (sbd != null && sbd.IsValidFileType()) {
+								System.out.print("File type: " + sbd.BasicType + "("
+										+ Speccy.SpecFileTypeToString(sbd.BasicType) + ") -> ");
+								sbd.BasicType = SpecFileEditDialog.NewFileType;
+								System.out.println(
+										sbd.BasicType + "(" + Speccy.SpecFileTypeToString(sbd.BasicType) + ")");
+								entry.SetHeader(sbd, mdf);
+							} else {
+								System.err.println("Update ignored, No Basic header to update.");
+							}
+						}
 					}
-					// refresh the screen.
-					AddComponents();
+					SpecFileEditDialog = null;
+					UpdateDirectoryEntryList();
+				} catch (IOException e1) {
+					e1.printStackTrace();
 				}
-				SpecFileEditDialog = null;
-				UpdateDirectoryEntryList();
-			} catch (IOException e1) {
-				e1.printStackTrace();
 			}
-
 		}
 	}
 

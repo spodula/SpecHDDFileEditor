@@ -1,6 +1,5 @@
 package hddEditor.libs;
 
-//TODO: Allow editing of file type for MDR
 //TODO: Allow editing of file type for MGT
 //TODO: Allow editing of file type for TRD
 
