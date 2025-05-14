@@ -41,7 +41,7 @@ import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
-import hddEditor.libs.partitions.TrDosPartition;
+import hddEditor.libs.partitions.MGTDosPartition;
 
 public class MGTDirectoryEntry implements FileEntry {
 	public byte RawDirectoryEntry[] = null;
@@ -142,6 +142,10 @@ public class MGTDirectoryEntry implements FileEntry {
 
 	public int GetFileType() {
 		return RawDirectoryEntry[0] & 0x1f;
+	}
+	
+	public void SetFileType(int ftype) {
+		RawDirectoryEntry[0] = (byte) (ftype & 0x1f);
 	}
 
 	@Override
@@ -320,7 +324,7 @@ public class MGTDirectoryEntry implements FileEntry {
 	 * @param sbd
 	 * @param Part
 	 */
-	public void SetSpeccyBasicDetails(SpeccyBasicDetails sbd, TrDosPartition Part) {
+	public void SetSpeccyBasicDetails(SpeccyBasicDetails sbd, MGTDosPartition Part) {
 		switch (sbd.BasicType) {
 		case Speccy.BASIC_BASIC:
 			SetVar1(sbd.VarStart);
@@ -336,7 +340,7 @@ public class MGTDirectoryEntry implements FileEntry {
 			break;
 		}
 		try {
-			Part.UpdateDirentsOnDisk();
+			Part.SaveDirectoryEntry(this);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

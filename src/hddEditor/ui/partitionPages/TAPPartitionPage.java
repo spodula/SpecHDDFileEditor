@@ -342,6 +342,7 @@ public class TAPPartitionPage extends GenericPage {
 
 	/**
 	 * Drop a file onto the form
+	 * 
 	 * @param filenames
 	 */
 	protected void DoDropFile(String[] filenames) {

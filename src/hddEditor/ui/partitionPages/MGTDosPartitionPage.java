@@ -52,8 +52,11 @@ import hddEditor.libs.MGT;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
+import hddEditor.libs.disks.LINEAR.TAPFile;
+import hddEditor.libs.disks.LINEAR.tapblocks.TAPBlock;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.MGTDosPartition;
+import hddEditor.libs.partitions.TAPPartition;
 import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
 import hddEditor.ui.FileExportAllPartitionsForm;
 import hddEditor.ui.HDDEditor;
@@ -485,24 +488,44 @@ public class MGTDosPartitionPage extends GenericPage {
 		}
 	}
 
+	/*
+	 * File Properties
+	 */
 	protected void DoFileProperties() {
-		TableItem itms[] = DirectoryListing.getSelection();
-		if ((itms != null) && (itms.length != 0)) {
-			MGTDirectoryEntry entry = (MGTDirectoryEntry) itms[0].getData();
-			try {
+		boolean DoAgain = true;
+
+		while (DoAgain == true) {
+			DoAgain = false;
+
+			TableItem itms[] = DirectoryListing.getSelection();
+			if ((itms != null) && (itms.length != 0)) {
+				MGTDirectoryEntry entry = (MGTDirectoryEntry) itms[0].getData();
 				SpecFileEditDialog = new MGTDosFileEditDialog(ParentComp.getDisplay(), fsd, partition);
 
-				byte[] data = entry.GetFileData();
-				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
-					// entry.SetDeleted(true);
+				byte[] data;
+				try {
+					data = entry.GetFileData();
+					if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
+						// entry.SetDeleted(true);
 
-					// refresh the screen.
-					AddComponents();
+						// refresh the screen.
+						AddComponents();
+					} else {
+						// There are two cases for SHOW returning false,
+						// 1: Just closed, no changes
+						// 2: File type change
+						if (SpecFileEditDialog.FileTypeHasChanged) {
+							MGTDosPartition part = (MGTDosPartition) partition;
+							entry.SetFileType(SpecFileEditDialog.NewFileType);
+							part.SaveDirectoryEntry(entry);
+						} 
+						SpecFileEditDialog = null;
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				SpecFileEditDialog = null;
-			} catch (IOException e) {
-				ErrorBox("Error reading partition: " + e.getMessage());
-				e.printStackTrace();
+				UpdateDirectoryEntryList();
 			}
 		}
 	}

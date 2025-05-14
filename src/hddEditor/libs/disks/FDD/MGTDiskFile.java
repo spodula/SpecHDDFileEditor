@@ -50,6 +50,7 @@ public class MGTDiskFile extends FloppyDisk {
 		// after loading.
 		SetNumSectors(MGT.MGT_SECTORSPERTRACK);
 		SetSectorSize(MGT.MGT_SECTORSIZE);
+				
 		long numLogicalTracks = GetFileSize() / GetSectorSize() / GetNumSectors();
 
 		if (numLogicalTracks > 159) {

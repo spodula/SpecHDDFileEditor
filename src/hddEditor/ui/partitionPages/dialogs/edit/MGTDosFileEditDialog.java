@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
+
 /**
  * Implementation of the Edit file page for an MGT file.
  *
@@ -10,10 +11,14 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -35,11 +40,13 @@ import hddEditor.ui.partitionPages.FileRenderers.MGTExecuteRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.MGTScreenRenderer;
 
 public class MGTDosFileEditDialog extends EditFileDialog {
+	public int NewFileType;
+	public boolean FileTypeHasChanged;
 
-	public MGTDosFileEditDialog(Display display, FileSelectDialog filesel,IDEDosPartition CurrentPartition) {
+	public MGTDosFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition) {
 		super(display, filesel, CurrentPartition);
 	}
-	
+
 	@Override
 	protected void Createform() {
 		shell = new Shell(display);
@@ -61,6 +68,42 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 		gd.horizontalSpan = 4;
 		lbl.setLayoutData(gd);
 
+
+		MGTDirectoryEntry mgt = (MGTDirectoryEntry) ThisEntry;
+		Combo filetype = new Combo(shell, SWT.NONE);
+		
+		filetype.setItems(MGT.MGTFileTypes);
+		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.horizontalSpan = 1;
+		filetype.setLayoutData(gd);
+
+		Button SetFileType = new Button(shell, SWT.NONE);
+		SetFileType.setText("Update file type");
+		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.horizontalSpan = 1;
+		SetFileType.setLayoutData(gd);
+
+		lbl = new Label(shell, SWT.NONE);
+		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.horizontalSpan = 2;
+		lbl.setLayoutData(gd);
+
+		filetype.select(mgt.GetFileType());
+
+		SetFileType.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				NewFileType = filetype.getSelectionIndex();
+				FileTypeHasChanged = true;
+				close();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				widgetSelected(arg0);
+			}
+		});
+
 		MainPage1 = new ScrolledComposite(shell, SWT.V_SCROLL);
 		MainPage1.setExpandHorizontal(true);
 		MainPage1.setExpandVertical(true);
@@ -68,27 +111,27 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 		gd = new GridData(GridData.FILL_BOTH);
 		gd.horizontalSpan = 4;
 		MainPage1.setLayoutData(gd);
-		
+
 		MainPage = new Composite(MainPage1, SWT.NONE);
 		MainPage1.setContent(MainPage);
-		
+
 		gridLayout = new GridLayout();
 		gridLayout.numColumns = 4;
 		gridLayout.makeColumnsEqualWidth = true;
 		MainPage.setLayout(gridLayout);
-		
+
 		MainPage1.addControlListener(new ControlListener() {
-			
+
 			@Override
 			public void controlResized(ControlEvent arg0) {
 				MainPage1.setMinSize(MainPage.computeSize(MainPage1.getClientArea().width, SWT.DEFAULT));
 			}
-			
+
 			@Override
 			public void controlMoved(ControlEvent arg0) {
 			}
 		});
-				
+
 		RenderAppropriatePage();
 
 		shell.pack();
@@ -96,39 +139,40 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 
 	private void RenderAppropriatePage() {
 		try {
-			MGTDirectoryEntry mEnt = (MGTDirectoryEntry)ThisEntry;
+			MGTDirectoryEntry mEnt = (MGTDirectoryEntry) ThisEntry;
 			int ftype = mEnt.GetFileType();
 			if (ftype == MGT.MGTFT_ZXBASIC) {
 				BasicRenderer CurrentRenderer = new BasicRenderer();
 				CurrentRenderer.RenderBasic(MainPage, data, null, mEnt.GetFilename(), mEnt.GetFileSize(),
-						mEnt.GetSpeccyBasicDetails().VarStart, mEnt.GetSpeccyBasicDetails().LineStart,filesel, new BasicSave());
+						mEnt.GetSpeccyBasicDetails().VarStart, mEnt.GetSpeccyBasicDetails().LineStart, filesel,
+						new BasicSave());
 			} else if (ftype == MGT.MGTFT_ZXNUMARRAY) {
 				NumericArrayRenderer CurrentRenderer = new NumericArrayRenderer();
 				CurrentRenderer.RenderNumericArray(MainPage, data, null, mEnt.GetFilename(),
-						"" + mEnt.GetSpeccyBasicDetails().VarName,filesel, null);
+						"" + mEnt.GetSpeccyBasicDetails().VarName, filesel, null);
 			} else if (ftype == MGT.MGTFT_SAMSCREEN) {
 				MGTScreenRenderer CurrentRenderer = new MGTScreenRenderer();
-				CurrentRenderer.RenderScreen(MainPage, data, mEnt.GetFilename(),mEnt, filesel); 
+				CurrentRenderer.RenderScreen(MainPage, data, mEnt.GetFilename(), mEnt, filesel);
 			} else if (ftype == MGT.MGTFT_ZXSTRARRAY) {
 				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
 				CurrentRenderer.RenderCharArray(MainPage, data, null, mEnt.GetFilename(),
-						"" + mEnt.GetSpeccyBasicDetails().VarName,filesel, null);
+						"" + mEnt.GetSpeccyBasicDetails().VarName, filesel, null);
 			} else if (ftype == MGT.MGTFT_ZX48SNA) {
 				MGT48kSnapshotRenderer CurrentRenderer = new MGT48kSnapshotRenderer();
-				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt,filesel);
+				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt, filesel);
 			} else if (ftype == MGT.MGTFT_ZX128SNA) {
 				MGT128kSnapshotRenderer CurrentRenderer = new MGT128kSnapshotRenderer();
-				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt,filesel);
+				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt, filesel);
 			} else if (ftype == MGT.MGTFT_ZXEXE) {
 				MGTExecuteRenderer CurrentRenderer = new MGTExecuteRenderer();
-				CurrentRenderer.Render(MainPage, data, mEnt.GetFilename(),filesel);
+				CurrentRenderer.Render(MainPage, data, mEnt.GetFilename(), filesel);
 			} else {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
-				CurrentRenderer.RenderCode(MainPage, data, null, mEnt.GetFilename(), data.length,
-						mEnt.GetLoadAddress(),filesel,CurrentPartition,new CodeSave());
+				CurrentRenderer.RenderCode(MainPage, data, null, mEnt.GetFilename(), data.length, mEnt.GetLoadAddress(),
+						filesel, CurrentPartition, new CodeSave());
 			}
 		} catch (Exception E) {
-			System.out.println("Error Showing " + ThisEntry.GetFilename()+ ": " + E.getMessage());
+			System.out.println("Error Showing " + ThisEntry.GetFilename() + ": " + E.getMessage());
 		}
 	}
 
@@ -139,13 +183,13 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 		@Override
 		public boolean DoSave(int valtype, String sValue, int Value) {
 			MGTDirectoryEntry direntry = (MGTDirectoryEntry) ThisEntry;
-			
+
 			System.out.print("Load address: " + direntry.GetLoadAddress() + " -> ");
-			direntry.SetLoadAddress(Value);			
+			direntry.SetLoadAddress(Value);
 			System.out.println(direntry.GetLoadAddress());
-			
+
 			try {
-				((MGTDosPartition)CurrentPartition).SaveDirectoryEntry(direntry);
+				((MGTDosPartition) CurrentPartition).SaveDirectoryEntry(direntry);
 				return true;
 			} catch (IOException e) {
 				System.out.println("Error updating directory entry");
@@ -162,7 +206,7 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 		@Override
 		public boolean DoSave(int valtype, String sValue, int Value) {
 			MGTDirectoryEntry direntry = (MGTDirectoryEntry) ThisEntry;
-			
+
 			if (valtype == 0) {
 				System.out.print("Start Line: " + direntry.GetStartLine() + " -> ");
 				direntry.SetStartLine(Value);
@@ -172,9 +216,9 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 				direntry.SetVar1(Value);
 				System.out.println(direntry.GetVar1());
 			}
-			
+
 			try {
-				((MGTDosPartition)CurrentPartition).SaveDirectoryEntry(direntry);
+				((MGTDosPartition) CurrentPartition).SaveDirectoryEntry(direntry);
 				return true;
 
 			} catch (IOException e) {
@@ -184,5 +228,5 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 			return false;
 		}
 	}
-	
+
 }
