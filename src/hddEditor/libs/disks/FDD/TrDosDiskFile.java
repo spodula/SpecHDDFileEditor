@@ -109,7 +109,7 @@ public class TrDosDiskFile extends FloppyDisk {
 		// TRD disks are just basically arrays of sectors arranged in C/H/S order.
 		// 0/0/9 contains the disk information. Load these first
 		// these values are common to all TR-DOS disks.
-		SetNumSectors(10);
+		SetNumSectors(0x10);
 		SetSectorSize(256);
 
 		DiskInfoBlock = new byte[0x100];
@@ -308,11 +308,11 @@ public class TrDosDiskFile extends FloppyDisk {
 		} catch (Exception E) {
 			result = false;
 		} finally {
-			if (trd!=null) {
+			if (trd != null) {
 				trd.close();
 			}
 		}
-		
+
 		return (result);
 	}
 
