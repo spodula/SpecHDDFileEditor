@@ -1,7 +1,5 @@
 package hddEditor.libs;
 
-//TODO: Allow editing of file type for TRD
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;

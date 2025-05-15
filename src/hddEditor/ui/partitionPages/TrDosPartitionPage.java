@@ -556,12 +556,28 @@ public class TrDosPartitionPage extends GenericPage {
 				SpecFileEditDialog = new TrDosFileEditDialog(ParentComp.getDisplay(), fsd, partition);
 
 				byte[] data = entry.GetFileData();
+				
+				GeneralUtils.HexDump(data, 0, data.length, 0);
+				
 				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
 					// entry.SetDeleted(true);
 
 					// refresh the screen.
 					AddComponents();
+				} else {
+					// There are two cases for SHOW returning false,
+					// 1: Just closed, no changes
+					// 2: File type change
+					if (SpecFileEditDialog.FileTypeHasChanged) {
+						System.out.print("File type: " + entry.GetFileType() + " -> ");
+						entry.SetFileType(SpecFileEditDialog.NewFileType.charAt(0));
+						System.out.println(entry.GetFileType());
+
+						TrDosPartition part = (TrDosPartition) partition;
+						part.UpdateDirentsOnDisk();
+					}
 				}
+
 				SpecFileEditDialog = null;
 				UpdateDirectoryEntryList();
 			} catch (IOException e) {

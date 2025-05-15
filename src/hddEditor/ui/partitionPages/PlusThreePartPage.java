@@ -492,7 +492,7 @@ public class PlusThreePartPage extends GenericPage {
 	private void DoEditFile() {
 		boolean DoAgain = true;
 
-		while (DoAgain==true) {
+		while (DoAgain == true) {
 			DoAgain = false;
 			TableItem itms[] = DirectoryListing.getSelection();
 			if ((itms != null) && (itms.length != 0)) {
@@ -518,8 +518,8 @@ public class PlusThreePartPage extends GenericPage {
 								System.out.print("File type: " + p3d.GetFileType() + "("
 										+ Speccy.SpecFileTypeToString(p3d.GetFileType()) + ") -> ");
 								p3d.SetFileType(SpecFileEditDialog.NewFileType);
-								System.out.println(p3d.GetFileType() + "("
-										+ Speccy.SpecFileTypeToString(p3d.GetFileType()) + ")");
+								System.out.println(
+										p3d.GetFileType() + "(" + Speccy.SpecFileTypeToString(p3d.GetFileType()) + ")");
 
 								PLUS3DOSPartition p3dPart = (PLUS3DOSPartition) partition;
 								try {
@@ -538,9 +538,9 @@ public class PlusThreePartPage extends GenericPage {
 					}
 					PopulateDirectory();
 					SpecFileEditDialog = null;
-					//Re-select the current file. 
-					int index=0;
-					for (TableItem ti:DirectoryListing.getItems()) {
+					// Re-select the current file.
+					int index = 0;
+					for (TableItem ti : DirectoryListing.getItems()) {
 						entry = (CPMDirectoryEntry) ti.getData();
 						if (entry.GetFilename().trim().equals(filename.trim())) {
 							DirectoryListing.select(index);

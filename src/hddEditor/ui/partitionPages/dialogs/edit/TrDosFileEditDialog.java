@@ -4,16 +4,21 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.TrDosPartition;
@@ -25,6 +30,9 @@ import hddEditor.ui.partitionPages.FileRenderers.NumericArrayRenderer;
 import hddEditor.ui.partitionPages.dialogs.edit.callbacks.GenericSaveEvent;
 
 public class TrDosFileEditDialog extends EditFileDialog {
+	public String NewFileType;
+	public boolean FileTypeHasChanged;
+
 	/**
 	 * Constructor
 	 * 
@@ -32,6 +40,7 @@ public class TrDosFileEditDialog extends EditFileDialog {
 	 */
 	public TrDosFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition) {
 		super(display, filesel, CurrentPartition);
+		FileTypeHasChanged = false;
 	}
 
 	/**
@@ -51,12 +60,57 @@ public class TrDosFileEditDialog extends EditFileDialog {
 		Label lbl = new Label(shell, SWT.NONE);
 		FontData fontData = lbl.getFont().getFontData()[0];
 		Font boldFont = new Font(display, new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
-		lbl.setText(String.format("CPM Length: %d bytes (%X)", data.length, data.length));
+		lbl.setText(String.format("Length: %d bytes (%X)", data.length, data.length));
 		lbl.setFont(boldFont);
 
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 4;
 		lbl.setLayoutData(gd);
+		
+		TrdDirectoryEntry trd = (TrdDirectoryEntry) ThisEntry;
+		char ftype = trd.GetFileType();
+		
+		if ((ftype=='C') || (ftype=='D') || (ftype=='B')) {
+			Combo filetype = new Combo(shell, SWT.NONE);
+			filetype.setItems(new String[] {"B - Basic","C - Code","D - Array"});
+			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.horizontalSpan = 1;
+			filetype.setLayoutData(gd);
+
+			Button SetFileType = new Button(shell, SWT.NONE);
+			SetFileType.setText("Update file type");
+			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.horizontalSpan = 1;
+			SetFileType.setLayoutData(gd);
+
+			lbl = new Label(shell, SWT.NONE);
+			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.horizontalSpan = 2;
+			lbl.setLayoutData(gd);
+
+			if (ftype=='B') {
+				filetype.select(0);	
+			} else if (ftype=='C') {
+				filetype.select(1);	
+			} else if (ftype=='D') {
+				filetype.select(2);	
+			}
+			
+			SetFileType.addSelectionListener(new SelectionListener() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					NewFileType = filetype.getItem(filetype.getSelectionIndex());
+					FileTypeHasChanged = true;
+					close();
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent arg0) {
+					widgetSelected(arg0);
+				}
+			});
+		}
+		
 
 		MainPage1 = new ScrolledComposite(shell, SWT.V_SCROLL);
 		MainPage1.setExpandHorizontal(true);
@@ -76,20 +130,20 @@ public class TrDosFileEditDialog extends EditFileDialog {
 
 		MainPage1.addControlListener(new ControlListener() {
 
-			@Override
-			public void controlResized(ControlEvent arg0) {
-				MainPage1.setMinSize(MainPage.computeSize(MainPage1.getClientArea().width, SWT.DEFAULT));
-			}
-
-			@Override
-			public void controlMoved(ControlEvent arg0) {
-			}
-		});
-
-		RenderAppropriatePage();
-
-		shell.pack();
+	@Override
+	public void controlResized(ControlEvent arg0) {
+		MainPage1.setMinSize(MainPage.computeSize(MainPage1.getClientArea().width, SWT.DEFAULT));
 	}
+
+	@Override
+	public void controlMoved(ControlEvent arg0) {
+	}
+
+	});
+
+	RenderAppropriatePage();
+
+	shell.pack();}
 
 	/**
 	 * Render the correct page for the file.
@@ -97,6 +151,7 @@ public class TrDosFileEditDialog extends EditFileDialog {
 	private void RenderAppropriatePage() {
 		try {
 			TrdDirectoryEntry trde = (TrdDirectoryEntry) ThisEntry;
+
 			char ftype = trde.GetFileType();
 			if (ftype == 'B') {
 				BasicRenderer CurrentRenderer = new BasicRenderer();
@@ -117,11 +172,11 @@ public class TrDosFileEditDialog extends EditFileDialog {
 			System.out.println("Error Showing " + ThisEntry.GetFilename() + ": " + E.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Save for BASIC files. Only the LOAD address is save-able.
 	 */
-	private class BasicSave  implements GenericSaveEvent {
+	private class BasicSave implements GenericSaveEvent {
 		@Override
 		public boolean DoSave(int valtype, String sValue, int Value) {
 			TrdDirectoryEntry trde = (TrdDirectoryEntry) ThisEntry;
@@ -135,8 +190,8 @@ public class TrDosFileEditDialog extends EditFileDialog {
 				sbd.VarStart = Value;
 				System.out.println(sbd.VarStart);
 			}
-		
-			trde.SetSpeccyBasicDetails(sbd,(TrDosPartition) CurrentPartition);
+
+			trde.SetSpeccyBasicDetails(sbd, (TrDosPartition) CurrentPartition);
 
 			return true;
 		}
@@ -150,14 +205,13 @@ public class TrDosFileEditDialog extends EditFileDialog {
 		public boolean DoSave(int valtype, String sValue, int Value) {
 			TrdDirectoryEntry trde = (TrdDirectoryEntry) ThisEntry;
 			SpeccyBasicDetails sbd = trde.GetSpeccyBasicDetails();
-			System.out.print("Code start: " + sbd.LoadAddress+ " -> ");
+			System.out.print("Code start: " + sbd.LoadAddress + " -> ");
 			sbd.LoadAddress = Value;
 			System.out.println(sbd.LoadAddress);
-			
-			trde.SetSpeccyBasicDetails(sbd,(TrDosPartition) CurrentPartition);
+
+			trde.SetSpeccyBasicDetails(sbd, (TrDosPartition) CurrentPartition);
 			return true;
 		}
 	}
 
-	
 }

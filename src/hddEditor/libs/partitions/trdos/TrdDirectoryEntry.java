@@ -524,7 +524,7 @@ public class TrdDirectoryEntry implements FileEntry {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void SetStartLine() {
 		/**
 		 * For BASIC files, extract the line from the file.
@@ -546,10 +546,10 @@ public class TrdDirectoryEntry implements FileEntry {
 				int ptr = itemlength - 0x10;
 				int lsb = startline & 0xff;
 				int msb = startline / 0x100;
-				
-				result[ptr+2] = (byte) (lsb & 0xff);
-				result[ptr+3] = (byte) (msb & 0xff);
-				CurrentDisk.SetLogicalBlockFromSector(startsector,result);
+
+				result[ptr + 2] = (byte) (lsb & 0xff);
+				result[ptr + 3] = (byte) (msb & 0xff);
+				CurrentDisk.SetLogicalBlockFromSector(startsector, result);
 
 			} catch (IOException e) {
 				e.printStackTrace();

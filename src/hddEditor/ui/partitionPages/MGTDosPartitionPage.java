@@ -522,7 +522,6 @@ public class MGTDosPartitionPage extends GenericPage {
 						SpecFileEditDialog = null;
 					}
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				UpdateDirectoryEntryList();

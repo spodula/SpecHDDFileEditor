@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.dialogs.edit;
+
 /**
  * Contains some base functions for Edit file dialogs.
  * This needs to be subclassed.
@@ -25,28 +26,28 @@ public class EditFileDialog {
 
 	// Composite we are parented to
 	protected Composite MainPage = null;
-	protected ScrolledComposite MainPage1 = null; 
-	
+	protected ScrolledComposite MainPage1 = null;
+
 	// Result
 	protected boolean result = false;
 
 	// Data for the file
 	public byte[] data = new byte[0];
-	
+
 	// Form details
 	protected Shell shell;
 	protected Display display;
-	
+
 	protected FileSelectDialog filesel;
-	
+
 	protected IDEDosPartition CurrentPartition;
-	
+
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public EditFileDialog(Display display, FileSelectDialog filesel,IDEDosPartition CurrentPartition) {
+	public EditFileDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition) {
 		this.display = display;
 		this.filesel = filesel;
 		this.CurrentPartition = CurrentPartition;
@@ -62,7 +63,7 @@ public class EditFileDialog {
 				display.sleep();
 		}
 	}
-	
+
 	/**
 	 * CLose the form.
 	 */
@@ -72,13 +73,12 @@ public class EditFileDialog {
 			shell.dispose();
 		}
 	}
-	
 
 	/**
 	 * Create a generic label with the given text and span.
 	 * 
 	 * @param text - Text to put in the label.
-	 * @param span - Number of columns to span. 
+	 * @param span - Number of columns to span.
 	 * @return - The label.
 	 */
 	protected Label label(String text, int span) {
@@ -91,10 +91,9 @@ public class EditFileDialog {
 		}
 		return (label);
 	}
-	
 
 	/**
-s	 * Set modified text in the title
+	 * s * Set modified text in the title
 	 *
 	 * @param Modified - Show the (Modified) text in the title?
 	 */
@@ -109,8 +108,8 @@ s	 * Set modified text in the title
 	/**
 	 * Show the form. Common to all edit file dialogs.
 	 * 
-	 * @param data	- Data to be edited.
-	 * @param title	- Title of the form. Usually the filename.
+	 * @param data  - Data to be edited.
+	 * @param title - Title of the form. Usually the filename.
 	 * @param entry - The FileEntry.
 	 * @return - TRUE if data has changed and the user OK's it.
 	 */
@@ -130,5 +129,5 @@ s	 * Set modified text in the title
 	 */
 	protected void Createform() {
 	}
-	
+
 }
