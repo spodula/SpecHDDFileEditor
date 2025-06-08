@@ -512,27 +512,29 @@ public class PlusThreePartPage extends GenericPage {
 						// There are two cases for SHOW returning false,
 						// 1: Just closed, no changes
 						// 2: File type change
-						if (SpecFileEditDialog.FileTypeHasChanged) {
-							Plus3DosFileHeader p3d = entry.GetPlus3DosHeader();
-							if (p3d != null && p3d.IsPlus3DosFile()) {
-								System.out.print("File type: " + p3d.GetFileType() + "("
-										+ Speccy.SpecFileTypeToString(p3d.GetFileType()) + ") -> ");
-								p3d.SetFileType(SpecFileEditDialog.NewFileType);
-								System.out.println(
-										p3d.GetFileType() + "(" + Speccy.SpecFileTypeToString(p3d.GetFileType()) + ")");
+						if (SpecFileEditDialog != null) {
+							if (SpecFileEditDialog.FileTypeHasChanged) {
+								Plus3DosFileHeader p3d = entry.GetPlus3DosHeader();
+								if (p3d != null && p3d.IsPlus3DosFile()) {
+									System.out.print("File type: " + p3d.GetFileType() + "("
+											+ Speccy.SpecFileTypeToString(p3d.GetFileType()) + ") -> ");
+									p3d.SetFileType(SpecFileEditDialog.NewFileType);
+									System.out.println(p3d.GetFileType() + "("
+											+ Speccy.SpecFileTypeToString(p3d.GetFileType()) + ")");
 
-								PLUS3DOSPartition p3dPart = (PLUS3DOSPartition) partition;
-								try {
-									entry.SetDeleted(true);
-									byte rawdata[] = entry.GetFileRawData();
-									System.arraycopy(p3d.RawHeader, 0, rawdata, 0, 0x80);
-									p3dPart.AddCPMFile(filename, rawdata);
-									DoAgain = true;
-								} catch (IOException e) {
-									e.printStackTrace();
+									PLUS3DOSPartition p3dPart = (PLUS3DOSPartition) partition;
+									try {
+										entry.SetDeleted(true);
+										byte rawdata[] = entry.GetFileRawData();
+										System.arraycopy(p3d.RawHeader, 0, rawdata, 0, 0x80);
+										p3dPart.AddCPMFile(filename, rawdata);
+										DoAgain = true;
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+								} else {
+									System.err.println("Update ignored, No +3DOS Basic header to update.");
 								}
-							} else {
-								System.err.println("Update ignored, No +3DOS Basic header to update.");
 							}
 						}
 					}

@@ -559,6 +559,9 @@ public class BasicRenderer implements Renderer {
 			row[2] = txt;
 			Row.setText(row);
 
+		} catch (ArrayIndexOutOfBoundsException E) {
+			System.out.println("Bad type 4 (Numeric array) variable found. Ignoring.");
+			//Ignore
 		} catch (Exception E) {
 			E.printStackTrace();
 			System.out.println(E.getMessage());

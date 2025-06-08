@@ -389,16 +389,22 @@ public class CPMPartition extends IDEDosPartition {
 				bytesLoaded = bytesRequired;
 			}
 		}
+		int validdirents = 0;
+		int invalidDirents = 0;
 		Dirents = new Dirent[MaxDirent + 1];
 		for (int i = 0; i <= MaxDirent; i++) {
 			Dirent d = new Dirent(i, ExtentMask);
 			d.Is16BitBlockID = (MaxBlock > 254);
 			d.LoadDirentFromArray(rawDirents, i * 32);
 			Dirents[i] = d;
+			if (d.getType() == Dirent.DIRENT_UNKNOWN) {
+				invalidDirents++;
+			} else {
+				validdirents++;
+			}
 		}
 		RecalculateDirectoryListing();
-		int validdirents = 0;
-		int invalidDirents = 0;
+		
 		for (CPMDirectoryEntry d : DirectoryEntries) {
 			boolean valid = d.IsComplete();
 
@@ -414,13 +420,8 @@ public class CPMPartition extends IDEDosPartition {
 					}
 				}
 			}
-			if (valid) {
-				validdirents++;
-			} else {
-				// invalidDirents++;
-			}
 		}
-		IsValid = ((validdirents > 1) && (invalidDirents < validdirents)); // || ((invalidDirents == 0));
+		IsValid = (((validdirents > 1) && (invalidDirents < validdirents))) || ((validdirents==0) && (invalidDirents==0)); // || ((invalidDirents == 0));
 	}
 
 	/**
