@@ -2,12 +2,17 @@ package hddEditor.libs.disks.LINEAR;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import hddEditor.libs.PLUSIDEDOS;
+import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
+import hddEditor.libs.disks.ExtendedSpeccyBasicDetails;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
 import hddEditor.libs.disks.LINEAR.tapblocks.TAPBlock;
 
@@ -450,25 +455,79 @@ public class TAPFile implements Disk {
 	 * 
 	 * @param args
 	 */
-	public static void main(String[] args) {
-		try {
-			String filename = "/home/graham/x.tap";
+	public static void main(String[] args) throws IOException {
+		if (args.length != 2) {
+			System.out.println("Expecting paramaters [Directory] [target file]");
+		} else {
+			int err = 0;
+			int proc = 0;
 
-			TAPFile mdt = new TAPFile();
-			if (mdt.IsMyFileType(new File(filename))) {
-				System.out.println("File is a valid TAP file.");
-				mdt = new TAPFile(new File(filename));
-				System.out.println(mdt);
-//				mdt.MoveBlockDown(mdt.Blocks[0],true);
-//				System.out.println(mdt);
-//				mdt.MoveBlockUp(mdt.Blocks[1],true);
-//				System.out.println(mdt);
-			} else {
-				System.out.println("File is not a valid Tap file.");
+			PrintWriter pr;
+			pr = new PrintWriter(new FileWriter(args[1]));
+			try {
+				File folder = new File(args[0]);
+				File contents[] = folder.listFiles();
+
+				Arrays.sort(contents);
+
+				for (File f : contents) {
+					if (f.getName().toLowerCase().endsWith(".tap")) {
+						proc++;
+						pr.println("=============================================");
+						pr.println(f.getName());
+						pr.println("=============================================");
+						System.out.println(f.getName());
+						try {
+							TAPFile mdt = new TAPFile(f);
+							pr.println(mdt);
+							pr.println("----------------------------------------------");
+							if (mdt.Blocks == null) {
+								pr.println("No blocks found. parsing error?");
+							} else {
+								for (TAPBlock block : mdt.Blocks) {
+									if (block.DecodeHeader() != null) {
+										pr.print("Blocks: " + block.blocknum+ "\\" + (block.blocknum + 1) + " ");
+
+										ExtendedSpeccyBasicDetails ebd = block.DecodeHeader();
+										String s = "  '" + ebd.filename + "' " + ebd.BasicTypeString() + " ("
+												+ ebd.BasicType + ") Len:" + ebd.filelength;
+
+										switch (ebd.BasicType) {
+										case Speccy.BASIC_BASIC:
+											s = s + " Line: " + ebd.LineStart;
+											s = s + " Vars: " + ebd.VarStart;
+											break;
+										case Speccy.BASIC_NUMARRAY:
+											s = s + " Var: " + ebd.VarName;
+											break;
+										case Speccy.BASIC_CHRARRAY:
+											s = s + " Var: " + ebd.VarName + "$";
+											break;
+										case Speccy.BASIC_CODE:
+											s = s + " Loadaddr: " + ebd.LoadAddress;
+											break;
+										default:
+											s = s + "UNKNOWN/INVALID TYPE ID";
+										}
+										pr.println(s.trim());
+									}
+								}
+							}
+
+							mdt.close();
+							mdt = null;
+						} catch (IOException | BadDiskFileException | NullPointerException
+								| ArrayIndexOutOfBoundsException e) {
+							err++;
+							pr.println(e.getMessage());
+							e.printStackTrace();
+						}
+					}
+				}
+			} finally {
+				pr.close();
 			}
-
-		} catch (IOException | BadDiskFileException e) {
-			e.printStackTrace();
+			System.out.println("Processed " + proc + " files with " + err + " Errors.");
 		}
 	}
 

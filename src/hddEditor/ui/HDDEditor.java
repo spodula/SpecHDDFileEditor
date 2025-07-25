@@ -540,7 +540,7 @@ public class HDDEditor {
 		}
 		PartitionDropdown.setItems(entries);
 
-		// QOL improvement, GDS 11 Jan: if we are NOT dealing with a hard drive, default
+		// QOL improvement, GDS 11 Jan: if we are NOT deali ng with a hard drive, default
 		// to probably the only real partition.
 		if (CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_HDD) {
 			PartitionDropdown.setText(entries[0]);

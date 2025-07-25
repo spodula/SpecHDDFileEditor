@@ -52,7 +52,7 @@ public class CodeRenderer extends FileRenderer {
 
 	// Rendering options
 	private String[] CODETYPES = { "Binary", "Screen", "Assembly", "SNA file", "Z80 file", "48k Ram Dump", ".SP file",
-			"ASCII Text", "Sprite", "48K ram dump (minus screen)", "SZX file" };
+			"ASCII Text", "Sprite", "48K ram dump (At loaded address)", "SZX file" };
 
 	/**
 	 * 
@@ -347,7 +347,7 @@ public class CodeRenderer extends FileRenderer {
 				Renderers.add(renderer);
 
 				byte data1[] = new byte[0xc000];
-				System.arraycopy(data, 0, data1, 0x1b00, Math.min(0xc000 - 0x1b00, data.length));
+				System.arraycopy(data, 0, data1, loadAddr-0x4000, Math.min(0xc000 - 0x1b00, data.length));
 
 				renderer.Render(MainPage, data1, loadAddr, false, 0x5c3a, new int[0], filename, null, null);
 			} else if (s.equals(CODETYPES[10])) {

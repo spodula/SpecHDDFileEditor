@@ -21,8 +21,8 @@ public class CPUStateToFiles {
 	 */
 	public static void SaveToPartition(MachineState cs, IDEDosPartition TargetPartition, String fileprefix)
 			throws Exception {
-		if (cs.MachineClass!= MachineState.MT_48K) {
-			throw new Exception("Can only process 48k snapshots.");
+		if (cs.MachineClass != MachineState.MT_48K) {
+			//throw new Exception("Can only process 48k snapshots.");
 		}
 
 		InputStream document = null;

@@ -636,7 +636,7 @@ public class TZXFile implements Disk {
 				Arrays.sort(contents);
 
 				for (File f : contents) {
-					if (f.getName().endsWith(".tzx")) {
+					if (f.getName().toLowerCase().endsWith(".tzx")) {
 						proc++;
 						pr.println("=============================================");
 						pr.println(f.getName());

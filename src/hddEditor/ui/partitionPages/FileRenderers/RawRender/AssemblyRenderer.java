@@ -1,4 +1,5 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
+
 /**
  * Render the given file as a table containing an assembly listing.
  */
@@ -15,15 +16,15 @@ import hddEditor.libs.ASMLib.DecodedASM;
 
 public class AssemblyRenderer implements Renderer {
 	Table AsmTable = null;
-	
+
 	@Override
 	public void DisposeRenderer() {
-		if (AsmTable!=null) {
+		if (AsmTable != null) {
 			AsmTable.dispose();
 			AsmTable = null;
 		}
 	}
-	
+
 	public void Render(Composite TargetPage, byte data[], int startaddress) {
 		AsmTable = new Table(TargetPage, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		AsmTable.setLinesVisible(true);
@@ -54,39 +55,47 @@ public class AssemblyRenderer implements Renderer {
 		try {
 			while (realaddress < data.length) {
 				String chrdata = "";
-				for (int i = 0; i < 5; i++) {
-					int d = 0;
-					if (realaddress + i < data.length) {
-						d = (int) data[realaddress + i] & 0xff;
-					}
-					asmData[i] = d;
-
-					if ((d > 0x1F) && (d < 0x7f)) {
-						chrdata = chrdata + (char) d;
-					} else {
-						chrdata = chrdata + "?";
-					}
-				}
-				// decode instruction
-				DecodedASM Instruction = asm.decode(asmData, loadedaddress);
-				// output it. - First, assemble a list of hex bytes, but pad out to 12 chars
-				// (4x3)
-				String hex = "";
-				for (int j = 0; j < Instruction.length; j++) {
-					hex = hex + String.format("%02X", asmData[j]) + " ";
-				}
-
 				TableItem Row = new TableItem(AsmTable, SWT.NONE);
 				String dta[] = new String[4];
 				dta[0] = String.format("%04X", loadedaddress);
-				dta[1] = hex;
-				dta[2] = Instruction.instruction;
-				dta[3] = chrdata.substring(0, Instruction.length);
+				int InstructionLen = 1;
+				if (data[realaddress] == 0) {
+					dta[1] = "00";
+					dta[2] = "Nop";
+					dta[3] = "";
+				} else {
+					for (int i = 0; i < 5; i++) {
+						int d = 0;
+						if (realaddress + i < data.length) {
+							d = (int) data[realaddress + i] & 0xff;
+						}
+						asmData[i] = d;
+
+						if ((d > 0x1F) && (d < 0x7f)) {
+							chrdata = chrdata + (char) d;
+						} else {
+							chrdata = chrdata + "?";
+						}
+					}
+					// decode instruction
+					DecodedASM Instruction = asm.decode(asmData, loadedaddress);
+					// output it. - First, assemble a list of hex bytes, but pad out to 12 chars
+					// (4x3)
+					String hex = "";
+					for (int j = 0; j < Instruction.length; j++) {
+						hex = hex + String.format("%02X", asmData[j]) + " ";
+					}
+					dta[1] = hex;
+					dta[2] = Instruction.instruction;
+					dta[3] = chrdata.substring(0, Instruction.length);
+					InstructionLen = Instruction.length;
+				}
+
 
 				Row.setText(dta);
 
-				realaddress = realaddress + Instruction.length;
-				loadedaddress = loadedaddress + Instruction.length;
+				realaddress = realaddress + InstructionLen;
+				loadedaddress = loadedaddress + InstructionLen;
 
 			} // while
 		} catch (Exception E) {

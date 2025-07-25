@@ -168,7 +168,7 @@ public class RamDump implements Renderer {
 		HasBasic = false;
 		BasicData = null;
 		VarsOffset = 0;
-		if ((VARS > PROG) && (E_LINE > VARS) && (PROG > 23754) && (PROG < 25000)) {
+		if ((VARS >= PROG) && (E_LINE > VARS) && (PROG > 23754) && (PROG < 25000)) {
 			BasicData = new byte[E_LINE - PROG];
 			VarsOffset = VARS - PROG;
 			System.arraycopy(data, PROG - diff, BasicData, 0, Math.min(BasicData.length, data.length - (PROG - diff)));
@@ -225,10 +225,10 @@ public class RamDump implements Renderer {
 				BinRenderer.Render(TargetPage, memdata, startAddress, 200);
 			}
 		} else {
-			byte memdata[] = new byte[42240];
-			for (int i = 0; i < 42240; i++)
+			byte memdata[] = new byte[0xa500];
+			for (int i = 0; i < memdata.length; i++)
 				memdata[i] = 0x00;
-			System.arraycopy(data, 0, memdata, 0, Math.min(0xa500, data.length));
+			System.arraycopy(data, 0, memdata, 0, Math.min(memdata.length, data.length));
 			BinaryRenderer BinRenderer = new BinaryRenderer();
 			Renderers.add(BinRenderer);
 			BinRenderer.Render(TargetPage, memdata, 0x4000, 200);

@@ -166,7 +166,7 @@ public class AMSDiskFile extends FloppyDisk {
 				fileptr = fileptr + CurrentRawTrack.length;
 				if (CurrentRawTrack.length == 0) {
 					System.out.println("Track: " + tracknum + " contains no data.");
-					CurrentTrack.header="**BAD**";
+					CurrentTrack.header = "**BAD**";
 					CurrentTrack.tracknum = Tracknum / NumHeads;
 					CurrentTrack.side = tracknum % NumHeads;
 					CurrentTrack.datarate = 0;
@@ -178,7 +178,7 @@ public class AMSDiskFile extends FloppyDisk {
 					CurrentTrack.Sectors = new Sector[0];
 					CurrentTrack.minsectorID = 0;
 					CurrentTrack.maxsectorID = 0;
-					
+
 				} else {
 					// Track-Info
 					for (int i = 0; i < 12; i++) {
@@ -288,7 +288,7 @@ public class AMSDiskFile extends FloppyDisk {
 			inFile.seek(0);
 			inFile.read(HeaderData);
 			String header = new String(HeaderData, StandardCharsets.UTF_8);
-			result = header.startsWith("MV - CPCEMU Disk") || header.startsWith("EXTENDED CPC DSK");
+			result = header.startsWith("MV - CPCEMU") || header.startsWith("EXTENDED CPC DSK");
 		} finally {
 			inFile.close();
 		}
@@ -305,7 +305,7 @@ public class AMSDiskFile extends FloppyDisk {
 		AMSDiskFile h;
 		try {
 			// String filename = "/data1/IDEDOS/Workbench2.3_4Gb_8Bits.hdf";
-			String filename = "/home/graham/test-extended.dsk";
+			String filename = "/home/graham/Desktop/disks/RSGAME.DSK";
 			if (new AMSDiskFile().IsMyFileType(new File(filename))) {
 //				new AMSDiskFile().CreateBlankAMSDisk(filename,true);
 				h = new AMSDiskFile(new File(filename));

@@ -248,8 +248,7 @@ public class FileExportAllPartitionsForm {
 					if (DoExport()) {
 						shell.close();
 					}
-				}
-			}
+				}			}
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
@@ -329,239 +328,248 @@ public class FileExportAllPartitionsForm {
 
 	protected boolean DoSpecialExport() {
 		String TargetFolder = Targetfile.getText();
-		if (!SpecialExportFBN.getSelection()) {
-			DoExportFlags(GeneralUtils.EXPORT_TYPE_TXT, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_CSV,
-					GeneralUtils.EXPORT_TYPE_PNG, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX,
-					TargetFolder);
-			File asm = new File(TargetFolder, "ASM");
-			asm.mkdir();
-			DoExportFlags(GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM,
-					GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM,
-					asm.getAbsolutePath());
-			File cpm = new File(TargetFolder, "CPM");
-			cpm.mkdir();
-			DoExportFlags(GeneralUtils.EXPORT_TYPE_RAWANDHEADER, GeneralUtils.EXPORT_TYPE_RAWANDHEADER,
-					GeneralUtils.EXPORT_TYPE_RAWANDHEADER, GeneralUtils.EXPORT_TYPE_RAWANDHEADER,
-					GeneralUtils.EXPORT_TYPE_RAWANDHEADER, GeneralUtils.EXPORT_TYPE_RAWANDHEADER,
-					cpm.getAbsolutePath());
-			File hex = new File(TargetFolder, "HEX");
-			hex.mkdir();
-			DoExportFlags(GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX,
-					GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX,
-					hex.getAbsolutePath());
-			File raw = new File(TargetFolder, "RAW");
-			raw.mkdir();
-			DoExportFlags(GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW,
-					GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW,
-					raw.getAbsolutePath());
-			return true;
-		} else {
-			int BasicType = TextToIndex(BasicTargetFileType.getText(), GeneralUtils.MasterList);
-			int CodeType = TextToIndex(CodeTargetFileType.getText(), GeneralUtils.MasterList);
-			int ArrayType = TextToIndex(ArrayTargetFileType.getText(), GeneralUtils.MasterList);
-			int ScreenType = TextToIndex(ScreenTargetFileType.getText(), GeneralUtils.MasterList);
-			int UnknownType = TextToIndex(UnknownTargetFileType.getText(), GeneralUtils.MasterList);
+		if (new File(TargetFolder).exists() && new File(TargetFolder).isDirectory()) {
 
-			PartitionExportProgress pep = new PartitionExportProgress(shell.getDisplay());
-			try {
-				pep.Show("Exporting Partition " + ThisDisk.GetName(), "Partition:", "File:");
-				pep.SetMax1(1);
-				pep.SetMax2(1);
-				pep.SetValue1(0);
-				pep.SetValue2(0);
-				int PartNum = 0;
-				File directory = new File(TargetFolder);
-				pep.setMessage1("Exporting partition " + ThisDisk.GetName() + " ("
-						+ PLUSIDEDOS.GetTypeAsString(ThisDisk.GetPartType()) + ")");
-				pep.SetValue1(PartNum++);
-				System.out.println(ThisDisk.getClass().getCanonicalName());
-				String PartClass = ThisDisk.getClass().getCanonicalName();
-				boolean HasDeletedFiles = PartClass.contains("PLUS3DOSPartition");
+			if (!SpecialExportFBN.getSelection()) {
+				DoExportFlags(GeneralUtils.EXPORT_TYPE_TXT, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_CSV,
+						GeneralUtils.EXPORT_TYPE_PNG, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX,
+						TargetFolder);
+				File asm = new File(TargetFolder, "ASM");
+				asm.mkdir();
+				DoExportFlags(GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM,
+						GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM,
+						asm.getAbsolutePath());
+				File cpm = new File(TargetFolder, "CPM");
+				cpm.mkdir();
+				DoExportFlags(GeneralUtils.EXPORT_TYPE_RAWANDHEADER, GeneralUtils.EXPORT_TYPE_RAWANDHEADER,
+						GeneralUtils.EXPORT_TYPE_RAWANDHEADER, GeneralUtils.EXPORT_TYPE_RAWANDHEADER,
+						GeneralUtils.EXPORT_TYPE_RAWANDHEADER, GeneralUtils.EXPORT_TYPE_RAWANDHEADER,
+						cpm.getAbsolutePath());
+				File hex = new File(TargetFolder, "HEX");
+				hex.mkdir();
+				DoExportFlags(GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX,
+						GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX,
+						hex.getAbsolutePath());
+				File raw = new File(TargetFolder, "RAW");
+				raw.mkdir();
+				DoExportFlags(GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW,
+						GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW,
+						raw.getAbsolutePath());
+				return true;
+			} else {
+				int BasicType = TextToIndex(BasicTargetFileType.getText(), GeneralUtils.MasterList);
+				int CodeType = TextToIndex(CodeTargetFileType.getText(), GeneralUtils.MasterList);
+				int ArrayType = TextToIndex(ArrayTargetFileType.getText(), GeneralUtils.MasterList);
+				int ScreenType = TextToIndex(ScreenTargetFileType.getText(), GeneralUtils.MasterList);
+				int UnknownType = TextToIndex(UnknownTargetFileType.getText(), GeneralUtils.MasterList);
 
-				if ((ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_FREE
-						&& ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_UNUSED
-						&& ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_UNKNOWN
-						&& ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_BAD)) {
+				PartitionExportProgress pep = new PartitionExportProgress(shell.getDisplay());
+				try {
+					pep.Show("Exporting Partition " + ThisDisk.GetName(), "Partition:", "File:");
+					pep.SetMax1(1);
+					pep.SetMax2(1);
+					pep.SetValue1(0);
+					pep.SetValue2(0);
+					int PartNum = 0;
+					File directory = new File(TargetFolder);
+					pep.setMessage1("Exporting partition " + ThisDisk.GetName() + " ("
+							+ PLUSIDEDOS.GetTypeAsString(ThisDisk.GetPartType()) + ")");
+					pep.SetValue1(PartNum++);
+					System.out.println(ThisDisk.getClass().getCanonicalName());
+					String PartClass = ThisDisk.getClass().getCanonicalName();
+					boolean HasDeletedFiles = PartClass.contains("PLUS3DOSPartition");
 
-					pep.SetMax2(ThisDisk.GetFileList().length);
-					int filenum = 0;
-					for (FileEntry file : ThisDisk.GetFileList()) {
-						boolean deleted = false;
-						if (HasDeletedFiles) {
-							deleted = ((hddEditor.libs.partitions.cpm.CPMDirectoryEntry) file).IsDeleted;
-						}
-						if (!deleted || IncludeDeleted.getSelection()) {
-							String fn = file.GetFilename();
-							if (fn.contains(".")) {
-								int dotloc = fn.lastIndexOf(".");
-								fn = fn.substring(0, dotloc);
+					if ((ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_FREE
+							&& ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_UNUSED
+							&& ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_UNKNOWN
+							&& ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_BAD)) {
+
+						pep.SetMax2(ThisDisk.GetFileList().length);
+						int filenum = 0;
+						for (FileEntry file : ThisDisk.GetFileList()) {
+							boolean deleted = false;
+							if (HasDeletedFiles) {
+								deleted = ((hddEditor.libs.partitions.cpm.CPMDirectoryEntry) file).IsDeleted;
 							}
-							File filefolder = new File(directory, fn.toUpperCase());
-							pep.setMessage2(file.GetFilename());
-							pep.SetValue2(filenum++);
-
-							// create blank sysconfig file.
-							FileWriter SysConfig;
-							try {
-								SysConfig = new FileWriter(new File(filefolder, "partition.index"), false);
-								SysConfig.close();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-
-							File asm = new File(filefolder, "ASM");
-							File cpm = new File(filefolder, "CPM");
-							File hex = new File(filefolder, "HEX");
-							File raw = new File(filefolder, "RAW");
-							if (!asm.exists())
-								asm.mkdirs();
-							if (!cpm.exists())
-								cpm.mkdirs();
-							if (!hex.exists())
-								hex.mkdirs();
-							if (!raw.exists())
-								raw.mkdirs();
-							try {
-								SpeccyBasicDetails sbd = file.GetSpeccyBasicDetails();
-								byte data[] = file.GetFileData();
-								byte cpmdata[] = file.GetFileRawData();
-								Speccy.SaveFileToDiskAdvanced(new File(asm, file.GetFilename()), data, cpmdata,
-										data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress, "",
-										GeneralUtils.EXPORT_TYPE_ASM);
-								Speccy.SaveFileToDiskAdvanced(new File(cpm, file.GetFilename()), data, cpmdata,
-										data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress, "",
-										GeneralUtils.EXPORT_TYPE_RAWANDHEADER);
-								Speccy.SaveFileToDiskAdvanced(new File(hex, file.GetFilename()), data, cpmdata,
-										data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress, "",
-										GeneralUtils.EXPORT_TYPE_HEX);
-								Speccy.SaveFileToDiskAdvanced(new File(raw, file.GetFilename()), data, cpmdata,
-										data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress, "",
-										GeneralUtils.EXPORT_TYPE_RAW);
-
-								Plus3DosFileHeader p3d = null;
-								if (PartClass.contains("PLUS3DOSPartition")) {
-									p3d = ((hddEditor.libs.partitions.cpm.CPMDirectoryEntry) file).GetPlus3DosHeader();
+							if (!deleted || IncludeDeleted.getSelection()) {
+								String fn = file.GetFilename();
+								if (fn.contains(".")) {
+									int dotloc = fn.lastIndexOf(".");
+									fn = fn.substring(0, dotloc);
 								}
-								boolean isUnknown = (sbd.BasicType < 0) || (sbd.BasicType > 3);
+								File filefolder = new File(directory, fn.toUpperCase());
+								pep.setMessage2(file.GetFilename());
+								pep.SetValue2(filenum++);
 
-								int SpeccyFileType = 0;
-								int basicLine = 0;
-								int basicVarsOffset = data.length;
-								int codeLoadAddress = 0;
-								int filelength = 0;
-								String arrayVarName = "";
-								if (p3d == null || !p3d.IsPlus3DosFile()) {
-									SpeccyFileType = Speccy.BASIC_CODE;
-									codeLoadAddress = 0x10000 - data.length;
-									filelength = data.length;
-								} else {
-									filelength = p3d.GetBasicFileLength();
-									SpeccyFileType = p3d.GetFileType();
-									basicLine = p3d.GetLine();
-									basicVarsOffset = p3d.GetVarsOffset();
-									codeLoadAddress = p3d.GetLoadAddress();
-									arrayVarName = p3d.GetVarName();
-								}
+								// create blank sysconfig file.
+								FileWriter SysConfig;
 								try {
-									int actiontype = GeneralUtils.EXPORT_TYPE_RAW;
-									if (isUnknown) { // Options are: "Raw", "Hex", "Assembly"
-										actiontype = UnknownType;
-									} else {
-										// Identifed BASIC File type
-										if (SpeccyFileType == Speccy.BASIC_BASIC) { // Options are: "Text", "Raw",
-																					// "Raw+Header",
-																					// "Hex"
-											actiontype = BasicType;
-										} else if ((SpeccyFileType == Speccy.BASIC_NUMARRAY)
-												&& (SpeccyFileType == Speccy.BASIC_CHRARRAY)) {
-											actiontype = ArrayType;
-										} else if ((filelength == 6912)) { // { "PNG", "GIF", "JPEG", "Raw",
-																			// "Raw+Header", "Hex", "Assembly" };
-											actiontype = ScreenType;
-										} else { // CODE Options: { "Raw", "Raw+Header", "Assembly", "Hex" };
-											actiontype = CodeType;
-										}
-									}
-
-									Speccy.SaveFileToDiskAdvanced(new File(filefolder, file.GetFilename()), data,
-											cpmdata, filelength, SpeccyFileType, basicLine, basicVarsOffset,
-											codeLoadAddress, arrayVarName, actiontype);
-									SysConfig = new FileWriter(new File(filefolder, "partition.index"), true);
-									try {
-										PrintWriter SysConfigp = new PrintWriter(SysConfig);
-										try {
-											SysConfigp.println("<file>");
-											SysConfigp.println(
-													"   <filename>" + file.GetFilename().trim() + "</filename>");
-											SysConfigp
-													.println("   <filelength>" + file.GetFileSize() + "</filelength>");
-
-											if (p3d == null || !p3d.IsPlus3DosFile()) {
-												// Treat CPM files as raw files.
-												SysConfigp.println("   <origfiletype>TAP</origfiletype>");
-												SysConfigp.println("   <specbasicinfo>");
-												SysConfigp.println("       <filetype>3</filetype>");
-												SysConfigp.println("       <filetypename>" + Speccy.FileTypeAsString(3)
-														+ "</filetypename>");
-												SysConfigp.println("       <codeloadaddr>32768</codeloadaddr>");
-												SysConfigp.println("   </specbasicinfo>");
-											} else {
-												SysConfigp.println("   <origfiletype>TAP</origfiletype>");
-												SysConfigp.println("   <specbasicinfo>");
-												SysConfigp.println("       <filetype>" + p3d.GetFileType()+ "</filetype>");
-												SysConfigp.println("       <filetypename>"
-														+ Speccy.FileTypeAsString(p3d.GetFileType()) + "</filetypename>");
-												SysConfigp.println(
-														"       <basicsize>" + p3d.GetBasicFileLength() + "</basicsize>");
-												SysConfigp.println(
-														"       <basicstartline>" + p3d.GetLine() + "</basicstartline>");
-												SysConfigp.println(
-														"       <codeloadaddr>" + p3d.GetLoadAddress() + "</codeloadaddr>");
-												SysConfigp.println("       <basicvarsoffset>" + p3d.GetVarsOffset()
-														+ "</basicvarsoffset>");
-												SysConfigp.println(
-														"       <arrayvarname>" + p3d.GetVarName() + "</arrayvarname>");
-												SysConfigp.println("   </specbasicinfo>");
-											}
-											if (file.getClass().getName().endsWith("TapDirectoryEntry")) {
-												SysConfigp.println("   <tap>");
-												SysConfigp.println("       <srcfile>"
-														+ ThisDisk.CurrentDisk.GetFilename() + "</srcfile>");
-												TapDirectoryEntry tf = (TapDirectoryEntry) file;
-												SysConfigp.println("       <datablocknum>" + tf.DataBlock.blocknum
-														+ "</datablocknum>");
-												if (tf.HeaderBlock != null) {
-													SysConfigp.println("       <headerblocknum>"
-															+ tf.HeaderBlock.blocknum + "</headerblocknum>");
-												}
-												SysConfigp.println("   </tap>");
-											}
-
-											SysConfigp.println("</file>");
-										} finally {
-											SysConfigp.close();
-										}
-									} finally {
-										SysConfig.close();
-									}
-
-								} catch (Exception E) {
-									System.out.println("\nError extracting " + file.GetFilename() + "For folder: "
-											+ filefolder + " - " + E.getMessage());
-									E.printStackTrace();
+									SysConfig = new FileWriter(new File(filefolder, "partition.index"), false);
+									SysConfig.close();
+								} catch (IOException e) {
+									e.printStackTrace();
 								}
-							} catch (Exception E) {
-								System.out.println("Error exporting " + file.GetFilename());
-								System.out.println(E.getMessage());
-							}
-						}
 
+								File asm = new File(filefolder, "ASM");
+								File cpm = new File(filefolder, "CPM");
+								File hex = new File(filefolder, "HEX");
+								File raw = new File(filefolder, "RAW");
+								if (!asm.exists())
+									asm.mkdirs();
+								if (!cpm.exists())
+									cpm.mkdirs();
+								if (!hex.exists())
+									hex.mkdirs();
+								if (!raw.exists())
+									raw.mkdirs();
+								try {
+									SpeccyBasicDetails sbd = file.GetSpeccyBasicDetails();
+									byte data[] = file.GetFileData();
+									byte cpmdata[] = file.GetFileRawData();
+									Speccy.SaveFileToDiskAdvanced(new File(asm, file.GetFilename()), data, cpmdata,
+											data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress,
+											"", GeneralUtils.EXPORT_TYPE_ASM);
+									Speccy.SaveFileToDiskAdvanced(new File(cpm, file.GetFilename()), data, cpmdata,
+											data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress,
+											"", GeneralUtils.EXPORT_TYPE_RAWANDHEADER);
+									Speccy.SaveFileToDiskAdvanced(new File(hex, file.GetFilename()), data, cpmdata,
+											data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress,
+											"", GeneralUtils.EXPORT_TYPE_HEX);
+									Speccy.SaveFileToDiskAdvanced(new File(raw, file.GetFilename()), data, cpmdata,
+											data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress,
+											"", GeneralUtils.EXPORT_TYPE_RAW);
+
+									Plus3DosFileHeader p3d = null;
+									if (PartClass.contains("PLUS3DOSPartition")) {
+										p3d = ((hddEditor.libs.partitions.cpm.CPMDirectoryEntry) file)
+												.GetPlus3DosHeader();
+									}
+									boolean isUnknown = (sbd.BasicType < 0) || (sbd.BasicType > 3);
+
+									int SpeccyFileType = 0;
+									int basicLine = 0;
+									int basicVarsOffset = data.length;
+									int codeLoadAddress = 0;
+									int filelength = 0;
+									String arrayVarName = "";
+									if (p3d == null || !p3d.IsPlus3DosFile()) {
+										SpeccyFileType = Speccy.BASIC_CODE;
+										codeLoadAddress = 0x10000 - data.length;
+										filelength = data.length;
+									} else {
+										filelength = p3d.GetBasicFileLength();
+										SpeccyFileType = p3d.GetFileType();
+										basicLine = p3d.GetLine();
+										basicVarsOffset = p3d.GetVarsOffset();
+										codeLoadAddress = p3d.GetLoadAddress();
+										arrayVarName = p3d.GetVarName();
+									}
+									try {
+										int actiontype = GeneralUtils.EXPORT_TYPE_RAW;
+										if (isUnknown) { // Options are: "Raw", "Hex", "Assembly"
+											actiontype = UnknownType;
+										} else {
+											// Identifed BASIC File type
+											if (SpeccyFileType == Speccy.BASIC_BASIC) { // Options are: "Text", "Raw",
+																						// "Raw+Header",
+																						// "Hex"
+												actiontype = BasicType;
+											} else if ((SpeccyFileType == Speccy.BASIC_NUMARRAY)
+													&& (SpeccyFileType == Speccy.BASIC_CHRARRAY)) {
+												actiontype = ArrayType;
+											} else if ((filelength == 6912)) { // { "PNG", "GIF", "JPEG", "Raw",
+																				// "Raw+Header", "Hex", "Assembly" };
+												actiontype = ScreenType;
+											} else { // CODE Options: { "Raw", "Raw+Header", "Assembly", "Hex" };
+												actiontype = CodeType;
+											}
+										}
+
+										Speccy.SaveFileToDiskAdvanced(new File(filefolder, file.GetFilename()), data,
+												cpmdata, filelength, SpeccyFileType, basicLine, basicVarsOffset,
+												codeLoadAddress, arrayVarName, actiontype);
+										SysConfig = new FileWriter(new File(filefolder, "partition.index"), true);
+										try {
+											PrintWriter SysConfigp = new PrintWriter(SysConfig);
+											try {
+												SysConfigp.println("<file>");
+												SysConfigp.println(
+														"   <filename>" + file.GetFilename().trim() + "</filename>");
+												SysConfigp.println(
+														"   <filelength>" + file.GetFileSize() + "</filelength>");
+
+												if (p3d == null || !p3d.IsPlus3DosFile()) {
+													// Treat CPM files as raw files.
+													SysConfigp.println("   <origfiletype>TAP</origfiletype>");
+													SysConfigp.println("   <specbasicinfo>");
+													SysConfigp.println("       <filetype>3</filetype>");
+													SysConfigp.println("       <filetypename>"
+															+ Speccy.FileTypeAsString(3) + "</filetypename>");
+													SysConfigp.println("       <codeloadaddr>32768</codeloadaddr>");
+													SysConfigp.println("   </specbasicinfo>");
+												} else {
+													SysConfigp.println("   <origfiletype>TAP</origfiletype>");
+													SysConfigp.println("   <specbasicinfo>");
+													SysConfigp.println(
+															"       <filetype>" + p3d.GetFileType() + "</filetype>");
+													SysConfigp.println("       <filetypename>"
+															+ Speccy.FileTypeAsString(p3d.GetFileType())
+															+ "</filetypename>");
+													SysConfigp.println("       <basicsize>" + p3d.GetBasicFileLength()
+															+ "</basicsize>");
+													SysConfigp.println("       <basicstartline>" + p3d.GetLine()
+															+ "</basicstartline>");
+													SysConfigp.println("       <codeloadaddr>" + p3d.GetLoadAddress()
+															+ "</codeloadaddr>");
+													SysConfigp.println("       <basicvarsoffset>" + p3d.GetVarsOffset()
+															+ "</basicvarsoffset>");
+													SysConfigp.println("       <arrayvarname>" + p3d.GetVarName()
+															+ "</arrayvarname>");
+													SysConfigp.println("   </specbasicinfo>");
+												}
+												if (file.getClass().getName().endsWith("TapDirectoryEntry")) {
+													SysConfigp.println("   <tap>");
+													SysConfigp.println("       <srcfile>"
+															+ ThisDisk.CurrentDisk.GetFilename() + "</srcfile>");
+													TapDirectoryEntry tf = (TapDirectoryEntry) file;
+													SysConfigp.println("       <datablocknum>" + tf.DataBlock.blocknum
+															+ "</datablocknum>");
+													if (tf.HeaderBlock != null) {
+														SysConfigp.println("       <headerblocknum>"
+																+ tf.HeaderBlock.blocknum + "</headerblocknum>");
+													}
+													SysConfigp.println("   </tap>");
+												}
+
+												SysConfigp.println("</file>");
+											} finally {
+												SysConfigp.close();
+											}
+										} finally {
+											SysConfig.close();
+										}
+
+									} catch (Exception E) {
+										System.out.println("\nError extracting " + file.GetFilename() + "For folder: "
+												+ filefolder + " - " + E.getMessage());
+										E.printStackTrace();
+									}
+								} catch (Exception E) {
+									System.out.println("Error exporting " + file.GetFilename());
+									System.out.println(E.getMessage());
+								}
+							}
+
+						}
 					}
+				} finally {
+					pep.close();
 				}
-			} finally {
-				pep.close();
+				return true;
 			}
-			return true;
+		} else {
+			System.out.println("Folder does not exist.");
+			return false;
 		}
 	}
 
@@ -610,7 +618,6 @@ public class FileExportAllPartitionsForm {
 					&& ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_UNKNOWN
 					&& ThisDisk.GetPartType() != PLUSIDEDOS.PARTITION_BAD) {
 				try {
-//					long start = System.currentTimeMillis();
 					ThisDisk.ExtractPartitiontoFolderAdvanced(directory, BasicType, CodeType, ArrayType, ScreenType,
 							UnknownType, SwapType, new ProgressCallback() {
 								int lastmax = 0;
@@ -627,10 +634,9 @@ public class FileExportAllPartitionsForm {
 								}
 							}, IncludeDeleted.getSelection());
 
-//					long finish = System.currentTimeMillis();
-//					System.out.println(String.valueOf(finish - start) + "ms");
 				} catch (IOException e) {
 					e.printStackTrace();
+					return false;
 				}
 			}
 		} finally {

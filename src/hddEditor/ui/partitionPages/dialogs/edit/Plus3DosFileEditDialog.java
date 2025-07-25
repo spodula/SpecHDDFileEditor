@@ -43,7 +43,7 @@ import hddEditor.ui.partitionPages.FileRenderers.CodeRenderer;
 public class Plus3DosFileEditDialog extends EditFileDialog {
 	public boolean FileTypeHasChanged;
 	public int NewFileType;
-	
+
 	/**
 	 * Constructor
 	 * 
@@ -53,7 +53,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 		super(display, filesel, CurrentPartition);
 		FileTypeHasChanged = false;
 	}
-	
+
 	/**
 	 * Create the form
 	 */

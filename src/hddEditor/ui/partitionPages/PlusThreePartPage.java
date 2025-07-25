@@ -541,13 +541,15 @@ public class PlusThreePartPage extends GenericPage {
 					PopulateDirectory();
 					SpecFileEditDialog = null;
 					// Re-select the current file.
-					int index = 0;
-					for (TableItem ti : DirectoryListing.getItems()) {
-						entry = (CPMDirectoryEntry) ti.getData();
-						if (entry.GetFilename().trim().equals(filename.trim())) {
-							DirectoryListing.select(index);
+					if (!DirectoryListing.isDisposed()) {
+						int index = 0;
+						for (TableItem ti : DirectoryListing.getItems()) {
+							entry = (CPMDirectoryEntry) ti.getData();
+							if (entry.GetFilename().trim().equals(filename.trim())) {
+								DirectoryListing.select(index);
+							}
+							index++;
 						}
-						index++;
 					}
 				} catch (IOException e) {
 					ErrorBox("Error reading partition: " + e.getMessage());
