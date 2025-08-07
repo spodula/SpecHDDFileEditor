@@ -17,12 +17,12 @@ public class CPUStateToFiles {
 	 * @param cs
 	 * @param TargetPartition
 	 * @param fileprefix
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public static void SaveToPartition(MachineState cs, IDEDosPartition TargetPartition, String fileprefix)
 			throws Exception {
 		if (cs.MachineClass != MachineState.MT_48K) {
-			//throw new Exception("Can only process 48k snapshots.");
+			// throw new Exception("Can only process 48k snapshots.");
 		}
 
 		InputStream document = null;
@@ -64,7 +64,7 @@ public class CPUStateToFiles {
 		int sp = ((cs.SPH & 0xff) * 0x100) + (cs.SPL & 0xff);
 		Notes = Notes + "\nSP: " + String.format("%04X (%d)", sp, sp) + "\n";
 		try {
-			for (int i = 0; i < 6; i++) {
+			for (int i = 0; i < 16; i++) {
 				int value = (cs.RAM[sp - 0x4000] & 0xff) + ((cs.RAM[sp - 0x4000 + 1] & 0xff) * 0x100);
 
 				Notes = Notes + String.format("%04X %04X (%d)", sp, value, value) + "\n";
@@ -94,7 +94,7 @@ public class CPUStateToFiles {
 				}
 			}
 			if (line.contains("237,--IM--")) {
-				switch(cs.IM) {
+				switch (cs.IM) {
 				case 0:
 					line = line.replace("--IM--", String.valueOf(0x46));
 					break;
@@ -105,7 +105,7 @@ public class CPUStateToFiles {
 					line = line.replace("--IM--", String.valueOf(0x5E));
 					break;
 				}
-				
+
 				// If IM = 1 as in BASIC, just ignore it.
 				if (cs.IM == 1) {
 					line = "";
