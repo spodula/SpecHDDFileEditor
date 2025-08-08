@@ -200,7 +200,13 @@ public class BasicRenderer implements Renderer {
 					RemDetails rd = new RemDetails();
 					byte line[] = new byte[linelen];
 					for (int i = 0; i < linelen; i++) {
-						line[i] = data[ptr + i];
+						//if the line length is corrupt, this feeds NULLS until the end of line.
+						//Something this happens as part of anti-hack protection.
+						if ((ptr+i) >= data.length) {
+							line[i] = 0x00;
+						} else {
+							line[i] = data[ptr + i];
+						}
 						// get the rem details
 						if ((line[i] & 0xff) == (0xEA & 0xff)) {
 							if (((i == 0) || (line[i - 1] == (byte) ':')) && !rd.valid) {
