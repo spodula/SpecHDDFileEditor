@@ -1,7 +1,58 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
 /**
  * Render a SNA file, including trying to decode BASIC programs.
- * https://sinclair.wiki.zxnet.co.uk/wiki/SNA_format
+ * https://sinclair.wiki.zxnet.co.uk/wiki/SNA_format  (48k)
+ * https://worldofspectrum.org/faq/reference/formats.htm
+ * 
+ * The original emulator snapshot file format. 
+ * The first known use is in Peter McGavin's 'Spectrum' emulator on the Amiga,
+ * 
+ * It is an extremely simple format, in both its 48K and 128K versions.
+ * 
+ * Notes:
+ * 	The 48K version has a problem in that the PC is pushed onto the stack.
+ * 		and a RETN is needed to return. 
+ * 		This is fine for most snapshots, but for programs that use SP manipulation for quick 
+ * 		block moves, this can fail. As well as for programs that have limited stack space.
+ * 
+ *  That the 128k version cannot properly represent +2AB/+3AB machines as it lacks
+ *   	storage for the $1FFD port. 
+ * 
+ * 	For the above reasons, the SNA file format is considered obsolete, although
+ * 		there are a lot of SNA files created in the early days of emulation that
+ * 		still use them. 
+ * 
+ *  48K snapshot format:
+ *  ====================
+ *  
+ *  $00  I
+ *  $01  HL'    
+ *  $03  DE'
+ *  $05  BC'
+ *  $07  AF'
+ *  $09  HL
+ *  $0B  DE
+ *  $0D  BC
+ *  $0F  IY
+ *  $11  IX
+ *  $13  IFF2    [Only bit 2 is defined: 1 for EI, 0 for DI]
+ *  $14  R
+ *  $15  AF
+ *  $17  SP
+ *  $19  Interrupt mode: 0, 1 or 2
+ *  $1A  Border colour
+ *  $1B+ 49152 bytes of RAM.
+ *  
+ *  128K version:
+ *  ==============
+ *  $00000->$0001A 	(Same as above)
+ *  $0001B->$0401A 	(Bank 5)
+ *  $0401B->$0801A 	(Bank 2)
+ *  $0801B->$0C01A 	(Currently paged in Bank)
+ *  $0C01B		   	PC
+ *  $0C01D			Last out to 0x7ffd
+ *  $0C01E			TR-DOS rom Paged
+ *  $0C01F			Remaining 16K RAM banks in ascending order ignoring banks 5,2 and the currently paged ram.
  */
 
 import java.util.ArrayList;

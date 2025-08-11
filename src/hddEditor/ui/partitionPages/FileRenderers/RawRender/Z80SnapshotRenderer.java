@@ -1,4 +1,21 @@
 package hddEditor.ui.partitionPages.FileRenderers.RawRender;
+/**
+ * Render a .z80 file
+ * https://worldofspectrum.org/faq/reference/z80format.htm
+ * 
+ * This implements the decoding a z80 file as a Ram Dump with registers.
+ * Its probably the most common snapshot file format.
+ * 
+ * Notes:
+ * 	There are currently 3 .Z80 versions. Version 1 is only good for 48K snapshots only.
+ * 	 Detection of version is as follows:
+ *  	[6/7] PC != 0 ? 		Version 1
+ *  		PC=0, [30/31] = 23? Version 2
+ *  			else Version 3
+ *  Compression is simple RLE encoding and can easily be written in z80
+ * 
+ * 
+ */
 
 import java.util.ArrayList;
 import java.util.Hashtable;
