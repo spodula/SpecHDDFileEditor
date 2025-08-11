@@ -1,6 +1,8 @@
 package hddEditor.ui;
-
 /**
+ * ZX Spectrum +3 Hard disk/floppy disk image editor. 
+ * https://github.com/spodula/SpecHDDFileEditor
+ * 
  * Main UI.
  */
 

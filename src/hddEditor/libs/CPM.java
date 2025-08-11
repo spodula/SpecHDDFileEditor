@@ -1,4 +1,9 @@
 package hddEditor.libs;
+/**
+ * CPM Specific data and functions.
+ * 
+ */
+
 
 public class CPM {
 	//Definitions of the bytes 0xfe00-0xfe0a for Amstrad CPM disks

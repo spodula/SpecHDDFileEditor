@@ -1,4 +1,11 @@
 package hddEditor.libs;
+/**
+ * This is a hack to get around the fact that SWT file dialogs seem to not
+ * remember their previous locations. This is here until a better solution comes
+ * along.
+ * 
+ * Swing dialogs are very ugly though. :(
+ */
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,13 +21,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.FileDialog;
 
-/**
- * This is a hack to get around the fact that SWT file dialogs seem to not
- * remember their previous locations. This is here until a better solution comes
- * along.
- * 
- * Swing dialogs are very ugly though. :(
- */
+
 
 public class FileSelectDialog {
 	public static int FILETYPE_DRIVE = 0;

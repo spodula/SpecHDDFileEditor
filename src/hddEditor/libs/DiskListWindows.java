@@ -1,4 +1,11 @@
 package hddEditor.libs;
+/**
+ * Get the device list for Windows. Used to try to access Raw devices.
+ * 
+ * Note, this requires the WMIC program, which has apparently 
+ * 		been depreciated as of Windows 10 v 21H1
+ * 		Need to find a better way of doing this.
+ */
 
 import java.io.BufferedReader;
 import java.io.File;

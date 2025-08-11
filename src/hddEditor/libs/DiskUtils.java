@@ -1,4 +1,9 @@
 package hddEditor.libs;
+/**
+ * Utilities to try to identify disk types and return the disk object
+ * 
+ * 
+ */
 
 import java.io.File;
 import java.io.IOException;
