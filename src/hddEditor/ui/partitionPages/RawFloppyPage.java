@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import hddEditor.libs.ASMLib;
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.ASMLib.DecodedASM;
 import hddEditor.libs.disks.FDD.FloppyDisk;
 import hddEditor.libs.disks.FDD.Sector;
@@ -35,8 +36,8 @@ public class RawFloppyPage extends GenericPage {
 	FloppyDisk fdd;
 	Button ExportDiskBtn;
 
-	public RawFloppyPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog fsd) {
-		super(root, parent, partition, fsd);
+	public RawFloppyPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog fsd, Languages lang) {
+		super(root, parent, partition, fsd,lang);
 		rawdiskdata = (RawDiskData) partition;
 		AddComponents();
 
@@ -50,11 +51,11 @@ public class RawFloppyPage extends GenericPage {
 			RemoveComponents();
 			super.AddBasicDetails();
 
-			label("Raw floppy disk:", 4);
-			label("Tracks: " + rawdiskdata.GetStartCyl() + "-" + rawdiskdata.GetEndCyl(), 1);
-			label("Sides: " + rawdiskdata.GetStartHead() + "-" + rawdiskdata.GetEndHead(), 1);
+			label(lang.Msg(Languages.MSG_RAWFLOPPY)+":", 4);
+			label(lang.Msg(Languages.MSG_TRACKS)+": " + rawdiskdata.GetStartCyl() + "-" + rawdiskdata.GetEndCyl(), 1);
+			label(lang.Msg(Languages.MSG_SIDES)+": " + rawdiskdata.GetStartHead() + "-" + rawdiskdata.GetEndHead(), 1);
 			label("", 1);
-			ExportDiskBtn = button("Export disk");
+			ExportDiskBtn = button(lang.Msg(Languages.MSG_EXPORTDISK));
 			ExportDiskBtn.addSelectionListener(new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -73,7 +74,7 @@ public class RawFloppyPage extends GenericPage {
 				s[ptr++] = String.valueOf(i);
 			}
 
-			label("Track: ", 1);
+			label(lang.Msg(Languages.MSG_TRACK)+": ", 1);
 			TrackCombo = combo(s, s[0]);
 			TrackCombo.addSelectionListener(new SelectionListener() {
 				@Override
@@ -97,7 +98,7 @@ public class RawFloppyPage extends GenericPage {
 				s[ptr++] = String.valueOf(i);
 			}
 
-			label("Side: ", 1);
+			label(lang.Msg(Languages.MSG_SIDE)+": ", 1);
 			SideCombo = combo(s, s[0]);
 			SideCombo.addSelectionListener(new SelectionListener() {
 				@Override
@@ -164,7 +165,7 @@ public class RawFloppyPage extends GenericPage {
 			}
 		}
 
-		renderer.Render(ParentComp, data, 0, 400);
+		renderer.Render(ParentComp, data, 0, 400, lang);
 	}
 
 	/**
@@ -172,23 +173,23 @@ public class RawFloppyPage extends GenericPage {
 	 */
 	public void DoExportDisk() {
 		DirectoryDialog dialog = new DirectoryDialog(ParentComp.getShell());
-		dialog.setText("Select folder for target");
+		dialog.setText(lang.Msg(Languages.MSG_SELTARGETFLDR));
 		String result = dialog.open();
 		if (result != null) {
 			File rootfolder = new File(result);
 			StringBuffer sb = new StringBuffer();
-			sb.append("Original file name: " + fdd.file.getAbsolutePath() + System.lineSeparator());
-			sb.append("Cylinders: " + fdd.NumCylinders + System.lineSeparator());
-			sb.append("Heads: " + fdd.NumHeads + System.lineSeparator());
-			sb.append("Sectors: " + fdd.NumSectors + System.lineSeparator());
-			sb.append("Num Logical Sectors: " + fdd.NumLogicalSectors + System.lineSeparator());
-			sb.append("Sector size: " + fdd.SectorSize + System.lineSeparator());
+			sb.append(lang.Msg(Languages.MSG_ORIGFILENAME)+": " + fdd.file.getAbsolutePath() + System.lineSeparator());
+			sb.append(lang.Msg(Languages.MSG_CYLS)+": " + fdd.NumCylinders + System.lineSeparator());
+			sb.append(lang.Msg(Languages.MSG_HEADS)+": " + fdd.NumHeads + System.lineSeparator());
+			sb.append(lang.Msg(Languages.MSG_SECTORS)+": " + fdd.NumSectors + System.lineSeparator());
+			sb.append(lang.Msg(Languages.MSG_NUMLOGSECTORS)+": " + fdd.NumLogicalSectors + System.lineSeparator());
+			sb.append(lang.Msg(Languages.MSG_SECTSZ)+": " + fdd.SectorSize + System.lineSeparator());
 			sb.append("=======================================" + System.lineSeparator());
 			for (TrackInfo t : fdd.diskTracks) {
-				sb.append("Track: " + t.tracknum);
-				sb.append(" Side: " + t.side);
-				sb.append(" Sectors:" + t.minsectorID + " - " + t.maxsectorID + " (" + t.Sectors.length + " sectors.)");
-				sb.append(" Sect size: " + t.sectorsz);
+				sb.append(lang.Msg(Languages.MSG_TRACK)+": " + t.tracknum);
+				sb.append(" "+lang.Msg(Languages.MSG_SIDE)+": " + t.side);
+				sb.append(" "+lang.Msg(Languages.MSG_SECTORS)+":" + t.minsectorID + " - " + t.maxsectorID + " (" + t.Sectors.length + " sectors.)");
+				sb.append(" "+lang.Msg(Languages.MSG_SECTSZ)+": " + t.sectorsz);
 				sb.append(System.lineSeparator());
 			}
 
@@ -198,26 +199,26 @@ public class RawFloppyPage extends GenericPage {
 			for (TrackInfo t : fdd.diskTracks) {
 				int dlen = 0;
 				sb = new StringBuffer();
-				sb.append("Track: " + t.tracknum + " Side:" + t.side + System.lineSeparator());
+				sb.append(lang.Msg(Languages.MSG_TRACK)+": " + t.tracknum + " "+lang.Msg(Languages.MSG_SIDE)+":" + t.side + System.lineSeparator());
 				sb.append("=======================================" + System.lineSeparator());
-				sb.append("Data rate: " + t.GetDataRate() + " (" + t.datarate + ")" + System.lineSeparator());
-				sb.append("Recording mode: " + t.GetRecordingMode() + " (" + t.recordingmode + ")"
+				sb.append(lang.Msg(Languages.MSG_DATARATE)+": " + t.GetDataRate() + " (" + t.datarate + ")" + System.lineSeparator());
+				sb.append(lang.Msg(Languages.MSG_RECMODE)+": " + t.GetRecordingMode() + " (" + t.recordingmode + ")"
 						+ System.lineSeparator());
-				sb.append("Filler byte: " + String.format("%d (%02X)", t.fillerByte, t.fillerByte)
+				sb.append(lang.Msg(Languages.MSG_FILLERB)+": " + String.format("%d (%02X)", t.fillerByte, t.fillerByte)
 						+ System.lineSeparator());
-				sb.append("Gap3Len: " + t.gap3len + System.lineSeparator());
-				sb.append("Sector range:" + t.minsectorID + " - " + t.maxsectorID + System.lineSeparator());
-				sb.append("Num Sectors: " + t.numsectors + System.lineSeparator());
+				sb.append(lang.Msg(Languages.MSG_GAP3)+": " + t.gap3len + System.lineSeparator());
+				sb.append(lang.Msg(Languages.MSG_SECTORR)+":" + t.minsectorID + " - " + t.maxsectorID + System.lineSeparator());
+				sb.append(lang.Msg(Languages.MSG_NUMSECTORS)+": " + t.numsectors + System.lineSeparator());
 				sb.append("=======================================" + System.lineSeparator() + System.lineSeparator());
 				for (Sector s : t.Sectors) {
-					sb.append("Sector " + s.sectorID + System.lineSeparator());
-					sb.append("Actual size: " + s.ActualSize + System.lineSeparator());
-					sb.append("Status reg 1: " + s.FDCsr1 + System.lineSeparator());
-					sb.append("Status reg 2: " + s.FDCsr2 + System.lineSeparator());
-					sb.append("Sector size marker: " + s.Sectorsz + System.lineSeparator());
-					sb.append("Side: " + t.side + System.lineSeparator());
-					sb.append("Track: " + t.tracknum + System.lineSeparator());
-					sb.append("Data:");
+					sb.append(lang.Msg(Languages.MSG_SECTOR)+" " + s.sectorID + System.lineSeparator());
+					sb.append(lang.Msg(Languages.MSG_ACTSIZE)+": " + s.ActualSize + System.lineSeparator());
+					sb.append(lang.Msg(Languages.MSG_STATUSR1)+": " + s.FDCsr1 + System.lineSeparator());
+					sb.append(lang.Msg(Languages.MSG_STATUSR1)+": " + s.FDCsr2 + System.lineSeparator());
+					sb.append(lang.Msg(Languages.MSG_SECTSIZEM)+": " + s.Sectorsz + System.lineSeparator());
+					sb.append(lang.Msg(Languages.MSG_SIDE)+": " + t.side + System.lineSeparator());
+					sb.append(lang.Msg(Languages.MSG_TRACK)+": " + t.tracknum + System.lineSeparator());
+					sb.append(lang.Msg(Languages.MSG_SECTDATA)+":");
 					int xptr = 0;
 					String xbytes = "";
 					if (s.data != null) {
@@ -241,12 +242,12 @@ public class RawFloppyPage extends GenericPage {
 						}
 						dlen = dlen + s.data.length;
 					} else {
-						sb.append(System.lineSeparator() + "No data");
+						sb.append(System.lineSeparator() + lang.Msg(Languages.MSG_NODATA));
 					}
 					sb.append(System.lineSeparator());
 
 					sb.append(System.lineSeparator());
-					sb.append("Assembly: " + System.lineSeparator());
+					sb.append(lang.Msg(Languages.MSG_ASSEMBLY)+": " + System.lineSeparator());
 
 					ASMLib asm = new ASMLib();
 					int loadedaddress = 0x0000;
@@ -292,7 +293,7 @@ public class RawFloppyPage extends GenericPage {
 
 						} // while
 					} catch (Exception E) {
-						System.out.println("Error at: " + realaddress + "(" + loadedaddress + ")");
+						System.out.println(String.format(lang.Msg(Languages.MSG_ERRORATADDR), realaddress, loadedaddress));
 						System.out.println(E.getMessage());
 						E.printStackTrace();
 					}

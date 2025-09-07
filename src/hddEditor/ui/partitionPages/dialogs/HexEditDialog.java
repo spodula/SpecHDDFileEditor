@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 
 public class HexEditDialog {
 	//result to be returned
@@ -62,10 +63,10 @@ public class HexEditDialog {
 	private SaveAsDialog SaveAsDlg = null;
 
 	//Generic texts.
-	private String EDIT_LABEL = "Press ENTER to edit byte";
-	private String EDITING_LABEL = "Press ENTER to set byte or ESCAPE to cancel";
 
 	private FileSelectDialog fsd = null;
+	
+	private Languages lang;
 	
 	/**
 	 * 
@@ -75,7 +76,7 @@ public class HexEditDialog {
 		xModified = Modified;
 		String s = Title;
 		if (Modified) {
-			s = s + " (Modified)";
+			s = s + " ("+lang.Msg(Languages.MSG_MODIFIED)+")";
 		}
 		shell.setText(s);
 	}
@@ -84,8 +85,9 @@ public class HexEditDialog {
 	 * 
 	 * @param display
 	 */
-	public HexEditDialog(Display display) {
+	public HexEditDialog(Display display, Languages lang) {
 		this.display = display;
+		this.lang = lang;
 	}
 
 	/**
@@ -132,7 +134,7 @@ public class HexEditDialog {
 		Label lbl = new Label(shell, SWT.NONE);
 		FontData fontData = lbl.getFont().getFontData()[0];
 		Font boldFont = new Font(display, new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
-		lbl.setText(String.format("Length: %d bytes (%X)", Data.length, Data.length));
+		lbl.setText(String.format(lang.Msg(Languages.MSG_LENXBYTESX), Data.length, Data.length));
 		lbl.setFont(boldFont);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 4;
@@ -188,7 +190,7 @@ public class HexEditDialog {
 		HexTable.setLayoutData(gd);
 
 		TableColumn tc1 = new TableColumn(HexTable, SWT.LEFT);
-		tc1.setText("Address");
+		tc1.setText(lang.Msg(Languages.MSG_LENGTH));
 		tc1.setWidth(80);
 		for (int i = 0; i < 16; i++) {
 			TableColumn tcx = new TableColumn(HexTable, SWT.LEFT);
@@ -196,7 +198,7 @@ public class HexEditDialog {
 			tcx.setWidth(30);
 		}
 		TableColumn tc2 = new TableColumn(HexTable, SWT.LEFT);
-		tc2.setText("Ascii");
+		tc2.setText(lang.Msg(Languages.MSG_ASCII));
 		tc2.setWidth(160);
 
 		HexTable.setHeaderVisible(true);
@@ -243,19 +245,17 @@ public class HexEditDialog {
 								asc[column - 1] = (byte) chr;
 								row.setText(17, new String(asc));
 								int address = Integer.valueOf(row.getText(0), 16) + column - 1;
-								System.out.println("Updating " + address + " (" + String.format("%04X", address)
-										+ ") with " + value);
 
 								Data[address] = (byte) (value & 0xff);
 
-								InfoLabel.setText(EDIT_LABEL);
+								InfoLabel.setText(lang.Msg(Languages.MSG_PRESSENTERTOEDIT));
 
 								SetModified(true);
 								e.doit = true;
 							} else if (e.character == SWT.ESC) {
 								// close the text editor when the user hits "ESC"
 								text.dispose();
-								InfoLabel.setText(EDIT_LABEL);
+								InfoLabel.setText(lang.Msg(Languages.MSG_PRESSENTERTOEDIT));
 								e.doit = true;
 							} else {
 								// make sure the user can only enter 0-9, A-F (And control keys)
@@ -278,7 +278,7 @@ public class HexEditDialog {
 					});
 					editor.setEditor(text);
 					text.setFocus();
-					InfoLabel.setText(EDITING_LABEL);
+					InfoLabel.setText(lang.Msg(Languages.MSG_PRESSENTERTOSET));
 					InfoLabel.setSize(800, 20);
 				}
 			}
@@ -319,7 +319,7 @@ public class HexEditDialog {
 		});
 
 		InfoLabel = new Label(shell, SWT.NONE);
-		InfoLabel.setText(EDIT_LABEL);
+		InfoLabel.setText(lang.Msg(Languages.MSG_PRESSENTERTOEDIT));
 		InfoLabel.setFont(boldFont);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 4;
@@ -331,7 +331,7 @@ public class HexEditDialog {
 		new Label(shell, SWT.NONE).setLayoutData(gd);
 
 		Button OKBtn = new Button(shell, SWT.NONE);
-		OKBtn.setText("OK");
+		OKBtn.setText(lang.Msg(Languages.MSG_OK));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.grabExcessHorizontalSpace = true;
 
@@ -350,7 +350,7 @@ public class HexEditDialog {
 		});
 
 		Button CancelBtn = new Button(shell, SWT.NONE);
-		CancelBtn.setText("Cancel");
+		CancelBtn.setText(lang.Msg(Languages.MSG_CANCEL));
 		CancelBtn.setLayoutData(gd);
 		CancelBtn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -378,13 +378,13 @@ public class HexEditDialog {
 		 * File menu
 		 */
 		MenuItem fileMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
-		fileMenuHeader.setText("&File");
+		fileMenuHeader.setText("&"+lang.Msg(Languages.MENU_FILE));
 
 		Menu fileMenu = new Menu(shell, SWT.DROP_DOWN);
 		fileMenuHeader.setMenu(fileMenu);
 
 		MenuItem fileSaveItem = new MenuItem(fileMenu, SWT.PUSH);
-		fileSaveItem.setText("&Save As");
+		fileSaveItem.setText("&"+lang.Msg(Languages.MENU_SAVEAS));
 		fileSaveItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -398,7 +398,7 @@ public class HexEditDialog {
 		});
 
 		MenuItem fileSaveAsciiItem = new MenuItem(fileMenu, SWT.PUSH);
-		fileSaveAsciiItem.setText("&Save As ascii");
+		fileSaveAsciiItem.setText("&"+lang.Msg(Languages.MENU_SAVEASASCII));
 		fileSaveAsciiItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -412,7 +412,7 @@ public class HexEditDialog {
 		});
 
 		MenuItem fileExitItem = new MenuItem(fileMenu, SWT.PUSH);
-		fileExitItem.setText("E&xit");
+		fileExitItem.setText("&"+lang.Msg(Languages.MENU_EXIT));
 		fileExitItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -428,13 +428,13 @@ public class HexEditDialog {
 		 * Edit menu
 		 */
 		MenuItem editMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
-		editMenuHeader.setText("&Edit");
+		editMenuHeader.setText("&"+lang.Msg(Languages.MENU_EDIT));
 
 		Menu editMenu = new Menu(shell, SWT.DROP_DOWN);
 		editMenuHeader.setMenu(editMenu);
 
 		MenuItem editSearchItem = new MenuItem(editMenu, SWT.PUSH);
-		editSearchItem.setText("&Search");
+		editSearchItem.setText("&"+lang.Msg(Languages.MENU_SEARCH));
 		editSearchItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -451,13 +451,13 @@ public class HexEditDialog {
 		 * Help menu
 		 */
 		MenuItem helpMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
-		helpMenuHeader.setText("&Help");
+		helpMenuHeader.setText("&"+lang.Msg(Languages.MENU_HELP));
 
 		Menu helpMenu = new Menu(shell, SWT.DROP_DOWN);
 		helpMenuHeader.setMenu(helpMenu);
 
 		MenuItem helpGetHelpItem = new MenuItem(helpMenu, SWT.PUSH);
-		helpGetHelpItem.setText("&Get Help");
+		helpGetHelpItem.setText("&"+lang.Msg(Languages.MENU_GETHELP));
 
 		shell.setMenuBar(menuBar);
 	}
@@ -470,8 +470,8 @@ public class HexEditDialog {
 		boolean DoClose = true;
 		if (xModified) {
 			MessageBox messageBox = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-			messageBox.setMessage("Do you really want to close without saving?");
-			messageBox.setText("Close");
+			messageBox.setMessage(lang.Msg(Languages.MSG_CLOSEREQ));
+			messageBox.setText(lang.Msg(Languages.MSG_CLOSE));
 			int response = messageBox.open();
 
 			DoClose = (response == SWT.YES);
@@ -501,8 +501,8 @@ public class HexEditDialog {
 	 */
 	public static void main(String[] args) {
 		Display display = new Display();
-		byte data[] = GeneralUtils.ReadFileIntoArray("/home/graham/2gtest.img");
-		HexEditDialog testf = new HexEditDialog(display);
+		byte data[] = GeneralUtils.ReadFileIntoArray(args[0]);
+		HexEditDialog testf = new HexEditDialog(display, new Languages());
 		System.out.println(testf.Show(data, "CPM BAM", null,null));
 	}
 
@@ -513,12 +513,12 @@ public class HexEditDialog {
 	 */
 	protected void DoFileSaveItem(boolean SaveAscii) {
 		if (SaveAscii) {
-			SaveAsAsciiDlg = new SaveAsAsciiDialog(display,fsd);
-			SaveAsAsciiDlg.Show(Data, "Save file as ascii", Title);
+			SaveAsAsciiDlg = new SaveAsAsciiDialog(display,fsd, lang);
+			SaveAsAsciiDlg.Show(Data, lang.Msg(Languages.MSG_SAVEASASCII), Title);
 			SaveAsAsciiDlg = null;
 		} else {
-			SaveAsDlg = new SaveAsDialog(display, fsd);
-			SaveAsDlg.Show(Data, "Save file (Binary)",Title);
+			SaveAsDlg = new SaveAsDialog(display, fsd, lang);
+			SaveAsDlg.Show(Data, lang.Msg(Languages.MSG_SAVEASBIN), Title);
 			SaveAsDlg = null;
 		}
 	}
@@ -530,7 +530,7 @@ public class HexEditDialog {
 		if (SearchReplaceDlg != null) {
 			SearchReplaceDlg.ForceFront();
 		} else {
-			SearchReplaceDlg = new SearchReplaceDialog(display, Data, notes);
+			SearchReplaceDlg = new SearchReplaceDialog(display, Data, notes,lang);
 			if (SearchReplaceDlg.Show()) {
 				if (!shell.isDisposed()) {
 					System.arraycopy(SearchReplaceDlg.Searchdata, 0, Data, 0, Data.length);

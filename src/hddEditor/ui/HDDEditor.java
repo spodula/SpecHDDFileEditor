@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.HtmlHelp;
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.DiskUtils;
 import hddEditor.libs.FileSelectDialog;
@@ -67,8 +68,9 @@ public class HDDEditor {
 	public OSHandler CurrentHandler = null;
 	public IDEDosPartition CurrentSelectedPartition = null;
 
-	private static String DefaultDropDownText = "<No Disk loaded>";
-
+	// Language
+	public Languages lang = null;
+	
 	// SWT display object
 	public Display display = null;
 
@@ -111,18 +113,20 @@ public class HDDEditor {
 	 * Make the menus
 	 */
 	private void MakeMenus() {
+		lang = new Languages();
+		
 		Label label = new Label(shell, SWT.CENTER);
 		label.setBounds(shell.getClientArea());
 
 		Menu menuBar = new Menu(shell, SWT.BAR);
 		MenuItem fileMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
-		fileMenuHeader.setText("&File");
+		fileMenuHeader.setText("&"+lang.Msg(Languages.MENU_FILE));
 
 		Menu fileMenu = new Menu(shell, SWT.DROP_DOWN);
 		fileMenuHeader.setMenu(fileMenu);
 
 		MenuItem FileNewHDDItem = new MenuItem(fileMenu, SWT.PUSH);
-		FileNewHDDItem.setText("&New Hard disk file");
+		FileNewHDDItem.setText(lang.Msg(Languages.MENU_NEWHDD));
 		FileNewHDDItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -136,7 +140,7 @@ public class HDDEditor {
 		});
 
 		MenuItem FileNewFDDItem = new MenuItem(fileMenu, SWT.PUSH);
-		FileNewFDDItem.setText("&New Floppy/cart/Tape file");
+		FileNewFDDItem.setText("&"+lang.Msg(Languages.MENU_NEWFDD));
 		FileNewFDDItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -150,7 +154,7 @@ public class HDDEditor {
 		});
 
 		MenuItem fileLoadItem = new MenuItem(fileMenu, SWT.PUSH);
-		fileLoadItem.setText("&Load");
+		fileLoadItem.setText("&"+lang.Msg(Languages.MENU_LOAD));
 		fileLoadItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -164,7 +168,7 @@ public class HDDEditor {
 					defaultdisk = new File(CurrentDisk.GetFilename()).getName();
 				}
 
-				File f = filesel.AskForSingleFileOpen(FileSelectDialog.FILETYPE_DRIVE, "Select file to open.",
+				File f = filesel.AskForSingleFileOpen(FileSelectDialog.FILETYPE_DRIVE, lang.Msg(Languages.MENU_SELFILE),
 						HDDEditor.SUPPORTEDFILETYPES, defaultdisk);
 
 				if (f != null) {
@@ -175,7 +179,7 @@ public class HDDEditor {
 
 		if (GeneralUtils.IsLinuxRoot() || GeneralUtils.IsWindowsAdministrator()) {
 			MenuItem deviceLoadItem = new MenuItem(fileMenu, SWT.PUSH);
-			deviceLoadItem.setText("&Select Physical disk");
+			deviceLoadItem.setText("&"+lang.Msg(Languages.MENU_SELDISK));
 			deviceLoadItem.addSelectionListener(new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
@@ -184,7 +188,7 @@ public class HDDEditor {
 
 				@Override
 				public void widgetDefaultSelected(SelectionEvent arg0) {
-					fileSelectDevice fdd = new fileSelectDevice(display);
+					fileSelectDevice fdd = new fileSelectDevice(display, lang);
 					File f = fdd.Show();
 					if (f != null) {
 						int blocksz = fdd.blocksize;
@@ -195,7 +199,7 @@ public class HDDEditor {
 		}
 
 		MenuItem fileReLoadItem = new MenuItem(fileMenu, SWT.PUSH);
-		fileReLoadItem.setText("&Reload");
+		fileReLoadItem.setText("&"+lang.Msg(Languages.MENU_RELOAD));
 		fileReLoadItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -209,7 +213,7 @@ public class HDDEditor {
 		});
 
 		MenuItem fileConvertItem = new MenuItem(fileMenu, SWT.PUSH);
-		fileConvertItem.setText("&Convert between Raw and HDF");
+		fileConvertItem.setText("&"+lang.Msg(Languages.MSG_CONVRAWHDF));
 		fileConvertItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -223,7 +227,7 @@ public class HDDEditor {
 		});
 
 		MenuItem fileCopyItem = new MenuItem(fileMenu, SWT.PUSH);
-		fileCopyItem.setText("&Import another partition/disk");
+		fileCopyItem.setText("&"+lang.Msg(Languages.MENU_IMPPART));
 		fileCopyItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -237,7 +241,7 @@ public class HDDEditor {
 		});
 
 		MenuItem fileImportZenobiItem = new MenuItem(fileMenu, SWT.PUSH);
-		fileImportZenobiItem.setText("&Import 48k PAWS tape");
+		fileImportZenobiItem.setText("&"+lang.Msg(Languages.MENU_IMPPAWS));
 		fileImportZenobiItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -251,7 +255,7 @@ public class HDDEditor {
 		});
 
 		MenuItem fileExitItem = new MenuItem(fileMenu, SWT.PUSH);
-		fileExitItem.setText("E&xit");
+		fileExitItem.setText(lang.Msg(Languages.MENU_EXIT));
 		fileExitItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -269,14 +273,14 @@ public class HDDEditor {
 		});
 
 		MenuItem OptMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
-		OptMenuHeader.setText("&Drag out default");
+		OptMenuHeader.setText("&"+lang.Msg(Languages.MENU_DRAGDEF));
 
 		Menu OptMenu = new Menu(shell, SWT.DROP_DOWN);
 		OptMenuHeader.setMenu(OptMenu);
 
 		for (int i = 0; i < dragtypes.length; i++) {
 			MenuItem DefaultDragTypeItem = new MenuItem(OptMenu, SWT.RADIO);
-			DefaultDragTypeItem.setText("&Drag out default: " + dragtypes[i]);
+			DefaultDragTypeItem.setText("&"+lang.Msg(Languages.MENU_DRAGDEF)+": " + dragtypes[i]);
 			DefaultDragTypeItem.setData(i);
 			DefaultDragTypeItem.addSelectionListener(new SelectionListener() {
 				@Override
@@ -297,13 +301,13 @@ public class HDDEditor {
 		}
 
 		MenuItem helpMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
-		helpMenuHeader.setText("&Help");
+		helpMenuHeader.setText("&"+lang.Msg(Languages.MENU_HELP));
 
 		Menu helpMenu = new Menu(shell, SWT.DROP_DOWN);
 		helpMenuHeader.setMenu(helpMenu);
 
 		MenuItem helpGetHelpItem = new MenuItem(helpMenu, SWT.PUSH);
-		helpGetHelpItem.setText("&Get Help");
+		helpGetHelpItem.setText("&"+lang.Msg(Languages.MENU_HELPDESC));
 		helpGetHelpItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -325,7 +329,7 @@ public class HDDEditor {
 			current = current + "                     ";
 			current = current.substring(0, 20).trim();
 		}
-		fileImportZenobi = new FileImportZenobi(display, CurrentHandler, filesel);
+		fileImportZenobi = new FileImportZenobi(display, CurrentHandler, filesel, lang);
 		try {
 			fileImportZenobi.Show(current);
 			// force a refresh
@@ -357,12 +361,12 @@ public class HDDEditor {
 	 */
 	private void MakeDropdown() {
 		// Strings to use as list items
-		String[] ITEMS = { DefaultDropDownText };
+		String[] ITEMS = { lang.Msg(Languages.MSG_NODISK) };
 
 		// Create a dropdown Combo
 		PartitionDropdown = new Combo(shell, SWT.DROP_DOWN);
 		PartitionDropdown.setItems(ITEMS);
-		PartitionDropdown.setText(DefaultDropDownText);
+		PartitionDropdown.setText(lang.Msg(Languages.MSG_NODISK));
 		PartitionDropdown.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -492,7 +496,7 @@ public class HDDEditor {
 	 *                       (Only useful for devices)
 	 */
 	public void LoadFile(File selected, boolean suppressdialog, int ForceBlockSize) {
-		System.out.println("Loading " + selected.getAbsolutePath());
+		System.out.println(String.format(lang.Msg(Languages.MSG_LOADING),selected.getAbsolutePath()));
 		try {
 			if (CurrentDisk != null) {
 				CurrentDisk.close();
@@ -501,8 +505,7 @@ public class HDDEditor {
 			if (CurrentDisk != null) {
 				if (RawHDDFile.class.isAssignableFrom(CurrentDisk.getClass()) && (ForceBlockSize != 0)) {
 					((RawHDDFile) CurrentDisk).DiskBlockSize = ForceBlockSize;
-					System.out
-							.println("Overriding default block size with " + ForceBlockSize + " for raw device access");
+					System.out.println(String.format(lang.Msg(Languages.MSG_BLOCSZOVERRIDE),ForceBlockSize));
 				}
 				CurrentHandler = DiskUtils.GetHandlerForDisk(CurrentDisk);
 				UpdateDropdown();
@@ -512,11 +515,11 @@ public class HDDEditor {
 		} catch (IOException e) {
 			if (!suppressdialog) {
 				MessageBox messageBox = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-				messageBox.setMessage("Cannot load file.");
+				messageBox.setMessage(lang.Msg(Languages.MSG_CANTLOAD));
 				messageBox.setText(e.getMessage());
 				messageBox.open();
 			}
-			System.out.println("Loading failed. " + e.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_CANTLOAD)+". " + e.getMessage());
 		}
 	}
 
@@ -527,7 +530,7 @@ public class HDDEditor {
 	public void UpdateDropdown() {
 		String entries[] = null;
 		if ((CurrentDisk == null) || !CurrentDisk.IsOpen() || CurrentHandler.SystemPart == null) {
-			entries = new String[] { DefaultDropDownText };
+			entries = new String[] { lang.Msg(Languages.MSG_NODISK) };
 		} else {
 			ArrayList<String> al = new ArrayList<String>();
 			for (IDEDosPartition part : CurrentHandler.SystemPart.partitions) {
@@ -542,7 +545,7 @@ public class HDDEditor {
 		}
 		PartitionDropdown.setItems(entries);
 
-		// QOL improvement, GDS 11 Jan: if we are NOT deali ng with a hard drive, default
+		// GDS 11 Jan: if we are NOT deali ng with a hard drive, default
 		// to probably the only real partition.
 		if (CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_HDD) {
 			PartitionDropdown.setText(entries[0]);
@@ -598,37 +601,37 @@ public class HDDEditor {
 		CurrentSelectedPartition = part;
 		switch (part.GetPartType()) {
 		case PLUSIDEDOS.PARTITION_SYSTEM:
-			new SystemPartPage(this, MainPage, part, filesel);
+			new SystemPartPage(this, MainPage, part, filesel, lang);
 			break;
 		case PLUSIDEDOS.PARTITION_PLUS3DOS:
-			new PlusThreePartPage(this, MainPage, part, filesel);
+			new PlusThreePartPage(this, MainPage, part, filesel, lang);
 			break;
 		case PLUSIDEDOS.PARTITION_BOOT:
-			new FloppyBootTrackPage(this, MainPage, part, filesel);
+			new FloppyBootTrackPage(this, MainPage, part, filesel, lang);
 			break;
 		case PLUSIDEDOS.PARTITION_DISK_TRDOS:
-			new TrDosPartitionPage(this, MainPage, part, filesel);
+			new TrDosPartitionPage(this, MainPage, part, filesel, lang);
 			break;
 		case PLUSIDEDOS.PARTITION_TAPE_SINCLAIRMICRODRIVE:
-			new MicrodrivePartitionPage(this, MainPage, part, filesel);
+			new MicrodrivePartitionPage(this, MainPage, part, filesel, lang);
 			break;
 		case PLUSIDEDOS.PARTITION_TAPE_TAP:
-			new TAPPartitionPage(this, MainPage, part, filesel);
+			new TAPPartitionPage(this, MainPage, part, filesel, lang);
 			break;
 		case PLUSIDEDOS.PARTITION_TAPE_TZX:
-			new TZXPartitionPage(this, MainPage, part, filesel);
+			new TZXPartitionPage(this, MainPage, part, filesel, lang);
 			break;
 		case PLUSIDEDOS.PARTITION_DISK_PLUSD:
-			new MGTDosPartitionPage(this, MainPage, part, filesel);
+			new MGTDosPartitionPage(this, MainPage, part, filesel, lang);
 			break;
 		case PLUSIDEDOS.PARTITION_UNKNOWN:
-			new FloppyGenericPage(this, MainPage, part, filesel);
+			new FloppyGenericPage(this, MainPage, part, filesel, lang);
 			break;
 		case PLUSIDEDOS.PARTITION_RAWFDD:
-			new RawFloppyPage(this, MainPage, part, filesel);
+			new RawFloppyPage(this, MainPage, part, filesel, lang);
 			break;
 		default:
-			new GenericPage(this, MainPage, part, filesel);
+			new GenericPage(this, MainPage, part, filesel, lang);
 		}
 	}
 
@@ -636,7 +639,7 @@ public class HDDEditor {
 	 * Show the conversion form
 	 */
 	protected void ShowConvertForm() {
-		fileConvForm = new FileConversionForm(display, filesel);
+		fileConvForm = new FileConversionForm(display, filesel, lang);
 		fileConvForm.Show();
 		fileConvForm = null;
 	}
@@ -645,7 +648,7 @@ public class HDDEditor {
 	 * New hard disk file form
 	 */
 	protected void doNewHDDFile() {
-		fileNewHDDForm = new FileNewHDDForm(display, filesel);
+		fileNewHDDForm = new FileNewHDDForm(display, filesel, lang);
 		String newfile = fileNewHDDForm.Show();
 		fileNewHDDForm = null;
 		if (newfile != null)
@@ -656,7 +659,7 @@ public class HDDEditor {
 	 * New floppy disk file
 	 */
 	protected void doNewFDDFile() {
-		fileNewFDDForm = new FileNewFDDForm(display, filesel);
+		fileNewFDDForm = new FileNewFDDForm(display, filesel, lang);
 		String newfile = fileNewFDDForm.Show();
 		fileNewFDDForm = null;
 		if (newfile != null)
@@ -672,7 +675,7 @@ public class HDDEditor {
 			current = current + "                     ";
 			current = current.substring(0, 20).trim();
 		}
-		fileImportForm = new FileImportForm(display, CurrentHandler, filesel);
+		fileImportForm = new FileImportForm(display, CurrentHandler, filesel, lang);
 		try {
 			fileImportForm.Show(current);
 			// force a refresh
@@ -688,8 +691,8 @@ public class HDDEditor {
 	public void OnDiskOutOfDate() {
 		if (!DontAskReload) {
 			MessageBox messageBox = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-			messageBox.setMessage("Current file has been updated on disk");
-			messageBox.setText("The current file has been updated on disk. \nReload?");
+			messageBox.setMessage(lang.Msg(Languages.MSG_FILECHANGED));
+			messageBox.setText(lang.Msg(Languages.MSG_FILECHANGED)+".\n"+lang.Msg(Languages.MENU_RELOAD)+"?");
 			if (messageBox.open() == SWT.YES) {
 				ReloadCurrentFile();
 			} else {
@@ -737,7 +740,7 @@ public class HDDEditor {
 			} else if (args[0].toLowerCase().startsWith("script=")) {
 				ScriptRunner sr = new ScriptRunner();
 				String splitParam[] = args[0].split("=");
-				sr.RunScript(splitParam[1]);
+				sr.RunScript(splitParam[1], new Languages());
 			} else {
 				HDDEditor hdi = new HDDEditor();
 				hdi.MakeForm();

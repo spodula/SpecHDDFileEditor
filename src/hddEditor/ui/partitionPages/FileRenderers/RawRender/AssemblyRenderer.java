@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 import hddEditor.libs.ASMLib;
 import hddEditor.libs.ASMLib.DecodedASM;
+import hddEditor.libs.Languages;
 
 public class AssemblyRenderer implements Renderer {
 	Table AsmTable = null;
@@ -25,7 +26,7 @@ public class AssemblyRenderer implements Renderer {
 		}
 	}
 
-	public void Render(Composite TargetPage, byte data[], int startaddress) {
+	public void Render(Composite TargetPage, byte data[], int startaddress, Languages lang) {
 		AsmTable = new Table(TargetPage, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		AsmTable.setLinesVisible(true);
 
@@ -35,13 +36,13 @@ public class AssemblyRenderer implements Renderer {
 		AsmTable.setLayoutData(gd);
 
 		TableColumn tc1 = new TableColumn(AsmTable, SWT.LEFT);
-		tc1.setText("Address");
+		tc1.setText(lang.Msg(Languages.MSG_ADDRESS));
 		tc1.setWidth(80);
 		TableColumn tc2 = new TableColumn(AsmTable, SWT.LEFT);
 		tc2.setText("Hex");
 		tc2.setWidth(160);
 		TableColumn tc3 = new TableColumn(AsmTable, SWT.LEFT);
-		tc3.setText("Asm");
+		tc3.setText(lang.Msg(Languages.MSG_ASSEMBLY));
 		tc3.setWidth(160);
 		TableColumn tc4 = new TableColumn(AsmTable, SWT.LEFT);
 		tc4.setText("Chr");
@@ -99,7 +100,8 @@ public class AssemblyRenderer implements Renderer {
 
 			} // while
 		} catch (Exception E) {
-			System.out.println("Error at: " + realaddress + "(" + loadedaddress + ")");
+			
+			System.out.println(String.format(lang.Msg(Languages.MSG_ERRORATXX), realaddress,loadedaddress));
 			System.out.println(E.getMessage());
 			E.printStackTrace();
 		}

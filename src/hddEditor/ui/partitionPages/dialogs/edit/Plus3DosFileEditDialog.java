@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Button;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
@@ -49,8 +50,8 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 	 * 
 	 * @param display
 	 */
-	public Plus3DosFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition) {
-		super(display, filesel, CurrentPartition);
+	public Plus3DosFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition, Languages lang) {
+		super(display, filesel, CurrentPartition, lang);
 		FileTypeHasChanged = false;
 	}
 
@@ -72,7 +73,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 		Label lbl = new Label(shell, SWT.NONE);
 		FontData fontData = lbl.getFont().getFontData()[0];
 		Font boldFont = new Font(display, new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
-		lbl.setText(String.format("CPM Length: %d bytes (%X)", data.length, data.length));
+		lbl.setText(String.format(lang.Msg(Languages.MSG_CPMLENXX), data.length, data.length));
 		lbl.setFont(boldFont);
 		lbl = new Label(shell, SWT.NONE);
 		GridData gd = new GridData(SWT.FILL, SWT.TOP, true, false);
@@ -90,7 +91,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 		if (logblocks.length() > 2) {
 			logblocks = logblocks.substring(2);
 		}
-		lbl.setText("Logical blocks: " + BlockCount + " (" + logblocks + ")");
+		lbl.setText(lang.Msg(Languages.MSG_LOGICALBLOCKS) + ": " + BlockCount + " (" + logblocks + ")");
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 2;
 		lbl.setLayoutData(gd);
@@ -101,9 +102,9 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 
 		if (p3d.IsPlus3DosFile()) {
 			lbl.setText(
-					String.format("+3DOS Length: %d bytes (%X)", p3d.GetBasicFileLength(), p3d.GetBasicFileLength()));
+					String.format(lang.Msg(Languages.MSG_PLUS3DOSFILELEN), p3d.GetBasicFileLength(), p3d.GetBasicFileLength()));
 		} else {
-			lbl.setText("Not a +3DOS file (Or header corrupt)");
+			lbl.setText(lang.Msg(Languages.MSG_INVALIDPLUS3HEADER));
 		}
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 4;
@@ -111,7 +112,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 
 		String filetypes[] = new String[Speccy.filetypeNames.length + 1];
 		System.arraycopy(Speccy.filetypeNames, 0, filetypes, 0, Speccy.filetypeNames.length);
-		filetypes[Speccy.filetypeNames.length] = "Raw CPM File";
+		filetypes[Speccy.filetypeNames.length] = lang.Msg(Languages.MSG_RAWCPMFILE);
 
 		// Only display file type change for valid +3DOS files
 		// to avoid hilarious consequences for changing Raw CPM files.
@@ -123,7 +124,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 			filetype.setLayoutData(gd);
 
 			Button SetFileType = new Button(shell, SWT.NONE);
-			SetFileType.setText("Update file type");
+			SetFileType.setText(lang.Msg(Languages.MSG_UPDATEFILETYPE));
 			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.horizontalSpan = 1;
 			SetFileType.setLayoutData(gd);
@@ -207,23 +208,23 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 		if (!p3d.IsPlus3DosFile()) {
 			CodeRenderer CR = new CodeRenderer();
 			CR.RenderCode(MainPage, newdata, null, ThisEntry.GetFilename(), newdata.length, 0x0000, filesel,
-					CurrentPartition, null);
+					CurrentPartition, null, lang);
 		} else if (p3d.GetFileType() == Speccy.BASIC_BASIC) {
 			BasicRenderer BR = new BasicRenderer();
 			BR.RenderBasic(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.GetBasicFileLength(),
-					p3d.GetVarsOffset(), p3d.GetLine(), filesel, new BasicSave());
+					p3d.GetVarsOffset(), p3d.GetLine(), filesel, new BasicSave(), lang);
 		} else if (p3d.GetFileType() == Speccy.BASIC_CODE) {
 			CodeRenderer CR = new CodeRenderer();
 			CR.RenderCode(MainPage, newdata, header, ThisEntry.GetFilename(), newdata.length, p3d.GetLoadAddress(),
-					filesel, CurrentPartition, new CodeSave());
+					filesel, CurrentPartition, new CodeSave(), lang);
 		} else if (p3d.GetFileType() == Speccy.BASIC_NUMARRAY) {
 			NumericArrayRenderer NR = new NumericArrayRenderer();
 			NR.RenderNumericArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.GetVarName(), filesel,
-					new ArraySave());
+					new ArraySave(), lang);
 		} else { // Char array
 			CharArrayRenderer CR = new CharArrayRenderer();
 			CR.RenderCharArray(MainPage, newdata, header, ThisEntry.GetFilename(), p3d.GetVarName(), filesel,
-					new ArraySave());
+					new ArraySave(), lang);
 		}
 	}
 
@@ -236,7 +237,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 			CPMDirectoryEntry direntry = (CPMDirectoryEntry) ThisEntry;
 			Plus3DosFileHeader p3d = direntry.GetPlus3DosHeader();
 			if (p3d != null && p3d.IsPlus3DosFile()) {
-				System.out.print("Load address: " + p3d.GetLoadAddress() + " -> ");
+				System.out.print(lang.Msg(Languages.MSG_CODELOADADD) + ": " + p3d.GetLoadAddress() + " -> ");
 				p3d.SetLoadAddress(Value);
 				System.out.println(p3d.GetLoadAddress());
 				PLUS3DOSPartition p3dPart = (PLUS3DOSPartition) CurrentPartition;
@@ -250,7 +251,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 					e.printStackTrace();
 				}
 			} else {
-				System.err.println("Update ignored, No +3DOS Basic header to update.");
+				System.err.println(lang.Msg(Languages.MSG_UPDATEIGNORED));
 			}
 			return false;
 		}
@@ -266,11 +267,11 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 			Plus3DosFileHeader p3d = direntry.GetPlus3DosHeader();
 			if (p3d != null && p3d.IsPlus3DosFile()) {
 				if (valtype == 0) {
-					System.out.print("Start Line: " + p3d.GetLine() + " -> ");
+					System.out.print(lang.Msg(Languages.MSG_STARTLINE) + ": " + p3d.GetLine() + " -> ");
 					p3d.SetLine(Value);
 					System.out.println(p3d.GetLine());
 				} else {
-					System.out.print("Vars Offset: " + p3d.GetVarsOffset() + " -> ");
+					System.out.print(lang.Msg(Languages.MSG_VARSTART) + ": " + p3d.GetVarsOffset() + " -> ");
 					p3d.SetVarsOffset(Value);
 					System.out.println(p3d.GetVarsOffset());
 				}
@@ -285,7 +286,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 					e.printStackTrace();
 				}
 			} else {
-				System.err.println("Update ignored, No +3DOS Basic header to update.");
+				System.err.println(lang.Msg(Languages.MSG_UPDATEIGNORED));
 			}
 			return false;
 		}
@@ -300,7 +301,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 			CPMDirectoryEntry direntry = (CPMDirectoryEntry) ThisEntry;
 			Plus3DosFileHeader p3d = direntry.GetPlus3DosHeader();
 			if (p3d != null && p3d.IsPlus3DosFile()) {
-				System.out.print("Array name: " + p3d.GetVarName() + " -> ");
+				System.out.print(lang.Msg(Languages.MSG_ARRAYNAME) + ": " + p3d.GetVarName() + " -> ");
 				p3d.SetVarName(sValue);
 				System.out.println(p3d.GetVarName());
 				PLUS3DOSPartition p3dPart = (PLUS3DOSPartition) CurrentPartition;
@@ -314,7 +315,7 @@ public class Plus3DosFileEditDialog extends EditFileDialog {
 					e.printStackTrace();
 				}
 			} else {
-				System.err.println("Update ignored, No +3DOS Basic header to update.");
+				System.err.println(lang.Msg(Languages.MSG_UPDATEIGNORED));
 			}
 			return false;
 		}

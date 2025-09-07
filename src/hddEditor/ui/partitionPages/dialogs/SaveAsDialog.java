@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 
 public class SaveAsDialog {
 	//Form components
@@ -37,14 +38,17 @@ public class SaveAsDialog {
 	
 	private String defaultFilename;
 	
+	private Languages lang;
+	
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public SaveAsDialog(Display display, FileSelectDialog filesel) {
+	public SaveAsDialog(Display display, FileSelectDialog filesel,Languages lang) {
 		this.display = display;
 		this.filesel = filesel;
+		this.lang = lang;
 	}
 	
 	/**
@@ -87,7 +91,7 @@ public class SaveAsDialog {
 
 		
 		lbl = new Label(shell,SWT.NONE);
-		lbl.setText("Filename:");
+		lbl.setText(lang.Msg(Languages.MSG_FILENAME) + ":");
 		lbl.setFont(boldFont);
 		
 		FileNameEdit = new Text(shell,SWT.BORDER);
@@ -99,7 +103,7 @@ public class SaveAsDialog {
 		FileNameEdit.setSize(200, FileNameEdit.getSize().y);
 		
 		Button Selbtn = new Button(shell,SWT.NONE);
-		Selbtn.setText("Select");
+		Selbtn.setText(lang.Msg(Languages.MSG_SELECT) );
 		Selbtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -119,7 +123,7 @@ public class SaveAsDialog {
 		
 		
 		lbl = new Label(shell,SWT.NONE);
-		lbl.setText("Range start:");
+		lbl.setText(lang.Msg(Languages.MSG_RANGESTART) + ":" );
 		lbl.setFont(boldFont);
 		
 		startEdit = new Text(shell,SWT.BORDER);
@@ -130,7 +134,7 @@ public class SaveAsDialog {
 		startEdit.setLayoutData(gd);
 		
 		lbl = new Label(shell,SWT.NONE);
-		lbl.setText("Length:");
+		lbl.setText(lang.Msg(Languages.MSG_LENGTH) + ":" );
 
 		lengthEdit = new Text(shell,SWT.BORDER);
 		lengthEdit.setText("00000000000000000000000000000000");
@@ -145,7 +149,7 @@ public class SaveAsDialog {
 		lbl.setText("");
 		
 		Button Cancelbtn = new Button(shell,SWT.NONE);
-		Cancelbtn.setText("Cancel");
+		Cancelbtn.setText(lang.Msg(Languages.MSG_CANCEL));
 		Cancelbtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -164,7 +168,7 @@ public class SaveAsDialog {
 		Cancelbtn.setLayoutData(gd);
 		
 		Button OKbtn = new Button(shell,SWT.NONE);
-		OKbtn.setText("Save");
+		OKbtn.setText(lang.Msg(Languages.MSG_SAVE));
 		OKbtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -200,7 +204,7 @@ public class SaveAsDialog {
 	 * Select the file to save as
 	 */
 	public void SelectFile() {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES,"Save file as", new String[] {"*"}, defaultFilename);
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES,lang.Msg(Languages.MSG_SAVEFILEAS), new String[] {"*"}, defaultFilename);
 		if (Selected != null) {
 			FileNameEdit.setText(Selected.getAbsolutePath());
 		}
@@ -230,15 +234,15 @@ public class SaveAsDialog {
 		} catch (FileNotFoundException e) {
 			MessageBox dialog =
 				    new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("Directory not found!");
+				dialog.setText(lang.Msg(Languages.MSG_ERRSAVING));
+				dialog.setMessage(lang.Msg(Languages.MSG_DIRNOTFOUND));
 				dialog.open();
 			e.printStackTrace();
 		} catch (IOException e) {
 			MessageBox dialog =
 				    new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("Cannot write to file! "+e.getMessage());
+				dialog.setText(lang.Msg(Languages.MSG_ERRSAVING));
+				dialog.setMessage(lang.Msg(Languages.MSG_IOERROR)+" "+e.getMessage());
 				dialog.open();
 			e.printStackTrace();
 		} 	

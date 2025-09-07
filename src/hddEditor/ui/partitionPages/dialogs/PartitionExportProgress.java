@@ -14,6 +14,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 
+import hddEditor.libs.Languages;
+
 public class PartitionExportProgress {
 	//Form details
 	private Display display = null;
@@ -25,6 +27,9 @@ public class PartitionExportProgress {
 
 	//result
 	private boolean cancelled = true;
+	
+	private Languages lang;
+	
 	
 	/**
 	 * Check if the form has been cancelled 
@@ -39,8 +44,10 @@ public class PartitionExportProgress {
 	 * 
 	 * @param display
 	 */
-	public PartitionExportProgress(Display display) {
+	public PartitionExportProgress(Display display, Languages lang) 
+	{
 		this.display = display;
+		this.lang = lang;
 	}
 
 	/**
@@ -133,7 +140,7 @@ public class PartitionExportProgress {
 		new Label(shell, SWT.NONE);
 
 		Button CancelBtn = new Button(shell, SWT.BORDER);
-		CancelBtn.setText("Cancel");
+		CancelBtn.setText(lang.Msg(Languages.MSG_ERRREADNGFILE));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;

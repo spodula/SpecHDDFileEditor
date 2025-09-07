@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.partitions.IDEDosPartition;
 
@@ -42,15 +43,18 @@ public class EditFileDialog {
 
 	protected IDEDosPartition CurrentPartition;
 
+	protected Languages lang;
+	
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public EditFileDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition) {
+	public EditFileDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition, Languages lang) {
 		this.display = display;
 		this.filesel = filesel;
 		this.CurrentPartition = CurrentPartition;
+		this.lang = lang;
 	}
 
 	/**
@@ -100,7 +104,7 @@ public class EditFileDialog {
 	protected void SetModified(boolean Modified) {
 		String s = Title;
 		if (Modified) {
-			s = s + " (Modified)";
+			s = s + " ("+lang.Msg(Languages.MSG_MODIFIED)+ ")";
 		}
 		shell.setText(s);
 	}

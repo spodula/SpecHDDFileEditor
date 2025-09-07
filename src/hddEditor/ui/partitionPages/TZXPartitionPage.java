@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
@@ -58,8 +59,8 @@ public class TZXPartitionPage extends GenericPage {
 	 * @param parent
 	 * @param partition
 	 */
-	public TZXPartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
-		super(root, parent, partition, filesel);
+	public TZXPartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel, Languages lang) {
+		super(root, parent, partition, filesel,lang);
 		AddComponents();
 	}
 
@@ -70,8 +71,8 @@ public class TZXPartitionPage extends GenericPage {
 		if (ParentComp != null) {
 			RemoveComponents();
 			TZXPartition tzx = (TZXPartition) partition;
-			label("TZX file", 4);
-			label("Blocks: " + tzx.DirectoryEntries.length, 1);
+			label(lang.Msg(Languages.FILET_TZXFILE) , 4);
+			label(lang.Msg(Languages.MSG_DATABLOCKS)+": " + tzx.DirectoryEntries.length, 1);
 			label("", 1);
 			label("", 1);
 
@@ -89,11 +90,11 @@ public class TZXPartitionPage extends GenericPage {
 			TableColumn tc3 = new TableColumn(DirectoryListing, SWT.LEFT);
 			TableColumn tc4 = new TableColumn(DirectoryListing, SWT.LEFT);
 			TableColumn tc5 = new TableColumn(DirectoryListing, SWT.FILL);
-			tc1.setText("Name");
-			tc2.setText("Blocks");
-			tc3.setText("Type");
-			tc4.setText("Length");
-			tc5.setText("Notes");
+			tc1.setText(lang.Msg(Languages.MSG_FILENAME));
+			tc2.setText(lang.Msg(Languages.MSG_BLOCKS));
+			tc3.setText(lang.Msg(Languages.MSG_FILETYPE));
+			tc4.setText(lang.Msg(Languages.MSG_LENGTH));
+			tc5.setText(lang.Msg(Languages.MSG_NOTES));
 			tc1.setWidth(150);
 			tc2.setWidth(60);
 			tc3.setWidth(150);
@@ -157,7 +158,6 @@ public class TZXPartitionPage extends GenericPage {
 								int exporttype = RootPage.dragindex;
 
 								FileEntry entry = (FileEntry) item.getData();
-								System.out.println("Exporttype:" + exporttype);
 								if (exporttype == HDDEditor.DRAG_TYPE) {
 									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
 									int actiontype = GeneralUtils.EXPORT_TYPE_HEX;
@@ -172,7 +172,6 @@ public class TZXPartitionPage extends GenericPage {
 										actiontype = GeneralUtils.EXPORT_TYPE_CSV;
 										break;
 									case (Speccy.BASIC_CODE):
-										System.out.println("CODE: " + entry.GetFileSize());
 										if (entry.GetFileSize() == 0x1b00) {
 											actiontype = GeneralUtils.EXPORT_TYPE_PNG;
 										} else {
@@ -238,7 +237,7 @@ public class TZXPartitionPage extends GenericPage {
 			gd.widthHint = 200;
 
 			Button Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("File Properties");
+			Btn.setText(lang.Msg(Languages.MSG_FILEPROPERTIES));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -253,7 +252,7 @@ public class TZXPartitionPage extends GenericPage {
 			});
 
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Delete file");
+			Btn.setText(lang.Msg(Languages.MSG_DELETEFILE));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -268,7 +267,7 @@ public class TZXPartitionPage extends GenericPage {
 			});
 
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Add File(s)");
+			Btn.setText(lang.Msg(Languages.MSG_ADDGFILES));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -283,7 +282,7 @@ public class TZXPartitionPage extends GenericPage {
 			});
 
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Extract all Files");
+			Btn.setText(lang.Msg(Languages.MSG_EXTRACTALLFILES));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -297,7 +296,7 @@ public class TZXPartitionPage extends GenericPage {
 				}
 			});
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Rename file");
+			Btn.setText(lang.Msg(Languages.MSG_RENAMEFILE));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -312,7 +311,7 @@ public class TZXPartitionPage extends GenericPage {
 			});
 			ParentComp.pack();
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Move file up");
+			Btn.setText(lang.Msg(Languages.MSG_MOVEFUP));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -326,7 +325,7 @@ public class TZXPartitionPage extends GenericPage {
 				}
 			});
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Move file Down");
+			Btn.setText(lang.Msg(Languages.MSG_MOVEFDOWN));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -355,14 +354,14 @@ public class TZXPartitionPage extends GenericPage {
 				URI uri = new URI(file);
 				file = uri.getPath();
 			} catch (URISyntaxException e) {
-				System.out.println("Cannot parse " + file);
+				System.out.println(String.format(lang.Msg(Languages.MSG_CANNOTPARSE), file));
 			}
 			System.out.println(file);
 			fFiles[i++] = new File(file);
 		}
 
-		DropFilesToTapePartition DropFilesDialog = new DropFilesToTapePartition(ParentComp.getDisplay());
-		DropFilesDialog.Show("Add files", partition, fFiles);
+		DropFilesToTapePartition DropFilesDialog = new DropFilesToTapePartition(ParentComp.getDisplay(), lang);
+		DropFilesDialog.Show(lang.Msg(Languages.MSG_ADDGFILES), partition, fFiles);
 		DropFilesDialog = null;
 		if (!ParentComp.isDisposed()) {
 			AddComponents();
@@ -428,13 +427,13 @@ public class TZXPartitionPage extends GenericPage {
 			TableItem itms[] = DirectoryListing.getSelection();
 			if ((itms != null) && (itms.length != 0)) {
 				TzxDirectoryEntry entry = (TzxDirectoryEntry) itms[0].getData();
-				SpecFileEditDialog = new TzxFileEditDialog(ParentComp.getDisplay(), fsd, partition);
+				SpecFileEditDialog = new TzxFileEditDialog(ParentComp.getDisplay(), fsd, partition, lang);
 
 				byte data[];
 				try {
 					data = entry.GetFileRawData();
 
-					if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
+					if (SpecFileEditDialog.Show(data, String.format(lang.Msg(Languages.MSG_EDITINGX),entry.GetFilename()), entry)) {
 						TZXFile tap = (TZXFile) partition.CurrentDisk;
 						if (entry.HeaderBlock != null) {
 							byte headerData[] = entry.HeaderBlock.data;
@@ -458,7 +457,7 @@ public class TZXPartitionPage extends GenericPage {
 							if (sbd != null && sbd.IsValidFileType()) {
 								TZXBlock header = entry.HeaderBlock;
 								if (header != null) {
-									System.out.print("File type: " + sbd.BasicType + "("
+									System.out.print(lang.Msg(Languages.MSG_FILETYPE)+ ": " + sbd.BasicType + "("
 											+ Speccy.SpecFileTypeToString(sbd.BasicType) + ") -> ");
 									sbd.BasicType = SpecFileEditDialog.NewFileType;
 
@@ -476,10 +475,10 @@ public class TZXPartitionPage extends GenericPage {
 										e.printStackTrace();
 									}
 								} else {
-									System.err.println("Update ignored, No Basic header to update.");
+									System.err.println(lang.Msg(Languages.MSG_UPDATEIGNORED));
 								}
 							} else {
-								System.err.println("Update ignored, Basic header to update.");
+								System.err.println(lang.Msg(Languages.MSG_UPDATEIGNORED));
 							}
 						}
 					}
@@ -523,7 +522,7 @@ public class TZXPartitionPage extends GenericPage {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
 			TzxDirectoryEntry entry = (TzxDirectoryEntry) itms[0].getData();
-			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay());
+			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay(), lang);
 			if (RenFileDialog.Show(entry.GetFilename())) {
 				try {
 					TZXPartition smp = (TZXPartition) partition;
@@ -533,8 +532,9 @@ public class TZXPartitionPage extends GenericPage {
 					UpdateDirectoryEntryList();
 				} catch (IOException e) {
 					MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
-					messageBox.setMessage("Error Renaming " + entry.GetFilename() + ": " + e.getMessage());
-					messageBox.setText("Error Renaming " + entry.GetFilename() + ": " + e.getMessage());
+					String s = String.format(lang.Msg(Languages.MSG_ERRORRENAME), entry.GetFilename()) + ": " + e.getMessage();
+					messageBox.setMessage(s);
+					messageBox.setText(s);
 					messageBox.open();
 					e.printStackTrace();
 				}
@@ -548,7 +548,7 @@ public class TZXPartitionPage extends GenericPage {
 	 * 
 	 */
 	protected void DoExtractAllFiles() {
-		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay());
+		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay(), lang);
 		try {
 			ExportAllPartsForm.ShowSinglePartition(partition);
 		} finally {
@@ -564,14 +564,15 @@ public class TZXPartitionPage extends GenericPage {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
 			TzxDirectoryEntry entry = (TzxDirectoryEntry) itms[0].getData();
+			String filename = entry.GetFilename();
 			try {
-				String filename = entry.GetFilename();
 				if (itms.length > 1) {
-					filename = "the selected files";
+					filename = lang.Msg(Languages.MSG_THESELECTEDFILES);
 				}
 				MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
-				messageBox.setMessage("Are you sure you want to delete " + filename + " ?");
-				messageBox.setText("Are you sure you want to delete " + filename + " ?");
+				String s = String.format(lang.Msg(Languages.MSG_AREYOUSUREDEL), filename);
+				messageBox.setMessage(s);
+				messageBox.setText(s);
 
 				if (messageBox.open() == SWT.OK) {
 					TZXPartition TZX = (TZXPartition) partition;
@@ -582,7 +583,8 @@ public class TZXPartitionPage extends GenericPage {
 					AddComponents();
 				}
 			} catch (IOException e) {
-				ErrorBox("Error deleting file: " + e.getMessage());
+				String s = String.format(lang.Msg(Languages.MSG_ERRDELFILE),filename);
+				ErrorBox(s + ": "+ e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -592,8 +594,8 @@ public class TZXPartitionPage extends GenericPage {
 	 * Show the Add files screen.
 	 */
 	protected void DoAddFiles() {
-		AddFilesDialog = new AddFilesToTZXPartition(ParentComp.getDisplay(), fsd);
-		AddFilesDialog.Show("Add files", (TZXPartition) partition);
+		AddFilesDialog = new AddFilesToTZXPartition(ParentComp.getDisplay(), fsd, lang);
+		AddFilesDialog.Show(lang.Msg(Languages.MSG_ADDGFILES), (TZXPartition) partition);
 		AddFilesDialog = null;
 		UpdateDirectoryEntryList();
 		if (!ParentComp.isDisposed()) {

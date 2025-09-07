@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.ui.partitionPages.dialogs.edit.callbacks.GenericSaveEvent;
 
 public class BasicRenderer extends FileRenderer {
@@ -49,17 +50,17 @@ public class BasicRenderer extends FileRenderer {
 	 * @param Startline
 	 */
 	public void RenderBasic(Composite mainPage, byte data[], byte header[], String Filename, int filelength,
-			int VariablesOffset, int Startline, FileSelectDialog filesel, GenericSaveEvent saveevent) {
-		super.Render(mainPage, data, Filename, filesel);
+			int VariablesOffset, int Startline, FileSelectDialog filesel, GenericSaveEvent saveevent, Languages lang) {
+		super.Render(mainPage, data, Filename, filesel, lang);
 
 		Label lbl = new Label(this.MainPage, SWT.NONE);
-		lbl.setText("BASIC program: ");
+		lbl.setText(lang.Msg(Languages.MSG_BASICPROGRAM)+": ");
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 4;
 		lbl.setLayoutData(gd);
 
 		lbl = new Label(this.MainPage, SWT.NONE);
-		lbl.setText("Start line: ");
+		lbl.setText(lang.Msg(Languages.MSG_STARTLINE) + ": ");
 
 		StartLineEdit = new Text(this.MainPage, SWT.NONE);
 		StartLineEdit.setText("");
@@ -71,7 +72,7 @@ public class BasicRenderer extends FileRenderer {
 		DefaultBackgroundColor = lbl.getBackground();
 		if (saveevent != null) {
 			btn = new Button(mainPage, SWT.NONE);
-			btn.setText("Update Start line");
+			btn.setText(lang.Msg(Languages.MSG_UPDATESTARTLINE));
 			btn.setLayoutData(gd);
 			btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -104,7 +105,7 @@ public class BasicRenderer extends FileRenderer {
 		lbl = new Label(mainPage, 0);
 
 		lbl = new Label(this.MainPage, SWT.NONE);
-		lbl.setText("Variable start: ");
+		lbl.setText(lang.Msg(Languages.MSG_VARSTART) + ": ");
 
 		VariableStartEdit = new Text(this.MainPage, SWT.NONE);
 		VariableStartEdit.setText("");
@@ -114,7 +115,7 @@ public class BasicRenderer extends FileRenderer {
 
 		if (saveevent != null) {
 			btn = new Button(mainPage, SWT.NONE);
-			btn.setText("Update Vaiable Start");
+			btn.setText(lang.Msg(Languages.MSG_UPDATEVARSTART));
 			btn.setLayoutData(gd);
 			btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -150,7 +151,7 @@ public class BasicRenderer extends FileRenderer {
 		gd.widthHint = 200;
 
 		btn = new Button(this.MainPage, SWT.NONE);
-		btn.setText("Extract file as text");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASTEXT));
 		btn.setLayoutData(gd);
 		Composite mainpage = this.MainPage;
 		btn.addSelectionListener(new SelectionListener() {
@@ -166,7 +167,7 @@ public class BasicRenderer extends FileRenderer {
 		});
 
 		btn = new Button(this.MainPage, SWT.NONE);
-		btn.setText("Extract file as Binary");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASBIN));
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -183,7 +184,7 @@ public class BasicRenderer extends FileRenderer {
 
 		if (header != null) {
 			btn = new Button(this.MainPage, SWT.NONE);
-			btn.setText("Extract file as Binary Inc Header");
+			btn.setText(lang.Msg(Languages.MSG_EXTRACTASBINHEADER));
 			btn.setLayoutData(gd);
 			btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -202,7 +203,7 @@ public class BasicRenderer extends FileRenderer {
 		}
 
 		btn = new Button(this.MainPage, SWT.NONE);
-		btn.setText("Extract file as Hex");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASHEX));
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -220,7 +221,7 @@ public class BasicRenderer extends FileRenderer {
 		VariableStartEdit.setText(String.valueOf(VariablesOffset));
 
 		hddEditor.ui.partitionPages.FileRenderers.RawRender.BasicRenderer br = new hddEditor.ui.partitionPages.FileRenderers.RawRender.BasicRenderer();
-		br.AddBasicFile(mainpage, data, filelength, VariablesOffset, false);
+		br.AddBasicFile(mainpage, data, filelength, VariablesOffset, false, lang);
 
 		Listing = br.Listing;
 		Variables = br.Variables;
@@ -235,7 +236,8 @@ public class BasicRenderer extends FileRenderer {
 	 */
 	protected void DoSaveFileAsText(Composite mainPage) {
 		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES,
-				"Save " + filename + " as text file", new String[] { "*.txt" }, filename);
+				String.format(lang.Msg(Languages.MSG_SAVEXASTEXT), filename) 
+				, new String[] { "*.txt" }, filename);
 
 		if (Selected != null) {
 			PrintWriter file;
@@ -254,15 +256,15 @@ public class BasicRenderer extends FileRenderer {
 				}
 			} catch (FileNotFoundException e) {
 				MessageBox dialog = new MessageBox(mainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("Directory not found!");
+				dialog.setText(lang.Msg(Languages.MSG_ERRSAVING));
+				dialog.setMessage(lang.Msg(Languages.MSG_DIRNOTFOUND));
 				dialog.open();
 
 				e.printStackTrace();
 			} catch (UnsupportedEncodingException e) {
 				MessageBox dialog = new MessageBox(mainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("Internal error, cannot write UTF-8?");
+				dialog.setText(lang.Msg(Languages.MSG_ERRSAVING));
+				dialog.setMessage(lang.Msg(Languages.MSG_ERRENC));
 				dialog.open();
 				e.printStackTrace();
 			}

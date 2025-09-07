@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.LINEAR.TAPFile;
@@ -42,8 +43,8 @@ public class TapFileEditDialog extends EditFileDialog {
 	public int NewFileType;
 	public boolean FileTypeHasChanged;
 
-	public TapFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition) {
-		super(display, filesel, CurrentPartition);
+	public TapFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition, Languages lang) {
+		super(display, filesel, CurrentPartition, lang);
 		FileTypeHasChanged = false;
 	}
 
@@ -61,12 +62,12 @@ public class TapFileEditDialog extends EditFileDialog {
 		gridLayout.marginRight = 20;
 		shell.setLayout(gridLayout);
 
-		Label lbl = label(ThisEntry.GetSpeccyBasicDetails().BasicTypeString() + " file", 4);
+		Label lbl = label(ThisEntry.GetSpeccyBasicDetails().BasicTypeString() + " " + lang.Msg(Languages.MSG_FILE), 4);
 		FontData fontData = lbl.getFont().getFontData()[0];
 		Font boldFont = new Font(display, new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 		lbl.setFont(boldFont);
 
-		label(String.format("Length : %d bytes (%X)", ThisEntry.GetRawFileSize(), ThisEntry.GetRawFileSize()), 2);
+		label(String.format(lang.Msg(Languages.MSG_LENXBYTESX), ThisEntry.GetRawFileSize(), ThisEntry.GetRawFileSize()), 2);
 
 		// Only display file type change for Tap files with headers.
 		TapDirectoryEntry tde = (TapDirectoryEntry) ThisEntry;
@@ -79,7 +80,7 @@ public class TapFileEditDialog extends EditFileDialog {
 			filetype.setLayoutData(gd);
 
 			Button SetFileType = new Button(shell, SWT.NONE);
-			SetFileType.setText("Update file type");
+			SetFileType.setText(lang.Msg(Languages.MSG_UPDATEFILETYPE));
 			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.horizontalSpan = 1;
 			SetFileType.setLayoutData(gd);
@@ -153,25 +154,25 @@ public class TapFileEditDialog extends EditFileDialog {
 		case Speccy.BASIC_BASIC:
 			BasicRenderer BR = new BasicRenderer();
 			BR.RenderBasic(MainPage, data, null, tde.GetFilename(), data.length, sbd.VarStart, sbd.LineStart, filesel,
-					new TapBasicSave());
+					new TapBasicSave(), lang);
 			break;
 		case Speccy.BASIC_CODE:
 			CR = new CodeRenderer();
 			CR.RenderCode(MainPage, data, null, tde.GetFilename(), data.length, sbd.LoadAddress, filesel,
-					CurrentPartition, new TapCodeSave());
+					CurrentPartition, new TapCodeSave(), lang);
 			break;
 		case Speccy.BASIC_NUMARRAY:
 			NumericArrayRenderer NR = new NumericArrayRenderer();
 			NR.RenderNumericArray(MainPage, data, null, tde.GetFilename(), sbd.VarName + "", filesel,
-					new TapArraySave());
+					new TapArraySave(), lang);
 			break;
 		case Speccy.BASIC_CHRARRAY:
 			CharArrayRenderer CAR = new CharArrayRenderer();
-			CAR.RenderCharArray(MainPage, data, null, tde.GetFilename(), sbd.VarName + "", filesel, new TapArraySave());
+			CAR.RenderCharArray(MainPage, data, null, tde.GetFilename(), sbd.VarName + "", filesel, new TapArraySave(), lang);
 		default:
 			CR = new CodeRenderer();
 			CR.RenderCode(MainPage, data, null, tde.GetFilename(), data.length, 0x0000, filesel, CurrentPartition,
-					null);
+					null, lang);
 		}
 	}
 
@@ -185,7 +186,7 @@ public class TapFileEditDialog extends EditFileDialog {
 			TAPBlock header = direntry.HeaderBlock;
 			if (header != null) {
 				SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
-				System.out.print("Load address: " + sbd.LoadAddress + " -> ");
+				System.out.print(lang.Msg(Languages.MSG_CODELOADADD) + sbd.LoadAddress + " -> ");
 				sbd.LoadAddress = Value;
 
 				TAPPartition TapPart = (TAPPartition) CurrentPartition;
@@ -200,7 +201,7 @@ public class TapFileEditDialog extends EditFileDialog {
 					e.printStackTrace();
 				}
 			} else {
-				System.err.println("Update ignored, No Basic header to update.");
+				System.err.println(lang.Msg(Languages.MSG_UPDATEIGNORED));
 			}
 			return false;
 		}
@@ -217,11 +218,11 @@ public class TapFileEditDialog extends EditFileDialog {
 			if (header != null) {
 				SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
 				if (valtype == 0) {
-					System.out.print("Start Line: " + sbd.LineStart + " -> ");
+					System.out.print(lang.Msg(Languages.MSG_STARTLINE)+ ": " + sbd.LineStart + " -> ");
 					sbd.LineStart = Value;
 					System.out.println(sbd.LineStart);
 				} else {
-					System.out.print("Vars Offset: " + sbd.VarStart + " -> ");
+					System.out.print(lang.Msg(Languages.MSG_VARSTART) + ": " + sbd.VarStart + " -> ");
 					sbd.VarStart = Value;
 					System.out.println(sbd.VarStart);
 				}
@@ -238,7 +239,7 @@ public class TapFileEditDialog extends EditFileDialog {
 					e.printStackTrace();
 				}
 			} else {
-				System.err.println("Update ignored, No Basic header to update.");
+				System.err.println(lang.Msg(Languages.MSG_UPDATEIGNORED));
 			}
 			return false;
 		}
@@ -254,7 +255,7 @@ public class TapFileEditDialog extends EditFileDialog {
 			TAPBlock header = direntry.HeaderBlock;
 			if (header != null) {
 				SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
-				System.out.print("Array name: " + sbd.VarName + " -> ");
+				System.out.print(lang.Msg(Languages.MSG_ARRAYNAME) + ": " + sbd.VarName + " -> ");
 				sbd.VarName = (sValue + "A").charAt(0);
 				header.SetHeader(sbd);
 				System.out.println(direntry.GetSpeccyBasicDetails().VarName);
@@ -269,7 +270,7 @@ public class TapFileEditDialog extends EditFileDialog {
 					e.printStackTrace();
 				}
 			} else {
-				System.err.println("Update ignored, No Basic header to update.");
+				System.err.println(lang.Msg(Languages.MSG_UPDATEIGNORED));
 			}
 			return false;
 		}

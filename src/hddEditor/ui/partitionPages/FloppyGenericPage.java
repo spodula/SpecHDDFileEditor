@@ -15,6 +15,7 @@ import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.disks.FDD.FloppyDisk;
 import hddEditor.libs.disks.FDD.Sector;
 import hddEditor.libs.disks.FDD.TrackInfo;
@@ -25,8 +26,8 @@ public class FloppyGenericPage extends GenericPage {
 	Combo TrackCombo = null;
 	Composite TrackComposite = null;
 
-	public FloppyGenericPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
-		super(root, parent, partition, filesel);
+	public FloppyGenericPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel, Languages lang) {
+		super(root, parent, partition, filesel,lang);
 		AddComponents();
 	}
 
@@ -36,7 +37,7 @@ public class FloppyGenericPage extends GenericPage {
 			super.AddBasicDetails();
 			label("", 4);
 			FloppyDisk fdd = (FloppyDisk) partition.CurrentDisk;
-			Label lbl = label("Track:", 1);
+			Label lbl = label(lang.Msg(Languages.MSG_TRACK)+ ":", 1);
 			FontData fontData = lbl.getFont().getFontData()[0];
 			Font font = new Font(ParentComp.getDisplay(),
 					new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
@@ -44,7 +45,7 @@ public class FloppyGenericPage extends GenericPage {
 
 			String tracknames[] = new String[fdd.diskTracks.length];
 			for (int i = 0; i < fdd.diskTracks.length; i++) {
-				tracknames[i] = "Track #" + fdd.diskTracks[i].tracknum + " Side #" + fdd.diskTracks[i].side;
+				tracknames[i] = lang.Msg(Languages.MSG_TRACK)+" #" + fdd.diskTracks[i].tracknum + " "+lang.Msg(Languages.MSG_SIDE)+" #" + fdd.diskTracks[i].side;
 			}
 			TrackCombo = combo(tracknames, tracknames[0]);
 
@@ -102,18 +103,18 @@ public class FloppyGenericPage extends GenericPage {
 			TrackComposite.setLayout(gridLayout);
 			
 			ParentComp = TrackComposite;
-			label("Track: " + SelectedTrack.tracknum, 1);
-			label("Side: " + SelectedTrack.side, 1);
-			label("Sector range: " + Integer.toHexString(SelectedTrack.minsectorID) + "-"
+			label(lang.Msg(Languages.MSG_TRACK)+": " + SelectedTrack.tracknum, 1);
+			label(lang.Msg(Languages.MSG_SIDE)+": " + SelectedTrack.side, 1);
+			label(lang.Msg(Languages.MSG_SECTORR)+": " + Integer.toHexString(SelectedTrack.minsectorID) + "-"
 					+ Integer.toHexString(SelectedTrack.maxsectorID), 1);
-			label("Filler byte: " + SelectedTrack.fillerByte, 1);
+			label(lang.Msg(Languages.MSG_FILLERB)+"Filler byte: " + SelectedTrack.fillerByte, 1);
 			
-			label("Gap3Len: " + SelectedTrack.gap3len, 1);
-			label("Data rate: " + SelectedTrack.datarate, 1);
-			label("Number of sectors: " + SelectedTrack.numsectors, 1);
-			label("Recording mode: " + SelectedTrack.recordingmode, 1);
+			label(lang.Msg(Languages.MSG_GAP3)+": " + SelectedTrack.gap3len, 1);
+			label(lang.Msg(Languages.MSG_DATARATE)+": " + SelectedTrack.datarate, 1);
+			label(lang.Msg(Languages.MSG_NUMSECTORS)+": " + SelectedTrack.numsectors, 1);
+			label(lang.Msg(Languages.MSG_RECMODE)+": " + SelectedTrack.recordingmode, 1);
 			
-			label("Sector size: " + SelectedTrack.sectorsz, 1);
+			label(lang.Msg(Languages.MSG_SECTSZ)+": " + SelectedTrack.sectorsz, 1);
 			label("",3);
 		    // Create a multiple-line text field
 		    Text t = new Text(TrackComposite, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
@@ -125,25 +126,18 @@ public class FloppyGenericPage extends GenericPage {
 		    
 		    String s = "";
 		    for(Sector sect: SelectedTrack.Sectors) {
-		    	s = s + "Sector "+Integer.toHexString(sect.sectorID)+" ("+sect.sectorID+") \n";
+		    	s = s + lang.Msg(Languages.MSG_SECTOR)+" "+Integer.toHexString(sect.sectorID)+" ("+sect.sectorID+") "+System.lineSeparator();
 		    	s = s + "FDC Sr1: "+sect.FDCsr1;
 		    	s = s + "  FDC Sr2: "+sect.FDCsr2;
-		    	s = s + "  Actual size: "+sect.ActualSize;
-		    	s = s + "  FDC size: "+sect.Sectorsz+"\n";
-		    	s = s + "Data:\n";
+		    	s = s + "  "+lang.Msg(Languages.MSG_ACTSIZE)+": "+sect.ActualSize;
+		    	s = s + "  FDC size: "+sect.Sectorsz+System.lineSeparator();
+		    	s = s + lang.Msg(Languages.MSG_SECTDATA)+":"+System.lineSeparator();
 		    	s = s + GeneralUtils.HexDump(sect.data,0, sect.data.length,0 );
-		    	s = s + "\n\n";
+		    	s = s + System.lineSeparator()+System.lineSeparator();
 		    }
-		    
 		    t.setText(s);
-			
-			
 		} finally {
 			ParentComp = MainComp;
 		}
-
-
-		
 	}
-
 }

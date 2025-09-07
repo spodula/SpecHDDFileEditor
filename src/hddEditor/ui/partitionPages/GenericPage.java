@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.ui.HDDEditor;
@@ -28,6 +29,8 @@ public class GenericPage {
 	protected HDDEditor RootPage = null;
 	
 	protected FileSelectDialog fsd = null;
+	
+	protected Languages lang;
 
 	/**
 	 * Generic constructor.
@@ -36,11 +39,12 @@ public class GenericPage {
 	 * @param parent    - Parent component to put stuff on.
 	 * @param partition - Partition.
 	 */
-	public GenericPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog fsd) {
+	public GenericPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog fsd, Languages lang) {
 		ParentComp = parent;
 		RootPage = root;
 		this.fsd = fsd;
 		this.partition = partition;
+		this.lang = lang;
 		AddBasicDetails();
 	}
 
@@ -137,11 +141,11 @@ public class GenericPage {
 			// Note, for most partition types, this would be editable.
 			// but for the system partition, this cannot be changed.
 			RemoveComponents();
-			label("Name: " + partition.GetName(), 1);
-			label("Type: " + PLUSIDEDOS.GetTypeAsString(partition.GetPartType()), 1);
-			label("Size (c/h): " + partition.GetStartCyl() + "/" + partition.GetStartHead() + " - "
+			label(lang.Msg(Languages.MSG_PARTNAME)+": " + partition.GetName(), 1);
+			label(lang.Msg(Languages.MSG_PARTTYPE)+": " + PLUSIDEDOS.GetTypeAsString(partition.GetPartType()), 1);
+			label(lang.Msg(Languages.MSG_SIZECH)+": " + partition.GetStartCyl() + "/" + partition.GetStartHead() + " - "
 					+ partition.GetEndCyl() + "/" + partition.GetEndHead(), 1);
-			label("Last sector: " + partition.GetEndSector(), 1);
+			label(lang.Msg(Languages.MSG_LASTSECT)+": " + partition.GetEndSector(), 1);
 			ParentComp.pack();
 		}
 	}

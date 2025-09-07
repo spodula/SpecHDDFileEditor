@@ -1,4 +1,6 @@
 package hddEditor.ui;
+//TODO: FDI format
+//TODO: Make so not so reliant on content of strings.
 
 import java.io.File;
 
@@ -15,6 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.disks.FDD.AMSDiskFile;
 import hddEditor.libs.disks.FDD.SCLDiskFile;
 import hddEditor.libs.disks.FDD.TrDosDiskFile;
@@ -44,15 +47,18 @@ public class FileNewFDDForm {
 	// private boolean ModInProgress = false;
 
 	private FileSelectDialog fsd = null;
+	
+	private Languages lang;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public FileNewFDDForm(Display display, FileSelectDialog fsd) {
+	public FileNewFDDForm(Display display, FileSelectDialog fsd, Languages lang) {
 		this.display = display;
 		this.fsd = fsd;
+		this.lang = lang;
 	}
 
 	/**
@@ -80,7 +86,7 @@ public class FileNewFDDForm {
 		gridLayout.marginRight = 20;
 
 		shell.setLayout(gridLayout);
-		shell.setText("Create new Floppy/Tape file.");
+		shell.setText(lang.Msg(Languages.MENU_NEWFDD));
 
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
@@ -93,7 +99,7 @@ public class FileNewFDDForm {
 		Targetfile.setText("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
 		SelectTargetFileBtn = new Button(shell, SWT.BORDER);
-		SelectTargetFileBtn.setText("Select Target file");
+		SelectTargetFileBtn.setText(lang.Msg(Languages.MSG_SELTARGET));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -101,7 +107,7 @@ public class FileNewFDDForm {
 		SelectTargetFileBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				File f = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_DRIVE , "Select target file", new String[] { "*" },"newdisk.dsk");
+				File f = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_DRIVE , lang.Msg(Languages.MSG_SELTARGET), new String[] { "*" },"newdisk.dsk");
 				if (f != null) {
 					Targetfile.setText(f.getAbsolutePath());
 				}
@@ -114,10 +120,15 @@ public class FileNewFDDForm {
 		});
 
 		Label lbl = new Label(shell, SWT.NONE);
-		lbl.setText("Target file type:");
+		lbl.setText(lang.Msg(Languages.MSG_TARGETTYPE)+":");
 
 		TargetFileType = new Combo(shell, SWT.CHECK);
-		String entries[] = { "Amstrad +3 DSK file", "128K Microdrive cart", "TR-DOS file (TRD/SCL)","TAP file","TZX file" };
+		String entries[] = { 
+				lang.Msg(Languages.FILET_DSKFILE),
+				lang.Msg(Languages.FILET_MDRFILE),
+				lang.Msg(Languages.FILET_TRDFILE),
+				lang.Msg(Languages.FILET_TAPFILE),
+				lang.Msg(Languages.FILET_TZXFILE)};
 		TargetFileType.setItems(entries);
 		TargetFileType.setText(entries[0]);
 		TargetFileType.addSelectionListener(new SelectionListener() {
@@ -136,17 +147,17 @@ public class FileNewFDDForm {
 		new Label(shell, SWT.NONE);
 
 		lbl = new Label(shell, SWT.NONE);
-		lbl.setText("TR-DOS disk size (TRD):");
+		lbl.setText(lang.Msg(Languages.MSG_TRDDISKSIZE)+":");
 		TrDosDiskFormat = new Combo(shell, SWT.CHECK);
 		String trdEntries[] = { "40 Tracks, 1 head (160K)", "40 Tracks, 2 heads (320k)", "80 Tracks, 1 head (316k)",
-				"80 Tracks, 2 heads (632k )" };
+				"80 Tracks, 2 heads (632k)" };
 		TrDosDiskFormat.setItems(trdEntries);
 		TrDosDiskFormat.setText(trdEntries[0]);
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
 
 		lbl = new Label(shell, SWT.NONE);
-		lbl.setText("Disk/Cart label:");
+		lbl.setText(lang.Msg(Languages.MSG_DSKLABEL)+":");
 		DiskLabel = new Text(shell, SWT.BORDER);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		DiskLabel.setLayoutData(gd);
@@ -156,20 +167,20 @@ public class FileNewFDDForm {
 
 		new Label(shell, SWT.NONE);
 		AmstradExtendedCB = new Button(shell, SWT.CHECK);
-		AmstradExtendedCB.setText("Amstrad file: Extended");
+		AmstradExtendedCB.setText(lang.Msg(Languages.MSG_AMSEXTENDED));
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
 
 		new Label(shell, SWT.NONE);
 		trdCompressed = new Button(shell, SWT.CHECK);
-		trdCompressed.setText("TR-DOS: Compressed (SCL)");
+		trdCompressed.setText(lang.Msg(Languages.MSG_TRDSCL));
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
 
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
 		CreateBtn = new Button(shell, SWT.BORDER);
-		CreateBtn.setText("Create new");
+		CreateBtn.setText(lang.Msg(Languages.MSG_CREATENEW));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -190,7 +201,7 @@ public class FileNewFDDForm {
 		});
 
 		CloseBtn = new Button(shell, SWT.BORDER);
-		CloseBtn.setText("Close");
+		CloseBtn.setText(lang.Msg(Languages.MSG_CLOSE));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -209,7 +220,7 @@ public class FileNewFDDForm {
 
 		shell.pack();
 		Targetfile.setText("");
-		DiskLabel.setText("Untitled");
+		DiskLabel.setText(lang.Msg(Languages.MSG_UNTITLED));
 		SetButtonsEnabled();
 	}
 
@@ -313,7 +324,7 @@ public class FileNewFDDForm {
 			mdf.CreateBlankMicrodriveCart(new File(filename), Label);
 			result = true;
 		} catch (Exception E) {
-			System.out.println("Error creating cart:" + E.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_ERRCART)+":" + E.getMessage());
 			E.printStackTrace();
 		}
 
@@ -333,7 +344,7 @@ public class FileNewFDDForm {
 			tap.CreateEmptyTapeFile(new File(filename));
 			result = true;
 		} catch (Exception E) {
-			System.out.println("Error creating tape:" + E.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_ERRTAPE)+":" + E.getMessage());
 			E.printStackTrace();
 		}
 
@@ -353,7 +364,7 @@ public class FileNewFDDForm {
 			tzx.CreateEmptyTapeFile(new File(filename));
 			result = true;
 		} catch (Exception E) {
-			System.out.println("Error creating TZX tape:" + E.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_ERRTZX)+":" + E.getMessage());
 			E.printStackTrace();
 		}
 
@@ -375,7 +386,7 @@ public class FileNewFDDForm {
 			trd.CreateBlankTRDOSDisk(new File(filename), tracks, heads, Label);
 			result = true;
 		} catch (Exception E) {
-			System.out.println("Error creating Compressed TR-DOS disk:" + E.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_ERRTRD)+":" + E.getMessage());
 			E.printStackTrace();
 		}
 
@@ -396,7 +407,7 @@ public class FileNewFDDForm {
 			scl.CreateBlankSCLDisk(new File(filename));
 			result = true;
 		} catch (Exception E) {
-			System.out.println("Error creating Compressed TR-DOS disk:" + E.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_ERRSCL)+":" + E.getMessage());
 			E.printStackTrace();
 		}
 
@@ -418,7 +429,7 @@ public class FileNewFDDForm {
 //			System.out.println(ams);
 			result = true;
 		} catch (Exception E) {
-			System.out.println("Error creating Amstrad disk:" + E.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_ERRAMS)+":"  + E.getMessage());
 			E.printStackTrace();
 		}
 

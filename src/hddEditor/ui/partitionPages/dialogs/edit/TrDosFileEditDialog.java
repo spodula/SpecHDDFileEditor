@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.TrDosPartition;
@@ -37,8 +38,8 @@ public class TrDosFileEditDialog extends EditFileDialog {
 	 * 
 	 * @param display
 	 */
-	public TrDosFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition) {
-		super(display, filesel, CurrentPartition);
+	public TrDosFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition, Languages lang) {
+		super(display, filesel, CurrentPartition, lang);
 		FileTypeHasChanged = false;
 	}
 
@@ -59,7 +60,7 @@ public class TrDosFileEditDialog extends EditFileDialog {
 		Label lbl = new Label(shell, SWT.NONE);
 		FontData fontData = lbl.getFont().getFontData()[0];
 		Font boldFont = new Font(display, new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
-		lbl.setText(String.format("Length: %d bytes (%X)", data.length, data.length));
+		lbl.setText(String.format(lang.Msg(Languages.MSG_LENXBYTESX), data.length, data.length));
 		lbl.setFont(boldFont);
 
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -71,13 +72,13 @@ public class TrDosFileEditDialog extends EditFileDialog {
 		
 		if ((ftype=='C') || (ftype=='D') || (ftype=='B')) {
 			Combo filetype = new Combo(shell, SWT.NONE);
-			filetype.setItems(new String[] {"B - Basic","C - Code","D - Array"});
+			filetype.setItems(new String[] {"B - "+lang.Msg(Languages.MSG_BASIC),"C - "+lang.Msg(Languages.MSG_CODE),"D - "+lang.Msg(Languages.MSG_ARRAY)});
 			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.horizontalSpan = 1;
 			filetype.setLayoutData(gd);
 
 			Button SetFileType = new Button(shell, SWT.NONE);
-			SetFileType.setText("Update file type");
+			SetFileType.setText(lang.Msg(Languages.MSG_UPDATEFILETYPE));
 			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.horizontalSpan = 1;
 			SetFileType.setLayoutData(gd);
@@ -155,20 +156,20 @@ public class TrDosFileEditDialog extends EditFileDialog {
 			if (ftype == 'B') {
 				BasicRenderer CurrentRenderer = new BasicRenderer();
 				CurrentRenderer.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), ThisEntry.GetFileSize(),
-						trde.GetVar2(), trde.startline, filesel, new BasicSave());
+						trde.GetVar2(), trde.startline, filesel, new BasicSave(), lang);
 			} else if (ftype != 'D') {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
 				CurrentRenderer.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, trde.GetVar1(),
-						filesel, CurrentPartition, new CodeSave());
+						filesel, CurrentPartition, new CodeSave(), lang);
 			} else if (trde.IsCharArray()) {
 				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
-				CurrentRenderer.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel, null);
+				CurrentRenderer.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel, null, lang);
 			} else {
 				NumericArrayRenderer CurrentRenderer = new NumericArrayRenderer();
-				CurrentRenderer.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel, null);
+				CurrentRenderer.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), "A", filesel, null, lang);
 			}
 		} catch (Exception E) {
-			System.out.println("Error Showing " + ThisEntry.GetFilename() + ": " + E.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_ERRORSHOWING) + " " + ThisEntry.GetFilename() + ": " + E.getMessage());
 		}
 	}
 
@@ -181,11 +182,11 @@ public class TrDosFileEditDialog extends EditFileDialog {
 			TrdDirectoryEntry trde = (TrdDirectoryEntry) ThisEntry;
 			SpeccyBasicDetails sbd = trde.GetSpeccyBasicDetails();
 			if (valtype == 0) {
-				System.out.print("Start Line: " + sbd.LineStart + " -> ");
+				System.out.print(lang.Msg(Languages.MSG_STARTLINE) + ": " + sbd.LineStart + " -> ");
 				sbd.LineStart = Value;
 				System.out.println(sbd.LineStart);
 			} else {
-				System.out.print("Vars Offset: " + sbd.VarStart + " -> ");
+				System.out.print(lang.Msg(Languages.MSG_VARSTART) + ": " + sbd.VarStart + " -> ");
 				sbd.VarStart = Value;
 				System.out.println(sbd.VarStart);
 			}
@@ -204,7 +205,7 @@ public class TrDosFileEditDialog extends EditFileDialog {
 		public boolean DoSave(int valtype, String sValue, int Value) {
 			TrdDirectoryEntry trde = (TrdDirectoryEntry) ThisEntry;
 			SpeccyBasicDetails sbd = trde.GetSpeccyBasicDetails();
-			System.out.print("Code start: " + sbd.LoadAddress + " -> ");
+			System.out.print(lang.Msg(Languages.MSG_CODELOADADD) + ": " + sbd.LoadAddress + " -> ");
 			sbd.LoadAddress = Value;
 			System.out.println(sbd.LoadAddress);
 

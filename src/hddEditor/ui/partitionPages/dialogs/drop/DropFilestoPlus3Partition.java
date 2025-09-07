@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -19,22 +18,23 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.CPM;
+import hddEditor.libs.Languages;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.cpm.CPMDirectoryEntry;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 
 public class DropFilestoPlus3Partition extends GenericDropForm {
 
-	public DropFilestoPlus3Partition(Display display) {
-		super(display);
+	public DropFilestoPlus3Partition(Display display, Languages lang) {
+		super(display, lang);
 	}
 
-	//New file type
+	// New file type
 	private final static int FILETYPE_PLUS3DOS = 10;
 
 	/**
-	 * Create a newFileListItem from the given file. 
-	 * This is overridden to look for +3DOS headers.
+	 * Create a newFileListItem from the given file. This is overridden to look for
+	 * +3DOS headers.
 	 * 
 	 * @param f
 	 * @return
@@ -85,13 +85,12 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 
 	/**
 	 * Enable or disable the appropriate buttons and sliders depending on the file
-	 * type.
-	 * Overridden for +3DOS header file type. (As you can't change any of the edit values
-	 * if they are already defined in the header)
+	 * type. Overridden for +3DOS header file type. (As you can't change any of the
+	 * edit values if they are already defined in the header)
 	 */
 	@Override
 	protected void EnableDisableModifiers() {
-		if (details.FileType != FILETYPE_PLUS3DOS)  {
+		if (details.FileType != FILETYPE_PLUS3DOS) {
 			super.EnableDisableModifiers();
 		} else {
 			intensitySlider.setEnabled(false);
@@ -102,15 +101,13 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 		}
 	}
 
-
-
 	/**
 	 * Render a given file with a +3DOS header.
 	 * 
 	 * @param details
 	 */
 	private void RenderPlus3DosFile(NewFileListItem details) {
-		String str = "Missing or invalid +3DOS header.";
+		String str = String.format(lang.Msg(Languages.MSG_NOPLUS3HEADER), details.OriginalFilename);
 
 		if (details != null) {
 			if (details.fileheader == null) {
@@ -121,23 +118,28 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 			}
 
 			if (details.fileheader != null) {
-				str = "Valid +3Dos Header: \n" + "File type: " + details.fileheader.getTypeDesc() + " ("
-						+ details.fileheader.GetFileType() + ")\n" + "+3DOS file length: " + details.fileheader.GetBasicFileLength()
-						+ "\n" + "Disk file length: " + details.fileheader.GetDOSFileSize() + "\n" + "Dos version: "
-						+ details.fileheader.GetVersionNo() + " Dos Issue:" + details.fileheader.GetIssueNo() + "\n";
+				str = lang.Msg(Languages.MSG_VALIDHEADER) + ": " + System.lineSeparator()
+						+ lang.Msg(Languages.MSG_FILETYPE) + ": " + details.fileheader.getTypeDesc() + " ("
+						+ details.fileheader.GetFileType() + ")" + System.lineSeparator()
+						+ lang.Msg(Languages.MSG_PLUS3DOSFILELEN) + ": " + details.fileheader.GetBasicFileLength()
+						+ System.lineSeparator() + lang.Msg(Languages.MSG_DISKFILELENGTH) + ": "
+						+ details.fileheader.GetDOSFileSize() + System.lineSeparator()
+						+ lang.Msg(Languages.MSG_DOSVERSION) + ": " + details.fileheader.GetVersionNo() + " "
+						+ lang.Msg(Languages.MSG_DOSISSUE) + ": " + details.fileheader.GetIssueNo()
+						+ System.lineSeparator();
 				switch (details.fileheader.GetFileType()) {
 				case 0:
-					str = str + "Start line: " + details.fileheader.GetLine() + "\n";
-					str = str + "Variables offset: " + details.fileheader.GetVarsOffset() + "\n";
+					str = str + lang.Msg(Languages.MSG_STARTLINE) + ": " + details.fileheader.GetLine() + System.lineSeparator();
+					str = str + lang.Msg(Languages.MSG_VARSTART) + ": " + details.fileheader.GetVarsOffset() + System.lineSeparator();
 					break;
 				case 1:
-					str = str + "Variable name: " + details.fileheader.GetVarName() + "\n";
+					str = str + lang.Msg(Languages.MSG_VARNAME) + ": " + details.fileheader.GetVarName() + System.lineSeparator();
 					break;
 				case 2:
-					str = str + "Variable name: " + details.fileheader.GetVarName() + "\n";
+					str = str + lang.Msg(Languages.MSG_VARNAME) + ": " + details.fileheader.GetVarName() + System.lineSeparator();
 					break;
 				case 3:
-					str = str + "Load address: " + details.fileheader.GetLoadAddress() + "\n";
+					str = str + lang.Msg(Languages.MSG_CODELOADADD) + ": " + details.fileheader.GetLoadAddress() + System.lineSeparator();
 					break;
 				}
 
@@ -175,8 +177,8 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 	}
 
 	/**
-	 * Routine to get the file data from a file taking into account the
-	 * +3DOS file type header for the appropriate type.
+	 * Routine to get the file data from a file taking into account the +3DOS file
+	 * type header for the appropriate type.
 	 * 
 	 * @param details
 	 * @return
@@ -190,7 +192,6 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 		}
 		return (data);
 	}
-
 
 	/**
 	 * Modify the given filename so its unique in the current selection. Note, this
@@ -273,7 +274,7 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 				} else if (details.FileType == FILETYPE_RAW) {
 					pfd.AddCPMFile(details.filename, details.data);
 				} else {
-					SaveFileWithDetails(details);					
+					SaveFileWithDetails(details);
 				}
 			} catch (IOException e) {
 			}
@@ -281,8 +282,8 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 	}
 
 	/**
-	 * Get the supported file text strings.
-	 * Adding in the file with +3DOS header string.
+	 * Get the supported file text strings. Adding in the file with +3DOS header
+	 * string.
 	 * 
 	 * @return
 	 */
@@ -290,9 +291,8 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 	protected String[] GetSupportedFileTypes() {
 		String result[] = new String[genericfiletypes.length + 1];
 		System.arraycopy(genericfiletypes, 0, result, 0, genericfiletypes.length);
-		result[result.length - 1] = "File w' plus3dos header";
+		result[result.length - 1] = lang.Msg(Languages.MSG_FILEWPLUS3DOSHDR);
 		return (result);
 	}
-	
 
 }

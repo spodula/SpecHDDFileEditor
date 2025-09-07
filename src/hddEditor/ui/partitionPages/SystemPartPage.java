@@ -36,6 +36,7 @@ import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.PlusIDEDosException;
 import hddEditor.libs.partitions.SystemPartition;
@@ -157,8 +158,8 @@ public class SystemPartPage extends GenericPage {
 	 * @param parent
 	 * @param partition
 	 */
-	public SystemPartPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
-		super(root, parent, partition, filesel);
+	public SystemPartPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel, Languages lang) {
+		super(root, parent, partition, filesel,lang);
 
 		AddComponents();
 	}
@@ -195,26 +196,26 @@ public class SystemPartPage extends GenericPage {
 			if (partition.CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_HDD) {
 
 				label("", 4);
-				Label l = label("SYSTEM Details.", 1);
+				Label l = label(lang.Msg(Languages.MSG_SYSDETS)+".", 1);
 				FontData fontData = l.getFont().getFontData()[0];
 				Font font = new Font(ParentComp.getDisplay(),
 						new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 				l.setFont(font);
 				label("", 3);
 
-				label("Unallocated space: " + GeneralUtils.GetSizeAsString(freeSpace), 1);
-				label("Allocated Space: " + GeneralUtils.GetSizeAsString(usedSpace), 1);
-				label("Free Partitions: " + (sp.GetMaxPartitions() - numUsedPartitions), 1);
-				label("Allocated Partitions: " + numUsedPartitions, 1);
+				label(lang.Msg(Languages.MSG_UNALLOCSPC) + ": " + GeneralUtils.GetSizeAsString(freeSpace), 1);
+				label(lang.Msg(Languages.MSG_ALLOCSPACE) + ": " + GeneralUtils.GetSizeAsString(usedSpace), 1);
+				label(lang.Msg(Languages.MSG_FREEPARTS)  + ": " + (sp.GetMaxPartitions() - numUsedPartitions), 1);
+				label(lang.Msg(Languages.MSG_ALLOCPARTS) + ": " + numUsedPartitions, 1);
 
 				label("", 4);
 
-				l = label("Default colours:", 1);
+				l = label(lang.Msg(Languages.MSG_DEFAULTCOLS)+":", 1);
 				l.setFont(font);
 
 				label("", 1);
-				label("Paper", 1);
-				label("Ink", 1);
+				label(lang.Msg(Languages.MSG_PAPER) , 1);
+				label(lang.Msg(Languages.MSG_INK) , 1);
 
 				// Colour attribute bits are:
 				// 76543210
@@ -236,8 +237,8 @@ public class SystemPartPage extends GenericPage {
 				int col = sp.GetBasicEditColour();
 				int ink = col & 0x07;
 				int paper = (col & 0x38) / 8;
-				label("Basic editor colour", 1);
-				becBright = checkbox("Bright", (col & 0x40) != 0);
+				label(lang.Msg(Languages.MSG_EDITORCOL), 1);
+				becBright = checkbox(lang.Msg(Languages.MSG_BRIGHT), (col & 0x40) != 0);
 				becBright.addSelectionListener(SetModifiedSelectionListener);
 
 				becPaper = combo(Speccy.SPECTRUM_COLOURS, Speccy.SPECTRUM_COLOURS[paper]);
@@ -253,8 +254,8 @@ public class SystemPartPage extends GenericPage {
 				col = sp.GetBasicColour();
 				ink = col & 0x07;
 				paper = (col & 0x38) / 8;
-				label("Default basic colour", 1);
-				dbcBright = checkbox("Bright", (col & 0x40) != 0);
+				label(lang.Msg(Languages.MSG_DEFCOL), 1);
+				dbcBright = checkbox(lang.Msg(Languages.MSG_BRIGHT), (col & 0x40) != 0);
 				dbcBright.addSelectionListener(SetModifiedSelectionListener);
 
 				dbcPaper = combo(Speccy.SPECTRUM_COLOURS, Speccy.SPECTRUM_COLOURS[(col & 0x38) / 8]);
@@ -269,7 +270,7 @@ public class SystemPartPage extends GenericPage {
 
 				label("", 4);
 
-				unmapA = checkbox("Unmap A:?", sp.GetUnmapA());
+				unmapA = checkbox(String.format(lang.Msg(Languages.MSG_UNMAPDRIVE), "A"), sp.GetUnmapA());
 				unmapA.addSelectionListener(SetModifiedSelectionListener);
 
 				Unit0DL = editbox(sp.GetUnit0DriveLetter(), 1);
@@ -277,21 +278,21 @@ public class SystemPartPage extends GenericPage {
 				label("", 1);
 				label("", 1);
 
-				unmapB = checkbox("Unmap B:?", sp.GetUnmapB());
+				unmapB = checkbox(String.format(lang.Msg(Languages.MSG_UNMAPDRIVE), "B"), sp.GetUnmapB());
 				unmapB.addSelectionListener(SetModifiedSelectionListener);
 				Unit1DL = editbox(sp.GetUnit1DriveLetter(), 1);
 				Unit1DL.addModifyListener(SetModifiedTextListener);
 
-				label("Default drive letter:", 1);
+				label(lang.Msg(Languages.MSG_DEFAULTDRIVE)+":", 1);
 				DefaultDrive = editbox(sp.GetDefaultDrive(), 1);
 				DefaultDrive.addModifyListener(SetModifiedTextListener);
 
-				unmapM = checkbox("Unmap M:?", sp.GetUnmapM());
+				unmapM = checkbox(String.format(lang.Msg(Languages.MSG_UNMAPDRIVE), "M"), sp.GetUnmapM());
 				unmapM.addSelectionListener(SetModifiedSelectionListener);
 				UnitMDL = editbox(sp.GetRamdiskDriveLetter(), 1);
 				UnitMDL.addModifyListener(SetModifiedTextListener);
 
-				CancelButton = button("Cancel");
+				CancelButton = button(lang.Msg(Languages.MSG_CANCEL));
 				GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 				gd.widthHint = 200;
 				CancelButton.setLayoutData(gd);
@@ -308,7 +309,7 @@ public class SystemPartPage extends GenericPage {
 					}
 				});
 
-				ApplyButton = button("Apply changes");
+				ApplyButton = button(lang.Msg(Languages.MSG_APPLY));
 				ApplyButton.setLayoutData(gd);
 				ApplyButton.setEnabled(false);
 				ApplyButton.addSelectionListener(new SelectionListener() {
@@ -322,13 +323,13 @@ public class SystemPartPage extends GenericPage {
 						widgetSelected(arg0);
 					}
 				});
-				l = label("Partitions:", 1);
+				l = label(lang.Msg(Languages.MSG_PARTITIONS)+":", 1);
 				l.setFont(font);
 				label("", 3);
 
 				CanEditPartitions = true;
 			} else {
-				Label l = label("Floppy disk sections:", 1);
+				Label l = label(lang.Msg(Languages.MSG_FDDSECTS) + ":", 1);
 				FontData fontData = l.getFont().getFontData()[0];
 				Font BoldFont = new Font(ParentComp.getDisplay(),
 						new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
@@ -351,16 +352,16 @@ public class SystemPartPage extends GenericPage {
 			TableColumn tc4 = new TableColumn(PartitionTable, SWT.LEFT);
 			TableColumn tc5 = new TableColumn(PartitionTable, SWT.LEFT);
 			if (partition.CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_HDD) {
-				tc1.setText("Partition name");
+				tc1.setText(lang.Msg(Languages.MSG_PARTNAME));
 			} else if (partition.CurrentDisk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_LINEAR) {
-				tc1.setText("Tape section:");
+				tc1.setText(lang.Msg(Languages.MSG_TAPESECT)+":");
 			} else {
-				tc1.setText("FDD Section:");
+				tc1.setText(lang.Msg(Languages.MSG_FDDSECT)+":");
 			}
-			tc2.setText("Type");
-			tc3.setText("Start");
-			tc4.setText("End");
-			tc5.setText("Size");
+			tc2.setText(lang.Msg(Languages.MSG_PARTTYPEM));
+			tc3.setText(lang.Msg(Languages.MSG_START));
+			tc4.setText(lang.Msg(Languages.MSG_END));
+			tc5.setText(lang.Msg(Languages.MSG_SIZE));
 			tc1.setWidth(150);
 			tc2.setWidth(150);
 			tc3.setWidth(150);
@@ -385,7 +386,7 @@ public class SystemPartPage extends GenericPage {
 			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.widthHint = 200;
 
-			DeleteButton = button("Delete partition");
+			DeleteButton = button(lang.Msg(Languages.MSG_DELPART));
 			DeleteButton.setLayoutData(gd);
 			DeleteButton.setEnabled(false);
 			DeleteButton.addSelectionListener(new SelectionListener() {
@@ -400,7 +401,7 @@ public class SystemPartPage extends GenericPage {
 				}
 			});
 
-			EditPartitionButton = button("Edit Raw Partition");
+			EditPartitionButton = button(lang.Msg(Languages.MSG_EDITRAWPART));
 			EditPartitionButton.setLayoutData(gd);
 			EditPartitionButton.setEnabled(false);
 			EditPartitionButton.addSelectionListener(new SelectionListener() {
@@ -415,7 +416,7 @@ public class SystemPartPage extends GenericPage {
 				}
 			});
 
-			GotoPartitionButton = button("Goto partition");
+			GotoPartitionButton = button(lang.Msg(Languages.MSG_GOTOPART));
 			GotoPartitionButton.setLayoutData(gd);
 			GotoPartitionButton.setEnabled(false);
 			GotoPartitionButton.addSelectionListener(new SelectionListener() {
@@ -430,7 +431,7 @@ public class SystemPartPage extends GenericPage {
 				}
 			});
 
-			NewPartitionButton = button("New partition");
+			NewPartitionButton = button(lang.Msg(Languages.MSG_NEWPART));
 			NewPartitionButton.setLayoutData(gd);
 			NewPartitionButton.addSelectionListener(new SelectionListener() {
 				@Override
@@ -444,7 +445,7 @@ public class SystemPartPage extends GenericPage {
 				}
 			});
 
-			DoExtractAllPartitionButton = button("Dump partitions");
+			DoExtractAllPartitionButton = button(lang.Msg(Languages.MSG_DUMPPART));
 			DoExtractAllPartitionButton.setLayoutData(gd);
 			DoExtractAllPartitionButton.addSelectionListener(new SelectionListener() {
 				@Override
@@ -458,7 +459,7 @@ public class SystemPartPage extends GenericPage {
 				}
 			});
 
-			ShrinkDisk = button("Shrink disk");
+			ShrinkDisk = button(lang.Msg(Languages.MSG_SHRINKDISK));
 			ShrinkDisk.setLayoutData(gd);
 			ShrinkDisk.addSelectionListener(new SelectionListener() {
 				@Override
@@ -472,7 +473,7 @@ public class SystemPartPage extends GenericPage {
 				}
 			});
 
-			RenamePartition = button("Rename partition");
+			RenamePartition = button(lang.Msg(Languages.MSG_RENAMEPART));
 			RenamePartition.setLayoutData(gd);
 			RenamePartition.addSelectionListener(new SelectionListener() {
 				@Override
@@ -505,8 +506,8 @@ public class SystemPartPage extends GenericPage {
 				String content[] = new String[5];
 				content[0] = part.GetName();
 				content[1] = PLUSIDEDOS.GetTypeAsString(part.GetPartType());
-				content[2] = "Cyl:" + part.GetStartCyl() + " Head:" + part.GetStartHead();
-				content[3] = "Cyl:" + part.GetEndCyl() + " Head:" + part.GetEndHead();
+				content[2] = lang.Msg(Languages.MSG_CYL)+":" + part.GetStartCyl() + " "+lang.Msg(Languages.MSG_HEAD)+":" + part.GetStartHead();
+				content[3] = lang.Msg(Languages.MSG_CYL)+":" + part.GetEndCyl() + " "+lang.Msg(Languages.MSG_HEAD)+":" + part.GetEndHead();
 				content[4] = GeneralUtils.GetSizeAsString(part.GetSizeK() * 1024);
 
 				item2.setText(content);
@@ -519,7 +520,7 @@ public class SystemPartPage extends GenericPage {
 	 * Extract all partitions to disk.
 	 */
 	protected void DoExtractAllPartitions() {
-		ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay());
+		ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay(), lang);
 		try {
 			ExportAllPartsForm.Show(partition);
 		} finally {
@@ -641,8 +642,8 @@ public class SystemPartPage extends GenericPage {
 			boolean DoChange = true;
 			if ((ApplyButton != null) && ApplyButton.getEnabled()) {
 				MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-				messageBox.setMessage("Do you really want to change partition without saving?");
-				messageBox.setText("Change Partition");
+				messageBox.setMessage(lang.Msg(Languages.MSG_CHANGEPARTQ));
+				messageBox.setText(lang.Msg(Languages.MSG_CHANGEPART));
 				int response = messageBox.open();
 				DoChange = (response == SWT.YES);
 			}
@@ -657,12 +658,12 @@ public class SystemPartPage extends GenericPage {
 	 */
 	private void DoNewPartition() {
 		if (!CanEditPartitions) {
-			ErrorBox("Cannot edit partitions on this media type.");
+			ErrorBox(lang.Msg(Languages.MSG_CANTEDITPART));
 		} else {
 			SystemPartition SystemPartition = (SystemPartition) RootPage.CurrentHandler
 					.GetPartitionByType(PLUSIDEDOS.PARTITION_SYSTEM);
 			if (SystemPartition == null) {
-				ErrorBox("Error creating partition: System partition not found.");
+				ErrorBox(lang.Msg(Languages.MSG_ERRCREATEPART)+": "+lang.Msg(Languages.MSG_NOSYSPART));
 			} else {
 				ArrayList<String> ExistingPartitions = new ArrayList<String>();
 				for (IDEDosPartition p : SystemPartition.partitions) {
@@ -675,9 +676,9 @@ public class SystemPartPage extends GenericPage {
 				IDEDosPartition freespacePartition = RootPage.CurrentHandler
 						.GetPartitionByType(PLUSIDEDOS.PARTITION_FREE);
 				if (freespacePartition == null) {
-					ErrorBox("Error creating partition: Free space partition not found.");
+					ErrorBox(lang.Msg(Languages.MSG_ERRCREATEPART)+": "+lang.Msg(Languages.MSG_NOFREEPART));
 				} else {
-					NewPartDialog = new NewPartitionDialog(ParentComp.getDisplay());
+					NewPartDialog = new NewPartitionDialog(ParentComp.getDisplay(), lang);
 					if (NewPartDialog.Show(sExistingPartitions) && !ParentComp.isDisposed()) {
 						try {
 							SystemPartition.CreatePartition(NewPartDialog.Name, NewPartDialog.SizeMB,
@@ -700,26 +701,25 @@ public class SystemPartPage extends GenericPage {
 	 */
 	protected void DoDeletePartition() {
 		if (!CanEditPartitions) {
-			ErrorBox("Cannot Delete partitions on this media type.");
+			ErrorBox(lang.Msg(Languages.MSG_CANTEDITPART));
 		} else {
 			TableItem itms[] = PartitionTable.getSelection();
 			if (itms != null) {
 				SystemPartition SystemPartition = (SystemPartition) RootPage.CurrentHandler
 						.GetPartitionByType(PLUSIDEDOS.PARTITION_SYSTEM);
 				if (SystemPartition == null) {
-					ErrorBox("Error Deleting partition: System partition not found. This should not happen");
+					ErrorBox(lang.Msg(Languages.MSG_ERRDELETEPART)+": "+lang.Msg(Languages.MSG_NOSYSPART));
 				} else {
 					String partName = itms[0].getText(0).trim();
 					MessageBox messageBox = new MessageBox(ParentComp.getShell(),
 							SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
-					messageBox.setMessage("Are you sure?");
-					messageBox.setText("Are you absolutely sure you want to delete " + partName.trim()
-							+ "?\nThis action is cant be undone!");
+					messageBox.setMessage(lang.Msg(Languages.MSG_AREYOUSURE));
+					messageBox.setText(String.format(lang.Msg(Languages.MSG_ABSOLUTELYSUREPART),partName.trim()));
 					if (messageBox.open() == SWT.OK) {
 						try {
 							SystemPartition.DeletePartition(partName);
 						} catch (PlusIDEDosException e) {
-							ErrorBox("Error deleting partition '" + partName + "'. " + e.getMessage());
+							ErrorBox(lang.Msg(Languages.MSG_ERRDELETEPART)+"'" + partName + "'. " + e.getMessage());
 						}
 						RootPage.UpdateDropdown();
 					}
@@ -742,7 +742,7 @@ public class SystemPartPage extends GenericPage {
 			IDEDosPartition part = RootPage.CurrentHandler.GetPartitionByName(partName);
 
 			// Create the hex edit dialog and start it.
-			HxEditDialog = new HexEditDialog(ParentComp.getDisplay());
+			HxEditDialog = new HexEditDialog(ParentComp.getDisplay(), lang);
 
 			if (!ParentComp.isDisposed()) {
 				boolean WriteBackData = false;
@@ -751,8 +751,8 @@ public class SystemPartPage extends GenericPage {
 					data = part.GetAllDataInPartition();
 					AddressNote an[] = part.GetAddressNotes();
 					WriteBackData = HxEditDialog.Show(data,
-							"Editing " + partName + " (" + PLUSIDEDOS.GetTypeAsString(part.GetPartType()) + ")", an,
-							fsd);
+							String.format(lang.Msg(Languages.MSG_EDITINGX),  partName + " (" + PLUSIDEDOS.GetTypeAsString(part.GetPartType()) )
+							, an,fsd);
 					if (WriteBackData) {
 						part.SetAllDataInPartition(HxEditDialog.Data);
 						part.Reload();
@@ -761,7 +761,7 @@ public class SystemPartPage extends GenericPage {
 						}
 					}
 				} catch (IOException e) {
-					ErrorBox("Error reading partition: " + e.getMessage());
+					ErrorBox(lang.Msg(Languages.MSG_ERRORREADINGPART)+": " + e.getMessage());
 					e.printStackTrace();
 				}
 			}
@@ -796,7 +796,7 @@ public class SystemPartPage extends GenericPage {
 	protected void DoShrinkDisk() {
 		SystemPartition sp = (SystemPartition) partition;
 		boolean result = false;
-		ShrinkDiskForm = new ShrinkDiskDialog(ParentComp.getDisplay());
+		ShrinkDiskForm = new ShrinkDiskDialog(ParentComp.getDisplay(), lang);
 		try {
 			result = ShrinkDiskForm.Show(sp);
 		} finally {
@@ -813,7 +813,7 @@ public class SystemPartPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 			String partName = itms[0].getText(0).trim();
 			IDEDosPartition part = RootPage.CurrentHandler.GetPartitionByName(partName);
-			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay());
+			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay(), lang);
 			if (RenFileDialog.Show(part.GetName())) {
 				try {
 					part.SetName(RenFileDialog.NewName);
@@ -823,8 +823,9 @@ public class SystemPartPage extends GenericPage {
 					AddComponents();
 				} catch (Exception e) {
 					MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
-					messageBox.setMessage("Error Renaming " + part.GetName() + ": " + e.getMessage());
-					messageBox.setText("Error Renaming " + part.GetName() + ": " + e.getMessage());
+					String s = String.format(lang.Msg(Languages.MSG_ERRREADNGFILE),part.GetName()) + ": " + e.getMessage();
+					messageBox.setMessage(s);
+					messageBox.setText(s);
 					messageBox.open();
 					e.printStackTrace();
 				}

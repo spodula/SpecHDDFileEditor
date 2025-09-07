@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
@@ -66,13 +67,16 @@ public class FileExportAllPartitionsForm {
 	// Mode
 	private Boolean SinglePartitionMode;
 
+	private Languages lang;
+	
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public FileExportAllPartitionsForm(Display display) {
+	public FileExportAllPartitionsForm(Display display,Languages lang) {
 		this.display = display;
+		this.lang = lang;
 	}
 
 	/**
@@ -363,7 +367,7 @@ public class FileExportAllPartitionsForm {
 				int ScreenType = TextToIndex(ScreenTargetFileType.getText(), GeneralUtils.MasterList);
 				int UnknownType = TextToIndex(UnknownTargetFileType.getText(), GeneralUtils.MasterList);
 
-				PartitionExportProgress pep = new PartitionExportProgress(shell.getDisplay());
+				PartitionExportProgress pep = new PartitionExportProgress(shell.getDisplay(), lang);
 				try {
 					pep.Show("Exporting Partition " + ThisDisk.GetName(), "Partition:", "File:");
 					pep.SetMax1(1);
@@ -601,7 +605,7 @@ public class FileExportAllPartitionsForm {
 	 */
 	protected boolean DoExportFlags(int BasicType, int CodeType, int ArrayType, int ScreenType, int UnknownType,
 			int SwapType, String TargetFolder) {
-		PartitionExportProgress pep = new PartitionExportProgress(shell.getDisplay());
+		PartitionExportProgress pep = new PartitionExportProgress(shell.getDisplay(), lang);
 		try {
 			pep.Show("Exporting Partition " + ThisDisk.GetName(), "Partition:", "File:");
 			pep.SetMax1(1);
@@ -666,7 +670,7 @@ public class FileExportAllPartitionsForm {
 
 		SystemPartition sp = (SystemPartition) ThisDisk;
 
-		PartitionExportProgress pep = new PartitionExportProgress(shell.getDisplay());
+		PartitionExportProgress pep = new PartitionExportProgress(shell.getDisplay(), lang);
 		try {
 			pep.Show("Exporting all partitions", "Partition:", "File:");
 			pep.SetMax1(sp.partitions.length);

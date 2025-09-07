@@ -16,6 +16,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.Languages;
+
 public class RenameFileDialog {
 	//Form components
 	private Display display = null;
@@ -26,12 +28,15 @@ public class RenameFileDialog {
 	public String NewName = "";
 	private boolean result = false;
 	
+	private Languages lang;
+	
 	/**
 	 * Constructor
 	 * @param display
 	 */
-	public RenameFileDialog(Display display) {
+	public RenameFileDialog(Display display, Languages lang) {
 		this.display = display;
+		this.lang = lang;
 	}
 
 	/**
@@ -70,12 +75,12 @@ public class RenameFileDialog {
 		gridLayout.marginBottom = 20;
 
 		shell.setLayout(gridLayout);
-		shell.setText("Rename file");
+		shell.setText(lang.Msg(Languages.MSG_RENAMEFILE));
 
 		Label lbl = new Label(shell, SWT.NONE);
 		FontData fontData = lbl.getFont().getFontData()[0];
 		Font boldFont = new Font(display, new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
-		lbl.setText("Old name:");
+		lbl.setText(lang.Msg(Languages.MSG_OLDNAME));
 		lbl.setFont(boldFont);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
@@ -91,7 +96,7 @@ public class RenameFileDialog {
 		OldNameTxt.setSize(200, OldNameTxt.getSize().y);
 
 		lbl = new Label(shell, SWT.NONE);
-		lbl.setText("New name:");
+		lbl.setText(lang.Msg(Languages.MSG_NEWNAME));
 		lbl.setFont(boldFont);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
@@ -110,7 +115,7 @@ public class RenameFileDialog {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 160;
 		Button Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Cancel");
+		Btn.setText(lang.Msg(Languages.MSG_CANCEL));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -124,7 +129,7 @@ public class RenameFileDialog {
 			}
 		});
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Rename");
+		Btn.setText(lang.Msg(Languages.MSG_RENAMEFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override

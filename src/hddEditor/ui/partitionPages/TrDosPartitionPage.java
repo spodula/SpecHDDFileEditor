@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
@@ -59,8 +60,8 @@ public class TrDosPartitionPage extends GenericPage {
 	 * @param parent
 	 * @param partition+
 	 */
-	public TrDosPartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
-		super(root, parent, partition, filesel);
+	public TrDosPartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel, Languages lang) {
+		super(root, parent, partition, filesel,lang);
 		AddComponents();
 	}
 
@@ -72,15 +73,16 @@ public class TrDosPartitionPage extends GenericPage {
 			RemoveComponents();
 			super.AddBasicDetails();
 			TrDosPartition fbc = (TrDosPartition) partition;
-			label("Size: " + (fbc.CurrentDisk.GetFileSize() / 1024) + "k", 1);
+			
+			label(lang.Msg(Languages.MSG_SIZE)+": " + (fbc.CurrentDisk.GetFileSize() / 1024) + "k", 1);
 			label("", 4);
-			label("Label: " + fbc.Disklabel, 1);
-			label("Free sectors: " + fbc.NumFreeSectors, 1);
-			label("Free Space: " + (fbc.NumFreeSectors * fbc.CurrentDisk.GetSectorSize() / 1024) + "k", 1);
-			label("Files: " + fbc.NumFiles, 1);
-			label("Deleted files: " + fbc.NumDeletedFiles, 1);
-			label("Logical disk type: " + fbc.LogicalDiskType + "(" + fbc.GetDiskTypeAsString() + ")", 1);
-			label("First free sector: (C/S) " + fbc.FirstFreeSectorT + "/" + fbc.FirstFreeSectorS, 1);
+			label(lang.Msg(Languages.MSG_DISKLABEL)+": " + fbc.Disklabel, 1);
+			label(lang.Msg(Languages.MSG_DISKLABEL)+": " + fbc.NumFreeSectors, 1);
+			label(lang.Msg(Languages.MSG_FREESPACE)+": " + (fbc.NumFreeSectors * fbc.CurrentDisk.GetSectorSize() / 1024) + "k", 1);
+			label(lang.Msg(Languages.MSG_FILES)+": " + fbc.NumFiles, 1);
+			label(lang.Msg(Languages.MSG_DELETEDFILES)+": " + fbc.NumDeletedFiles, 1);
+			label(lang.Msg(Languages.MSG_LOGICALDISKTYP)+": " + fbc.LogicalDiskType + "(" + fbc.GetDiskTypeAsString() + ")", 1);
+			label(lang.Msg(Languages.MSG_FIRSTFREESECT)+": (C/S) " + fbc.FirstFreeSectorT + "/" + fbc.FirstFreeSectorS, 1);
 			label("", 1);
 
 			// directory listing
@@ -97,11 +99,11 @@ public class TrDosPartitionPage extends GenericPage {
 			TableColumn tc3 = new TableColumn(DirectoryListing, SWT.LEFT);
 			TableColumn tc4 = new TableColumn(DirectoryListing, SWT.LEFT);
 			TableColumn tc5 = new TableColumn(DirectoryListing, SWT.LEFT);
-			tc1.setText("Filename");
-			tc2.setText("Type");
-			tc3.setText("Start");
-			tc4.setText("Length");
-			tc5.setText("Sectors");
+			tc1.setText(lang.Msg(Languages.MSG_FILENAME));
+			tc2.setText(lang.Msg(Languages.MSG_FILETYPE));
+			tc3.setText(lang.Msg(Languages.MSG_START));
+			tc4.setText(lang.Msg(Languages.MSG_LENGTH));
+			tc5.setText(lang.Msg(Languages.MSG_SECTORS));
 			tc1.setWidth(150);
 			tc2.setWidth(150);
 			tc3.setWidth(150);
@@ -189,7 +191,6 @@ public class TrDosPartitionPage extends GenericPage {
 								int exporttype = RootPage.dragindex;
 
 								FileEntry entry = (FileEntry) item.getData();
-								System.out.println("Exporttype:" + exporttype);
 								if (exporttype == HDDEditor.DRAG_TYPE) {
 									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
 									int actiontype = GeneralUtils.EXPORT_TYPE_HEX;
@@ -204,7 +205,6 @@ public class TrDosPartitionPage extends GenericPage {
 										actiontype = GeneralUtils.EXPORT_TYPE_CSV;
 										break;
 									case (Speccy.BASIC_CODE):
-										System.out.println("CODE: " + entry.GetFileSize());
 										if (entry.GetFileSize() == 0x1b00) {
 											actiontype = GeneralUtils.EXPORT_TYPE_PNG;
 										} else {
@@ -267,7 +267,7 @@ public class TrDosPartitionPage extends GenericPage {
 			gd.widthHint = 200;
 
 			Button Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("File Properties");
+			Btn.setText(lang.Msg(Languages.MSG_FILEPROPERTIES));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -282,7 +282,7 @@ public class TrDosPartitionPage extends GenericPage {
 			});
 
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Edit Raw file");
+			Btn.setText(lang.Msg(Languages.MSG_EDITRAWFILE));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -297,7 +297,7 @@ public class TrDosPartitionPage extends GenericPage {
 			});
 
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Delete file");
+			Btn.setText(lang.Msg(Languages.MSG_DELETEFILE));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -312,7 +312,7 @@ public class TrDosPartitionPage extends GenericPage {
 			});
 
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Add File(s)");
+			Btn.setText(lang.Msg(Languages.MSG_ADDGFILES));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -327,7 +327,7 @@ public class TrDosPartitionPage extends GenericPage {
 			});
 
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Extract all Files");
+			Btn.setText(lang.Msg(Languages.MSG_EXTRACTALLFILES));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -342,7 +342,7 @@ public class TrDosPartitionPage extends GenericPage {
 			});
 
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Rename file");
+			Btn.setText(lang.Msg(Languages.MSG_RENAMEFILE));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -357,7 +357,7 @@ public class TrDosPartitionPage extends GenericPage {
 			});
 
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Defrag disk");
+			Btn.setText(lang.Msg(Languages.MSG_DEFRAGDISK));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -375,8 +375,8 @@ public class TrDosPartitionPage extends GenericPage {
 	}
 
 	protected void DoAddFiles() {
-		AddFilesDialog = new AddFilesToTrDosPartition(ParentComp.getDisplay(), fsd);
-		AddFilesDialog.Show("Add files", (TrDosPartition) partition);
+		AddFilesDialog = new AddFilesToTrDosPartition(ParentComp.getDisplay(), fsd, lang);
+		AddFilesDialog.Show(lang.Msg(Languages.MSG_ADDGFILES), (TrDosPartition) partition);
 		UpdateDirectoryEntryList();
 		AddFilesDialog = null;
 		if (!ParentComp.isDisposed()) {
@@ -392,14 +392,14 @@ public class TrDosPartitionPage extends GenericPage {
 				URI uri = new URI(file);
 				file = uri.getPath();
 			} catch (URISyntaxException e) {
-				System.out.println("Cannot parse " + file);
+				System.out.println(String.format(lang.Msg(Languages.MSG_CANNOTPARSE),file));
 			}
 			System.out.println(file);
 			fFiles[i++] = new File(file);
 		}
 
-		DropFilesToTapePartition DropFilesDialog = new DropFilesToTapePartition(ParentComp.getDisplay());
-		DropFilesDialog.Show("Add files", partition, fFiles);
+		DropFilesToTapePartition DropFilesDialog = new DropFilesToTapePartition(ParentComp.getDisplay(), lang);
+		DropFilesDialog.Show(lang.Msg(Languages.MSG_ADDGFILES), partition, fFiles);
 		DropFilesDialog = null;
 		if (!ParentComp.isDisposed()) {
 			AddComponents();
@@ -413,7 +413,7 @@ public class TrDosPartitionPage extends GenericPage {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
 			TrdDirectoryEntry entry = (TrdDirectoryEntry) itms[0].getData();
-			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay());
+			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay(), lang);
 			if (RenFileDialog.Show(entry.GetFilename())) {
 				try {
 					TrDosPartition fbc = (TrDosPartition) partition;
@@ -423,8 +423,9 @@ public class TrDosPartitionPage extends GenericPage {
 					UpdateDirectoryEntryList();
 				} catch (IOException e) {
 					MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
-					messageBox.setMessage("Error Renaming " + entry.GetFilename() + ": " + e.getMessage());
-					messageBox.setText("Error Renaming " + entry.GetFilename() + ": " + e.getMessage());
+					String s = String.format(lang.Msg(Languages.MSG_ERRORRENAME), entry.GetFilename()) + ": "+e.getMessage();
+					messageBox.setMessage(s);
+					messageBox.setText(s);
 					messageBox.open();
 					e.printStackTrace();
 				}
@@ -434,7 +435,7 @@ public class TrDosPartitionPage extends GenericPage {
 	}
 
 	protected void DoExtractAllFiles() {
-		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay());
+		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay(), lang);
 		try {
 			ExportAllPartsForm.ShowSinglePartition(partition);
 		} finally {
@@ -472,10 +473,9 @@ public class TrDosPartitionPage extends GenericPage {
 			fbc.Pack();
 			UpdateDirectoryEntryList();
 		} catch (IOException e) {
-			ErrorBox("IO Error deleting file." + e.getMessage());
+			ErrorBox(lang.Msg(Languages.MSG_ERRIODEL)+"." + e.getMessage());
 			e.printStackTrace();
 		}
-
 	}
 
 	/**
@@ -488,11 +488,13 @@ public class TrDosPartitionPage extends GenericPage {
 			TrdDirectoryEntry entry = (TrdDirectoryEntry) itms[0].getData();
 			String filename = entry.GetFilename();
 			if (itms.length > 1) {
-				filename = "the selected files";
+				filename = lang.Msg(Languages.MSG_THESELECTEDFILES);
 			}
 			MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
-			messageBox.setMessage("Are you sure you want to delete " + filename + " ?");
-			messageBox.setText("Are you sure you want to delete " + filename + " ?");
+			String s = String.format(lang.Msg(Languages.MSG_AREYOUSUREDEL), filename);
+			messageBox.setMessage(s);
+			messageBox.setText(s);
+
 			if (messageBox.open() == SWT.YES) {
 				TrDosPartition fbc = (TrDosPartition) partition;
 				try {
@@ -506,7 +508,8 @@ public class TrDosPartitionPage extends GenericPage {
 					}
 					UpdateDirectoryEntryList();
 				} catch (IOException e) {
-					ErrorBox("IO Error deleting file." + e.getMessage());
+					s = String.format(lang.Msg(Languages.MSG_ERRDELFILE),filename);
+					ErrorBox(s + ": "+ e.getMessage());
 					e.printStackTrace();
 				}
 			}
@@ -521,22 +524,22 @@ public class TrDosPartitionPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 			TrdDirectoryEntry entry = (TrdDirectoryEntry) itms[0].getData();
 			// Create the hex edit dialog and start it.
-			HxEditDialog = new HexEditDialog(ParentComp.getDisplay());
+			HxEditDialog = new HexEditDialog(ParentComp.getDisplay(), lang);
 
 			byte data[];
 			try {
 				data = entry.GetFileData();
 
-				AddressNote NewAddressNote = new AddressNote(0, data.length, 0, "File: " + entry.GetFilename());
+				AddressNote NewAddressNote = new AddressNote(0, data.length, 0, lang.Msg(Languages.MSG_FILE)+": " + entry.GetFilename());
 				AddressNote ANArray[] = { NewAddressNote };
 
-				boolean WriteBackData = HxEditDialog.Show(data, "Editing " + entry.GetFilename(), ANArray, fsd);
+				boolean WriteBackData = HxEditDialog.Show(data,String.format(lang.Msg(Languages.MSG_EDITINGX),entry.GetFilename()), ANArray, fsd);
 				if (WriteBackData) {
 					TrDosPartition fbc = (TrDosPartition) partition;
 					fbc.UpdateFile(entry, data);
 				}
 			} catch (IOException e) {
-				ErrorBox("Error editing partition: " + e.getMessage());
+				ErrorBox(String.format(lang.Msg(Languages.MSG_ERROREDITING))+": " + e.getMessage());
 				e.printStackTrace();
 			}
 
@@ -553,13 +556,13 @@ public class TrDosPartitionPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 			TrdDirectoryEntry entry = (TrdDirectoryEntry) itms[0].getData();
 			try {
-				SpecFileEditDialog = new TrDosFileEditDialog(ParentComp.getDisplay(), fsd, partition);
+				SpecFileEditDialog = new TrDosFileEditDialog(ParentComp.getDisplay(), fsd, partition,lang);
 
 				byte[] data = entry.GetFileData();
 				
 				GeneralUtils.HexDump(data, 0, data.length, 0);
 				
-				if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
+				if (SpecFileEditDialog.Show(data, String.format(lang.Msg(Languages.MSG_EDITINGX),entry.GetFilename()), entry)) {
 					// entry.SetDeleted(true);
 
 					// refresh the screen.
@@ -569,7 +572,7 @@ public class TrDosPartitionPage extends GenericPage {
 					// 1: Just closed, no changes
 					// 2: File type change
 					if (SpecFileEditDialog.FileTypeHasChanged) {
-						System.out.print("File type: " + entry.GetFileType() + " -> ");
+						System.out.print(lang.Msg(Languages.MSG_FILETYPE)+": " + entry.GetFileType() + " -> ");
 						entry.SetFileType(SpecFileEditDialog.NewFileType.charAt(0));
 						System.out.println(entry.GetFileType());
 
@@ -581,7 +584,7 @@ public class TrDosPartitionPage extends GenericPage {
 				SpecFileEditDialog = null;
 				UpdateDirectoryEntryList();
 			} catch (IOException e) {
-				ErrorBox("Error reading partition: " + e.getMessage());
+				ErrorBox(lang.Msg(Languages.MSG_ERRORREADINGPART)+ ": " + e.getMessage());
 				e.printStackTrace();
 			}
 		}

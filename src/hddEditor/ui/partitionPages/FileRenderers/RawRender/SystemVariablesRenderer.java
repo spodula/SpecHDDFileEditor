@@ -18,6 +18,7 @@ import hddEditor.libs.SpeccySystemVariables;
 import hddEditor.libs.SpeccySystemVariables.FlagBit;
 import hddEditor.libs.SpeccySystemVariables.SystemVariable;
 import hddEditor.libs.ASMLib.DecodedASM;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 
 public class SystemVariablesRenderer implements Renderer {
@@ -52,11 +53,11 @@ public class SystemVariablesRenderer implements Renderer {
 	 * @param targetPage
 	 * @param sysVars
 	 */
-	public void AddSysVars(Composite targetPage, byte[] sysVars, boolean Is128, boolean IsPlus3) {
+	public void AddSysVars(Composite targetPage, byte[] sysVars, boolean Is128, boolean IsPlus3, Languages lang) {
 		DisposeRenderer();
 		
 		VarLBL = new Label(targetPage, SWT.NONE);
-		VarLBL.setText("System Variables: ");
+		VarLBL.setText(lang.Msg(Languages.MSG_SYSTEMVARS));
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 3;
 		VarLBL.setLayoutData(gd);
@@ -73,7 +74,7 @@ public class SystemVariablesRenderer implements Renderer {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				int typ = SysVarVersion.getSelectionIndex();
-				AddSysVars(targetPage, sysVars, (typ>0),(typ>1));
+				AddSysVars(targetPage, sysVars, (typ>0),(typ>1), lang);
 				targetPage.pack();
 			}
 			
@@ -96,27 +97,27 @@ public class SystemVariablesRenderer implements Renderer {
 		SysVarList.setLayoutData(gd);
 
 		TableColumn vc1 = new TableColumn(SysVarList, SWT.LEFT);
-		vc1.setText("Variable");
+		vc1.setText(lang.Msg(Languages.MSG_VARIABLE));
 		vc1.setWidth(120);
 		TableColumn vc2 = new TableColumn(SysVarList, SWT.FILL);
-		vc2.setText("Content");
+		vc2.setText(lang.Msg(Languages.MSG_CONTENT));
 		vc2.setWidth(100);
 		TableColumn vc3 = new TableColumn(SysVarList, SWT.FILL);
-		vc3.setText("Notes");
+		vc3.setText(lang.Msg(Languages.MSG_NOTES));
 		vc3.setWidth(580);
 
 		if (Is128) {
 			if (IsPlus3) {
-				AddVarList(ssv.SpeccyPlus3SystemVariables, sysVars);
+				AddVarList(ssv.SpeccyPlus3SystemVariables, sysVars, lang);
 			} else {
-				AddVarList(ssv.Speccy128SystemVariables, sysVars);
+				AddVarList(ssv.Speccy128SystemVariables, sysVars, lang);
 			}
 		}
-		AddVarList(ssv.Speccy48SystemVariables, sysVars);
+		AddVarList(ssv.Speccy48SystemVariables, sysVars, lang);
 
 	}
 
-	private void AddVarList(ArrayList<SystemVariable> variables, byte sysVars[]) {
+	private void AddVarList(ArrayList<SystemVariable> variables, byte sysVars[], Languages lang) {
 		for (SpeccySystemVariables.SystemVariable sv : variables) {
 			String vName = sv.abbrev + " (" + sv.address + ")";
 			String vNotes = sv.description;
@@ -165,7 +166,7 @@ public class SystemVariablesRenderer implements Renderer {
 				}
 				break;
 			case SpeccySystemVariables.SV_SUBROUTINE:
-				vData = DecodeSubroutine(data, sv.address);
+				vData = DecodeSubroutine(data, sv.address, lang);
 				break;
 			case SpeccySystemVariables.SV_STACK:
 				vData = "";
@@ -208,7 +209,7 @@ public class SystemVariablesRenderer implements Renderer {
 					}
 					vNotes = vNotes+"\n"+result;
 				} else {
-					vNotes = vNotes+"\n"+String.format("%d (%02Xh)", (data[0] & 0xff), (data[0] & 0xff)) + "(flags not defined)";
+					vNotes = vNotes+"\n"+String.format("%d (%02Xh)", (data[0] & 0xff), (data[0] & 0xff)) + "("+lang.Msg(Languages.MSG_FLAGSNOTDEF)+")";
 				}
 			}
 
@@ -229,7 +230,7 @@ public class SystemVariablesRenderer implements Renderer {
 	 * @param baseaddress
 	 * @return
 	 */
-	private String DecodeSubroutine(byte data[], int baseaddress) {
+	private String DecodeSubroutine(byte data[], int baseaddress, Languages lang) {
 		String result = "";
 		ASMLib asm = new ASMLib();
 		int realaddress = 0x0000;
@@ -253,7 +254,8 @@ public class SystemVariablesRenderer implements Renderer {
 
 			} // while
 		} catch (Exception E) {
-			System.out.println("Error at: " + realaddress + "(" + baseaddress + realaddress + ")");
+			
+			System.out.println(String.format(lang.Msg(Languages.MSG_ERRORATXX), realaddress,baseaddress + realaddress));
 			System.out.println(E.getMessage());
 			E.printStackTrace();
 		}

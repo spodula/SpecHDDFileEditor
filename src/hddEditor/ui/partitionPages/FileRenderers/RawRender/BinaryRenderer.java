@@ -11,6 +11,8 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
+import hddEditor.libs.Languages;
+
 public class BinaryRenderer implements Renderer {
 	Table BinTable = null;
 	
@@ -29,7 +31,7 @@ public class BinaryRenderer implements Renderer {
 	 * @param loadAddr
 	 * @param HeightLimit
 	 */
-	public void Render(Composite TargetPage, byte data[], int loadAddr, int HeightLimit) {
+	public void Render(Composite TargetPage, byte data[], int loadAddr, int HeightLimit, Languages lang) {
 		if (BinTable!=null) {
 			BinTable.dispose();
 		}
@@ -45,7 +47,7 @@ public class BinaryRenderer implements Renderer {
 		BinTable.setLayoutData(gd);
 
 		TableColumn tc1 = new TableColumn(BinTable, SWT.LEFT);
-		tc1.setText("Address");
+		tc1.setText(lang.Msg(Languages.MSG_ADDRESS));
 		tc1.setWidth(80);
 		for (int i = 0; i < 16; i++) {
 			TableColumn tcx = new TableColumn(BinTable, SWT.LEFT);

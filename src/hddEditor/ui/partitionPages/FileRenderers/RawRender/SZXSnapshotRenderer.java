@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import hddEditor.libs.ASMLib;
+import hddEditor.libs.Languages;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.snapshots.MachineState;
 import hddEditor.libs.snapshots.readers.SZXFile;
@@ -59,7 +60,7 @@ public class SZXSnapshotRenderer extends RamDump {
 	 * @param loadAddr   - Load address (unused)
 	 * @param filename   - Filename
 	 */
-	public void Render(Composite TargetPage, byte[] data, int loadAddr, String filename, IDEDosPartition targetpart) {
+	public void Render(Composite TargetPage, byte[] data, int loadAddr, String filename, IDEDosPartition targetpart, Languages lang) {
 		SZXFile szxfile;
 		try {
 			szxfile = new SZXFile(data);
@@ -100,7 +101,7 @@ public class SZXSnapshotRenderer extends RamDump {
 
 			lbl = new Label(TargetPage, SWT.NONE);
 			labels.add(lbl);
-			lbl.setText("Flags: " + flags);
+			lbl.setText(lang.Msg(Languages.MSG_FLAGS)+": " + flags);
 			gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 			gd.horizontalSpan = 2;
 			lbl.setLayoutData(gd);
@@ -109,7 +110,7 @@ public class SZXSnapshotRenderer extends RamDump {
 
 			lbl = new Label(TargetPage, SWT.NONE);
 			labels.add(lbl);
-			lbl.setText("Alt Flags: " + flags);
+			lbl.setText(lang.Msg(Languages.MSG_ALTFLAGS) + ": " + flags);
 			gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 			gd.horizontalSpan = 2;
 			lbl.setLayoutData(gd);
@@ -117,7 +118,7 @@ public class SZXSnapshotRenderer extends RamDump {
 			lbl = new Label(TargetPage, SWT.NONE);
 			labels.add(lbl);
 
-			lbl.setText("File HW info.");
+			lbl.setText(lang.Msg(Languages.MSG_FILEHWINFO));
 
 			gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 			gd.horizontalSpan = 4;
@@ -150,13 +151,7 @@ public class SZXSnapshotRenderer extends RamDump {
 				gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 				gd.horizontalSpan = 2;
 				lbl.setLayoutData(gd);
-				
-				
-				
-				
 			}
-			
-			
 			
 			int RamBankOrder[] = new int[8];
 			byte rawdata[] = null;
@@ -183,7 +178,7 @@ public class SZXSnapshotRenderer extends RamDump {
 			}
 
 			super.Render(TargetPage, rawdata, loadAddr, szxfile.MachineClass != MachineState.MT_48K, szxfile.IY(),
-					RamBankOrder, filename, szxfile, targetpart);
+					RamBankOrder, filename, szxfile, targetpart, lang);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

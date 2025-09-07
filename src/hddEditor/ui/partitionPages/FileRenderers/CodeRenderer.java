@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.Renderer;
@@ -64,20 +65,20 @@ public class CodeRenderer extends FileRenderer {
 	 * @param loadAddr
 	 */
 	public void RenderCode(Composite mainPage, byte data[], byte header[], String Filename, int fileSize, int loadAddr,
-			FileSelectDialog filesel, IDEDosPartition currentpart, GenericSaveEvent saveevent) {
+			FileSelectDialog filesel, IDEDosPartition currentpart, GenericSaveEvent saveevent, Languages lang) {
 
-		super.Render(mainPage, data, Filename, filesel);
+		super.Render(mainPage, data, Filename, filesel, lang);
 		part = currentpart;
 		Renderers = new Vector<Renderer>();
 		Label lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("CODE file: ");
+		lbl.setText(lang.Msg(Languages.MSG_CODEFILE) + ": ");
 		GridData gd = new GridData(SWT.FILL, SWT.TOP, true, true);
 		gd.horizontalSpan = 2;
 		gd.heightHint = 20;
 		lbl.setLayoutData(gd);
 
 		lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("+3DOS File length: ");
+		lbl.setText(lang.Msg(Languages.MSG_PLUS3DOSFILELEN) +": ");
 		gd = new GridData(SWT.FILL, SWT.TOP, true, true);
 		gd.horizontalSpan = 1;
 		gd.heightHint = 20;
@@ -91,7 +92,7 @@ public class CodeRenderer extends FileRenderer {
 		lbl.setLayoutData(gd);
 
 		lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("Start Address: ");
+		lbl.setText(lang.Msg(Languages.MSG_STARTADDRESS) + ": ");
 		gd.horizontalSpan = 1;
 		gd.heightHint = 20;
 		lbl.setLayoutData(gd);
@@ -107,7 +108,7 @@ public class CodeRenderer extends FileRenderer {
 		DefaultBackgroundColor = lbl.getBackground();
 		if (saveevent != null) {
 			btn = new Button(mainPage, SWT.NONE);
-			btn.setText("Update Start address");
+			btn.setText(lang.Msg(Languages.MSG_UPDSTARTADDRESS));
 			btn.setLayoutData(gd);
 			btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -139,7 +140,7 @@ public class CodeRenderer extends FileRenderer {
 		}
 
 		btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract file as Hex");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASHEX));
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -152,13 +153,13 @@ public class CodeRenderer extends FileRenderer {
 				widgetSelected(arg0);
 			}
 		});
-		btn.setToolTipText("Save the file as hex");
+		btn.setToolTipText(lang.Msg(Languages.MSG_EXTRACTASHEX));
 		gd.horizontalSpan = 1;
 		gd.heightHint = 20;
 		btn.setLayoutData(gd);
 
 		btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract file as Binary");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASBIN));
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -171,14 +172,13 @@ public class CodeRenderer extends FileRenderer {
 				widgetSelected(arg0);
 			}
 		});
-		btn.setToolTipText("Save the file as a raw binary file");
 		gd.horizontalSpan = 1;
 		gd.heightHint = 20;
 		btn.setLayoutData(gd);
 
 		if (header != null) {
 			btn = new Button(mainPage, SWT.NONE);
-			btn.setText("Extract file as Binary Inc Header");
+			btn.setText(lang.Msg(Languages.MSG_EXTRACTASBINHEADER));
 			btn.setLayoutData(gd);
 			btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -195,7 +195,6 @@ public class CodeRenderer extends FileRenderer {
 					widgetSelected(arg0);
 				}
 			});
-			btn.setToolTipText("Extract the file including the OS (+3DOS/TR-DOS) header");
 			gd.horizontalSpan = 1;
 			gd.heightHint = 20;
 			btn.setLayoutData(gd);
@@ -204,7 +203,7 @@ public class CodeRenderer extends FileRenderer {
 		}
 
 		btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract file as Picture");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASIMG));
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -217,13 +216,13 @@ public class CodeRenderer extends FileRenderer {
 				widgetSelected(arg0);
 			}
 		});
-		btn.setToolTipText("Extract the file as an image");
+		btn.setToolTipText(lang.Msg(Languages.MSG_EXTRACTASIMG));
 		gd.horizontalSpan = 1;
 		gd.heightHint = 20;
 		btn.setLayoutData(gd);
 
 		btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract file as Asm");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASASM));
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -236,7 +235,7 @@ public class CodeRenderer extends FileRenderer {
 				widgetSelected(arg0);
 			}
 		});
-		btn.setToolTipText("Save a disassembled text of the file");
+		btn.setToolTipText(lang.Msg(Languages.MSG_EXTRACTASASMDESC));
 		gd.horizontalSpan = 1;
 		gd.heightHint = 20;
 		btn.setLayoutData(gd);
@@ -317,23 +316,23 @@ public class CodeRenderer extends FileRenderer {
 			} else if (s.equals(CODETYPES[2])) {
 				AssemblyRenderer renderer = new AssemblyRenderer();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, loadAddr);
+				renderer.Render(MainPage, data, loadAddr, lang);
 			} else if (s.equals(CODETYPES[3])) {
 				SNARenderer renderer = new SNARenderer();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, loadAddr, filename, part);
+				renderer.Render(MainPage, data, loadAddr, filename, part, lang);
 			} else if (s.equals(CODETYPES[4])) {
 				Z80SnapshotRenderer renderer = new Z80SnapshotRenderer();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, loadAddr, filename, part);
+				renderer.Render(MainPage, data, loadAddr, filename, part, lang);
 			} else if (s.equals(CODETYPES[5])) {
 				RamDump renderer = new RamDump();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a, new int[0], filename, null, null);
+				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a, new int[0], filename, null, null, lang);
 			} else if (s.equals(CODETYPES[6])) {
 				RamDump renderer = new SPRenderer();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a, new int[0], filename, null, null);
+				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a, new int[0], filename, null, null, lang);
 			} else if (s.equals(CODETYPES[7])) {
 				TextRenderer renderer = new TextRenderer();
 				Renderers.add(renderer);
@@ -341,7 +340,7 @@ public class CodeRenderer extends FileRenderer {
 			} else if (s.equals(CODETYPES[8])) {
 				SpriteRenderer renderer = new SpriteRenderer();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, 400, loadAddr, filesel, filename);
+				renderer.Render(MainPage, data, 400, loadAddr, filesel, filename, lang);
 			} else if (s.equals(CODETYPES[9])) {
 				RamDump renderer = new RamDump();
 				Renderers.add(renderer);
@@ -349,15 +348,15 @@ public class CodeRenderer extends FileRenderer {
 				byte data1[] = new byte[0xc000];
 				System.arraycopy(data, 0, data1, loadAddr-0x4000, Math.min(0xc000 - 0x1b00, data.length));
 
-				renderer.Render(MainPage, data1, loadAddr, false, 0x5c3a, new int[0], filename, null, null);
+				renderer.Render(MainPage, data1, loadAddr, false, 0x5c3a, new int[0], filename, null, null, lang);
 			} else if (s.equals(CODETYPES[10])) {
 				SZXSnapshotRenderer renderer = new SZXSnapshotRenderer();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, loadAddr, filename, part);
+				renderer.Render(MainPage, data, loadAddr, filename, part, lang);
 			} else {
 				BinaryRenderer renderer = new BinaryRenderer();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, loadAddr, 400);
+				renderer.Render(MainPage, data, loadAddr, 400, lang);
 			}
 		} catch (Exception E) {
 			System.out.println("Error rendering:");
@@ -372,7 +371,7 @@ public class CodeRenderer extends FileRenderer {
 
 	protected void DoSaveFileAsAsm(byte[] data, Composite mainPage2, int loadAddr, String Origfilename) {
 		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES,
-				"Save " + Origfilename + " as Assembly...", new String[] { "*.asm" }, filename);
+				String.format(lang.Msg(Languages.MSG_SAVEXASASM), Origfilename), new String[] { "*.asm" }, filename);
 
 		if (Selected != null) {
 			Speccy.DoSaveFileAsAsm(data, Selected, loadAddr);
@@ -390,7 +389,7 @@ public class CodeRenderer extends FileRenderer {
 	 */
 	protected void DoSaveFileAsPic(byte[] data, Composite mainPage, String Origfilename) {
 		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES,
-				"Save " + Origfilename + " as an image...",
+				String.format(lang.Msg(Languages.MSG_SAVEXASIMG), Origfilename),
 				new String[] { "*.png", "*.gif", "*.bmp", "*.tiff", "*.jpg", "*.ico" }, filename + ".png");
 
 		if (Selected != null) {
@@ -421,15 +420,15 @@ public class CodeRenderer extends FileRenderer {
 				}
 			} catch (FileNotFoundException e) {
 				MessageBox dialog = new MessageBox(MainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("Directory not found!");
+				dialog.setText(lang.Msg(Languages.MSG_ERRSAVING));
+				dialog.setMessage(lang.Msg(Languages.MSG_DIRNOTFOUND));
 				dialog.open();
 
 				e.printStackTrace();
 			} catch (IOException e) {
 				MessageBox dialog = new MessageBox(MainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("IO error: " + e.getMessage());
+				dialog.setText(lang.Msg(Languages.MSG_ERRSAVING));
+				dialog.setMessage(lang.Msg(Languages.MSG_IOERROR) + ": " + e.getMessage());
 				dialog.open();
 				e.printStackTrace();
 			}

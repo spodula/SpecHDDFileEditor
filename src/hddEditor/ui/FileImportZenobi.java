@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Text;
 import hddEditor.libs.DiskUtils;
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
@@ -55,17 +56,17 @@ public class FileImportZenobi {
 		// if TRUE, the screen is compressed and need to put in a RANDOMIZE USR to
 		// decompress it.
 		public boolean ScreenUncompress = false;
-		
-		//Address of the Randomize usr to decompress the screen
+
+		// Address of the Randomize usr to decompress the screen
 		public int ScreenUncompressAddress = 0;
-		
-		//Any errors when decoding tape file.
+
+		// Any errors when decoding tape file.
 		public String errors = "";
-		
-		//Some versions use EXTVEL+xx to start the program. This stores it if required
+
+		// Some versions use EXTVEL+xx to start the program. This stores it if required
 		public int extvec = 0;
-		
-		//any EXTVEC lines
+
+		// any EXTVEC lines
 		public String excveclines[] = null;
 
 		/**
@@ -90,11 +91,11 @@ public class FileImportZenobi {
 
 		/**
 		 * Do we have enough information to create a loader?
+		 * 
 		 * @return
 		 */
 		public boolean CanImport() {
-			boolean result = (binfile[0] != null) && (binfile[1] != null) && (binfile[2] != null)
-					&& (loaderpoke > 0);
+			boolean result = (binfile[0] != null) && (binfile[1] != null) && (binfile[2] != null) && (loaderpoke > 0);
 
 			return (result);
 		}
@@ -156,15 +157,18 @@ public class FileImportZenobi {
 	// Default file select dialog;.
 	private FileSelectDialog fsd = null;
 
+	private Languages lang;
+
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public FileImportZenobi(Display display, OSHandler handler, FileSelectDialog fsd) {
+	public FileImportZenobi(Display display, OSHandler handler, FileSelectDialog fsd, Languages lang) {
 		this.display = display;
 		this.CurrentTargetHandler = handler;
 		this.fsd = fsd;
+		this.lang = lang;
 	}
 
 	/**
@@ -206,7 +210,7 @@ public class FileImportZenobi {
 		Sourcefile.setText("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
 		SelectSourceFileBtn = new Button(shell, SWT.BORDER);
-		SelectSourceFileBtn.setText("Select Source file");
+		SelectSourceFileBtn.setText(lang.Msg(Languages.MSG_SELSOURCE));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -215,7 +219,7 @@ public class FileImportZenobi {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				File selected = fsd.AskForSingleFileOpen(FileSelectDialog.FILETYPE_IMPORTDRIVE,
-						"Select file to import.", HDDEditor.SUPPORTEDFILETYPES, "");
+						lang.Msg(Languages.MSG_SELFILEIMP) + ".", HDDEditor.SUPPORTEDFILETYPES, "");
 				if (selected != null) {
 					Sourcefile.setText(selected.getAbsolutePath());
 					DoLoadFile(selected);
@@ -230,7 +234,7 @@ public class FileImportZenobi {
 		});
 
 		Label lbl = new Label(shell, SWT.NONE);
-		lbl.setText("Source partition:");
+		lbl.setText(lang.Msg(Languages.MSG_SOURCEPART) + ":");
 
 		SourcePartition = new Combo(shell, SWT.CHECK);
 		String entries[] = { "" };
@@ -247,7 +251,7 @@ public class FileImportZenobi {
 		});
 
 		Button btn = new Button(shell, SWT.BORDER);
-		btn.setText("Select all");
+		btn.setText(lang.Msg(Languages.MSG_SELECTALL));
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -265,7 +269,7 @@ public class FileImportZenobi {
 		});
 
 		btn = new Button(shell, SWT.BORDER);
-		btn.setText("Select None");
+		btn.setText(lang.Msg(Languages.MSG_SELECTNONE));
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -283,7 +287,7 @@ public class FileImportZenobi {
 		});
 
 		btn = new Button(shell, SWT.BORDER);
-		btn.setText("Invert selection");
+		btn.setText(lang.Msg(Languages.MSG_INVSEL));
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -312,13 +316,13 @@ public class FileImportZenobi {
 
 		TableColumn tc1 = new TableColumn(SourceList, SWT.LEFT);
 		TableColumn tc2 = new TableColumn(SourceList, SWT.FILL);
-		tc1.setText("Filename");
-		tc2.setText("Notes");
+		tc1.setText(lang.Msg(Languages.MSG_FILENAME));
+		tc2.setText(lang.Msg(Languages.MSG_NOTES));
 		tc1.setWidth(250);
 		tc2.setWidth(250);
 
 		Label txtlbl = new Label(shell, SWT.NONE);
-		txtlbl.setText("Base filename:");
+		txtlbl.setText(lang.Msg(Languages.MSG_NOTES) + ":");
 
 		TargFilename = new Text(shell, SWT.BORDER);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -327,7 +331,7 @@ public class FileImportZenobi {
 		TargFilename.setLayoutData(gd);
 
 		txtlbl = new Label(shell, SWT.NONE);
-		txtlbl.setText("Target partition:");
+		txtlbl.setText(lang.Msg(Languages.MSG_TARGETPART) + ":");
 		TargetPartition = new Combo(shell, SWT.CHECK);
 		String itms[] = new String[CurrentTargetHandler.SystemPart.partitions.length];
 		int itmptr = 0;
@@ -347,7 +351,7 @@ public class FileImportZenobi {
 		new Label(shell, SWT.NONE);
 
 		ImportBtn = new Button(shell, SWT.BORDER);
-		ImportBtn.setText("Import");
+		ImportBtn.setText(lang.Msg(Languages.MSG_IMPORT));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -365,7 +369,7 @@ public class FileImportZenobi {
 		});
 
 		CloseBtn = new Button(shell, SWT.BORDER);
-		CloseBtn.setText("Close");
+		CloseBtn.setText(lang.Msg(Languages.MSG_CLOSE));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -451,7 +455,7 @@ public class FileImportZenobi {
 			messageBox.setMessage(e.getMessage());
 			messageBox.setText(e.getMessage());
 			messageBox.open();
-			System.out.println("Loading failed. " + e.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_CANTLOAD) + ". " + e.getMessage());
 		}
 	}
 
@@ -501,12 +505,12 @@ public class FileImportZenobi {
 				if (!zDets[0].errors.isBlank()) {
 					ErrorText.setText(z.errors);
 				} else {
-					String s = "File does not seem to be a Zenobi PAWS file...";
+					String s = lang.Msg(Languages.MSG_ZENOBI_INCORRECT) + "...";
 					if (zDets[0].loaderpoke == 0) {
-						s = s + "\nLoader patch cannot be found.";
+						s = s + "\n" + lang.Msg(Languages.MSG_ZENOBI_CANTFINDLOADER) + ".";
 					}
 					if (zDets[0].startaddress == -1) {
-						s = s + "\nCannot find start address";
+						s = s + "\n" + lang.Msg(Languages.MSG_ZENOBI_CANTFINDSTART);
 					}
 
 					ErrorText.setText(s);
@@ -666,7 +670,7 @@ public class FileImportZenobi {
 		for (int dirIndex = 0; dirIndex < directory.length; dirIndex++) {
 			FileEntry f = directory[dirIndex];
 			if (f.GetSpeccyBasicDetails().BasicType == -1) {
-				result[dirIndex] = "Invalid file.";
+				result[dirIndex] = lang.Msg(Languages.MSG_INVALIDFILE) + ".";
 			} else if (f.GetSpeccyBasicDetails().BasicType == Speccy.BASIC_BASIC) {
 				lastBasic = dirIndex;
 			} else
@@ -674,11 +678,11 @@ public class FileImportZenobi {
 					String filename = f.GetFilename();
 					if (f.GetFileData() != null && f.GetFileData().length == 6912) {
 						// uncompressed screens will always override an attempt at a compressed
-						result[dirIndex] = entrynum + ".Uncompressed screen";
+						result[dirIndex] = entrynum + "." + lang.Msg(Languages.MSG_UNCOMPRESSEDSCREEN);
 						currentzd.screen = f;
 						currentzd.ScreenUncompress = false;
 					} else if (f.GetFileData() != null && f.GetFileData().length == 768) {
-						result[dirIndex] = entrynum + ".Font file";
+						result[dirIndex] = entrynum + "." + lang.Msg(Languages.MSG_FONTFILE);
 						currentzd.Font = f;
 					} else if (filename.endsWith("@")) {
 						currentzd.binfile[0] = f;
@@ -689,10 +693,11 @@ public class FileImportZenobi {
 						int foundaddress = locate_bytestream(data,
 								new int[] { 0xDD, 0xE5, 0xCD, 0x08, 0x07, 0xDD, 0xE1 }, 0);
 						if (foundaddress == -1) {
-							result[dirIndex] = entrynum + ".Bin part 1 (Cant find loader)";
+							result[dirIndex] = entrynum + ".Bin part 1 ("
+									+ lang.Msg(Languages.MSG_ZENOBI_CANTFINDLOADER) + ")";
 						} else {
-							result[dirIndex] = entrynum + ".Bin part 1 (Loader poke:" + (foundaddress + 2 + baseaddress)
-									+ ")";
+							result[dirIndex] = entrynum + ".Bin part 1 (" + lang.Msg(Languages.MSG_LOADERPOKE) + ":"
+									+ (foundaddress + 2 + baseaddress) + ")";
 							currentzd.loaderpoke = foundaddress + 2 + baseaddress;
 						}
 
@@ -714,17 +719,17 @@ public class FileImportZenobi {
 						}
 
 					} else if (filename.endsWith("C")) {
-						result[dirIndex] = "128K file";
-						currentzd.errors = currentzd.errors + "Looks like a 128K PAWS file. not currently supported.";
+						result[dirIndex] = lang.Msg(Languages.MSG_128KFILE);
+						currentzd.errors = currentzd.errors + lang.Msg(Languages.MSG_128KPAWS) + ".";
 					} else {
 						// unidentified BIN file... If we havent found a screen, see if this is it.
 						if (currentzd.screen == null) {
-							result[dirIndex] = entrynum + ". Compressed screen? (uses basic: "
-									+ directory[lastBasic].GetFilename() + ")";
+							result[dirIndex] = entrynum + ". " + lang.Msg(Languages.MSG_COMPRESSEDSCREEN)
+									+ "? (uses basic: " + directory[lastBasic].GetFilename() + ")";
 							currentzd.screen = f;
 							currentzd.ScreenUncompress = true;
 						} else {
-							result[dirIndex] = "Unknown file";
+							result[dirIndex] = lang.Msg(Languages.MSG_UNKNOWNFILE);
 						}
 
 					}
@@ -754,37 +759,40 @@ public class FileImportZenobi {
 	 */
 	private String[] ParseBasicFile(ZenobiDetails currentzd, byte basicdata[], String currentnotes[], int lastbasic,
 			int blockstart, int entrynum) {
-		currentnotes[lastbasic] = entrynum + ".Real loader";
+		currentnotes[lastbasic] = entrynum + "." + lang.Msg(Languages.MSG_REALLOADER);
 		int address = 0;
 		double finalru = -1;
 		double firstru = -1;
 		int numru = 0;
-		while (address > -1) {
+		while ((address > -1) && (address < basicdata.length)) {
 			address = locate_bytestream(basicdata, new int[] { 0xF9, 0xC0 }, address + 1);
-			if (address != -1) {
+			if ((address != -1) && (address < basicdata.length)) {
 				// Decode the following number
-				while (basicdata[address] != 0x0e) {
+				while ((address < basicdata.length) && (basicdata[address] != 0x0e)) {
 					address++;
 				}
-				finalru = Speccy.GetNumberAtByte(basicdata, address + 1);
-				if (numru == 0) {
-					firstru = finalru;
-				}
-				numru++;
-				if (numru > 2) {
-					currentzd.errors = currentzd.errors + entrynum
-							+ ".More than 2 RANDOMIZE USR statements found. May meed manual intervention."
-							+ System.lineSeparator();
+				if (address < basicdata.length) {
+					finalru = Speccy.GetNumberAtByte(basicdata, address + 1);
+					if (numru == 0) {
+						firstru = finalru;
+					}
+					numru++;
+					if (numru > 2) {
+						currentzd.errors = currentzd.errors + entrynum + "." + lang.Msg(Languages.MSG_CONFUSINGLOADER)
+								+ "." + System.lineSeparator();
+					}
 				}
 			}
 		}
 		// Updates the notes screen.
-		currentnotes[lastbasic] = entrynum + ".Real loader - Start address:" + finalru;
+		currentnotes[lastbasic] = entrynum + "." + lang.Msg(Languages.MSG_REALLOADER) + " - "
+				+ lang.Msg(Languages.MSG_STARTADDRESS) + ":" + finalru;
 		currentzd.startaddress = (int) Math.floor(finalru);
 		if (numru > 1) {
 			for (int i = blockstart; i < currentnotes.length; i++) {
-				if (currentnotes[i].contains("Compressed screen")) {
-					currentnotes[i] = currentnotes[i] + " (Run address: " + firstru + ")";
+				if (currentnotes[i].contains(lang.Msg(Languages.MSG_COMPRESSEDSCREEN))) {
+					currentnotes[i] = currentnotes[i] + " (" + lang.Msg(Languages.MSG_RUNADDRESS) + ": " + firstru
+							+ ")";
 					currentzd.ScreenUncompressAddress = (int) Math.floor(firstru);
 				}
 			}
@@ -815,7 +823,7 @@ public class FileImportZenobi {
 				}
 				if (numstartloc != 11) {
 					currentzd.clear = (int) Speccy.GetNumberAtByte(possnum, numstartloc);
-					currentnotes[lastbasic] = currentnotes[lastbasic] + " Clear:" + currentzd.clear;
+					currentnotes[lastbasic] = currentnotes[lastbasic] + " CLEAR:" + currentzd.clear;
 				}
 			}
 			address++;

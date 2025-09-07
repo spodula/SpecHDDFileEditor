@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import hddEditor.libs.ASMLib;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.snapshots.MachineState;
@@ -95,7 +96,7 @@ public class SPRenderer extends RamDump {
 	 */
 	@Override
 	public void Render(Composite TargetPage, byte[] data, int loadAddr, boolean is128K, int xx, int i128BankOrder[],
-			String filename, MachineState cpustate, IDEDosPartition targetpartition) {
+			String filename, MachineState cpustate, IDEDosPartition targetpartition, Languages lang) {
 		labels = new ArrayList<Label>();
 		Renderers = new ArrayList<Renderer>();
 
@@ -108,12 +109,11 @@ public class SPRenderer extends RamDump {
 		Font boldFont = new Font(lbl.getShell().getDisplay(),
 				new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 
-		String s = "16K";
+		String s = lang.Msg(Languages.MSG_16SPSNAPSHOT);
 		if (proglen == 49152)
-			s = "48K";
-		s = s + " .SP (SPECTRUM) snapshot file: ";
+			s = lang.Msg(Languages.MSG_48SPSNAPSHOT);
 		if (data[0] != 'S' || data[1] != 'P') {
-			s = s + "(Bad header)";
+			s = s + "("+lang.Msg(Languages.MSG_BADHEADER)+")";
 		}
 
 		lbl.setText(s);
@@ -166,7 +166,7 @@ public class SPRenderer extends RamDump {
 
 		lbl = new Label(TargetPage, SWT.NONE);
 		labels.add(lbl);
-		lbl.setText("Flags: " + flags);
+		lbl.setText(lang.Msg(Languages.MSG_FLAGS)+": " + flags);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 2;
 		lbl.setLayoutData(gd);
@@ -175,7 +175,7 @@ public class SPRenderer extends RamDump {
 
 		lbl = new Label(TargetPage, SWT.NONE);
 		labels.add(lbl);
-		lbl.setText("Alt Flags: " + flags);
+		lbl.setText(lang.Msg(Languages.MSG_ALTFLAGS) + ": " + flags);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 2;
 		lbl.setLayoutData(gd);
@@ -185,7 +185,7 @@ public class SPRenderer extends RamDump {
 		byte rawdata[] = new byte[49152];
 		System.arraycopy(data, 38, rawdata, 0, Math.min(data.length - 38, 49152));
 
-		super.Render(TargetPage, rawdata, loadAddr, false, IY, new int[8], filename, null,null);
+		super.Render(TargetPage, rawdata, loadAddr, false, IY, new int[8], filename, null,null, lang);
 	}
 
 }

@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 import hddEditor.ui.partitionPages.dialogs.edit.callbacks.GenericSaveEvent;
@@ -30,8 +31,8 @@ public class CharArrayRenderer extends FileRenderer {
 	 * Render the character array to the composite.
 	 */
 	@Override
-	public void Render(Composite mainPage, byte data[], String Filename, FileSelectDialog filesel) {
-		super.Render(mainPage, data, Filename, filesel);
+	public void Render(Composite mainPage, byte data[], String Filename, FileSelectDialog filesel, Languages lang) {
+		super.Render(mainPage, data, Filename, filesel,lang);
 		Plus3DosFileHeader p3d = new Plus3DosFileHeader(data);
 		String Varname ="A";
 		byte header[] = null;
@@ -44,7 +45,7 @@ public class CharArrayRenderer extends FileRenderer {
 			System.arraycopy(data, 0x80, newdata, 0, newdata.length);
 		} 
 
-		RenderCharArray(mainPage, newdata, header, Filename, Varname,filesel,null);
+		RenderCharArray(mainPage, newdata, header, Filename, Varname,filesel,null, lang);
 	}
 
 
@@ -59,9 +60,10 @@ public class CharArrayRenderer extends FileRenderer {
 	 * @param varname  - variable name
      * @param saveevent - If not null, called when the variable name changes.
 	 */
-	public void RenderCharArray(Composite mainPage, byte data[], byte header[], String Filename, String varname, FileSelectDialog filesel, GenericSaveEvent saveevent) {
+	public void RenderCharArray(Composite mainPage, byte data[], byte header[], String Filename, String varname, FileSelectDialog filesel, GenericSaveEvent saveevent, Languages lang) {
+		this.lang = lang;
 		Label lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("Character array: ");
+		lbl.setText(lang.Msg(Languages.MSG_CHARARRAY) + ": ");
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 4;
 		lbl.setLayoutData(gd);
@@ -69,7 +71,7 @@ public class CharArrayRenderer extends FileRenderer {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 1;
 		Button btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract array as text");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASTEXT));
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -84,7 +86,7 @@ public class CharArrayRenderer extends FileRenderer {
 		});
 
 		btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract file as Binary");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASBIN));
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -100,7 +102,7 @@ public class CharArrayRenderer extends FileRenderer {
 
 		if (header != null) {
 			btn = new Button(mainPage, SWT.NONE);
-			btn.setText("Extract file as Binary Inc Header");
+			btn.setText(lang.Msg(Languages.MSG_EXTRACTASBINHEADER));
 			btn.setLayoutData(gd);
 			btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -123,7 +125,7 @@ public class CharArrayRenderer extends FileRenderer {
 		new Label(mainPage, SWT.NONE);
 
 		lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("Variable: ");
+		lbl.setText(lang.Msg(Languages.MSG_VARNAME) + ": ");
 
 		VariableEdit = new Text(mainPage, SWT.NONE);
 		VariableEdit.setText("");
@@ -135,7 +137,7 @@ public class CharArrayRenderer extends FileRenderer {
 		DefaultBackgroundColor = lbl.getBackground();
 		if (saveevent != null) {
 			btn = new Button(mainPage, SWT.NONE);
-			btn.setText("Update Variable name");
+			btn.setText(lang.Msg(Languages.MSG_UPDVARNAME));
 			btn.setLayoutData(gd);
 			btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -181,7 +183,7 @@ public class CharArrayRenderer extends FileRenderer {
 		}
 
 		lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("Dimensions: " + numDimensions);
+		lbl.setText(lang.Msg(Languages.MSG_DIMENSIONS) + ": " + numDimensions);
 
 		String s = varname + "(";
 		for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
@@ -219,7 +221,7 @@ public class CharArrayRenderer extends FileRenderer {
 
 				sb.append(chr);
 			}
-			sb.append("\r\n");
+			sb.append(System.lineSeparator());
 			int diminc = Dimsizes.length - 2;
 			boolean doneInc = false;
 			while (!doneInc) {
@@ -256,7 +258,7 @@ public class CharArrayRenderer extends FileRenderer {
 	 * @param p3d
 	 */
 	protected void DoSaveArrayAsText(byte[] data, Composite mainPage, String varname) {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save array as...", new String[] {"*.csv"},filename);
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES,lang.Msg(Languages.MSG_SAVEARRAYAS), new String[] {"*.csv"},filename);
 		
 		if (Selected != null) {
 			Speccy.DoSaveCharArrayAsText(Selected, data, varname);

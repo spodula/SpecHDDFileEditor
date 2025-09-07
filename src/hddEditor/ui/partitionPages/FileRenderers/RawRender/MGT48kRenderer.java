@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import hddEditor.libs.ASMLib;
+import hddEditor.libs.Languages;
 import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
 
 public class MGT48kRenderer extends RamDump {
@@ -49,7 +50,7 @@ public class MGT48kRenderer extends RamDump {
 	private String[] snaVars = { "IY", "IX", "DE'", "BC'", "HL'", "AF'", "DE", "BC", "HL", "junk", "I", "SP"};
 	private int[] snaLen = { 2,2,2,2,2,2,2,2,2,1,1,2 };
 	
-	public void Render(Composite TargetPage, byte[] data, MGTDirectoryEntry entry ) {
+	public void Render(Composite TargetPage, byte[] data, MGTDirectoryEntry entry , Languages lang) {
 		labels = new ArrayList<Label>();
 		Renderers = new ArrayList<Renderer>();
 
@@ -127,7 +128,7 @@ public class MGT48kRenderer extends RamDump {
 		String Flags = ASMLib.GetFlagsAsString(flagReg);
 		lbl = new Label(TargetPage, SWT.NONE);
 		labels.add(lbl);
-		lbl.setText("Flags: " + Flags);
+		lbl.setText(lang.Msg(Languages.MSG_FLAGS) + ": " + Flags);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 2;
 		lbl.setLayoutData(gd);
@@ -135,7 +136,7 @@ public class MGT48kRenderer extends RamDump {
 		String altFlags = ASMLib.GetFlagsAsString(data[0x09]);
 		lbl = new Label(TargetPage, SWT.NONE);
 		labels.add(lbl);
-		lbl.setText("Alt Flags: " + altFlags);
+		lbl.setText(lang.Msg(Languages.MSG_ALTFLAGS) + ": " + altFlags);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 2;
 		lbl.setLayoutData(gd);
@@ -144,6 +145,6 @@ public class MGT48kRenderer extends RamDump {
 		
 		int IY = (int) ((entry.RawDirectoryEntry[0xdd] & 0xff) * 0x100) + (entry.RawDirectoryEntry[0xdc] & 0xff);
 		
-		super.Render(TargetPage,data, 0x4000, false, IY,new int[1], entry.GetFilename(),null,null);
+		super.Render(TargetPage,data, 0x4000, false, IY,new int[1], entry.GetFilename(),null,null, lang);
 	}
 }

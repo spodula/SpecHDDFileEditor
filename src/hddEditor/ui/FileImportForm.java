@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import hddEditor.libs.DiskUtils;
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
@@ -69,15 +70,18 @@ public class FileImportForm {
 
 	private FileSelectDialog fsd = null;
 
+	private Languages lang;
+	
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public FileImportForm(Display display, OSHandler handler, FileSelectDialog fsd) {
+	public FileImportForm(Display display, OSHandler handler, FileSelectDialog fsd, Languages lang) {
 		this.display = display;
 		this.CurrentTargetHandler = handler;
 		this.fsd = fsd;
+		this.lang = lang;
 	}
 
 	/**
@@ -105,7 +109,7 @@ public class FileImportForm {
 		gridLayout.marginRight = 20;
 
 		shell.setLayout(gridLayout);
-		shell.setText("Import another disk.");
+		shell.setText(lang.Msg(Languages.MENU_IMPPART));
 
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
@@ -119,7 +123,7 @@ public class FileImportForm {
 		Sourcefile.setText("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
 		SelectSourceFileBtn = new Button(shell, SWT.BORDER);
-		SelectSourceFileBtn.setText("Select Source file");
+		SelectSourceFileBtn.setText(lang.Msg(Languages.MSG_SELSOURCE));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -128,7 +132,7 @@ public class FileImportForm {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				File selected = fsd.AskForSingleFileOpen(FileSelectDialog.FILETYPE_IMPORTDRIVE,
-						"Select file to import.", HDDEditor.SUPPORTEDFILETYPES, "");
+						lang.Msg(Languages.MSG_SELFILEIMP)+".", HDDEditor.SUPPORTEDFILETYPES, "");
 				if (selected != null) {
 					Sourcefile.setText(selected.getAbsolutePath());
 					DoLoadFile(selected);
@@ -143,7 +147,7 @@ public class FileImportForm {
 		});
 
 		Label lbl = new Label(shell, SWT.NONE);
-		lbl.setText("Source partition:");
+		lbl.setText(lang.Msg(Languages.MSG_SOURCEPART)+":");
 
 		SourcePartition = new Combo(shell, SWT.CHECK);
 		String entries[] = { "" };
@@ -160,7 +164,7 @@ public class FileImportForm {
 		});
 
 		Button btn = new Button(shell, SWT.BORDER);
-		btn.setText("Select all");
+		btn.setText(lang.Msg(Languages.MSG_SELECTALL));
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -178,7 +182,7 @@ public class FileImportForm {
 		});
 
 		btn = new Button(shell, SWT.BORDER);
-		btn.setText("Select None");
+		btn.setText(lang.Msg(Languages.MSG_SELECTNONE));
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -196,7 +200,7 @@ public class FileImportForm {
 		});
 
 		btn = new Button(shell, SWT.BORDER);
-		btn.setText("Invert selection");
+		btn.setText(lang.Msg(Languages.MSG_INVSEL));
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -224,7 +228,7 @@ public class FileImportForm {
 		SourceList.setHeaderVisible(true);
 
 		Label txtlbl = new Label(shell, SWT.NONE);
-		txtlbl.setText("Target partition:");
+		txtlbl.setText(lang.Msg(Languages.MSG_TARGETPART)+":");
 		TargetPartition = new Combo(shell, SWT.CHECK);
 		String itms[] = new String[CurrentTargetHandler.SystemPart.partitions.length];
 		int itmptr = 0;
@@ -242,7 +246,7 @@ public class FileImportForm {
 		new Label(shell, SWT.NONE);
 
 		ImportBtn = new Button(shell, SWT.BORDER);
-		ImportBtn.setText("Import");
+		ImportBtn.setText(lang.Msg(Languages.MSG_IMPORT));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -260,7 +264,7 @@ public class FileImportForm {
 		});
 
 		CloseBtn = new Button(shell, SWT.BORDER);
-		CloseBtn.setText("Close");
+		CloseBtn.setText(lang.Msg(Languages.MSG_CLOSE));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -342,7 +346,7 @@ public class FileImportForm {
 			messageBox.setMessage(e.getMessage());
 			messageBox.setText(e.getMessage());
 			messageBox.open();
-			System.out.println("Loading failed. " + e.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_CANTLOAD)+ ". " + e.getMessage());
 		}
 	}
 
@@ -425,7 +429,7 @@ public class FileImportForm {
 			messageBox.setMessage(e.getMessage());
 			messageBox.setText(e.getMessage());
 			messageBox.open();
-			System.out.println("Copy failed. " + e.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_COPYFAILED)+". " + e.getMessage());
 		}
 	}
 }

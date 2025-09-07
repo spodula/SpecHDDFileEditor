@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.HDFUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.HDD.IDEDosDisk;
@@ -48,16 +49,21 @@ public class FileConversionForm {
 	//Set so the form cant close when the conversion is running. 
 	private boolean running = false;
 
+	//File save/load dialogs
 	private FileSelectDialog fsd = null;
+	
+	//Language
+	Languages lang;
 	
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public FileConversionForm(Display display, FileSelectDialog fsd) {
+	public FileConversionForm(Display display, FileSelectDialog fsd, Languages lang) {
 		this.display = display;
 		this.fsd = fsd;
+		this.lang = lang;
 	}
 
 	/**
@@ -85,7 +91,7 @@ public class FileConversionForm {
 		gridLayout.marginRight = 20;
 
 		shell.setLayout(gridLayout);
-		shell.setText("Convert Between Hard drive image formats.");
+		shell.setText(lang.Msg(Languages.MSG_CONVRAWHDF));
 
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
@@ -98,7 +104,7 @@ public class FileConversionForm {
 		Sourcefile.setText("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
 		SelectSourceFileBtn = new Button(shell, SWT.BORDER);
-		SelectSourceFileBtn.setText("Select Source file");
+		SelectSourceFileBtn.setText(lang.Msg(Languages.MSG_SELSOURCE));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -106,7 +112,7 @@ public class FileConversionForm {
 		SelectSourceFileBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				File Selected = fsd.AskForSingleFileOpen(FileSelectDialog.FILETYPE_DRIVE,"Select source file", new String[] { "*", "*.img", "*.hdf" },"");
+				File Selected = fsd.AskForSingleFileOpen(FileSelectDialog.FILETYPE_DRIVE,lang.Msg(Languages.MSG_SELSOURCE), new String[] { "*", "*.img", "*.hdf" },"");
 				if (Selected != null) {
 					Sourcefile.setText(Selected.getAbsolutePath());
 				}
@@ -126,7 +132,7 @@ public class FileConversionForm {
 		Targetfile.setText("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
 		SelectTargetFileBtn = new Button(shell, SWT.BORDER);
-		SelectTargetFileBtn.setText("Select Target file");
+		SelectTargetFileBtn.setText(lang.Msg(Languages.MSG_SELTARGET));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -134,7 +140,9 @@ public class FileConversionForm {
 		SelectTargetFileBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				File Selected = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_DRIVE,"Select Target file",new String[] { "*", "*.img", "*.hdf" },"");
+				String seltarget = lang.Msg(Languages.MSG_SELTARGET);
+				File Selected = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_DRIVE,seltarget,
+							new String[] { "*.img", "*.hdf","*.*" },"");
 				if (Selected != null) {
 					Targetfile.setText(Selected.getAbsolutePath());
 				}
@@ -147,7 +155,7 @@ public class FileConversionForm {
 		});
 
 		Label lbl = new Label(shell, SWT.NONE);
-		lbl.setText("Target file type:");
+		lbl.setText(lang.Msg(Languages.MSG_TARGETTYPE)+":");
 
 		TargetFileType = new Combo(shell, SWT.CHECK);
 		String entries[] = { "HDF file (8 bit)", "HDF file (16 bit)", "Raw IMG file (8 bit)", "Raw IMG file (16 bit)" };
@@ -161,7 +169,7 @@ public class FileConversionForm {
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
 		ConvertBtn = new Button(shell, SWT.BORDER);
-		ConvertBtn.setText("Convert");
+		ConvertBtn.setText(lang.Msg(Languages.MSG_CONVERT));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -179,7 +187,7 @@ public class FileConversionForm {
 		});
 
 		CloseBtn = new Button(shell, SWT.BORDER);
-		CloseBtn.setText("Close");
+		CloseBtn.setText(lang.Msg(Languages.MSG_CLOSE));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -241,14 +249,14 @@ public class FileConversionForm {
 				result = new RS_IDEDosDisk(f);
 			} else {
 				MessageBox messageBox = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-				messageBox.setMessage("File " + Filename + " is not a Raw HD image or RS HDF drive image.");
-				messageBox.setText("File " + Filename + " is not a Raw HD image or RS HDF drive image.");
+				messageBox.setMessage(String.format(lang.Msg(Languages.MSG_NOTRAWHDD), Filename));
+				messageBox.setText(String.format(lang.Msg(Languages.MSG_NOTRAWHDD), Filename));
 				messageBox.open();
 			}
 		} catch (IOException e) {
 			MessageBox messageBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-			messageBox.setMessage("Error openning file " + Filename + " " + e.getMessage());
-			messageBox.setText("Error openning file " + Filename + " " + e.getMessage());
+			messageBox.setMessage(String.format(lang.Msg(Languages.MSG_ERRORLOADING), Filename)+ " " + e.getMessage());
+			messageBox.setText(String.format(lang.Msg(Languages.MSG_ERRORLOADING), Filename)+ " " + e.getMessage());
 			messageBox.open();
 			e.printStackTrace();
 		}
@@ -259,7 +267,7 @@ public class FileConversionForm {
 	 * Actually convert the file
 	 */
 	protected void DoConvert() {
-		ProgesssForm pf = new ProgesssForm(display);
+		ProgesssForm pf = new ProgesssForm(display, lang);
 		try {
 			//Disable all the buttons
 			ConvertBtn.setEnabled(false);
@@ -278,17 +286,18 @@ public class FileConversionForm {
 			//Filenames
 			String srcfile = Sourcefile.getText();
 			String targFile = Targetfile.getText();
-			pf.Show("Converting...", "Converting "+new File(srcfile).getName()+" to "+new File(targFile).getName());
+			pf.Show(lang.Msg(Languages.MSG_CONVERTING)+"...",
+					String.format(lang.Msg(Languages.MSG_CONVERTFILE), new File(srcfile).getName(),new File(targFile).getName()));
 
 			// Open the disk.
-			System.out.println("Loading " + srcfile);
+			System.out.println(String.format(lang.Msg(Languages.MSG_LOADING), srcfile));
 			Disk SourceDisk = GetCorrectDiskFromFile(srcfile);
 
 			//File flags
 			boolean IsTarget8Bit = TargetFileType.getText().contains("8 bit");
 			boolean IsTargetHDF = TargetFileType.getText().contains("HDF");
 
-			System.out.println("Openning " + targFile + " for writing...");
+			System.out.println(String.format(lang.Msg(Languages.MSG_OPENINGWRITE), targFile));
 			try {
 				//GDS 30 Apr: Bug #1: Converted to use LONGs for sector numbers.
 				long ProgressScaleNum = 1;   //Scale value.
@@ -309,7 +318,8 @@ public class FileConversionForm {
 					}
 					pf.SetMax((int)ScaledNumSectors);
 					
-					System.out.println("Copying " + Numsectors + " sectors.");
+					System.out.println(String.format(lang.Msg(Languages.MSG_COPYINGXXSECTPRS), Numsectors));
+					
 					int SectorSz = SourceDisk.GetSectorSize();
 					for (long sectorNum = 0; (sectorNum < Numsectors) && !cancelled; sectorNum++) {
 						byte sector[] = SourceDisk.GetBytesStartingFromSector(sectorNum, SectorSz);
@@ -331,20 +341,20 @@ public class FileConversionForm {
 					}
 					System.out.println();
 					if (cancelled) {
-						System.out.println("Cancelled");
+						System.out.println(lang.Msg(Languages.MSG_CANCELLED));
 					} else {
-						System.out.println("Copied "+Numsectors+" sectors of "+SectorSz+" bytes");
+						System.out.println(String.format(lang.Msg(Languages.MSG_COPIEDSECT), Numsectors,SectorSz));
 					}
 				} finally {
 					TargetFile.close();
 				}
 				System.out.println("Conversion finished.");
 			} catch (FileNotFoundException e) {
-				System.out.println("Cannot open file " + targFile + " for writing.");
+				System.out.println(String.format(lang.Msg(Languages.MSG_CANTOPENWRITE), targFile));
 				System.out.println(e.getMessage());
 				e.printStackTrace();
 			} catch (IOException e) {
-				System.out.println("Cannot write to file file " + targFile);
+				System.out.println(String.format(lang.Msg(Languages.MSG_CANTWRITE), targFile));
 				System.out.println(e.getMessage());
 				e.printStackTrace();
 			}

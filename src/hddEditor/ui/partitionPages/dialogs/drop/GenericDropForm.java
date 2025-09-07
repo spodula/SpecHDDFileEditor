@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.SpeccyFileEncoders;
 import hddEditor.libs.partitions.IDEDosPartition;
@@ -127,13 +128,16 @@ public class GenericDropForm {
 	protected final static int FILETYPE_IMAGE = 8;
 	protected final static int FILETYPE_RAW = 9;
 
+	protected Languages lang;
+	
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public GenericDropForm(Display display) {
+	public GenericDropForm(Display display, Languages lang) {
 		this.display = display;
+		this.lang = lang;
 	}
 
 	/**
@@ -220,11 +224,11 @@ public class GenericDropForm {
 		TableColumn tc3 = new TableColumn(DirectoryListing, SWT.LEFT);
 		TableColumn tc4 = new TableColumn(DirectoryListing, SWT.LEFT);
 		TableColumn tc5 = new TableColumn(DirectoryListing, SWT.LEFT);
-		tc1.setText("External Filename");
-		tc2.setText("Partition Filename");
-		tc3.setText("Type");
-		tc4.setText("Length");
-		tc5.setText("Flags");
+		tc1.setText(lang.Msg(Languages.MSG_EXTFILENAME));
+		tc2.setText(lang.Msg(Languages.MSG_PARTFILENAME));
+		tc3.setText(lang.Msg(Languages.MSG_FILETYPE));
+		tc4.setText(lang.Msg(Languages.MSG_LENGTH));
+		tc5.setText(lang.Msg(Languages.MSG_FLAGS));
 		tc1.setWidth(250);
 		tc2.setWidth(150);
 		tc3.setWidth(150);
@@ -244,7 +248,7 @@ public class GenericDropForm {
 		});
 
 		filenameLabel = new Label(shell, SWT.LEFT);
-		filenameLabel.setText("File: <none selected>");
+		filenameLabel.setText(lang.Msg(Languages.MSG_FILE) +": <"+lang.Msg(Languages.MSG_NONESELECTED)+">");
 		FontData fontData = filenameLabel.getFont().getFontData()[0];
 		Font font = new Font(shell.getDisplay(), new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 		filenameLabel.setFont(font);
@@ -253,7 +257,7 @@ public class GenericDropForm {
 		filenameLabel.setLayoutData(gd);
 
 		Label l = new Label(shell, SWT.LEFT);
-		l.setText("Disk filename:");
+		l.setText(lang.Msg(Languages.MSG_DISKFILENAME));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		l.setLayoutData(gd);
@@ -304,7 +308,7 @@ public class GenericDropForm {
 		});
 
 		l = new Label(shell, SWT.LEFT);
-		l.setText("BASIC files:");
+		l.setText(lang.Msg(Languages.MSG_DISKFILENAME) +":");
 		l.setFont(font);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 4;
@@ -337,7 +341,7 @@ public class GenericDropForm {
 		});
 
 		l = new Label(shell, SWT.LEFT);
-		l.setText("Image files:");
+		l.setText(lang.Msg(Languages.MSG_IMAGEFILES)+":");
 		l.setFont(font);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 4;
@@ -346,7 +350,7 @@ public class GenericDropForm {
 		new Label(shell, SWT.NONE);
 
 		IsBWCheck = new Button(shell, SWT.CHECK);
-		IsBWCheck.setText("Monochrome");
+		IsBWCheck.setText(lang.Msg(Languages.MSG_MONOCHROME));
 		IsBWCheck.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -361,7 +365,7 @@ public class GenericDropForm {
 		});
 
 		Label IntensityLabel = new Label(shell, SWT.LEFT);
-		IntensityLabel.setText("Cutoff: 100%");
+		IntensityLabel.setText(lang.Msg(Languages.MSG_CUTOFF) +": 100%");
 
 		intensitySlider = new Slider(shell, SWT.HORIZONTAL | SWT.BORDER);
 		intensitySlider.setBounds(0, 0, 150, 40);
@@ -376,7 +380,7 @@ public class GenericDropForm {
 			public void handleEvent(Event event) {
 				int perspectiveValue = intensitySlider.getMaximum() - intensitySlider.getSelection()
 						+ intensitySlider.getMinimum() - intensitySlider.getThumb();
-				IntensityLabel.setText("Cutoff: " + perspectiveValue + "%");
+				IntensityLabel.setText(lang.Msg(Languages.MSG_CUTOFF) +":" + perspectiveValue + "%");
 				ReRenderImage();
 				UpdateFlagsFromDetails();
 			}
@@ -387,7 +391,7 @@ public class GenericDropForm {
 
 		l = new Label(shell, SWT.NONE);
 
-		l.setText("CODE files:");
+		l.setText(lang.Msg(Languages.MSG_CODEFILES) );
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 4;
 		l.setLayoutData(gd);
@@ -395,7 +399,7 @@ public class GenericDropForm {
 
 		new Label(shell, SWT.NONE);
 		l = new Label(shell, SWT.NONE);
-		l.setText("CODE load address:");
+		l.setText(lang.Msg(Languages.MSG_CODELOADADD)+":");
 		StartAddress = new Text(shell, SWT.NONE);
 		StartAddress.setText("32768");
 		StartAddress.addFocusListener(new FocusListener() {
@@ -406,7 +410,6 @@ public class GenericDropForm {
 					NewFileListItem details = (NewFileListItem) SelectedFiles[0].getData();
 					if (details != null) {
 						details.LoadAddress = Integer.valueOf(StartAddress.getText());
-						System.out.println("Reset load address");
 					}
 					UpdateFlagsFromDetails();
 				}
@@ -452,7 +455,7 @@ public class GenericDropForm {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Cancel");
+		Btn.setText(lang.Msg(Languages.MSG_CANCEL));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -466,7 +469,7 @@ public class GenericDropForm {
 			}
 		});
 
-		IntensityLabel.setText("Cutoff: 50%");
+		IntensityLabel.setText(lang.Msg(Languages.MSG_CUTOFF)+ ": 50%");
 
 		PopulateFiles(files);
 		shell.pack();
@@ -537,7 +540,7 @@ public class GenericDropForm {
 			if (Details.fileheader != null) {
 				switch (Details.fileheader.GetFileType()) {
 				case 0:
-					flags = "BASIC line " + Details.fileheader.GetLine();
+					flags = lang.Msg(Languages.MSG_STARTLINE) +" "+ Details.fileheader.GetLine();
 				case 3:
 					flags = "Code " + Details.fileheader.GetLoadAddress() + "," + Details.fileheader.GetBasicFileLength();
 				}
@@ -546,7 +549,7 @@ public class GenericDropForm {
 				switch (Details.FileType) {
 				case FILETYPE_BASIC_TEXT:
 				case FILETYPE_BASIC_ENC:
-					flags = "BASIC line " + Details.StartLine;
+					flags = lang.Msg(Languages.MSG_STARTLINE)+" " + Details.StartLine;
 					break;
 				case FILETYPE_CODE:
 				case FILETYPE_CODE_SCREEN:
@@ -808,7 +811,7 @@ public class GenericDropForm {
 				s = s + ",";
 			s = s + String.valueOf(Dimsizes[dimnum]);
 		}
-		s = s + ")\n";
+		s = s + ")"+System.lineSeparator();
 
 		Text ArrayEdit = new Text(MainPage, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -844,7 +847,7 @@ public class GenericDropForm {
 				}
 				location = location + 5;
 			}
-			sb.append("\r\n");
+			sb.append(System.lineSeparator());
 			int diminc = Dimsizes.length - 2;
 			boolean doneInc = false;
 			while (!doneInc) {
@@ -886,7 +889,7 @@ public class GenericDropForm {
 		HexTable.setLayoutData(gd);
 
 		TableColumn tc1 = new TableColumn(HexTable, SWT.LEFT);
-		tc1.setText("Address");
+		tc1.setText(lang.Msg(Languages.MSG_ADDRESS));
 		tc1.setWidth(80);
 		for (int i = 0; i < 16; i++) {
 			TableColumn tcx = new TableColumn(HexTable, SWT.LEFT);
@@ -894,7 +897,7 @@ public class GenericDropForm {
 			tcx.setWidth(30);
 		}
 		TableColumn tc2 = new TableColumn(HexTable, SWT.LEFT);
-		tc2.setText("Ascii");
+		tc2.setText(lang.Msg(Languages.MSG_ASCII));
 		tc2.setWidth(160);
 
 		HexTable.setHeaderVisible(true);
@@ -1084,7 +1087,7 @@ public class GenericDropForm {
 	 * @return
 	 */
 	protected String UniqueifyName(String name) {
-		System.out.println("UniqueifyName is not implemented!");
+		System.out.println("UniqueifyName "+lang.Msg(Languages.MSG_NOTIMP)+"!");
 		return name;
 	}
 

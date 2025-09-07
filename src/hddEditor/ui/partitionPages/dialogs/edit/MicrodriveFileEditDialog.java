@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.SpeccyBasicDetails;
 import hddEditor.libs.disks.LINEAR.MDFMicrodriveFile;
@@ -42,8 +43,8 @@ public class MicrodriveFileEditDialog extends EditFileDialog {
 	public int NewFileType;
 	public boolean FileTypeHasChanged;
 
-	public MicrodriveFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition) {
-		super(display, filesel, CurrentPartition);
+	public MicrodriveFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition, Languages lang) {
+		super(display, filesel, CurrentPartition, lang);
 	}
 
 	/**
@@ -62,14 +63,14 @@ public class MicrodriveFileEditDialog extends EditFileDialog {
 
 		MicrodriveDirectoryEntry mde = (MicrodriveDirectoryEntry) ThisEntry;
 
-		Label lbl = label(ThisEntry.GetSpeccyBasicDetails().BasicTypeString() + " file", 4);
+		Label lbl = label(ThisEntry.GetSpeccyBasicDetails().BasicTypeString() + " "+lang.Msg(Languages.MSG_FILE), 4);
 		FontData fontData = lbl.getFont().getFontData()[0];
 		Font boldFont = new Font(display, new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 		lbl.setFont(boldFont);
 
-		label(String.format("Length Inc Header: %d bytes (%X)", ThisEntry.GetRawFileSize(), ThisEntry.GetRawFileSize()),
+		label(String.format(lang.Msg(Languages.MSG_LENGTHWHEADER), ThisEntry.GetRawFileSize(), ThisEntry.GetRawFileSize()),
 				2);
-		label(String.format("Length without Header: %d bytes (%X)", ThisEntry.GetFileSize(), ThisEntry.GetFileSize()),
+		label(String.format(lang.Msg(Languages.MSG_LENGTHWOHEADER), ThisEntry.GetFileSize(), ThisEntry.GetFileSize()),
 				2);
 
 		String logblocks = "";
@@ -80,7 +81,7 @@ public class MicrodriveFileEditDialog extends EditFileDialog {
 			logblocks = logblocks.substring(2);
 		}
 
-		label("Used sectors: " + mde.sectors.length + " (" + logblocks + ")", 2);
+		label(String.format(lang.Msg(Languages.MSG_USEDSECTORS),mde.sectors.length, logblocks),1);
 
 		// Only display file type change for Tap files with headers.
 
@@ -94,7 +95,7 @@ public class MicrodriveFileEditDialog extends EditFileDialog {
 			filetype.setLayoutData(gd);
 
 			Button SetFileType = new Button(shell, SWT.NONE);
-			SetFileType.setText("Update file type");
+			SetFileType.setText(lang.Msg(Languages.MSG_UPDATEFILETYPE));
 			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.horizontalSpan = 1;
 			SetFileType.setLayoutData(gd);
@@ -164,25 +165,25 @@ public class MicrodriveFileEditDialog extends EditFileDialog {
 		case Speccy.BASIC_BASIC:
 			BasicRenderer BR = new BasicRenderer();
 			BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.VarStart, sbd.LineStart,
-					filesel, new MDRBasicSave(mdf));
+					filesel, new MDRBasicSave(mdf), lang);
 			break;
 		case Speccy.BASIC_CODE:
 			CodeRenderer CR = new CodeRenderer();
 			CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length,
-					((MicrodriveDirectoryEntry) ThisEntry).GetVar2(), filesel, CurrentPartition, new MDRCodeSave(mdf));
+					((MicrodriveDirectoryEntry) ThisEntry).GetVar2(), filesel, CurrentPartition, new MDRCodeSave(mdf), lang);
 			break;
 		case Speccy.BASIC_NUMARRAY:
 			NumericArrayRenderer NR = new NumericArrayRenderer();
 			NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(), sbd.VarName + "", filesel,
-					new MDRArraySave(mdf));
+					new MDRArraySave(mdf), lang);
 			break;
 		case Speccy.BASIC_CHRARRAY:
 			CharArrayRenderer CAR = new CharArrayRenderer();
 			CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(), sbd.VarName + "", filesel,
-					new MDRArraySave(mdf));
+					new MDRArraySave(mdf), lang);
 		default:
 			FileRenderer FR = new FileRenderer();
-			FR.Render(MainPage, data, ThisEntry.GetFilename(), filesel);
+			FR.Render(MainPage, data, ThisEntry.GetFilename(), filesel, lang);
 		}
 	}
 
@@ -216,7 +217,7 @@ public class MicrodriveFileEditDialog extends EditFileDialog {
 		public boolean DoSave(int valtype, String sValue, int Value) {
 			MicrodriveDirectoryEntry direntry = (MicrodriveDirectoryEntry) ThisEntry;
 			SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
-			System.out.print("Load address: " + sbd.LoadAddress + " -> ");
+			System.out.print(lang.Msg(Languages.MSG_CODELOADADD)+ ": " + sbd.LoadAddress + " -> ");
 			sbd.LoadAddress = Value;
 			try {
 				direntry.SetHeader(sbd, file);
@@ -269,7 +270,7 @@ public class MicrodriveFileEditDialog extends EditFileDialog {
 		public boolean DoSave(int valtype, String sValue, int Value) {
 			MicrodriveDirectoryEntry direntry = (MicrodriveDirectoryEntry) ThisEntry;
 			SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
-			System.out.print("Array name: " + sbd.VarName + " -> ");
+			System.out.print(lang.Msg(Languages.MSG_ARRAYNAME) +  ": " + sbd.VarName + " -> ");
 			sbd.VarName = (sValue + "A").charAt(0);
 
 			try {

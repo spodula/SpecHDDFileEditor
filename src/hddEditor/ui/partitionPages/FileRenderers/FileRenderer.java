@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.MessageBox;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 
 public class FileRenderer {
 	//Storage for the file details
@@ -28,6 +29,8 @@ public class FileRenderer {
 	
 	protected FileSelectDialog filesel = null;
 	
+	protected Languages lang;
+	
 	/**
 	 * Generic constructor. 
 	 * 
@@ -35,11 +38,12 @@ public class FileRenderer {
 	 * @param data
 	 * @param Filename
 	 */
-	public void Render(Composite mainPage, byte data[], String Filename, FileSelectDialog filesel) {
+	public void Render(Composite mainPage, byte data[], String Filename, FileSelectDialog filesel, Languages lang) {
 		this.filename = Filename;
 		this.MainPage = mainPage;
 		this.data = data;
 		this.filesel = filesel;
+		this.lang = lang;
 	}
 
 	/**
@@ -52,16 +56,16 @@ public class FileRenderer {
 	 * @param Origfilename
 	 */
 	public void DoSaveFileAsHex(byte[] data, Composite mainPage, int loadaddr, int filesize, String Origfilename) {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save "+Origfilename+" as Hex..", new String[] {"*.*"},filename);
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES,String.format (lang.Msg(Languages.MSG_SAVEXASHEX),Origfilename), new String[] {"*.*"},filename);
 		
 		if (Selected != null) {
 			FileOutputStream file;
 			try {
 				file = new FileOutputStream(Selected);
 				try {
-					file.write(("File: " + filename + System.lineSeparator()).getBytes());
+					file.write((lang.Msg(Languages.MSG_FILE) + ": " + filename + System.lineSeparator()).getBytes());
 					file.write(("Org: " + loadaddr + System.lineSeparator()).getBytes());
-					file.write(("Length: " + filesize+ System.lineSeparator() + System.lineSeparator()).getBytes());
+					file.write((lang.Msg(Languages.MSG_LENGTH) + ": " + filesize+ System.lineSeparator() + System.lineSeparator()).getBytes());
 					int AddressLength = String.format("%X", data.length - 1).length();
 					int ptr = 0;
 					int numrows = filesize / 16;
@@ -101,15 +105,15 @@ public class FileRenderer {
 				}
 			} catch (FileNotFoundException e) {
 				MessageBox dialog = new MessageBox(MainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("Directory not found!");
+				dialog.setText(lang.Msg(Languages.MSG_ERRSAVING));
+				dialog.setMessage(lang.Msg(Languages.MSG_DIRNOTFOUND));
 				dialog.open();
 
 				e.printStackTrace();
 			} catch (IOException e) {
 				MessageBox dialog = new MessageBox(MainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("IO error: " + e.getMessage());
+				dialog.setText(lang.Msg(Languages.MSG_ERRSAVING));
+				dialog.setMessage(lang.Msg(Languages.MSG_IOERROR) + ": " + e.getMessage());
 				dialog.open();
 				e.printStackTrace();
 			}
@@ -126,29 +130,29 @@ public class FileRenderer {
 	 * @param Origfilename
 	 */
 	protected void DoSaveFileAsBin(byte data[], Composite mainPage, String Origfilename) {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save "+Origfilename+" as Binary..", new String[] {"*.*"},filename);
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, String.format (lang.Msg(Languages.MSG_SAVEXASBIN),Origfilename), new String[] {"*.*"},filename);
 		
 		if (Selected != null) {
 			FileOutputStream file;
 			try {
 				file = new FileOutputStream(Selected);
 				try {
-					System.out.println("Writing " + Selected + " from: 0 len: " + data.length);
+					System.out.println(lang.Msg(Languages.MSG_WRITING)+" "+ Selected + " from: 0 len: " + data.length);
 					file.write(data, 0, data.length);
 				} finally {
 					file.close();
 				}
 			} catch (FileNotFoundException e) {
 				MessageBox dialog = new MessageBox(mainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("Directory not found!");
+				dialog.setText(lang.Msg(Languages.MSG_ERRSAVING));
+				dialog.setMessage(lang.Msg(Languages.MSG_DIRNOTFOUND));
 				dialog.open();
 
 				e.printStackTrace();
 			} catch (IOException e) {
 				MessageBox dialog = new MessageBox(mainPage.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("IO error: " + e.getMessage());
+				dialog.setText(lang.Msg(Languages.MSG_ERRSAVING));
+				dialog.setMessage(lang.Msg(Languages.MSG_IOERROR) + ": " + e.getMessage());
 				dialog.open();
 
 				e.printStackTrace();

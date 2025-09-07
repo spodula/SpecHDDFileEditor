@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.AssemblyRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.Renderer;
@@ -30,19 +31,19 @@ public class MGTExecuteRenderer extends FileRenderer {
 	private Vector<Renderer> Renderers = null;
 
 	public void RenderCode(Composite mainPage, byte data[], byte header [], String Filename, int fileSize,
-			int loadAddr , FileSelectDialog filesel) {
+			int loadAddr , FileSelectDialog filesel, Languages lang) {
 		
-		super.Render(mainPage, data, Filename, filesel);
+		super.Render(mainPage, data, Filename, filesel, lang);
 		Renderers = new Vector<Renderer>();
 		Label lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("CODE file: ");
+		lbl.setText(lang.Msg(Languages.MSG_CODEFILE) + ": ");
 		GridData gd = new GridData(SWT.FILL, SWT.TOP, true, true);
 		gd.horizontalSpan = 2;
 		gd.heightHint = 20;
 		lbl.setLayoutData(gd);
 
 		lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("File length: ");
+		lbl.setText(lang.Msg(Languages.MSG_LENGTH) + ": ");
 		gd = new GridData(SWT.FILL, SWT.TOP, true, true);
 		gd.horizontalSpan = 1;
 		gd.heightHint = 20;
@@ -56,7 +57,7 @@ public class MGTExecuteRenderer extends FileRenderer {
 		lbl.setLayoutData(gd);
 
 		lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("Start Address (Should be $1BD6 or $3DB6): ");
+		lbl.setText(lang.Msg(Languages.MSG_STARTADDRSHOULDBE) + ": ");
 		gd.horizontalSpan = 1;
 		gd.heightHint = 20;
 		lbl.setLayoutData(gd);
@@ -71,7 +72,7 @@ public class MGTExecuteRenderer extends FileRenderer {
 		lbl = new Label(mainPage, SWT.NONE);
 
 		Button btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract file as Hex");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASHEX) );
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -84,13 +85,13 @@ public class MGTExecuteRenderer extends FileRenderer {
 				widgetSelected(arg0);
 			}
 		});
-		btn.setToolTipText("Save the file as hex");
+		btn.setToolTipText(lang.Msg(Languages.MSG_EXTRACTASHEX) );
 		gd.horizontalSpan = 1;
 		gd.heightHint = 20;
 		btn.setLayoutData(gd);
 
 		btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract file as Binary");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASBIN) );
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -103,14 +104,14 @@ public class MGTExecuteRenderer extends FileRenderer {
 				widgetSelected(arg0);
 			}
 		});
-		btn.setToolTipText("Save the file as a raw binary file");
+		btn.setToolTipText(lang.Msg(Languages.MSG_EXTRACTASBIN) );
 		gd.horizontalSpan = 1;
 		gd.heightHint = 20;
 		btn.setLayoutData(gd);
 
 		if (header != null) {
 			btn = new Button(mainPage, SWT.NONE);
-			btn.setText("Extract file as Binary Inc Header");
+			btn.setText(lang.Msg(Languages.MSG_EXTRACTASBINHEADER)) ;
 			btn.setLayoutData(gd);
 			btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -132,7 +133,7 @@ public class MGTExecuteRenderer extends FileRenderer {
 		}
 
 		btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract file as Asm");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASASM) );
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -145,7 +146,7 @@ public class MGTExecuteRenderer extends FileRenderer {
 				widgetSelected(arg0);
 			}
 		});
-		btn.setToolTipText("Save a disassembled text of the file");
+		btn.setToolTipText(lang.Msg(Languages.MSG_EXTRACTASASMDESC));
 		gd.horizontalSpan = 1;
 		gd.heightHint = 20;
 		btn.setLayoutData(gd);
@@ -156,19 +157,19 @@ public class MGTExecuteRenderer extends FileRenderer {
 
 		AssemblyRenderer renderer = new AssemblyRenderer();
 		Renderers.add(renderer);
-		renderer.Render(MainPage, data, loadAddr);
+		renderer.Render(MainPage, data, loadAddr, lang);
 
 		mainPage.pack();
 	}
 
 	protected void DoSaveFileAsAsm(byte[] data, Composite mainPage2, int loadAddr, String Origfilename) {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save " + Origfilename + " as Assembly...", new String[] {"*.asm"}, Origfilename+".asm");
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES,
+				String.format(lang.Msg(Languages.MSG_SAVEXASASM), Origfilename), new String[] {"*.asm"}, Origfilename+".asm");
 		
 		if (Selected != null) {
 			Speccy.DoSaveFileAsAsm(data, Selected, loadAddr);
 		}
 		mainPage2.getShell().moveAbove(null);
-
 	}
 
 	

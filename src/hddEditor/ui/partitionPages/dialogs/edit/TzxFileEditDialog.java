@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.TZX;
 import hddEditor.libs.disks.SpeccyBasicDetails;
@@ -62,8 +63,8 @@ public class TzxFileEditDialog extends EditFileDialog {
 
 	
 	
-	public TzxFileEditDialog(Display display,FileSelectDialog filesel,IDEDosPartition CurrentPartition) {
-		super(display, filesel, CurrentPartition);
+	public TzxFileEditDialog(Display display,FileSelectDialog filesel,IDEDosPartition CurrentPartition, Languages lang) {
+		super(display, filesel, CurrentPartition, lang);
 	}
 
 	/**
@@ -74,10 +75,9 @@ public class TzxFileEditDialog extends EditFileDialog {
 		TzxDirectoryEntry te = (TzxDirectoryEntry)ThisEntry;
 		if ((te.GetTZXFileType() != TZX.TZX_STANDARDSPEED_DATABLOCK)
 				&& (te.GetTZXFileType() != TZX.TZX_TURBOSPEED_DATABLOCK)) {
-			return (TZX.GetDataBlockTypeForID(te.GetTZXFileType()) + " Block");
+			return (TZX.GetDataBlockTypeForID(te.GetTZXFileType()) + " "+lang.Msg(Languages.MSG_BLOCK));
 		}
-
-		return (ThisEntry.GetSpeccyBasicDetails().BasicTypeString() + " File");
+		return (ThisEntry.GetSpeccyBasicDetails().BasicTypeString() + " "+lang.Msg(Languages.MSG_FILE));
 	}
 
 	/**
@@ -100,9 +100,9 @@ public class TzxFileEditDialog extends EditFileDialog {
 		lbl.setFont(boldFont);
 
 		if (ThisEntry.GetRawFileSize() == 0) {
-			label(String.format("Length : No data"), 2);
+			label(String.format(lang.Msg(Languages.MSG_LENGTH) + ": No data"), 2);
 		} else {
-			label(String.format("Length : %d bytes (%X)", ThisEntry.GetRawFileSize(), ThisEntry.GetRawFileSize()), 2);
+			label(String.format(lang.Msg(Languages.MSG_LENXBYTESX), ThisEntry.GetRawFileSize(), ThisEntry.GetRawFileSize()), 2);
 		}
 		
 		// Only display file type change for Tap files with headers.
@@ -116,7 +116,7 @@ public class TzxFileEditDialog extends EditFileDialog {
 			filetype.setLayoutData(gd);
 
 			Button SetFileType = new Button(shell, SWT.NONE);
-			SetFileType.setText("Update file type");
+			SetFileType.setText(lang.Msg(Languages.MSG_UPDATEFILETYPE));
 			gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.horizontalSpan = 1;
 			SetFileType.setLayoutData(gd);
@@ -192,61 +192,61 @@ public class TzxFileEditDialog extends EditFileDialog {
 			// Cant render this, so just exit.
 		} else if ((TzxFileType == TZX.TZX_TEXTDESC) || (TzxFileType == TZX.TZX_GROUPSTART)) {
 			TextDescRenderer tdr = new TextDescRenderer();
-			tdr.RenderText(MainPage, te.GetTZXBlockData(), null, te.GetTZXBlockString(),filesel);
+			tdr.RenderText(MainPage, te.GetTZXBlockData(), null, te.GetTZXBlockString(),filesel, lang);
 		} else if ((TzxFileType == TZX.TZX_PURETONE)) {
 			PureToneBlock ptb = (PureToneBlock) te.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			sdr.RenderTexts(MainPage, new String[] { "Pulse length", "Pulse count" },
-					new String[] { String.valueOf(ptb.PulseLen) + " Tstates", String.valueOf(ptb.Pulses) });
+			sdr.RenderTexts(MainPage, new String[] { lang.Msg(Languages.MSG_PULSELEN), lang.Msg(Languages.MSG_PULSECNT)},
+					new String[] { String.valueOf(ptb.PulseLen) + " Tstates", String.valueOf(ptb.Pulses) }, lang);
 		} else if ((TzxFileType == TZX.TZX_LOOPSTART)) {
 			LoopStartBlock lsb = (LoopStartBlock) te.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			sdr.RenderTexts(MainPage, new String[] { "Repetitions" }, new String[] { String.valueOf(lsb.Repeat) });
+			sdr.RenderTexts(MainPage, new String[] { lang.Msg(Languages.MSG_REPETITIONS)}, new String[] { String.valueOf(lsb.Repeat) }, lang);
 		} else if ((TzxFileType == TZX.TZX_JUMP)) {
 			JumpToBlock jtb = (JumpToBlock) te.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			sdr.RenderTexts(MainPage, new String[] { "Relative jump", "Actual target" },
-					new String[] { String.valueOf(jtb.Disp), String.valueOf(jtb.Disp + jtb.BlockNumber) });
+			sdr.RenderTexts(MainPage, new String[] { lang.Msg(Languages.MSG_RELJUMP), lang.Msg(Languages.MSG_ACTTARGET) },
+					new String[] { String.valueOf(jtb.Disp), String.valueOf(jtb.Disp + jtb.BlockNumber) }, lang);
 		} else if ((TzxFileType == TZX.TZX_MESSAGEBLOCK)) {
 			MessageBlock mb = (MessageBlock) te.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			sdr.RenderTexts(MainPage, new String[] { "Time delay", "Message"},
-					new String[] { String.valueOf(mb.time), mb.BlockNotes });		
+			sdr.RenderTexts(MainPage, new String[] { lang.Msg(Languages.MSG_TDELAY), lang.Msg(Languages.MSG_MSG)},
+					new String[] { String.valueOf(mb.time), mb.BlockNotes }, lang);		
 		} else if ((TzxFileType == TZX.TZX_GLUE)) {
 			GlueBlock gb = (GlueBlock) te.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			sdr.RenderTexts(MainPage, new String[] { "XTAPE", "Major", "Minor" },
-					new String[] { gb.XTAPE, String.valueOf(gb.Major), String.valueOf(gb.Minor) });
+			sdr.RenderTexts(MainPage, new String[] { lang.Msg(Languages.MSG_XTAPE), lang.Msg(Languages.MSG_MAJOR), lang.Msg(Languages.MSG_MINOR) },
+					new String[] { gb.XTAPE, String.valueOf(gb.Major), String.valueOf(gb.Minor) }, lang);
 		} else if ((TzxFileType == TZX.TZX_PAUSE)) {
 			PauseStopTape pst = (PauseStopTape) te.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			String s = "Stop tape";
+			String s = lang.Msg(Languages.MSG_STOPTAPE);
 			if (pst.PauseDuration != 0) {
 				s = pst.PauseDuration + "ms";
 			}
-			sdr.RenderTexts(MainPage, new String[] { "Pause" }, new String[] { s });
+			sdr.RenderTexts(MainPage, new String[] { lang.Msg(Languages.MSG_PAUSE)}, new String[] { s }, lang);
 		} else if ((TzxFileType == TZX.TZX_SETSIGNALLEVEL)) {
 			SetSignalLevelBlock ssl = (SetSignalLevelBlock) te.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			String level = "High (1)";
+			String level = lang.Msg(Languages.MSG_HIGH)+" (1)";
 			if (ssl.SignalLevel == 0) {
-				level = "Low (0)";
+				level = lang.Msg(Languages.MSG_LOW)+" (0)";
 			}
-			sdr.RenderTexts(MainPage, new String[] { "Signal level" }, new String[] { level });
+			sdr.RenderTexts(MainPage, new String[] { lang.Msg(Languages.MSG_SIGNALLEVEL) }, new String[] { level }, lang);
 		} else if ((TzxFileType == TZX.TZX_CUSTOMINFO)) {
 			CustomInfoBlock cib = (CustomInfoBlock) te.DataBlock;
 			CR = new CodeRenderer();
-			CR.RenderCode(MainPage, cib.data, null, cib.ID, cib.data.length, 0, filesel,CurrentPartition,null);
+			CR.RenderCode(MainPage, cib.data, null, cib.ID, cib.data.length, 0, filesel,CurrentPartition,null, lang);
 		} else if ((TzxFileType == TZX.TZX_SNAPSHOT)) {
 			SnapshotBlock sb = (SnapshotBlock) te.DataBlock;
 			CR = new CodeRenderer();
-			String filename = "Block"+sb.BlockNumber+" File of type: ";
+			String filename = lang.Msg(Languages.MSG_BLOCK) + sb.BlockNumber+" "+lang.Msg(Languages.MSG_FILEOFTYPE)+": ";
 			if(sb.SnapShotType==1) {
 				filename = filename +".SNA";
 			} else {
 				filename = filename +".Z80";
 			}
-			CR.RenderCode(MainPage, sb.data, null, filename, sb.data.length, 0, filesel,CurrentPartition,null);
+			CR.RenderCode(MainPage, sb.data, null, filename, sb.data.length, 0, filesel,CurrentPartition,null, lang);
 		} else if ((TzxFileType == TZX.TZX_ARCHIVEINFO)) {
 			ArchiveInfoBlock aab = (ArchiveInfoBlock) te.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
@@ -259,7 +259,7 @@ public class TzxFileEditDialog extends EditFileDialog {
 				content[ptr] = t.text;
 				ptr++;
 			}
-			sdr.RenderTexts(MainPage, labels, content);
+			sdr.RenderTexts(MainPage, labels, content, lang);
 		} else if ((TzxFileType == TZX.TZX_CALLSEQ)) {
 			CallSequenceBlock csb = (CallSequenceBlock) te.DataBlock;
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
@@ -272,7 +272,7 @@ public class TzxFileEditDialog extends EditFileDialog {
 				content[ptr] = String.valueOf(t);
 				ptr++;
 			}
-			sdr.RenderTexts(MainPage, labels, content);
+			sdr.RenderTexts(MainPage, labels, content, lang);
 
 		} else if ((TzxFileType == TZX.TZX_HARDWARETYPE)) {
 			HardwareInfoBlock hwb = (HardwareInfoBlock) te.DataBlock;
@@ -287,49 +287,49 @@ public class TzxFileEditDialog extends EditFileDialog {
 				content[ptr] = t.GetHWInfo();
 				ptr++;
 			}
-			sdr.RenderTexts(MainPage, labels, content);
+			sdr.RenderTexts(MainPage, labels, content, lang);
 		} else if ((TzxFileType == TZX.TZX_PULSESEQ)) {
 			PulseSequence psb = (PulseSequence) te.DataBlock;
 			String labels[] = new String[psb.Pulses];
 			String data[] = new String[psb.Pulses];
 			for (int cnt = 0; cnt < psb.Pulses; cnt++) {
-				labels[cnt] = "Pulse number " + cnt;
-				data[cnt] = psb.PulseLen[cnt] + " T states";
+				labels[cnt] = lang.Msg(Languages.MSG_PULSENUM) +" " + cnt;
+				data[cnt] = psb.PulseLen[cnt] + " "+lang.Msg(Languages.MSG_TSTATES);
 			}
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			sdr.RenderTexts(MainPage, labels, data);
+			sdr.RenderTexts(MainPage, labels, data, lang);
 		} else if ((TzxFileType == TZX.TZX_SELECTBLOCK)) {
 			SelectBlock sb = (SelectBlock) te.DataBlock;
 			String labels[] = new String[sb.Entries.length];
 			String data[] = new String[sb.Entries.length];
 			for (int cnt = 0; cnt < sb.Entries.length; cnt++) {
-				labels[cnt] = "Offset " + sb.Entries[cnt].relOffset;
+				labels[cnt] = lang.Msg(Languages.MSG_OFFSET) + " " + sb.Entries[cnt].relOffset;
 				data[cnt] = sb.Entries[cnt].text;
 			}
 			StaticTextsBlockRender sdr = new StaticTextsBlockRender();
-			sdr.RenderTexts(MainPage, labels, data);
+			sdr.RenderTexts(MainPage, labels, data, lang);
 
 		} else {
 			SpeccyBasicDetails sbd = ThisEntry.GetSpeccyBasicDetails();
 			switch (sbd.BasicType) {
 			case Speccy.BASIC_BASIC:
 				BasicRenderer BR = new BasicRenderer();
-				BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.VarStart, sbd.LineStart, filesel, new TzxBasicSave());
+				BR.RenderBasic(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.VarStart, sbd.LineStart, filesel, new TzxBasicSave(), lang);
 				break;
 			case Speccy.BASIC_CODE:
 				CR = new CodeRenderer();
-				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress, filesel,CurrentPartition,new TzxCodeSave());
+				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, sbd.LoadAddress, filesel,CurrentPartition,new TzxCodeSave(), lang);
 				break;
 			case Speccy.BASIC_NUMARRAY:
 				NumericArrayRenderer NR = new NumericArrayRenderer();
-				NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(),  sbd.VarName + "", filesel, new TzxArraySave());
+				NR.RenderNumericArray(MainPage, data, null, ThisEntry.GetFilename(),  sbd.VarName + "", filesel, new TzxArraySave(), lang);
 				break;
 			case Speccy.BASIC_CHRARRAY:
 				CharArrayRenderer CAR = new CharArrayRenderer();
-				CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(),  sbd.VarName + "", filesel, new TzxArraySave());
+				CAR.RenderCharArray(MainPage, data, null, ThisEntry.GetFilename(),  sbd.VarName + "", filesel, new TzxArraySave(), lang);
 			default:
 				CR = new CodeRenderer();
-				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, 0x0000, filesel,CurrentPartition,null);
+				CR.RenderCode(MainPage, data, null, ThisEntry.GetFilename(), data.length, 0x0000, filesel,CurrentPartition,null, lang);
 			}
 		}
 	}
@@ -344,7 +344,7 @@ public class TzxFileEditDialog extends EditFileDialog {
 			TZXBlock header = direntry.HeaderBlock;
 			if (header != null) {
 				SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
-				System.out.print("Load address: " + sbd.LoadAddress + " -> ");
+				System.out.print(lang.Msg(Languages.MSG_CODELOADADD)+": " + sbd.LoadAddress + " -> ");
 				sbd.LoadAddress = Value;
 
 				TZXPartition TzxPart = (TZXPartition) CurrentPartition;
@@ -359,7 +359,7 @@ public class TzxFileEditDialog extends EditFileDialog {
 					e.printStackTrace();
 				}
 			} else {
-				System.err.println("Update ignored, No Basic header to update.");
+				System.err.println(lang.Msg(Languages.MSG_UPDATEIGNORED));
 			}
 			return false;
 		}
@@ -376,11 +376,11 @@ public class TzxFileEditDialog extends EditFileDialog {
 			if (header != null) {
 				SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
 				if (valtype == 0) {
-					System.out.print("Start Line: " + sbd.LineStart + " -> ");
+					System.out.print(lang.Msg(Languages.MSG_STARTLINE) + ": " + sbd.LineStart + " -> ");
 					sbd.LineStart = Value;
 					System.out.println(sbd.LineStart);
 				} else {
-					System.out.print("Vars Offset: " + sbd.VarStart + " -> ");
+					System.out.print(lang.Msg(Languages.MSG_VARSTART) + ": " + sbd.VarStart + " -> ");
 					sbd.VarStart = Value;
 					System.out.println(sbd.VarStart);
 				}
@@ -398,7 +398,7 @@ public class TzxFileEditDialog extends EditFileDialog {
 					e.printStackTrace();
 				}
 			} else {
-				System.err.println("Update ignored, No Basic header to update.");
+				System.err.println(lang.Msg(Languages.MSG_UPDATEIGNORED));
 			}
 			return false;
 		}
@@ -414,7 +414,7 @@ public class TzxFileEditDialog extends EditFileDialog {
 			TZXBlock header = direntry.HeaderBlock;
 			if (header != null) {
 				SpeccyBasicDetails sbd = direntry.GetSpeccyBasicDetails();
-				System.out.print("Array name: " + sbd.VarName + " -> ");
+				System.out.print(lang.Msg(Languages.MSG_ARRAYNAME) + ": " + sbd.VarName + " -> ");
 				sbd.VarName = (sValue + "A").charAt(0);
 				header.SetHeader(sbd);
 				System.out.println(direntry.GetSpeccyBasicDetails().VarName);
@@ -429,7 +429,7 @@ public class TzxFileEditDialog extends EditFileDialog {
 					e.printStackTrace();
 				}
 			} else {
-				System.err.println("Update ignored, No Basic header to update.");
+				System.err.println(lang.Msg(Languages.MSG_UPDATEIGNORED));
 			}
 			return false;
 		}

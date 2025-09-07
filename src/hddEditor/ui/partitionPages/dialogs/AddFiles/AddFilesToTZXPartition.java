@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.partitions.TZXPartition;
 import hddEditor.libs.partitions.tzx.TzxDirectoryEntry;
 
@@ -49,8 +50,8 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 	 * 
 	 * @param display
 	 */
-	public AddFilesToTZXPartition(Display display, FileSelectDialog fsd) {
-		super(display, fsd);
+	public AddFilesToTZXPartition(Display display, FileSelectDialog fsd,Languages lang) {
+		super(display, fsd, lang);
 	}
 	
 	/**
@@ -89,7 +90,7 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
 		Button Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select Text BASIC file");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTTXTBASICFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -104,7 +105,7 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select binary BASIC file");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTBINBASICFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -119,7 +120,7 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select Code file");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTCODEFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -134,7 +135,7 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select image as screen$");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTIMAGEFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -149,7 +150,7 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select Numeric array");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTNUMFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -164,7 +165,7 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select Character array");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTCHARFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -190,10 +191,10 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 		TableColumn tc3 = new TableColumn(DirectoryListing, SWT.LEFT);
 		TableColumn tc4 = new TableColumn(DirectoryListing, SWT.LEFT);
 		TableColumn tc5 = new TableColumn(DirectoryListing, SWT.LEFT);
-		tc1.setText("Filename");
-		tc3.setText("Type");
-		tc4.setText("Length");
-		tc5.setText("Flags");
+		tc1.setText(lang.Msg(Languages.MSG_FILENAME));
+		tc3.setText(lang.Msg(Languages.MSG_FILETYPE));
+		tc4.setText(lang.Msg(Languages.MSG_LENGTH));
+		tc5.setText(lang.Msg(Languages.MSG_FLAGS));
 		tc1.setWidth(250);
 		tc3.setWidth(150);
 		tc4.setWidth(150);
@@ -212,7 +213,7 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 		});
 
 		Label l = new Label(shell, SWT.LEFT);
-		l.setText("Defaults.");
+		l.setText(lang.Msg(Languages.MSG_DEFAULTS) + ".");
 		FontData fontData = l.getFont().getFontData()[0];
 		Font font = new Font(shell.getDisplay(), new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 		l.setFont(font);
@@ -221,7 +222,7 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 		l.setLayoutData(gd);
 		
 		l = new Label(shell, SWT.LEFT);
-		l.setText("Filename:");
+		l.setText(lang.Msg(Languages.MSG_FILENAME) + ":");
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		l.setLayoutData(gd);
@@ -247,22 +248,22 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 		});
 
 		l = new Label(shell, SWT.LEFT);
-		l.setText("BASIC files:");
+		l.setText(lang.Msg(Languages.MSG_BASICFILES) + ":");
 		l.setFont(font);
 
 		l = new Label(shell, SWT.LEFT);
-		l.setText("Line (32788 = none):");
+		l.setText(lang.Msg(Languages.MSG_STARTLINE) + " (32788 = none):");
 
 		StartLine = new Text(shell, SWT.BORDER);
 		StartLine.setText("32768");
 
 		new Label(shell, SWT.NONE);
 		l = new Label(shell, SWT.LEFT);
-		l.setText("Image files:");
+		l.setText(lang.Msg(Languages.MSG_IMAGEFILES) + ":");
 		l.setFont(font);
 
 		IsBWCheck = new Button(shell, SWT.CHECK);
-		IsBWCheck.setText("Monochrome");
+		IsBWCheck.setText(lang.Msg(Languages.MSG_MONOCHROME));
 		IsBWCheck.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -276,18 +277,17 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 		});
 		
 		l = new Label(shell, SWT.LEFT);
-		l.setText("CODE load address: ");
+		l.setText(lang.Msg(Languages.MSG_CODELOADADD)+": ");
 
 		StartAddress = new Text(shell, SWT.BORDER);
 		StartAddress.setText("16384");
-
 
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
 
 		Label IntensityLabel = new Label(shell, SWT.LEFT);
-		IntensityLabel.setText("Cutoff: 100%");
+		IntensityLabel.setText(lang.Msg(Languages.MSG_CUTOFF) + ": ");
 
 		intensitySlider = new Slider(shell, SWT.HORIZONTAL | SWT.BORDER);
 		intensitySlider.setBounds(0, 0, 150, 40);
@@ -302,7 +302,7 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 			public void handleEvent(Event event) {
 				int perspectiveValue = intensitySlider.getMaximum() - intensitySlider.getSelection()
 						+ intensitySlider.getMinimum() - intensitySlider.getThumb();
-				IntensityLabel.setText("Cutoff: " + perspectiveValue + "%");
+				IntensityLabel.setText(lang.Msg(Languages.MSG_CUTOFF) + ": " + perspectiveValue + "%");
 				ReRenderImage();
 			}
 		});
@@ -327,7 +327,7 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Add files");
+		Btn.setText(lang.Msg(Languages.MSG_ADDGFILES));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -345,7 +345,7 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Cancel");
+		Btn.setText(lang.Msg(Languages.MSG_CANCEL));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -360,7 +360,7 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 		});
 
 		shell.pack();
-		IntensityLabel.setText("Cutoff: 50%");
+		IntensityLabel.setText(lang.Msg(Languages.MSG_CUTOFF) + ": 50%");
 	}
 	
 
@@ -398,8 +398,8 @@ public class AddFilesToTZXPartition  extends GenericAddPageDialog {
 					break;
 				}
 			} catch (IOException e) {
-				System.out.println(
-						"Error adding " + details.OriginalFilename + " as " + details.filename + " " + e.getMessage());
+				System.out.println(String.format(lang.Msg(Languages.MSG_ERRORADDING),details.OriginalFilename , 
+						details.filename) + " " + e.getMessage());
 				e.printStackTrace();
 			}
 		}

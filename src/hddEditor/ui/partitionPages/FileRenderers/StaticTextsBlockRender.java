@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
+import hddEditor.libs.Languages;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.Renderer;
 
 public class StaticTextsBlockRender implements Renderer {
@@ -20,7 +21,7 @@ public class StaticTextsBlockRender implements Renderer {
 		}
 	}
 	
-	public void RenderTexts(Composite mainPage, String labels[], String texts[] ) {
+	public void RenderTexts(Composite mainPage, String labels[], String texts[] , Languages lang) {
 		Tbl = new Table(mainPage, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		Tbl.setLinesVisible(true);
 
@@ -33,10 +34,10 @@ public class StaticTextsBlockRender implements Renderer {
 		tc1.setText("#");
 		tc1.setWidth(60);
 		TableColumn tc2 = new TableColumn(Tbl, SWT.LEFT);
-		tc2.setText("Variable");
+		tc2.setText(lang.Msg(Languages.MSG_VARNAME));
 		tc2.setWidth(160);
 		TableColumn tc3 = new TableColumn(Tbl, SWT.LEFT);
-		tc3.setText("Value");
+		tc3.setText(lang.Msg(Languages.MSG_CONTENT));
 		tc3.setWidth(160);
 		Tbl.setHeaderVisible(true);
 

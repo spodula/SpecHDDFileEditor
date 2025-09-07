@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
@@ -60,8 +61,8 @@ public class MicrodrivePartitionPage extends GenericPage {
 	 * @param partition
 	 */
 	public MicrodrivePartitionPage(HDDEditor root, Composite parent, IDEDosPartition partition,
-			FileSelectDialog filesel) {
-		super(root, parent, partition, filesel);
+			FileSelectDialog filesel, Languages lang) {
+		super(root, parent, partition, filesel,lang);
 		AddComponents();
 	}
 
@@ -72,10 +73,10 @@ public class MicrodrivePartitionPage extends GenericPage {
 		if (ParentComp != null) {
 			RemoveComponents();
 			SinclairMicrodrivePartition smp = (SinclairMicrodrivePartition) partition;
-			label("Sinclair Spectrum Microdrive cartridge", 4);
-			label("Blocks: " + smp.CurrentDisk.GetNumSectors(), 1);
-			label("Cart Name: " + smp.GetCartName(), 1);
-			label("Free Blocks: " + smp.NumFreeSectors(), 1);
+			label(lang.Msg(Languages.MSG_SSMDRCART), 4);
+			label(lang.Msg(Languages.MSG_BLOCKS)+": " + smp.CurrentDisk.GetNumSectors(), 1);
+			label(lang.Msg(Languages.MSG_CARTNAME)+": " + smp.GetCartName(), 1);
+			label(lang.Msg(Languages.MSG_FREEBLOCKS)+": " + smp.NumFreeSectors(), 1);
 			label("", 1);
 
 			// directory listing
@@ -92,11 +93,11 @@ public class MicrodrivePartitionPage extends GenericPage {
 			TableColumn tc3 = new TableColumn(DirectoryListing, SWT.LEFT);
 			TableColumn tc4 = new TableColumn(DirectoryListing, SWT.LEFT);
 			TableColumn tc5 = new TableColumn(DirectoryListing, SWT.LEFT);
-			tc1.setText("Filename");
-			tc2.setText("Type");
-			tc3.setText("Length");
-			tc4.setText("Sectors");
-			tc5.setText("Notes");
+			tc1.setText(lang.Msg(Languages.MSG_FILENAME));
+			tc2.setText(lang.Msg(Languages.MSG_FILETYPE));
+			tc3.setText(lang.Msg(Languages.MSG_LENGTH));
+			tc4.setText(lang.Msg(Languages.MSG_SECTORS));
+			tc5.setText(lang.Msg(Languages.MSG_NOTES));
 			tc1.setWidth(150);
 			tc2.setWidth(150);
 			tc3.setWidth(150);
@@ -160,7 +161,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 								int exporttype = RootPage.dragindex;
 
 								FileEntry entry = (FileEntry) item.getData();
-								System.out.println("Exporttype:" + exporttype);
+								
 								if (exporttype == HDDEditor.DRAG_TYPE) {
 									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
 									int actiontype = GeneralUtils.EXPORT_TYPE_HEX;
@@ -175,7 +176,6 @@ public class MicrodrivePartitionPage extends GenericPage {
 										actiontype = GeneralUtils.EXPORT_TYPE_CSV;
 										break;
 									case (Speccy.BASIC_CODE):
-										System.out.println("CODE: " + entry.GetFileSize());
 										if (entry.GetFileSize() == 0x1b00) {
 											actiontype = GeneralUtils.EXPORT_TYPE_PNG;
 										} else {
@@ -241,7 +241,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 			gd.widthHint = 200;
 
 			Button Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("File Properties");
+			Btn.setText(lang.Msg(Languages.MSG_FILEPROPERTIES));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -256,7 +256,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 			});
 
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Edit Raw file");
+			Btn.setText(lang.Msg(Languages.MSG_EDITRAWFILE));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -271,7 +271,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 			});
 
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Delete file");
+			Btn.setText(lang.Msg(Languages.MSG_DELETEFILE));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -286,7 +286,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 			});
 
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Add File(s)");
+			Btn.setText(lang.Msg(Languages.MSG_ADDGFILES));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -301,7 +301,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 			});
 
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Extract all Files");
+			Btn.setText(lang.Msg(Languages.MSG_EXTRACTALLFILES));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -315,7 +315,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 				}
 			});
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Rename file");
+			Btn.setText(lang.Msg(Languages.MSG_RENAMEFILE));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -329,7 +329,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 				}
 			});
 			Btn = new Button(ParentComp, SWT.PUSH);
-			Btn.setText("Pack Cartridge");
+			Btn.setText(lang.Msg(Languages.MSG_PACKCART));
 			Btn.setLayoutData(gd);
 			Btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -354,14 +354,14 @@ public class MicrodrivePartitionPage extends GenericPage {
 				URI uri = new URI(file);
 				file = uri.getPath();
 			} catch (URISyntaxException e) {
-				System.out.println("Cannot parse " + file);
+				System.out.println(String.format(lang.Msg(Languages.MSG_CANNOTPARSE), file));
 			}
 			System.out.println(file);
 			fFiles[i++] = new File(file);
 		}
 
-		DropFilesToTapePartition DropFilesDialog = new DropFilesToTapePartition(ParentComp.getDisplay());
-		DropFilesDialog.Show("Add files", partition, fFiles);
+		DropFilesToTapePartition DropFilesDialog = new DropFilesToTapePartition(ParentComp.getDisplay(), lang);
+		DropFilesDialog.Show(lang.Msg(Languages.MSG_ADDGFILES), partition, fFiles);
 		DropFilesDialog = null;
 		if (!ParentComp.isDisposed()) {
 			AddComponents();
@@ -400,11 +400,11 @@ public class MicrodrivePartitionPage extends GenericPage {
 				String notes = "";
 
 				if (FileHBad > 0)
-					notes = notes + " bad file headers: " + FileHBad;
+					notes = notes + lang.Msg(Languages.MSG_BADFILEHEADER)+": " + FileHBad;
 				if (SectorHBad > 0)
-					notes = notes + " bad sector headers: " + SectorHBad;
+					notes = notes + lang.Msg(Languages.MSG_BADSECTHEADER)+": " + SectorHBad;
 				if (DataBad > 0)
-					notes = notes + " bad DataBad headers: " + DataBad;
+					notes = notes + lang.Msg(Languages.MSG_BADDATA)+": " + DataBad;
 
 				content[4] = notes.trim();
 				item2.setText(content);
@@ -425,7 +425,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 			if ((itms != null) && (itms.length != 0)) {
 
 				MicrodriveDirectoryEntry entry = (MicrodriveDirectoryEntry) itms[0].getData();
-				SpecFileEditDialog = new MicrodriveFileEditDialog(ParentComp.getDisplay(), fsd, partition);
+				SpecFileEditDialog = new MicrodriveFileEditDialog(ParentComp.getDisplay(), fsd, partition, lang);
 
 				byte data[];
 				try {
@@ -433,7 +433,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 					byte newdata[] = new byte[data.length - 0x09];
 					System.arraycopy(data, 0x09, newdata, 0, newdata.length);
 
-					if (SpecFileEditDialog.Show(newdata, "Editing " + entry.GetFilename(), entry)) {
+					if (SpecFileEditDialog.Show(newdata, String.format(lang.Msg(Languages.MSG_EDITINGX), entry.GetFilename()), entry)) {
 						byte NewRawData[] = new byte[newdata.length + 0x09];
 						System.arraycopy(data, 0, NewRawData, 0, 0x09);
 						System.arraycopy(newdata, 0, NewRawData, 0x09, newdata.length);
@@ -444,9 +444,9 @@ public class MicrodrivePartitionPage extends GenericPage {
 						} catch (IOException e) {
 							MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
 							messageBox.setMessage(
-									"Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
+									lang.Msg(Languages.MSG_ERRORWRITEBACK)+": " + entry.GetFilename() + ": " + e.getMessage());
 							messageBox
-									.setText("Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
+									.setText(lang.Msg(Languages.MSG_ERRORWRITEBACK)+": " + entry.GetFilename() + ": " + e.getMessage());
 							messageBox.open();
 							e.printStackTrace();
 						}
@@ -463,14 +463,14 @@ public class MicrodrivePartitionPage extends GenericPage {
 						if (SpecFileEditDialog.FileTypeHasChanged) {
 							SpeccyBasicDetails sbd = entry.GetSpeccyBasicDetails();
 							if (sbd != null && sbd.IsValidFileType()) {
-								System.out.print("File type: " + sbd.BasicType + "("
+								System.out.print(lang.Msg(Languages.MSG_FILETYPE)+": " + sbd.BasicType + "("
 										+ Speccy.SpecFileTypeToString(sbd.BasicType) + ") -> ");
 								sbd.BasicType = SpecFileEditDialog.NewFileType;
 								System.out.println(
 										sbd.BasicType + "(" + Speccy.SpecFileTypeToString(sbd.BasicType) + ")");
 								entry.SetHeader(sbd, mdf);
 							} else {
-								System.err.println("Update ignored, No Basic header to update.");
+								System.err.println(lang.Msg(Languages.MSG_UPDATEIGNORED));
 							}
 						}
 					}
@@ -491,22 +491,23 @@ public class MicrodrivePartitionPage extends GenericPage {
 		if ((itms != null) && (itms.length != 0)) {
 			MicrodriveDirectoryEntry entry = (MicrodriveDirectoryEntry) itms[0].getData();
 			// Create the hex edit dialog and start it.
-			HxEditDialog = new HexEditDialog(ParentComp.getDisplay());
+			HxEditDialog = new HexEditDialog(ParentComp.getDisplay(), lang);
 
 			try {
 				byte data[] = entry.GetFileRawData();
 				AddressNote NewAddressNote = new AddressNote(0, data.length, 0, "File: " + entry.GetFilename());
 				AddressNote ANArray[] = { NewAddressNote };
 
-				boolean WriteBackData = HxEditDialog.Show(data, "Editing " + entry.GetFilename(), ANArray, fsd);
+				boolean WriteBackData = HxEditDialog.Show(data, String.format(lang.Msg(Languages.MSG_EDITINGX), entry.GetFilename()), ANArray, fsd);
 				if (WriteBackData) {
 					try {
 						entry.SetFileRawData(HxEditDialog.Data, (MDFMicrodriveFile) partition.CurrentDisk);
 					} catch (IOException e) {
 						MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
+						messageBox.setMessage(
+								lang.Msg(Languages.MSG_ERRORWRITEBACK)+": " + entry.GetFilename() + ": " + e.getMessage());
 						messageBox
-								.setMessage("Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
-						messageBox.setText("Error Writing back file: " + entry.GetFilename() + ": " + e.getMessage());
+								.setText(lang.Msg(Languages.MSG_ERRORWRITEBACK)+": " + entry.GetFilename() + ": " + e.getMessage());
 						messageBox.open();
 						e.printStackTrace();
 					}
@@ -548,7 +549,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
 			MicrodriveDirectoryEntry entry = (MicrodriveDirectoryEntry) itms[0].getData();
-			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay());
+			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay(), lang);
 			if (RenFileDialog.Show(entry.GetFilename())) {
 				try {
 					SinclairMicrodrivePartition smp = (SinclairMicrodrivePartition) partition;
@@ -558,8 +559,9 @@ public class MicrodrivePartitionPage extends GenericPage {
 					UpdateDirectoryEntryList();
 				} catch (IOException e) {
 					MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
-					messageBox.setMessage("Error Renaming " + entry.GetFilename() + ": " + e.getMessage());
-					messageBox.setText("Error Renaming " + entry.GetFilename() + ": " + e.getMessage());
+					String s = String.format(lang.Msg(Languages.MSG_ERRORRENAME), entry.GetFilename());
+					messageBox.setMessage(s + ": " + e.getMessage());
+					messageBox.setText(s + ": " + e.getMessage());
 					messageBox.open();
 					e.printStackTrace();
 				}
@@ -578,8 +580,9 @@ public class MicrodrivePartitionPage extends GenericPage {
 			smp.Pack();
 		} catch (IOException e) {
 			MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
-			messageBox.setMessage("Error packing microdrive: " + e.getMessage());
-			messageBox.setText("Error packing microdrive: " + e.getMessage());
+			String s = lang.Msg(Languages.MSG_ERRPACKINGMDR);
+			messageBox.setMessage(s + ": " + e.getMessage());
+			messageBox.setText(s + ": " + e.getMessage());
 			messageBox.open();
 			e.printStackTrace();
 		}
@@ -591,7 +594,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 	 * 
 	 */
 	protected void DoExtractAllFiles() {
-		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay());
+		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay(), lang);
 		try {
 			ExportAllPartsForm.ShowSinglePartition(partition);
 		} finally {
@@ -613,8 +616,9 @@ public class MicrodrivePartitionPage extends GenericPage {
 					filename = "the selected files";
 				}
 				MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
-				messageBox.setMessage("Are you sure you want to delete " + filename + " ?");
-				messageBox.setText("Are you sure you want to delete " + filename + " ?");
+				String s = String.format(lang.Msg(Languages.MSG_AREYOUSUREDEL), filename);
+				messageBox.setMessage(s);
+				messageBox.setText(s);
 
 				if (messageBox.open() == SWT.OK) {
 					SinclairMicrodrivePartition smp = (SinclairMicrodrivePartition) partition;
@@ -625,7 +629,7 @@ public class MicrodrivePartitionPage extends GenericPage {
 					AddComponents();
 				}
 			} catch (IOException e) {
-				ErrorBox("Error deleting file: " + e.getMessage());
+				ErrorBox(lang.Msg(Languages.MSG_ERRIODEL) + e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -635,8 +639,8 @@ public class MicrodrivePartitionPage extends GenericPage {
 	 * Show the Add files screen.
 	 */
 	protected void DoAddFiles() {
-		AddFilesDialog = new AddFilesToMDRPartition(ParentComp.getDisplay(), fsd);
-		AddFilesDialog.Show("Add files", (SinclairMicrodrivePartition) partition);
+		AddFilesDialog = new AddFilesToMDRPartition(ParentComp.getDisplay(), fsd, lang);
+		AddFilesDialog.Show(lang.Msg(Languages.MSG_ADDGFILES), (SinclairMicrodrivePartition) partition);
 		AddFilesDialog = null;
 		if (!ParentComp.isDisposed()) {
 			AddComponents();

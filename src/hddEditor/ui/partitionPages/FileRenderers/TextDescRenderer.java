@@ -9,17 +9,18 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.TextRenderer;
 
 public class TextDescRenderer extends FileRenderer {
 	private TextRenderer tr = null;
 	
-	public void RenderText(Composite mainPage, byte data[], byte header[], String Filename, FileSelectDialog filesel) {
-		super.Render(mainPage, data, Filename, filesel);
+	public void RenderText(Composite mainPage, byte data[], byte header[], String Filename, FileSelectDialog filesel, Languages lang) {
+		super.Render(mainPage, data, Filename, filesel, lang);
 
 
 		Label lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("Text: ");
+		lbl.setText(lang.Msg(Languages.MSG_TEXT) +": ");
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 4;
 		lbl.setLayoutData(gd);
@@ -28,7 +29,7 @@ public class TextDescRenderer extends FileRenderer {
 		gd.horizontalSpan = 1;
 
 		Button btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract file as text");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASTEXT) );
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -43,7 +44,7 @@ public class TextDescRenderer extends FileRenderer {
 		});
 
 		btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract file as Hex");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASHEX) );
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -59,7 +60,7 @@ public class TextDescRenderer extends FileRenderer {
 
 		if (header != null) {
 			btn = new Button(mainPage, SWT.NONE);
-			btn.setText("Extract file as Binary Inc Header");
+			btn.setText(lang.Msg(Languages.MSG_EXTRACTASBINHEADER) );
 			btn.setLayoutData(gd);
 			btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -83,7 +84,7 @@ public class TextDescRenderer extends FileRenderer {
 		
 		
 		tr = new TextRenderer();
-		tr.Render(mainPage, data,Filename +" - Text Description: ");
+		tr.Render(mainPage, data,Filename +" - "+lang.Msg(Languages.MSG_TEXTDESC)+ ": ");
 		
 		mainPage.pack();
 		

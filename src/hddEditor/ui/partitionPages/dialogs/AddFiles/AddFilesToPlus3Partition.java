@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.CPM;
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.PLUS3DOSPartition;
 import hddEditor.libs.partitions.cpm.CPMDirectoryEntry;
@@ -57,8 +58,8 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 	 * 
 	 * @param display
 	 */
-	public AddFilesToPlus3Partition(Display display, FileSelectDialog fsd) {
-		super(display, fsd);
+	public AddFilesToPlus3Partition(Display display, FileSelectDialog fsd, Languages lang) {
+		super(display, fsd, lang);
 	}
 
 	/**
@@ -98,7 +99,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
 		Button Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select +3 Files with headers");
+		Btn.setText(lang.Msg(Languages.MSG_SELPLUS3FILES));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -113,7 +114,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select Text BASIC file");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTTXTBASICFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -128,7 +129,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select binary BASIC file");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTBINBASICFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -143,7 +144,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select Code file");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTCODEFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -158,7 +159,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select image as screen$");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTIMAGEFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -173,7 +174,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select Numeric array");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTNUMFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -188,7 +189,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select Character array");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTCHARFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -203,7 +204,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select CPM file");
+		Btn.setText(lang.Msg(Languages.MSG_SELCPMFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -230,11 +231,11 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		TableColumn tc3 = new TableColumn(DirectoryListing, SWT.LEFT);
 		TableColumn tc4 = new TableColumn(DirectoryListing, SWT.LEFT);
 		TableColumn tc5 = new TableColumn(DirectoryListing, SWT.LEFT);
-		tc1.setText("Filename");
-		tc2.setText("+3 Filename");
-		tc3.setText("Type");
-		tc4.setText("Length");
-		tc5.setText("Flags");
+		tc1.setText(lang.Msg(Languages.MSG_FILENAME));
+		tc2.setText(lang.Msg(Languages.MSG_PLUS3FILES));
+		tc3.setText(lang.Msg(Languages.MSG_FILETYPE));
+		tc4.setText(lang.Msg(Languages.MSG_LENGTH));
+		tc5.setText(lang.Msg(Languages.MSG_FLAGS));
 		tc1.setWidth(250);
 		tc2.setWidth(150);
 		tc3.setWidth(150);
@@ -254,7 +255,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		});
 
 		Label l = new Label(shell, SWT.LEFT);
-		l.setText("Defaults.");
+		l.setText(lang.Msg(Languages.MSG_DEFAULTS) + ".");
 		FontData fontData = l.getFont().getFontData()[0];
 		Font font = new Font(shell.getDisplay(), new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 		l.setFont(font);
@@ -263,7 +264,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		l.setLayoutData(gd);
 
 		l = new Label(shell, SWT.LEFT);
-		l.setText("Filename:");
+		l.setText(lang.Msg(Languages.MSG_FILENAME) + ":");
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		l.setLayoutData(gd);
@@ -289,11 +290,11 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		});
 
 		l = new Label(shell, SWT.LEFT);
-		l.setText("BASIC files:");
+		l.setText(lang.Msg(Languages.MSG_BASICFILES) + ":");
 		l.setFont(font);
 
 		l = new Label(shell, SWT.LEFT);
-		l.setText("Line (32788 = none):");
+		l.setText(lang.Msg(Languages.MSG_STARTLINE) + " (32788 = none):");
 
 		StartLine = new Text(shell, SWT.BORDER);
 		StartLine.setText("32768");
@@ -319,11 +320,11 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 
 		new Label(shell, SWT.NONE);
 		l = new Label(shell, SWT.LEFT);
-		l.setText("Image files:");
+		l.setText(lang.Msg(Languages.MSG_IMAGEFILES) + ":");
 		l.setFont(font);
 
 		IsBWCheck = new Button(shell, SWT.CHECK);
-		IsBWCheck.setText("Monochrome");
+		IsBWCheck.setText(lang.Msg(Languages.MSG_MONOCHROME));
 		IsBWCheck.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -337,7 +338,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		});
 
 		l = new Label(shell, SWT.NONE);
-		l.setText("CODE load address:");
+		l.setText(lang.Msg(Languages.MSG_CODELOADADD) + ": ");
 		StartAddress = new Text(shell, SWT.NONE);
 		StartAddress.setText("32768");
 		StartAddress.addFocusListener(new FocusListener() {
@@ -363,7 +364,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		new Label(shell, SWT.NONE);
 
 		Label IntensityLabel = new Label(shell, SWT.LEFT);
-		IntensityLabel.setText("Cutoff: 100%");
+		IntensityLabel.setText(lang.Msg(Languages.MSG_CUTOFF) + ": 100%");
 
 		intensitySlider = new Slider(shell, SWT.HORIZONTAL | SWT.BORDER);
 		intensitySlider.setBounds(0, 0, 150, 40);
@@ -378,7 +379,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 			public void handleEvent(Event event) {
 				int perspectiveValue = intensitySlider.getMaximum() - intensitySlider.getSelection()
 						+ intensitySlider.getMinimum() - intensitySlider.getThumb();
-				IntensityLabel.setText("Cutoff: " + perspectiveValue + "%");
+				IntensityLabel.setText(lang.Msg(Languages.MSG_CUTOFF) + ": " + perspectiveValue + "%");
 				ReRenderImage();
 			}
 		});
@@ -403,7 +404,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Add files");
+		Btn.setText(lang.Msg(Languages.MSG_ADDGFILES));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -421,7 +422,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Cancel");
+		Btn.setText(lang.Msg(Languages.MSG_CANCEL));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -436,7 +437,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 		});
 
 		shell.pack();
-		IntensityLabel.setText("Cutoff: 50%");
+		IntensityLabel.setText(lang.Msg(Languages.MSG_CUTOFF) + ": 50%");
 		Filename.setText("");
 	}
 
@@ -445,7 +446,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 	 * header.
 	 */
 	protected void DoAddPlus3Files() {
-		File selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Select files to add",
+		File selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES,lang.Msg(Languages.MSG_SELFILEIMP),
 				new String[] { "*" });
 		if ((selected != null) && (selected.length > 0)) {
 			/*
@@ -472,7 +473,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 						data = new byte[p3d.GetBasicFileLength()];
 						numRead = is.read(data);
 						if (numRead < data.length) {
-							System.out.println("File terminated before +3DOS header says it should.");
+							System.out.println(lang.Msg(Languages.MSG_PLUS3FILEBAD));
 						}
 					} finally {
 						if (is != null)
@@ -484,7 +485,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 					// Check for a +3DOS header
 					if (p3d.IsPlus3DosFile()) {
 						String DosFileName = UniqueifyName(filename.getName());
-						String filetypeName = p3d.getTypeDesc() + "(+3Dos Header)";
+						String filetypeName = p3d.getTypeDesc() + "("+lang.Msg(Languages.MSG_PLUS3HEADER)+")";
 
 						TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 						String values[] = new String[5];
@@ -510,12 +511,12 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 						item2.setText(values);
 						item2.setData(listitem);
 					} else {
-						System.out.println("File " + filename + " does not have a +3DOS header.");
+						System.out.println(String.format(lang.Msg(Languages.MSG_NOPLUS3HEADER), filename ));
 					}
 				} catch (FileNotFoundException E) {
-					System.out.println("Error reading " + filename + " File not found.");
+					System.out.println(String.format(lang.Msg(Languages.MSG_ERRREADFILEXFNF), filename ));
 				} catch (IOException E) {
-					System.out.println("Error reading " + filename + " " + E.getMessage());
+					System.out.println(String.format(lang.Msg(Languages.MSG_ERRREADFILEX), filename ) + " " + E.getMessage());
 				}
 			}
 		}
@@ -526,7 +527,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 	 * Add file(s) as raw CPM files (EG, Headerless).
 	 */
 	protected void DoAddCPMFiles() {
-		File selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Select files to add",
+		File selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, lang.Msg(Languages.MSG_SELFILESTOADD),
 				new String[] { "*.*" });
 		if ((selected != null) && (selected.length > 0)) {
 			for (File filename : selected) {
@@ -545,7 +546,7 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 							is.close();
 					}
 				} catch (IOException e) {
-					System.out.println("Error loading file!");
+					System.out.println(String.format(lang.Msg(Languages.MSG_ERRORLOADING), filename.getName()));
 				}
 
 				/*
@@ -618,8 +619,8 @@ public class AddFilesToPlus3Partition extends GenericAddPageDialog {
 					break;
 				}
 			} catch (IOException e) {
-				System.out.println(
-						"Error adding " + details.OriginalFilename + " as " + details.filename + " " + e.getMessage());
+				System.out.println(String.format(lang.Msg(Languages.MSG_ERRORADDING),details.OriginalFilename, 
+						details.filename) + " " + e.getMessage());
 				e.printStackTrace();
 			}
 		}

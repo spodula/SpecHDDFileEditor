@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 import hddEditor.libs.FileSelectDialog;
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.SpeccyBasicDetails;
@@ -76,8 +77,8 @@ public class PlusThreePartPage extends GenericPage {
 	 * @param partition - Current partition.
 	 * @param filesel   - File selection dialog object.
 	 */
-	public PlusThreePartPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel) {
-		super(root, parent, partition, filesel);
+	public PlusThreePartPage(HDDEditor root, Composite parent, IDEDosPartition partition, FileSelectDialog filesel, Languages lang) {
+		super(root, parent, partition, filesel,lang);
 		AddComponents();
 	}
 
@@ -98,7 +99,7 @@ public class PlusThreePartPage extends GenericPage {
 			});
 
 			label("", 4);
-			Label l = label("Partition Details.", 1);
+			Label l = label(lang.Msg(Languages.MSG_PARTDETS), 1);
 			FontData fontData = l.getFont().getFontData()[0];
 			Font font = new Font(ParentComp.getDisplay(),
 					new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
@@ -106,21 +107,20 @@ public class PlusThreePartPage extends GenericPage {
 			label("", 3);
 
 			if (pdp.DirectoryBlocks == 0 || pdp.bam == null) {
-				label("Partition does not contain a valid CPM/+3 filesystem.", 4);
+				label(lang.Msg(Languages.MSG_PLUS3DOSPARTINVALID)+".", 4);
 			} else {
+				label(lang.Msg(Languages.MSG_PARTFREESPACE)+": " + GeneralUtils.GetSizeAsString(pdp.freeSpace * 1024), 1);
+				label(lang.Msg(Languages.MSG_DRIVEMAP)+": " + pdp.DriveLetter, 1);
+				label(lang.Msg(Languages.MSG_RESERVEDTR)+": " + pdp.ReservedTracks, 1);
+				label(lang.Msg(Languages.MSG_DISKSIZE)+": " + GeneralUtils.GetSizeAsString(pdp.diskSize * 1024), 1);
 
-				label("Partition free space: " + GeneralUtils.GetSizeAsString(pdp.freeSpace * 1024), 1);
-				label("Drive Mapping: " + pdp.DriveLetter, 1);
-				label("Reserved Tracks: " + pdp.ReservedTracks, 1);
-				label("Disk size: " + GeneralUtils.GetSizeAsString(pdp.diskSize * 1024), 1);
+				label(lang.Msg(Languages.MSG_BLOCKSZ)+": " + pdp.BlockSize, 1);
+				label(lang.Msg(Languages.MSG_MAXCPMB)+": " + pdp.MaxBlock, 1);
+				label(lang.Msg(Languages.MSG_USEDBLOCKS)+": " + pdp.usedblocks, 1);
+				label(lang.Msg(Languages.MSG_FREESPACE)+": " + GeneralUtils.GetSizeAsString(pdp.freeSpace * 1024), 1);
 
-				label("Blocksize: " + pdp.BlockSize, 1);
-				label("Max Block: " + pdp.MaxBlock, 1);
-				label("Used blocks: " + pdp.usedblocks, 1);
-				label("Free space: " + GeneralUtils.GetSizeAsString(pdp.freeSpace * 1024), 1);
-
-				label("Max dirent: " + pdp.MaxDirent, 1);
-				label("Used dirents: " + pdp.usedDirEnts, 1);
+				label(lang.Msg(Languages.MSG_MAXDIRENTS)+": " + pdp.MaxDirent, 1);
+				label(lang.Msg(Languages.MSG_USEDDIRENTS)+": " + pdp.usedDirEnts, 1);
 
 				label("", 2);
 
@@ -139,11 +139,11 @@ public class PlusThreePartPage extends GenericPage {
 				TableColumn tc3 = new TableColumn(DirectoryListing, SWT.LEFT);
 				TableColumn tc4 = new TableColumn(DirectoryListing, SWT.LEFT);
 				TableColumn tc5 = new TableColumn(DirectoryListing, SWT.LEFT);
-				tc1.setText("Filename");
-				tc2.setText("Type");
-				tc3.setText("CPM Length");
-				tc4.setText("+3 Length");
-				tc5.setText("Flags");
+				tc1.setText(lang.Msg(Languages.MSG_FILENAME));
+				tc2.setText(lang.Msg(Languages.MSG_FILETYPE));
+				tc3.setText(lang.Msg(Languages.MSG_CPMLEN));
+				tc4.setText(lang.Msg(Languages.MSG_REALLEN));
+				tc5.setText(lang.Msg(Languages.MSG_FLAGS));
 				tc1.setWidth(150);
 				tc2.setWidth(150);
 				tc3.setWidth(150);
@@ -228,7 +228,6 @@ public class PlusThreePartPage extends GenericPage {
 									int exporttype = RootPage.dragindex;
 
 									FileEntry entry = (FileEntry) item.getData();
-									System.out.println("Exporttype:" + exporttype);
 									if (exporttype == HDDEditor.DRAG_TYPE) {
 										SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
 										int actiontype = GeneralUtils.EXPORT_TYPE_HEX;
@@ -243,7 +242,6 @@ public class PlusThreePartPage extends GenericPage {
 											actiontype = GeneralUtils.EXPORT_TYPE_CSV;
 											break;
 										case (Speccy.BASIC_CODE):
-											System.out.println("CODE: " + entry.GetFileSize());
 											if (entry.GetFileSize() == 0x1b00) {
 												actiontype = GeneralUtils.EXPORT_TYPE_PNG;
 											} else {
@@ -306,7 +304,7 @@ public class PlusThreePartPage extends GenericPage {
 				gd.widthHint = 200;
 
 				Button Btn = new Button(ParentComp, SWT.PUSH);
-				Btn.setText("File Properties");
+				Btn.setText(lang.Msg(Languages.MSG_FILEPROPERTIES));
 				Btn.addSelectionListener(new SelectionListener() {
 					@Override
 					public void widgetSelected(SelectionEvent arg0) {
@@ -321,7 +319,7 @@ public class PlusThreePartPage extends GenericPage {
 				Btn.setLayoutData(gd);
 
 				Btn = new Button(ParentComp, SWT.PUSH);
-				Btn.setText("Edit Raw file");
+				Btn.setText(lang.Msg(Languages.MSG_EDITRAWFILE));
 				Btn.addSelectionListener(new SelectionListener() {
 					@Override
 					public void widgetSelected(SelectionEvent arg0) {
@@ -336,7 +334,7 @@ public class PlusThreePartPage extends GenericPage {
 				Btn.setLayoutData(gd);
 
 				Btn = new Button(ParentComp, SWT.PUSH);
-				Btn.setText("Delete file");
+				Btn.setText(lang.Msg(Languages.MSG_DELETEFILE));
 				Btn.setLayoutData(gd);
 				Btn.addSelectionListener(new SelectionListener() {
 					@Override
@@ -351,7 +349,7 @@ public class PlusThreePartPage extends GenericPage {
 				});
 
 				Btn = new Button(ParentComp, SWT.PUSH);
-				Btn.setText("Add File(s)");
+				Btn.setText(lang.Msg(Languages.MSG_ADDGFILES));
 				Btn.setLayoutData(gd);
 				Btn.addSelectionListener(new SelectionListener() {
 					@Override
@@ -365,7 +363,7 @@ public class PlusThreePartPage extends GenericPage {
 					}
 				});
 				Btn = new Button(ParentComp, SWT.PUSH);
-				Btn.setText("Extract all Files");
+				Btn.setText(lang.Msg(Languages.MSG_EXTRACTALLFILES));
 				Btn.setLayoutData(gd);
 				Btn.addSelectionListener(new SelectionListener() {
 					@Override
@@ -379,7 +377,7 @@ public class PlusThreePartPage extends GenericPage {
 					}
 				});
 				Btn = new Button(ParentComp, SWT.PUSH);
-				Btn.setText("Rename file");
+				Btn.setText(lang.Msg(Languages.MSG_RENAMEFILE));
 				Btn.setLayoutData(gd);
 				Btn.addSelectionListener(new SelectionListener() {
 					@Override
@@ -394,7 +392,7 @@ public class PlusThreePartPage extends GenericPage {
 				});
 
 				Btn = new Button(ParentComp, SWT.PUSH);
-				Btn.setText("Undelete file");
+				Btn.setText(lang.Msg(Languages.MSG_UNDELETEFILE));
 				Btn.setLayoutData(gd);
 				Btn.addSelectionListener(new SelectionListener() {
 					@Override
@@ -427,9 +425,8 @@ public class PlusThreePartPage extends GenericPage {
 					} else {
 						MessageBox messageBox = new MessageBox(ParentComp.getShell(),
 								SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-						messageBox.setMessage(
-								"The file " + ent.GetFilename() + "is incomplete and may not work. Un-delete?");
-						messageBox.setText("Incomplete file");
+						messageBox.setMessage(String.format(lang.Msg(Languages.MSG_MSGMAYBEINCOMPLETE), ent.GetFilename()));
+						messageBox.setText(lang.Msg(Languages.MSG_INCOMPLETEFILE));
 						if (messageBox.open() == SWT.YES) {
 							ent.SetDeleted(false);
 						}
@@ -440,7 +437,7 @@ public class PlusThreePartPage extends GenericPage {
 				AddComponents();
 				PopulateDirectory();
 			} catch (IOException e) {
-				ErrorBox("Error reading partition: " + e.getMessage());
+				ErrorBox(lang.Msg(Languages.MSG_ERRORREADINGPART)+": " + e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -464,17 +461,17 @@ public class PlusThreePartPage extends GenericPage {
 					content[1] = pfdh.getTypeDesc();
 					content[3] = String.valueOf(pfdh.GetDOSFileSize() - 0x80);
 				} else {
-					content[1] = "CPM/Invalid +3 Header";
+					content[1] = lang.Msg(Languages.MSG_INVALIDPLUS3HEADER);
 				}
 				content[2] = String.valueOf(entry.GetRawFileSize());
 				String s = "";
 				if (entry.IsDeleted) {
-					s = s + ",Deleted";
+					s = s + ","+lang.Msg(Languages.MSG_DELETED);
 				}
 				if (!entry.IsComplete()) {
-					s = s + ",Incomplete";
+					s = s + ","+lang.Msg(Languages.MSG_INCOMPLETE);
 				} else {
-					s = s + ",Complete";
+					s = s + ","+lang.Msg(Languages.MSG_COMPLETE);
 				}
 				if (!s.isEmpty()) {
 					s = s.substring(1);
@@ -499,11 +496,11 @@ public class PlusThreePartPage extends GenericPage {
 				CPMDirectoryEntry entry = (CPMDirectoryEntry) itms[0].getData();
 				String filename = entry.GetFilename();
 				try {
-					SpecFileEditDialog = new Plus3DosFileEditDialog(ParentComp.getDisplay(), fsd, partition);
+					SpecFileEditDialog = new Plus3DosFileEditDialog(ParentComp.getDisplay(), fsd, partition, lang);
 
 					byte[] data = entry.GetFileRawData();
 
-					if (SpecFileEditDialog.Show(data, "Editing " + entry.GetFilename(), entry)) {
+					if (SpecFileEditDialog.Show(data,String.format(lang.Msg(Languages.MSG_EDITINGX), entry.GetFilename()), entry)) {
 						entry.SetDeleted(true);
 						((PLUS3DOSPartition) partition).AddCPMFile(entry.GetFilename(), SpecFileEditDialog.data);
 						// refresh the screen.
@@ -516,7 +513,7 @@ public class PlusThreePartPage extends GenericPage {
 							if (SpecFileEditDialog.FileTypeHasChanged) {
 								Plus3DosFileHeader p3d = entry.GetPlus3DosHeader();
 								if (p3d != null && p3d.IsPlus3DosFile()) {
-									System.out.print("File type: " + p3d.GetFileType() + "("
+									System.out.print(lang.Msg(Languages.MSG_FILETYPE)+": " + p3d.GetFileType() + "("
 											+ Speccy.SpecFileTypeToString(p3d.GetFileType()) + ") -> ");
 									p3d.SetFileType(SpecFileEditDialog.NewFileType);
 									System.out.println(p3d.GetFileType() + "("
@@ -533,7 +530,7 @@ public class PlusThreePartPage extends GenericPage {
 										e.printStackTrace();
 									}
 								} else {
-									System.err.println("Update ignored, No +3DOS Basic header to update.");
+									System.err.println(lang.Msg(Languages.MSG_NOUPDATTENOHEADER));
 								}
 							}
 						}
@@ -552,7 +549,7 @@ public class PlusThreePartPage extends GenericPage {
 						}
 					}
 				} catch (IOException e) {
-					ErrorBox("Error reading partition: " + e.getMessage());
+					ErrorBox(lang.Msg(Languages.MSG_ERRORREADINGPART)+": " + e.getMessage());
 					e.printStackTrace();
 				}
 			}
@@ -563,8 +560,8 @@ public class PlusThreePartPage extends GenericPage {
 	 * Add files pressed
 	 */
 	private void DoAddFiles() {
-		AddFilesDialog = new AddFilesToPlus3Partition(ParentComp.getDisplay(), fsd);
-		AddFilesDialog.Show("Add files", (PLUS3DOSPartition) partition);
+		AddFilesDialog = new AddFilesToPlus3Partition(ParentComp.getDisplay(), fsd, lang);
+		AddFilesDialog.Show(lang.Msg(Languages.MSG_ADDGFILES), (PLUS3DOSPartition) partition);
 		AddFilesDialog = null;
 		if (!ParentComp.isDisposed()) {
 			AddComponents();
@@ -580,14 +577,14 @@ public class PlusThreePartPage extends GenericPage {
 			CPMDirectoryEntry entry = (CPMDirectoryEntry) itms[0].getData();
 			try {
 				// Create the hex edit dialog and start it.
-				HxEditDialog = new HexEditDialog(ParentComp.getDisplay());
+				HxEditDialog = new HexEditDialog(ParentComp.getDisplay(), lang);
 
 				byte data[] = entry.GetFileData();
 
-				AddressNote NewAddressNote = new AddressNote(0, data.length, 0, "File: " + entry.GetFilename());
+				AddressNote NewAddressNote = new AddressNote(0, data.length, 0,lang.Msg(Languages.MSG_FILE)+ ": " + entry.GetFilename());
 				AddressNote ANArray[] = { NewAddressNote };
 
-				boolean WriteBackData = HxEditDialog.Show(data, "Editing " + entry.GetFilename(), ANArray, fsd);
+				boolean WriteBackData = HxEditDialog.Show(data, String.format(lang.Msg(Languages.MSG_EDITINGX), entry.GetFilename()), ANArray, fsd);
 				if (WriteBackData) {
 					entry.SetDeleted(true);
 					((PLUS3DOSPartition) partition).AddCPMFile(entry.GetFilename(), HxEditDialog.Data);
@@ -596,7 +593,7 @@ public class PlusThreePartPage extends GenericPage {
 				}
 				HxEditDialog = null;
 			} catch (IOException e) {
-				ErrorBox("Error reading File: " + e.getMessage());
+				ErrorBox(lang.Msg(Languages.MSG_ERRREADNGFILE)+": " + e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -615,8 +612,9 @@ public class PlusThreePartPage extends GenericPage {
 					filename = "the selected files";
 				}
 				MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
-				messageBox.setMessage("Are you sure you want to delete " + filename + " ?");
-				messageBox.setText("Are you sure you want to delete " + filename + " ?");
+				String s = String.format(lang.Msg(Languages.MSG_AREYOUSUREDEL),filename);
+				messageBox.setMessage(s);
+				messageBox.setText(s);
 				if (messageBox.open() == SWT.OK) {
 					// for +3dos files, deleting deleted files causes a reload of the dirents.
 					// This means the existing ones are invalidated. so we set a delayed reload and
@@ -640,7 +638,7 @@ public class PlusThreePartPage extends GenericPage {
 				}
 				PopulateDirectory();
 			} catch (IOException e) {
-				ErrorBox("Error reading partition: " + e.getMessage());
+				ErrorBox(lang.Msg(Languages.MSG_ERRORREADINGPART)+": " + e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -650,7 +648,7 @@ public class PlusThreePartPage extends GenericPage {
 	 * Show the "Extract all files" form.
 	 */
 	protected void DoExtractAllFiles() {
-		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay());
+		FileExportAllPartitionsForm ExportAllPartsForm = new FileExportAllPartitionsForm(ParentComp.getDisplay(), lang);
 		try {
 			ExportAllPartsForm.ShowSinglePartition(partition);
 		} finally {
@@ -665,7 +663,7 @@ public class PlusThreePartPage extends GenericPage {
 		TableItem itms[] = DirectoryListing.getSelection();
 		if ((itms != null) && (itms.length != 0)) {
 			CPMDirectoryEntry entry = (CPMDirectoryEntry) itms[0].getData();
-			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay());
+			RenFileDialog = new RenameFileDialog(ParentComp.getDisplay(), lang);
 			if (RenFileDialog.Show(entry.GetFilename())) {
 				try {
 					if (RenFileDialog != null)
@@ -674,8 +672,9 @@ public class PlusThreePartPage extends GenericPage {
 					AddComponents();
 				} catch (IOException e) {
 					MessageBox messageBox = new MessageBox(ParentComp.getShell(), SWT.ICON_ERROR | SWT.CLOSE);
-					messageBox.setMessage("Error Renaming " + entry.GetFilename() + ": " + e.getMessage());
-					messageBox.setText("Error Renaming " + entry.GetFilename() + ": " + e.getMessage());
+					String s = String.format(lang.Msg(Languages.MSG_ERRORRENAME), entry.GetFilename());
+					messageBox.setMessage(s + ": " + e.getMessage());
+					messageBox.setText(s + ": " + e.getMessage());
 					messageBox.open();
 					e.printStackTrace();
 				}
@@ -719,14 +718,14 @@ public class PlusThreePartPage extends GenericPage {
 				URI uri = new URI(file);
 				file = uri.getPath();
 			} catch (URISyntaxException e) {
-				System.out.println("Cannot parse " + file);
+				System.out.println(String.format(lang.Msg(Languages.MSG_ERRORRENAME), file));
 			}
 			System.out.println(file);
 			fFiles[i++] = new File(file);
 		}
 
-		DropFilestoPlus3Partition DropFilesDialog = new DropFilestoPlus3Partition(ParentComp.getDisplay());
-		DropFilesDialog.Show("Add files", (PLUS3DOSPartition) partition, fFiles);
+		DropFilestoPlus3Partition DropFilesDialog = new DropFilestoPlus3Partition(ParentComp.getDisplay(), lang);
+		DropFilesDialog.Show(lang.Msg(Languages.MSG_ADDGFILES), (PLUS3DOSPartition) partition, fFiles);
 		DropFilesDialog = null;
 		if (!ParentComp.isDisposed()) {
 			AddComponents();

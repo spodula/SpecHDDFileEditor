@@ -21,6 +21,8 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.Languages;
+
 public class SearchReplaceDialog {
 	//Form components
 	private Display display = null;
@@ -44,6 +46,8 @@ public class SearchReplaceDialog {
 	private static String FormatHex = "Format: XX XX XX XX";
 	private static String FormatAsc = "Format: ABCDEFGH";
 
+	public Languages lang;
+	
 	/**
 	 * Constructor
 	 * 
@@ -51,11 +55,12 @@ public class SearchReplaceDialog {
 	 * @param src
 	 * @param notes
 	 */
-	public SearchReplaceDialog(Display display, byte src[], AddressNote notes[]) {
+	public SearchReplaceDialog(Display display, byte src[], AddressNote notes[], Languages lang) {
 		this.display = display;
 		Searchdata = new byte[src.length];
 		System.arraycopy(src, 0, Searchdata, 0, src.length);
 		Notes = notes;
+		this.lang = lang;
 	}
 
 	/**
@@ -91,12 +96,12 @@ public class SearchReplaceDialog {
 		gridLayout.marginBottom = 20;
 
 		shell.setLayout(gridLayout);
-		shell.setText("Search and replace");
+		shell.setText(lang.Msg(Languages.MSG_SEARCHREPLACE));
 
 		Label lbl = new Label(shell, SWT.NONE);
 		FontData fontData = lbl.getFont().getFontData()[0];
 		Font boldFont = new Font(display, new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
-		lbl.setText("Search:");
+		lbl.setText(lang.Msg(Languages.MENU_SEARCH)+":");
 		lbl.setFont(boldFont);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
@@ -111,7 +116,7 @@ public class SearchReplaceDialog {
 		searchEdit.setSize(200, searchEdit.getSize().y);
 
 		lbl = new Label(shell, SWT.NONE);
-		lbl.setText("Replace:");
+		lbl.setText(lang.Msg(Languages.MSG_REPLACE)+":");
 		lbl.setFont(boldFont);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
@@ -130,7 +135,7 @@ public class SearchReplaceDialog {
 		InfoLabel.setFont(boldFont);
 
 		binAscii = new Button(shell, SWT.BORDER | SWT.CHECK);
-		binAscii.setText("Hex(off) or Ascii(on)?");
+		binAscii.setText(lang.Msg(Languages.MSG_HEXASCII));
 		gd = new GridData();
 		gd.grabExcessHorizontalSpace = true;
 		gd.horizontalSpan = 1;
@@ -165,8 +170,8 @@ public class SearchReplaceDialog {
 
 		TableColumn tc1 = new TableColumn(ResultList, SWT.LEFT);
 		TableColumn tc2 = new TableColumn(ResultList, SWT.FILL);
-		tc1.setText("Address");
-		tc2.setText("Notes");
+		tc1.setText(lang.Msg(Languages.MSG_ADDRESS));
+		tc2.setText(lang.Msg(Languages.MSG_NOTES));
 		tc1.setWidth(150);
 		tc2.setWidth(350);
 		ResultList.setHeaderVisible(true);
@@ -174,7 +179,7 @@ public class SearchReplaceDialog {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 160;
 		Button Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Search");
+		Btn.setText(lang.Msg(Languages.MENU_SEARCH));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -189,7 +194,7 @@ public class SearchReplaceDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Replace");
+		Btn.setText(lang.Msg(Languages.MSG_REPLACE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -204,7 +209,7 @@ public class SearchReplaceDialog {
 			}
 		});
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Cancel");
+		Btn.setText(lang.Msg(Languages.MSG_CANCEL));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -218,7 +223,7 @@ public class SearchReplaceDialog {
 			}
 		});
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Save and close");
+		Btn.setText(lang.Msg(Languages.MSG_SAVECLOSE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -308,7 +313,7 @@ public class SearchReplaceDialog {
 		String s = "";
 		if (numresults > 1)
 			s = "s";
-		InfoLabel.setText(numresults + " item" + s + " found.");
+		InfoLabel.setText(String.format(lang.Msg(Languages.MSG_XITEMSFOUND), numresults,s));
 		ResultList.redraw();
 	}
 
@@ -403,8 +408,8 @@ public class SearchReplaceDialog {
 
 		if (searchBytes.length != ReplaceBytes.length) {
 			MessageBox messageBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-			messageBox.setMessage("Search and Replace must be the same length");
-			messageBox.setText("Search and Replace must be the same length");
+			messageBox.setMessage(lang.Msg(Languages.MSG_SRSAMELEN));
+			messageBox.setText(lang.Msg(Languages.MSG_SRSAMELEN));
 			messageBox.open();
 		} else {
 			DoSearch();
@@ -420,6 +425,6 @@ public class SearchReplaceDialog {
 		String s = "";
 		if (NumReplace > 1)
 			s = "s";
-		InfoLabel.setText("Replaced " + NumReplace + " item" + s);
+		InfoLabel.setText(String.format(lang.Msg(Languages.MSG_REPLACEDXITEMS), NumReplace, s));
 	}
 }

@@ -1,4 +1,5 @@
 package hddEditor.ui;
+//TODO: make selections not reliant on text.
 
 /**
  * New file form...
@@ -21,6 +22,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.disks.HDD.RS_IDEDosDisk;
 import hddEditor.libs.disks.HDD.RawHDDFile;
 import hddEditor.ui.partitionPages.dialogs.ProgesssForm;
@@ -47,6 +49,7 @@ public class FileNewHDDForm {
 	// Flag to prevent an endless loop when the boxes are being edited.
 	private boolean ModInProgress = false;
 
+	Languages lang;
 	
 	private FileSelectDialog fsd = null;
 	/**
@@ -54,9 +57,10 @@ public class FileNewHDDForm {
 	 * 
 	 * @param display
 	 */
-	public FileNewHDDForm(Display display, FileSelectDialog fsd) {
+	public FileNewHDDForm(Display display, FileSelectDialog fsd, Languages lang) {
 		this.display = display;
 		this.fsd = fsd;
+		this.lang = lang;
 	}
 
 	/**
@@ -84,7 +88,7 @@ public class FileNewHDDForm {
 		gridLayout.marginRight = 20;
 
 		shell.setLayout(gridLayout);
-		shell.setText("Create new HDF file.");
+		shell.setText(lang.Msg(Languages.MENU_NEWHDD));
 
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
@@ -97,7 +101,7 @@ public class FileNewHDDForm {
 		Targetfile.setText("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
 		SelectTargetFileBtn = new Button(shell, SWT.BORDER);
-		SelectTargetFileBtn.setText("Select Target file");
+		SelectTargetFileBtn.setText(lang.Msg(Languages.MSG_SELTARGET));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -106,7 +110,7 @@ public class FileNewHDDForm {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				
-				File Selected = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_DRIVE, "Select target file", new String[] { "*", "*.img", "*.hdf" },"newhdd.hdf");
+				File Selected = fsd.AskForSingleFileSave(FileSelectDialog.FILETYPE_DRIVE, lang.Msg(Languages.MSG_SELTARGET), new String[] { "*", "*.img", "*.hdf" },"newhdd.hdf");
 				if (Selected != null) {
 					Targetfile.setText(Selected.getAbsolutePath());
 				}
@@ -119,7 +123,7 @@ public class FileNewHDDForm {
 		});
 
 		Label lbl = new Label(shell, SWT.NONE);
-		lbl.setText("Target file type:");
+		lbl.setText(lang.Msg(Languages.MSG_TARGETTYPE));
 
 		TargetFileType = new Combo(shell, SWT.CHECK);
 		String entries[] = { "HDF file (8 bit)", "HDF file (16 bit)", "Raw IMG file (8 bit)", "Raw IMG file (16 bit)" };
@@ -130,7 +134,7 @@ public class FileNewHDDForm {
 		new Label(shell, SWT.NONE);
 
 		lbl = new Label(shell, SWT.NONE);
-		lbl.setText("Cyls:");
+		lbl.setText(lang.Msg(Languages.MSG_CYLS)+":");
 		Cyls = new Text(shell, SWT.BORDER);
 		Cyls.setText("xxxxxxxxxxxxxxxxxxxx");
 		Cyls.addModifyListener(new ModifyListener() {
@@ -143,7 +147,7 @@ public class FileNewHDDForm {
 		new Label(shell, SWT.NONE);
 
 		lbl = new Label(shell, SWT.NONE);
-		lbl.setText("Heads:");
+		lbl.setText(lang.Msg(Languages.MSG_HEADS)+":");
 		Heads = new Text(shell, SWT.BORDER);
 		Heads.setText("xxxxxxxxxxxxxxxxxxxx");
 		Heads.addModifyListener(new ModifyListener() {
@@ -154,7 +158,7 @@ public class FileNewHDDForm {
 		});
 
 		lbl = new Label(shell, SWT.NONE);
-		lbl.setText("Disk Size Mb:");
+		lbl.setText(lang.Msg(Languages.MSG_DISKSIZE)+":");
 		SizeMB = new Text(shell, SWT.BORDER);
 		SizeMB.setText("xxxxxxxxxxxxxxxxxxxx");
 		SizeMB.addModifyListener(new ModifyListener() {
@@ -165,7 +169,7 @@ public class FileNewHDDForm {
 		});
 
 		lbl = new Label(shell, SWT.NONE);
-		lbl.setText("Sectors Per track:");
+		lbl.setText(lang.Msg(Languages.MSG_SPT)+":");
 		Spt = new Text(shell, SWT.BORDER);
 		Spt.setText("xxxxxxxxxxxxxxxxxxxx");
 		Spt.addModifyListener(new ModifyListener() {
@@ -180,7 +184,7 @@ public class FileNewHDDForm {
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
 		CreateBtn = new Button(shell, SWT.BORDER);
-		CreateBtn.setText("Create new");
+		CreateBtn.setText(lang.Msg(Languages.MSG_CREATENEW));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -205,7 +209,7 @@ public class FileNewHDDForm {
 		});
 
 		CloseBtn = new Button(shell, SWT.BORDER);
-		CloseBtn.setText("Close");
+		CloseBtn.setText(lang.Msg(Languages.MSG_CLOSE));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		gd.widthHint = 200;
@@ -296,7 +300,7 @@ public class FileNewHDDForm {
 	public boolean DoCreateFile(boolean IsTargetHDF, boolean IsTarget8Bit, String targFile, int cyl, int head,
 			int spt) {
 		boolean SuccessfullyCreated = false;
-		ProgesssForm pf = new ProgesssForm(display);
+		ProgesssForm pf = new ProgesssForm(display, lang);
 		try {
 			String bitstring = "8-bit";
 			if (!IsTarget8Bit) {
@@ -307,7 +311,8 @@ public class FileNewHDDForm {
 				hdfstring = "HDF file";
 			}
 			
-			System.out.println("Openning " + targFile + " for writing... as "+bitstring+" "+hdfstring);
+			System.out.println(String.format(lang.Msg(Languages.MSG_OPENNINGFORWRITING), targFile, bitstring, hdfstring));
+
 			if (IsTargetHDF) {
 				RS_IDEDosDisk rs = new RS_IDEDosDisk();
 				SuccessfullyCreated= rs.CreateBlankHDFDisk(new File(targFile), cyl, head, spt, IsTarget8Bit, pf); 

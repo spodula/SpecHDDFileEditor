@@ -201,19 +201,7 @@ public class FileSelectDialog {
 				return (chooser.getSelectedFile());
 			}
 		} else {
-			String search = "*.*";
-			String replace = "*";
-			if (System.getProperty("os.name").toUpperCase().contains("WIN")) {
-				search = "*";
-				replace = "*.*";
-			}
-			for (int i=0;i<extension.length;i++) {
-				if (extension[i].equals(search)) {
-					extension[i] = replace;
-				}
-			}
-			
-
+						
 			FileDialog fd = new FileDialog(shell, SWT.SAVE);
 			fd.setText(title);
 			fd.setFilterExtensions(extension);

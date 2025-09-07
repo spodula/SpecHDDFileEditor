@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.CPM;
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.SpeccyFileEncoders;
 import hddEditor.libs.partitions.IDEDosPartition;
@@ -89,15 +90,18 @@ public class GenericAddPageDialog {
 		public byte[] data = null;
 
 	}
+	
+	protected Languages lang;
 
 	/**
 	 * Base constructor
 	 * 
 	 * @param display
 	 */
-	public GenericAddPageDialog(Display display, FileSelectDialog fsd) {
+	public GenericAddPageDialog(Display display, FileSelectDialog fsd, Languages lang) {
 		this.display = display;
 		this.fsd = fsd;
+		this.lang = lang;
 	}
 
 	/**
@@ -456,7 +460,7 @@ public class GenericAddPageDialog {
 	 */
 	protected void DoAddCharacterFiles() {
 		int filelimit = 16384;
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CSV file",new String[] {"*"});
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES,lang.Msg(Languages.MSG_OPENCSV) ,new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				/*
@@ -472,7 +476,7 @@ public class GenericAddPageDialog {
 					String values[] = new String[5];
 					values[0] = filename.getAbsolutePath();
 					values[1] = DosFileName;
-					values[2] = "Character Array";
+					values[2] = lang.Msg(Languages.MSG_CHARARRAY);
 					values[3] = String.valueOf(ArrayAsBytes.length);
 					values[4] = "";
 
@@ -492,7 +496,7 @@ public class GenericAddPageDialog {
 					item2.setText(values);
 					item2.setData(listitem);
 				} catch (IOException e) {
-					System.out.println("Failed to add " + filename.getAbsolutePath() + " " + e.getMessage());
+					System.out.println(String.format(lang.Msg(Languages.MSG_FAILEDTOADD),filename.getAbsolutePath()) + " " + e.getMessage());
 				}
 			}
 		}
@@ -504,7 +508,7 @@ public class GenericAddPageDialog {
 	 */
 	protected void DoAddNumericArrays() {
 		int filelimit = 16384;
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CSV file",new String[] {"*"});
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, lang.Msg(Languages.MSG_OPENCSV),new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				try {
@@ -518,7 +522,7 @@ public class GenericAddPageDialog {
 					String values[] = new String[5];
 					values[0] = filename.getAbsolutePath();
 					values[1] = DosFileName;
-					values[2] = "Number Array";
+					values[2] = lang.Msg(Languages.MSG_NUMARRAY);
 					values[3] = String.valueOf(ArrayAsBytes.length);
 					values[4] = "";
 
@@ -538,7 +542,7 @@ public class GenericAddPageDialog {
 					item2.setText(values);
 					item2.setData(listitem);
 				} catch (IOException e) {
-					System.out.println("Failed to add " + filename.getAbsolutePath() + " " + e.getMessage());
+					System.out.println(String.format(lang.Msg(Languages.MSG_FAILEDTOADD),filename.getAbsolutePath()) + " " + e.getMessage());
 				}
 			}
 		}
@@ -550,7 +554,7 @@ public class GenericAddPageDialog {
 	 * ImageIO supports (PNG, GIF, JPEG, BMP, WEBMP)
 	 */
 	protected void DoAddImageFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open Image file",new String[] {"*"});
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, lang.Msg(Languages.MSG_OPENIMGFILE),new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				BufferedImage RawImage;
@@ -600,7 +604,7 @@ public class GenericAddPageDialog {
 					item2.setText(values);
 					item2.setData(listitem);
 				} catch (IOException e) {
-					System.out.println("Failed to add " + filename.getAbsolutePath() + " " + e.getMessage());
+					System.out.println(String.format(lang.Msg(Languages.MSG_FAILEDTOADD),filename.getAbsolutePath()) + " " + e.getMessage());
 				}
 			}
 		}
@@ -611,7 +615,7 @@ public class GenericAddPageDialog {
 	 * Add BINARY file(s) as a CODE file.
 	 */
 	protected void DoAddBinaryFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open raw binary file",new String[] {"*"});
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, lang.Msg(Languages.MSG_OPENRAWBINFILE),new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				
@@ -626,7 +630,7 @@ public class GenericAddPageDialog {
 							is.close();
 					}
 				} catch (IOException e) {
-					System.out.println("Error loading file!");
+					System.out.println( String.format(lang.Msg(Languages.MSG_ERRORLOADING), filename.getName()));
 				}
 
 				/*
@@ -666,7 +670,7 @@ public class GenericAddPageDialog {
 	 * Add a text file as a BASIC file.
 	 */
 	protected void DoAddTextBasicFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open BASIC text file",new String[] {"*"});
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, lang.Msg(Languages.MSG_OPENBASICTXTFILE),new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				
@@ -707,7 +711,7 @@ public class GenericAddPageDialog {
 	 * Add pre-converted basic files.
 	 */
 	protected void DoAddBinaryBasicFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open encoded BASIC file",new String[] {"*"});
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES,  lang.Msg(Languages.MSG_OPENBASICENCFILE),new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				/*
@@ -724,7 +728,7 @@ public class GenericAddPageDialog {
 							is.close();
 					}
 				} catch (IOException e) {
-					System.out.println("Error loading file!");
+					System.out.println( String.format(lang.Msg(Languages.MSG_ERRORLOADING), filename.getName()));
 				}
 
 				/*

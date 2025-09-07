@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.TableItem;
 import hddEditor.libs.ASMLib;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.ASMLib.DecodedASM;
+import hddEditor.libs.Languages;
 
 public class BasicRenderer implements Renderer {
 	public Table Listing = null;
@@ -43,7 +44,7 @@ public class BasicRenderer implements Renderer {
 		VarLBL = null;
 	}
 
-	public String GetBasicSummary() {
+	public String GetBasicSummary(Languages lang) {
 		String result = "";
 
 		for (TableItem line : Listing.getItems()) {
@@ -51,7 +52,7 @@ public class BasicRenderer implements Renderer {
 			String content = line.getText(1);
 			result = result + lineno + " " + content + "\n";
 		}
-		result = result + "\nVariables:\n";
+		result = result + System.lineSeparator() + lang.Msg(Languages.MSG_VARIABLES) + ":" + System.lineSeparator();
 		if (Variables != null && Variables.getItems() != null) {
 			for (TableItem line : Variables.getItems()) {
 				String varname = line.getText(0);
@@ -60,7 +61,7 @@ public class BasicRenderer implements Renderer {
 				result = result + varname + " " + type + " - " + content + "\n";
 			}
 		} else {
-			result = result + "None.";
+			result = result + lang.Msg(Languages.MSG_NOVARS) + ".";
 		}
 		return (result.trim());
 	}
@@ -72,13 +73,14 @@ public class BasicRenderer implements Renderer {
 	 * @param filelength
 	 * @param VariablesOffset
 	 */
-	private void PopulateVariables(Composite TargetPage, byte data[], int filelength, int VariablesOffset) {
+	private void PopulateVariables(Composite TargetPage, byte data[], int filelength, int VariablesOffset,
+			Languages lang) {
 		Variables.removeAll();
 		int varlen = Math.min(filelength, data.length) - VariablesOffset;
 		if (varlen > 0) {
 			byte variables[] = new byte[varlen];
 			System.arraycopy(data, VariablesOffset, variables, 0, varlen);
-			DecodeVariables(TargetPage, variables);
+			DecodeVariables(TargetPage, variables, lang);
 		}
 	}
 
@@ -88,14 +90,15 @@ public class BasicRenderer implements Renderer {
 	 * @param filelength
 	 * @param VariablesOffset
 	 */
-	public void AddBasicFile(Composite TargetPage, byte data[], int filelength, int VariablesOffset, boolean IncludeRealValues) {
+	public void AddBasicFile(Composite TargetPage, byte data[], int filelength, int VariablesOffset,
+			boolean IncludeRealValues, Languages lang) {
 		if (Listing != null) {
 			Listing.dispose();
 		}
 		if (Variables != null) {
 			Variables.dispose();
 		}
-		
+
 		Listing = new Table(TargetPage, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		Listing.setLinesVisible(true);
 
@@ -106,14 +109,14 @@ public class BasicRenderer implements Renderer {
 		Listing.setLayoutData(gd);
 
 		TableColumn tc1 = new TableColumn(Listing, SWT.LEFT);
-		tc1.setText("Line number");
+		tc1.setText(lang.Msg(Languages.MSG_LINENUM));
 		tc1.setWidth(80);
 		TableColumn tc2 = new TableColumn(Listing, SWT.FILL);
-		tc2.setText("Line");
+		tc2.setText(lang.Msg(Languages.MSG_LINE));
 		tc2.setWidth(600);
 
 		VarLBL = new Label(TargetPage, SWT.NONE);
-		VarLBL.setText("Variables: ");
+		VarLBL.setText(lang.Msg(Languages.MSG_VARIABLES) + ": ");
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 4;
 		VarLBL.setLayoutData(gd);
@@ -124,29 +127,30 @@ public class BasicRenderer implements Renderer {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 4;
 		gd.heightHint = 100;
-		//gd.widthHint = TargetPage.getSize().x;
+		// gd.widthHint = TargetPage.getSize().x;
 		Variables.setLayoutData(gd);
 
 		TableColumn vc1 = new TableColumn(Variables, SWT.LEFT);
-		vc1.setText("Variable");
+		vc1.setText(lang.Msg(Languages.MSG_VARIABLE));
 		vc1.setWidth(80);
 		TableColumn vc2 = new TableColumn(Variables, SWT.FILL);
-		vc2.setText("Type");
+		vc2.setText(lang.Msg(Languages.MSG_VARTYPE));
 		vc2.setWidth(100);
 		TableColumn vc3 = new TableColumn(Variables, SWT.FILL);
-		vc3.setText("Content");
+		vc3.setText(lang.Msg(Languages.MSG_CONTENTS));
 		vc3.setWidth(580);
 
-		PopulateBASIC(data, filelength, VariablesOffset,IncludeRealValues);
+		PopulateBASIC(data, filelength, VariablesOffset, IncludeRealValues, lang);
 		try {
-			PopulateVariables(TargetPage, data, filelength, VariablesOffset);
+			PopulateVariables(TargetPage, data, filelength, VariablesOffset, lang);
 		} catch (Exception E) {
-			
+
 		}
 		TargetPage.pack();
 	}
 
-	private void PopulateBASIC(byte data[], int filelength, int VariablesOffset, boolean IncludeRealVals) {
+	private void PopulateBASIC(byte data[], int filelength, int VariablesOffset, boolean IncludeRealVals,
+			Languages lang) {
 		class RemDetails {
 			public int locationAddr;
 			public int size;
@@ -177,10 +181,10 @@ public class BasicRenderer implements Renderer {
 				// fiddles bad line lengths
 				linelen = Math.min(filelength - ptr + 4, linelen);
 			} catch (Exception E) {
-				System.out.println("Basic parsing error, bad linenum.");
+				System.out.println(lang.Msg(Languages.MSG_BASICPARSERR));
 				String details[] = new String[2];
-				details[0] = "Invalid";
-				details[1] = "Bad line number encountered.";
+				details[0] = lang.Msg(Languages.MSG_INVALID);
+				details[1] = lang.Msg(Languages.MSG_BADLINENO);
 				ptr = 99999999;
 
 				TableItem Row = new TableItem(Listing, SWT.NONE);
@@ -200,9 +204,9 @@ public class BasicRenderer implements Renderer {
 					RemDetails rd = new RemDetails();
 					byte line[] = new byte[linelen];
 					for (int i = 0; i < linelen; i++) {
-						//if the line length is corrupt, this feeds NULLS until the end of line.
-						//Something this happens as part of anti-hack protection.
-						if ((ptr+i) >= data.length) {
+						// if the line length is corrupt, this feeds NULLS until the end of line.
+						// Something this happens as part of anti-hack protection.
+						if ((ptr + i) >= data.length) {
 							line[i] = 0x00;
 						} else {
 							line[i] = data[ptr + i];
@@ -235,7 +239,7 @@ public class BasicRenderer implements Renderer {
 					}
 					Speccy.DecodeBasicLine(sb, line, 0, linelen, IncludeRealVals);
 				} catch (Exception E) {
-					sb.append("Bad line: " + E.getMessage());
+					sb.append(lang.Msg(Languages.MSG_BADLINENO) + ": " + E.getMessage());
 					ptr = 99999999;
 				}
 				// point to next line.
@@ -253,7 +257,7 @@ public class BasicRenderer implements Renderer {
 		if (RemLocations.size() > 0) {
 			String details[] = new String[2];
 			details[0] = "";
-			details[1] = "Code in Rem statements:";
+			details[1] = lang.Msg(Languages.MSG_REMCODE) + ":";
 			TableItem Row = new TableItem(Listing, SWT.NONE);
 			Row.setText(details);
 
@@ -261,8 +265,8 @@ public class BasicRenderer implements Renderer {
 
 			for (RemDetails rd : RemLocations) {
 				details = new String[2];
-				details[0] = "Line: " + String.valueOf(rd.line);
-				details[1] = rd.size + " bytes";
+				details[0] = lang.Msg(Languages.MSG_LINE) + ": " + String.valueOf(rd.line);
+				details[1] = rd.size + " " + lang.Msg(Languages.MSG_BYTES);
 				Row = new TableItem(Listing, SWT.NONE);
 				Row.setText(details);
 
@@ -315,14 +319,12 @@ public class BasicRenderer implements Renderer {
 
 					} // while
 				} catch (Exception E) {
-					System.out.println("Error at: " + realaddress + "(" + loadedaddress + ")");
+					System.out.println(String.format(lang.Msg(Languages.MSG_ERRORATXX), realaddress, loadedaddress));
 					System.out.println(E.getMessage());
 					E.printStackTrace();
 				}
 			}
-
 		}
-
 	}
 
 	/**
@@ -331,12 +333,12 @@ public class BasicRenderer implements Renderer {
 	 * @param mainPage
 	 * @param VarData
 	 */
-	private void DecodeVariables(Composite mainPage, byte[] VarData) {
+	private void DecodeVariables(Composite mainPage, byte[] VarData, Languages lang) {
 		try {
 			int ptr = 0x00;
 			if (ptr >= (VarData.length)) {
 				TableItem Row = new TableItem(Variables, SWT.NONE);
-				Row.setText(new String[] { "No Variables", "", "" });
+				Row.setText(new String[] { lang.Msg(Languages.MSG_NOVARS), "", "" });
 			} else {
 				while (ptr < VarData.length) {
 					int var = (int) (VarData[ptr++] & 0xff);
@@ -346,32 +348,33 @@ public class BasicRenderer implements Renderer {
 					if (vartype == 0x00) {
 						// anything after this marker is junk so just skip it.
 						TableItem Row = new TableItem(Variables, SWT.NONE);
-						Row.setText(new String[] { "End of variables", "", "" });
+						Row.setText(new String[] { lang.Msg(Languages.MSG_ENDOFVARS), "", "" });
 						ptr = VarData.length;
 					} else if (vartype == 1) {
 						TableItem Row = new TableItem(Variables, SWT.NONE);
-						Row.setText(new String[] { "Unknown type", "", "" });
+						Row.setText(new String[] { lang.Msg(Languages.MSG_UNKNOWNTYP), "", "" });
 						ptr = VarData.length;
 					} else if (vartype == 2) { // string
-						ptr = VariableType2(ptr, var, VarData);
+						ptr = VariableType2(ptr, var, VarData, lang);
 					} else if (vartype == 3) { // number (1 letter)
-						ptr = VariableType3(ptr, var, VarData);
+						ptr = VariableType3(ptr, var, VarData, lang);
 					} else if (vartype == 4) { // Array of numbers
-						ptr = VariableType4(ptr, var, VarData);
+						ptr = VariableType4(ptr, var, VarData, lang);
 					} else if (vartype == 5) { // Number who's name is longer than 1 letter
-						ptr = VariableType5(ptr, var, VarData);
+						ptr = VariableType5(ptr, var, VarData, lang);
 					} else if (vartype == 6) { // array of characters
-						ptr = VariableType6(ptr, var, VarData);
+						ptr = VariableType6(ptr, var, VarData, lang);
 					} else if (vartype == 7) { // for/next control variable
-						ptr = VariableType7(ptr, var, VarData);
+						ptr = VariableType7(ptr, var, VarData, lang);
 					} else {
-						System.out.print("UNKNOWN! $" + Integer.toHexString(var) + " at " + ptr);
+						System.out.print(lang.Msg(Languages.MSG_UNKNOWNTYP).toUpperCase() + "! $"
+								+ Integer.toHexString(var) + " at " + ptr);
 					}
 				}
 			}
 		} catch (Exception E) {
 			TableItem Row = new TableItem(Variables, SWT.NONE);
-			Row.setText(new String[] { "Failed to decode variables.", "", "" });
+			Row.setText(new String[] { lang.Msg(Languages.MSG_FAILEDTODECODE), "", "" });
 		}
 	}
 
@@ -393,29 +396,29 @@ public class BasicRenderer implements Renderer {
 	 * @param file
 	 * @return
 	 */
-	private int VariableType7(int Address, int chr, byte[] file) {
+	private int VariableType7(int Address, int chr, byte[] file, Languages lang) {
 		int varname = (chr & 0x1f);
 		varname = varname + 0x40;
-		String txt = "Value=" + String.valueOf(Speccy.GetNumberAtByte(file, Address));
+		String txt = lang.Msg(Languages.MSG_VALUE) + "=" + String.valueOf(Speccy.GetNumberAtByte(file, Address));
 		Address = Address + 5;
-		txt = txt + " Limit=" + String.valueOf(Speccy.GetNumberAtByte(file, Address));
+		txt = txt + " " + lang.Msg(Languages.MSG_LIMIT) + "=" + String.valueOf(Speccy.GetNumberAtByte(file, Address));
 		Address = Address + 5;
-		txt = txt + " Step=" + String.valueOf(Speccy.GetNumberAtByte(file, Address));
+		txt = txt + " " + lang.Msg(Languages.MSG_STEP) + "=" + String.valueOf(Speccy.GetNumberAtByte(file, Address));
 		Address = Address + 5;
 
 		int lsb = (file[Address++] & 0xff);
 		int msb = (file[Address++] & 0xff);
 		int line = (msb * 256) + lsb;
-		txt = txt + " Loop line=" + String.valueOf(line);
+		txt = txt + " " + lang.Msg(Languages.MSG_LOOPLINE) + "=" + String.valueOf(line);
 
 		int statement = (file[Address++] & 0xff);
 
-		txt = txt + " Next Statement in line: " + String.valueOf(statement);
+		txt = txt + " " + lang.Msg(Languages.MSG_NEXTSTATE) + "=" + String.valueOf(statement);
 
 		TableItem Row = new TableItem(Variables, SWT.NONE);
 		String row[] = new String[3];
 		row[0] = (char) varname + "";
-		row[1] = "For/Next variable";
+		row[1] = lang.Msg(Languages.MSG_FORNEXT);
 		row[2] = txt;
 		Row.setText(row);
 
@@ -442,7 +445,7 @@ public class BasicRenderer implements Renderer {
 	 * @param file
 	 * @return
 	 */
-	private int VariableType6(int Address, int chr, byte[] file) {
+	private int VariableType6(int Address, int chr, byte[] file, Languages lang) {
 		int varname = (chr & 0x1f);
 		varname = varname + 0x40;
 
@@ -469,7 +472,7 @@ public class BasicRenderer implements Renderer {
 		TableItem Row = new TableItem(Variables, SWT.NONE);
 		String row[] = new String[3];
 		row[0] = (char) varname + "$";
-		row[1] = "Character array";
+		row[1] = lang.Msg(Languages.MSG_CHARARRAY);
 		row[2] = txt;
 		Row.setText(row);
 
@@ -489,7 +492,7 @@ public class BasicRenderer implements Renderer {
 	 * @param file
 	 * @return
 	 */
-	private int VariableType5(int Address, int chr, byte[] file) {
+	private int VariableType5(int Address, int chr, byte[] file, Languages lang) {
 		boolean done = false;
 		String vn = "";
 		while (!done) {
@@ -507,7 +510,7 @@ public class BasicRenderer implements Renderer {
 		TableItem Row = new TableItem(Variables, SWT.NONE);
 		String row[] = new String[3];
 		row[0] = vn;
-		row[1] = "Number (#5)";
+		row[1] = lang.Msg(Languages.MSG_NUMBER) + " (#5)";
 		row[2] = String.valueOf(value);
 		Row.setText(row);
 
@@ -534,7 +537,7 @@ public class BasicRenderer implements Renderer {
 	 * @param file
 	 * @return
 	 */
-	private int VariableType4(int Address, int chr, byte[] file) {
+	private int VariableType4(int Address, int chr, byte[] file, Languages lang) {
 		int numValues = 1;
 		try {
 			int varname = (chr & 0x1f);
@@ -561,13 +564,13 @@ public class BasicRenderer implements Renderer {
 			TableItem Row = new TableItem(Variables, SWT.NONE);
 			String row[] = new String[3];
 			row[0] = (char) varname + "";
-			row[1] = "Numeric Array";
+			row[1] = lang.Msg(Languages.MSG_NUMARRAY); 
 			row[2] = txt;
 			Row.setText(row);
 
 		} catch (ArrayIndexOutOfBoundsException E) {
-			System.out.println("Bad type 4 (Numeric array) variable found. Ignoring.");
-			//Ignore
+			System.out.println(lang.Msg(Languages.MSG_BADNUMARRAY));
+			// Ignore
 		} catch (Exception E) {
 			E.printStackTrace();
 			System.out.println(E.getMessage());
@@ -586,7 +589,7 @@ public class BasicRenderer implements Renderer {
 	 * @param file
 	 * @return
 	 */
-	private int VariableType3(int Address, int chr, byte[] file) {
+	private int VariableType3(int Address, int chr, byte[] file, Languages lang) {
 		int varname = (chr & 0x1f);
 		varname = varname + 0x40;
 		double value = Speccy.GetNumberAtByte(file, Address);
@@ -595,7 +598,7 @@ public class BasicRenderer implements Renderer {
 		TableItem Row = new TableItem(Variables, SWT.NONE);
 		String row[] = new String[3];
 		row[0] = (char) varname + "";
-		row[1] = "Number (#3)";
+		row[1] = lang.Msg(Languages.MSG_NUMBER) + " (#3)";
 		row[2] = sValue;
 		Row.setText(row);
 
@@ -605,9 +608,8 @@ public class BasicRenderer implements Renderer {
 
 	/**
 	 * Handler for type 2 variables (Strings) Variable name is parsed from the
-	 * original marker (first 5 bits) + 0x40 
-	 * [1..2] String length lsb first 
-	 * [3..x] Characters making up the string.
+	 * original marker (first 5 bits) + 0x40 [1..2] String length lsb first [3..x]
+	 * Characters making up the string.
 	 * 
 	 * @param Address
 	 * @param chr
@@ -615,7 +617,7 @@ public class BasicRenderer implements Renderer {
 	 * @return
 	 * @throws Exception
 	 */
-	private int VariableType2(int Address, int chr, byte[] file) {
+	private int VariableType2(int Address, int chr, byte[] file, Languages lang) {
 		int varname = chr & 0x1f;
 		varname = varname + 0x40;
 		int lsb = (file[Address++] & 0xff);
@@ -632,7 +634,7 @@ public class BasicRenderer implements Renderer {
 		TableItem Row = new TableItem(Variables, SWT.NONE);
 		String row[] = new String[3];
 		row[0] = (char) chr + "$";
-		row[1] = "String";
+		row[1] = lang.Msg(Languages.MSG_STRING); 
 		row[2] = s.trim();
 
 		Row.setText(row);

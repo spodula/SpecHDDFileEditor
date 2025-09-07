@@ -37,17 +37,18 @@ package hddEditor.ui.partitionPages.FileRenderers;
 import org.eclipse.swt.widgets.Composite;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.partitions.mgt.MGTDirectoryEntry;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.MGT48kRenderer;
 
 public class MGT48kSnapshotRenderer extends FileRenderer {
 	MGT48kRenderer renderer = null;
 
-	public void RenderSnapshot(Composite mainPage, byte data[], String Filename, MGTDirectoryEntry entry , FileSelectDialog filesel) {
-		super.Render(mainPage, data, Filename, filesel);
+	public void RenderSnapshot(Composite mainPage, byte data[], String Filename, MGTDirectoryEntry entry , FileSelectDialog filesel, Languages lang) {
+		super.Render(mainPage, data, Filename, filesel, lang);
 
 		
 		renderer = new MGT48kRenderer();
-		renderer.Render(mainPage, data, entry);
+		renderer.Render(mainPage, data, entry, lang);
 	}	
 }

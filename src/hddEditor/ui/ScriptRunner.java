@@ -9,6 +9,7 @@ import java.io.IOException;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.SpeccyFileEncoders;
@@ -26,6 +27,8 @@ import hddEditor.libs.partitions.trdos.TrdDirectoryEntry;
 public class ScriptRunner {
 	HDDEditor hdi = null;
 	boolean LeaveOpen = false;
+	
+	Languages lang;
 
 	/**
 	 * Main function.
@@ -34,14 +37,14 @@ public class ScriptRunner {
 	 */
 	public static void main(String[] args) {
 		ScriptRunner sr = new ScriptRunner();
-		sr.RunScript(args[0]);
+		sr.RunScript(args[0], new Languages());
 	}
 
 	/**
 	 * 
 	 * @param filename
 	 */
-	public void RunScript(String filename) {
+	public void RunScript(String filename, Languages lang) {
 		LeaveOpen = false;
 		hdi = new HDDEditor();
 		try {
@@ -167,43 +170,43 @@ public class ScriptRunner {
 					int hed = Integer.valueOf(params[2]);
 					int spt = Integer.valueOf(params[3]);
 					String filename = params[4];
-					FileNewHDDForm FNHDD = new FileNewHDDForm(hdi.display, null);
+					FileNewHDDForm FNHDD = new FileNewHDDForm(hdi.display, null, lang);
 					FNHDD.DoCreateFile(IsHDF, Is8Bit, filename, cyl, hed, spt);
 					hdi.LoadFile(new File(filename), true);
 					System.out.println(">Disk " + params[4] + " created and loaded.");
 				} else if (disktype.startsWith("DSK")) {
-					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null);
+					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null, lang);
 					FNFDD.DoCreateFile(params[1], "AMSTRAD", "", false, "", false);
 					hdi.LoadFile(new File(params[1]), true);
 					System.out.println(">Disk " + params[1] + " created and loaded.");
 				} else if (disktype.startsWith("EDSK")) {
-					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null);
+					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null, lang);
 					FNFDD.DoCreateFile(params[1], "AMSTRAD", "", true, "", false);
 					hdi.LoadFile(new File(params[1]), true);
 					System.out.println(">Disk " + params[1] + " created and loaded.");
 				} else if (disktype.startsWith("MDF")) {
-					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null);
+					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null, lang);
 					FNFDD.DoCreateFile(params[2], "MICRODRIVE", params[1], false, "", false);
 					hdi.LoadFile(new File(params[2]), true);
 					System.out.println(">Cart " + params[2] + " created and loaded.");
 				} else if (disktype.startsWith("TAP")) {
-					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null);
+					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null, lang);
 					FNFDD.DoCreateFile(params[1], "TAP", params[1], false, "", false);
 					hdi.LoadFile(new File(params[1]), true);
 					System.out.println(">Tape " + params[1] + " created and loaded.");
 				} else if (disktype.startsWith("TZX")) {
-					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null);
+					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null, lang);
 					FNFDD.DoCreateFile(params[1], "TZX", params[1], false, "", false);
 					hdi.LoadFile(new File(params[1]), true);
 					System.out.println(">TZX " + params[1] + " created and loaded.");
 				} else if (disktype.startsWith("TRD")) {
-					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null);
+					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null, lang);
 					String TRDOSFormat = params[1] + " TRACKS " + params[2] + " HEADS";
 					FNFDD.DoCreateFile(params[4], "TR-DOS", params[3], false, TRDOSFormat, false);
 					hdi.LoadFile(new File(params[4]), true);
 					System.out.println(">Disk " + params[4] + " created and loaded.");
 				} else if (disktype.startsWith("SCL")) {
-					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null);
+					FileNewFDDForm FNFDD = new FileNewFDDForm(hdi.display, null, lang);
 					FNFDD.DoCreateFile(params[2], "TR-DOS", params[1], false, "", true);
 					hdi.LoadFile(new File(params[2]), true);
 					System.out.println(">Disk " + params[2] + " created and loaded.");

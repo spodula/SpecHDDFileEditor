@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 
 public class NewPartitionDialog {
@@ -45,13 +46,15 @@ public class NewPartitionDialog {
 	public String Name = "";
 	private boolean result = false;
 
+	private Languages lang;
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public NewPartitionDialog(Display display) {
+	public NewPartitionDialog(Display display, Languages lang) {
 		this.display = display;
+		this.lang = lang;
 	}
 
 	/**
@@ -120,7 +123,7 @@ public class NewPartitionDialog {
 		}
 
 		Label l = new Label(shell, SWT.SHADOW_NONE);
-		l.setText("Create a new partition.");
+		l.setText(lang.Msg(Languages.MSG_CREATEPART));
 		FontData fontData = l.getFont().getFontData()[0];
 		Font boldFont = new Font(shell.getDisplay(), new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 		l.setFont(boldFont);
@@ -131,7 +134,7 @@ public class NewPartitionDialog {
 		l.setLayoutData(gridData);
 
 		l = new Label(shell, SWT.SHADOW_NONE);
-		l.setText("Partition type:");
+		l.setText(lang.Msg(Languages.MSG_PARTTYPE)+":");
 		l.setFont(boldFont);
 		gridData = new GridData();
 		gridData.horizontalAlignment = GridData.FILL;
@@ -150,7 +153,7 @@ public class NewPartitionDialog {
 		PartitionTypeDropdown.setLayoutData(gridData);
 
 		l = new Label(shell, SWT.SHADOW_NONE);
-		l.setText("Partition name:");
+		l.setText(lang.Msg(Languages.MSG_PARTNAME)+":");
 		l.setFont(boldFont);
 		gridData = new GridData();
 		gridData.horizontalAlignment = GridData.FILL;
@@ -216,7 +219,7 @@ public class NewPartitionDialog {
 		PartitionKeyAdapter.keyReleased(null);
 
 		l = new Label(shell, SWT.SHADOW_NONE);
-		l.setText("Size (Mb) (Max 16Mb):");
+		l.setText(lang.Msg(Languages.MSG_SIZEMSG) +":");
 		l.setFont(boldFont);
 		gridData = new GridData();
 		gridData.horizontalAlignment = GridData.FILL;
@@ -270,7 +273,7 @@ public class NewPartitionDialog {
 		Button CancelButton = new Button(shell, SWT.NONE);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
-		CancelButton.setText("Cancel");
+		CancelButton.setText(lang.Msg(Languages.MSG_CANCEL));
 		CancelButton.setLayoutData(gd);
 		CancelButton.addSelectionListener(new SelectionListener() {
 			@Override
@@ -288,7 +291,7 @@ public class NewPartitionDialog {
 		Button CreateButton = new Button(shell, SWT.NONE);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
-		CreateButton.setText("Create Partition");
+		CreateButton.setText(lang.Msg(Languages.MSG_CREATEPART));
 		CreateButton.setLayoutData(gd);
 		CreateButton.addSelectionListener(new SelectionListener() {
 			@Override

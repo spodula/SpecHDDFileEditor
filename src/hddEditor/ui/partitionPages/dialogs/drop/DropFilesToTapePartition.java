@@ -6,10 +6,12 @@ package hddEditor.ui.partitionPages.dialogs.drop;
 
 import org.eclipse.swt.widgets.Display;
 
+import hddEditor.libs.Languages;
+
 public class DropFilesToTapePartition extends GenericDropForm {
 
-	public DropFilesToTapePartition(Display display) {
-		super(display);
+	public DropFilesToTapePartition(Display display, Languages lang) {
+		super(display, lang);
 	}
 	
 	@Override

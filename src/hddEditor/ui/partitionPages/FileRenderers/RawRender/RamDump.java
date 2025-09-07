@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.graphics.ImageLoader;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.snapshots.CPUStateToFiles;
@@ -95,9 +96,10 @@ public class RamDump implements Renderer {
 	 * @param filename      - Filename of the file. Used to determine a default filename when saving.
 	 * @param cpustate		- If not NULL, used to contain any CPU-Specific details for converting snapshots. 
 	 * @param targetpartition - Used as a default partition when saving. 
+	 * @param lang			- Language object
 	 */
 	public void Render(Composite TargetPage, byte[] data, int loadAddr, boolean is128K, int IY, int i128BankOrder[],
-			String filename, MachineState cpustate, IDEDosPartition targetpartition) {
+			String filename, MachineState cpustate, IDEDosPartition targetpartition, Languages lang) {
 		labels = new ArrayList<Label>();
 		Renderers = new ArrayList<Renderer>();
 		Targetpg = TargetPage;
@@ -118,14 +120,14 @@ public class RamDump implements Renderer {
 		ScrRenderer.Render(TargetPage, screen);
 
 		ExtractBtn = new Button(TargetPage, SWT.NONE);
-		ExtractBtn.setText("Extract to disk");
+		ExtractBtn.setText(lang.Msg(Languages.MSG_EXTRACTDISK));
 		ExtractBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				if (is128K) {
-					doExtractFiles128();
+					doExtractFiles128(lang);
 				} else {
-					doExtractFiles();
+					doExtractFiles(lang);
 				}
 			}
 
@@ -137,7 +139,7 @@ public class RamDump implements Renderer {
 
 		if (!is128K && (cpustate != null)) {
 			AddSnapshotBtn = new Button(TargetPage, SWT.NONE);
-			AddSnapshotBtn.setText("Convert Snapshot to files");
+			AddSnapshotBtn.setText(lang.Msg(Languages.MSG_CONVERTSNAPSHOT));
 			AddSnapshotBtn.addSelectionListener(new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
@@ -174,20 +176,20 @@ public class RamDump implements Renderer {
 			System.arraycopy(data, PROG - diff, BasicData, 0, Math.min(BasicData.length, data.length - (PROG - diff)));
 			BR = new BasicRenderer();
 			Renderers.add(BR);
-			BR.AddBasicFile(TargetPage, BasicData, BasicData.length, VarsOffset, false);
+			BR.AddBasicFile(TargetPage, BasicData, BasicData.length, VarsOffset, false, lang);
 
 			byte SysVars[] = new byte[512];
 			System.arraycopy(data, 0x5b00 - diff, SysVars, 0, SysVars.length);
 			SVR = new SystemVariablesRenderer();
 			Renderers.add(SVR);
-			SVR.AddSysVars(TargetPage, SysVars, false, false);
+			SVR.AddSysVars(TargetPage, SysVars, false, false, lang);
 			HasBasic = true;
 		}
 
 		if (is128K) {
-			lbl.setText("Paged in memory (5B00-7FFF)=bank 5, (8000-BFFF)=bank 2, (C000-FFFF)=bank " + i128BankOrder[2]);
+			lbl.setText(String.format(lang.Msg(Languages.MSG_CONVERTSNAPSHOT),i128BankOrder[2]));
 		} else {
-			lbl.setText("48K memory dump (4000-FFFF)");
+			lbl.setText(lang.Msg(Languages.MSG_RAM48));
 		}
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 4;
@@ -209,8 +211,9 @@ public class RamDump implements Renderer {
 
 				lbl = new Label(TargetPage, SWT.NONE);
 				labels.add(lbl);
-				lbl.setText("Ram bank " + rambank + " (" + Integer.toHexString(startAddress) + "-"
-						+ Integer.toHexString(startAddress + 0x3fff) + ")");
+				
+				
+				lbl.setText(String.format(lang.Msg(Languages.MSG_RAMBANKMSG),rambank, startAddress, startAddress+0x3fff));
 				gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 				gd.horizontalSpan = 4;
 				lbl.setFont(boldFont);
@@ -222,7 +225,7 @@ public class RamDump implements Renderer {
 				ptr = ptr + actualdatalength;
 				BinaryRenderer BinRenderer = new BinaryRenderer();
 				Renderers.add(BinRenderer);
-				BinRenderer.Render(TargetPage, memdata, startAddress, 200);
+				BinRenderer.Render(TargetPage, memdata, startAddress, 200,lang);
 			}
 		} else {
 			byte memdata[] = new byte[0xa500];
@@ -231,7 +234,7 @@ public class RamDump implements Renderer {
 			System.arraycopy(data, 0, memdata, 0, Math.min(memdata.length, data.length));
 			BinaryRenderer BinRenderer = new BinaryRenderer();
 			Renderers.add(BinRenderer);
-			BinRenderer.Render(TargetPage, memdata, 0x4000, 200);
+			BinRenderer.Render(TargetPage, memdata, 0x4000, 200, lang);
 		}
 	}
 
@@ -261,9 +264,9 @@ public class RamDump implements Renderer {
 	/**
 	 * This extracts the current 128k Ram dump to a series to files on a disk.
 	 */
-	protected void doExtractFiles128() {
+	protected void doExtractFiles128(Languages lang) {
 		DirectoryDialog dialog = new DirectoryDialog(Targetpg.getShell());
-		dialog.setText("Select folder for target");
+		dialog.setText(lang.Msg(Languages.MSG_SELECTTARGETFOLDER));
 		String result = dialog.open();
 		if (result != null) {
 			File rootfolder = new File(result);
@@ -271,7 +274,7 @@ public class RamDump implements Renderer {
 			// firstly BASIC...
 			// save any basic
 			if (IYReg == 0x5c3a) {
-				SaveBasicFile(RootFile);
+				SaveBasicFile(RootFile, lang);
 			}
 			// Paged in RAM
 			// make sure we have a full ram dump. If not, pad to the full 49152.
@@ -324,9 +327,9 @@ public class RamDump implements Renderer {
 	/**
 	 * This extracts the current 48k Ram dump to a series to files on a disk.
 	 */
-	protected void doExtractFiles() {
+	protected void doExtractFiles(Languages lang) {
 		DirectoryDialog dialog = new DirectoryDialog(Targetpg.getShell());
-		dialog.setText("Select folder for target");
+		dialog.setText(lang.Msg(Languages.MSG_SELECTTARGETFOLDER));
 		String result = dialog.open();
 		if (result != null) {
 			File rootfolder = new File(result);
@@ -379,7 +382,7 @@ public class RamDump implements Renderer {
 	 * @param RootFile	- File part of the filename.
 	 * @return - End of basic. 
 	 */
-	private int SaveBasicFile(File RootFile) {
+	private int SaveBasicFile(File RootFile, Languages lang) {
 		// check for BASIC.
 		int diff = 0x4000;
 		int PROG = (rawdata[0x5c54 - diff] & 0xff) * 256 + (rawdata[0x5c53 - diff] & 0xff);
@@ -414,7 +417,7 @@ public class RamDump implements Renderer {
 								// fiddles bad line lengths
 								linelen = Math.min(BasicData.length - ptr + 4, linelen);
 							} catch (Exception E) {
-								printWriter.println("Basic parsing error, bad linenum.");
+								printWriter.println(lang.Msg(Languages.MSG_BADLINENO));
 								ptr = 99999999;
 							}
 
@@ -434,7 +437,7 @@ public class RamDump implements Renderer {
 									}
 									Speccy.DecodeBasicLine(sb, line, 0, linelen, false);
 								} catch (Exception E) {
-									sb.append("Bad line: " + E.getMessage());
+									sb.append(lang.Msg(Languages.MSG_BADLINENO)+ ": " + E.getMessage());
 									ptr = 99999999;
 								}
 								// point to next line.
@@ -450,7 +453,7 @@ public class RamDump implements Renderer {
 					fileWriter.close();
 				}
 			} catch (IOException e) {
-				System.out.println("Cannot write basic file - IO error.");
+				System.out.println(lang.Msg(Languages.MSG_CANNOTWRITEBASICFILEIO));
 			}
 		}
 		return (EndOfAnyBasic);

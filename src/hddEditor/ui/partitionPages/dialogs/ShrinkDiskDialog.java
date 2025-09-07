@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.disks.HDD.HardDisk;
 import hddEditor.libs.partitions.IDEDosPartition;
@@ -62,13 +63,16 @@ public class ShrinkDiskDialog {
 
 	//global result
 	private boolean result = false;
+	
+	private Languages lang;
 	/**
 	 * Constructor
 	 * 
 	 * @param display
 	 */
-	public ShrinkDiskDialog(Display display) {
+	public ShrinkDiskDialog(Display display, Languages lang) {
 		this.display = display;
+		this.lang = lang;
 	}
 
 	/**
@@ -91,15 +95,16 @@ public class ShrinkDiskDialog {
 				CurrCyl = Math.max(CurrCyl, part.GetEndCyl() + 1);
 			}
 		}
-		System.out.println("Current max cyl:" + CurrCyl);
-		System.out.println("Possible Shrink cyl:" + MinCyl);
+		//lang.Msg(Languages.MSG_REPLACEDXITEMS)
+		System.out.println(lang.Msg(Languages.MSG_CURRMAXCYL)+":" + CurrCyl);
+		System.out.println(lang.Msg(Languages.MSG_POSSCYL)+":" + MinCyl);
 		int KPerCyl = syspart.CurrentDisk.GetSectorSize() * syspart.CurrentDisk.GetNumHeads()
 				* syspart.CurrentDisk.GetNumSectors() / 1024;
 		CurrSizeK = (CurrCyl + 1) * KPerCyl;
 		MinSizeK = (MinCyl + 1) * KPerCyl;
 
-		System.out.println("Old max size: " + CurrSizeK / 1024 + "M");
-		System.out.println("Min size possible: " + MinSizeK / 1024 + "M");
+		System.out.println(lang.Msg(Languages.MSG_OLDMAXSZ)+":" + CurrSizeK / 1024 + "M");
+		System.out.println(lang.Msg(Languages.MSG_MINSZPOSS)+":"  + MinSizeK / 1024 + "M");
 
 		Createform();
 		loop();
@@ -123,7 +128,7 @@ public class ShrinkDiskDialog {
 	private void Createform() {
 		shell = new Shell(display);
 		shell.setSize(400, 200);
-		shell.setText("Shrink or expand disk");
+		shell.setText(lang.Msg(Languages.MSG_SHRINGOREXP));
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 4;
 		gridLayout.marginLeft = 20;
@@ -158,11 +163,11 @@ public class ShrinkDiskDialog {
 		TableColumn tc3 = new TableColumn(PartList, SWT.LEFT);
 		TableColumn tc4 = new TableColumn(PartList, SWT.LEFT);
 		TableColumn tc5 = new TableColumn(PartList, SWT.LEFT);
-		tc1.setText("Name");
-		tc2.setText("size");
-		tc3.setText("Type");
-		tc4.setText("Start");
-		tc5.setText("End");
+		tc1.setText(lang.Msg(Languages.MSG_PARTNAME));
+		tc2.setText(lang.Msg(Languages.MSG_SIZE));
+		tc3.setText(lang.Msg(Languages.MSG_PARTTYPE));
+		tc4.setText(lang.Msg(Languages.MSG_START));
+		tc5.setText(lang.Msg(Languages.MSG_END));
 		tc1.setWidth(150);
 		tc2.setWidth(100);
 		tc3.setWidth(150);
@@ -172,11 +177,11 @@ public class ShrinkDiskDialog {
 		UpdatePartitionList();
 
 		Label lbl = new Label(shell, SWT.NONE);
-		lbl.setText("New number of cyls:");
+		lbl.setText(lang.Msg(Languages.MSG_NEWCYLS)+":");
 		NumCyl = new Text(shell, SWT.BORDER);
 		NumCyl.setText("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 		lbl = new Label(shell, SWT.NONE);
-		lbl.setText("Min:" + MinCyl + " Max: 32000");
+		lbl.setText(String.format(lang.Msg(Languages.MSG_MINXMAXX), MinCyl,32000));
 
 		new Label(shell, SWT.NONE);
 
@@ -186,7 +191,7 @@ public class ShrinkDiskDialog {
 		Button CancelButton = new Button(shell, SWT.NONE);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
-		CancelButton.setText("Cancel");
+		CancelButton.setText(lang.Msg(Languages.MSG_CANCEL));
 		CancelButton.setLayoutData(gd);
 		CancelButton.addSelectionListener(new SelectionListener() {
 			@Override
@@ -203,7 +208,7 @@ public class ShrinkDiskDialog {
 		Button ModifyDiskButton = new Button(shell, SWT.NONE);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
-		ModifyDiskButton.setText("Modify");
+		ModifyDiskButton.setText(lang.Msg(Languages.MSG_MODIFY));
 		ModifyDiskButton.setLayoutData(gd);
 		ModifyDiskButton.addSelectionListener(new SelectionListener() {
 			@Override
@@ -254,7 +259,7 @@ public class ShrinkDiskDialog {
 					col[i] = sectionval[currcol% sectionval.length];
 				} else {
 					if (!ExceedMsg) {
-						System.out.println("WARNING: Partition \"" + part.GetName() + "\" exceeds size of file.");
+						System.out.println(String.format(lang.Msg(Languages.MSG_WARNPARTSIZE), part.GetName()));
 						ExceedMsg = true;
 						i = Endpos;
 					}
@@ -323,17 +328,17 @@ public class ShrinkDiskDialog {
 		try {
 			newCyl = Integer.valueOf(NumCyl.getText());
 		} catch (Exception E) {
-			error = "Value " + NumCyl.getText() + " is invalid.";
+			error = String.format(lang.Msg(Languages.MSG_ERRVALUEINVALID), NumCyl.getText());
 		}
 		if (error == null) {
 			if (newCyl < MinCyl) {
-				error = "Cannot shrink disk to less than " + MinCyl + " cylinders.";
+				error = String.format(lang.Msg(Languages.MSG_ERRCANTSHRINKDISK), MinCyl);
 			}
 		}
 		if (error == null) {
 			//Modify the last partition
 			if (MaxPartition.GetPartType() != PLUSIDEDOS.PARTITION_FREE) {
-				error = "Highest partition is a not a FREE partition. Cannot resize";
+				error = lang.Msg(Languages.MSG_CANTRESIZEFREEPART);
 			} else {
 				//Modify the last partition
 				MaxPartition.SetEndCyl(newCyl);
@@ -355,7 +360,7 @@ public class ShrinkDiskDialog {
 		if (error != null) {
 			MessageBox messageBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.ERROR);
 			messageBox.setMessage(error);
-			messageBox.setText("Cannot shrink disk");
+			messageBox.setText(lang.Msg(Languages.MSG_CANTSHRINK));
 			messageBox.open();
 			System.out.println(error);
 		} else {

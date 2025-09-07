@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 
 public class SpriteRenderer implements Renderer {
 	private Text SpriteWidth = null;
@@ -58,20 +59,20 @@ public class SpriteRenderer implements Renderer {
 	private String filename;
 
 	public void Render(Composite mainPage, byte data[], int HeightLimit, int baseaddress, FileSelectDialog filesel,
-			String filename) {
+			String filename, Languages lang) {
 		this.page = mainPage;
 		this.filesel = filesel;
 		this.data = data;
 		this.BaseAddress = baseaddress;
 		this.filename = filename;
 		Label lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("View as sprites: ");
+		lbl.setText(lang.Msg(Languages.MSG_VIEWASSPR) );
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 4;
 		lbl.setLayoutData(gd);
 
 		lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("Sprite Width (cols): ");
+		lbl.setText(lang.Msg(Languages.MSG_SPRITEWIDTH) );
 		SpriteWidth = new Text(mainPage, SWT.NONE);
 		SpriteWidth.setText("1");
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -89,7 +90,7 @@ public class SpriteRenderer implements Renderer {
 		});
 
 		lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("Sprite Height (px): ");
+		lbl.setText(lang.Msg(Languages.MSG_SPRITEHEIGHT));
 		SpriteHeight = new Text(mainPage, SWT.NONE);
 		SpriteHeight.setText("8");
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -107,7 +108,7 @@ public class SpriteRenderer implements Renderer {
 		});
 
 		lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("Displacement: ");
+		lbl.setText(lang.Msg(Languages.MSG_DISPLACE));
 		Displacement = new Text(mainPage, SWT.NONE);
 		Displacement.setText("0");
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -125,7 +126,7 @@ public class SpriteRenderer implements Renderer {
 		});
 
 		ExportSelectedBin = new Button(mainPage, SWT.BORDER);
-		ExportSelectedBin.setText("Export Selected as bin");
+		ExportSelectedBin.setText(lang.Msg(Languages.MSG_EXPORTSELASBIN));
 		ExportSelectedBin.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -133,13 +134,13 @@ public class SpriteRenderer implements Renderer {
 			}
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
-				DoExportSelected(true);
+				DoExportSelected(true, lang);
 				mainPage.getShell().forceActive();
 			}
 		});
 
 		ExportSelectedAsm = new Button(mainPage, SWT.BORDER);
-		ExportSelectedAsm.setText("Export Selected as asm");
+		ExportSelectedAsm.setText(lang.Msg(Languages.MSG_EXPORTSELASASM));
 		ExportSelectedAsm.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -147,7 +148,7 @@ public class SpriteRenderer implements Renderer {
 			}
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
-				DoExportSelected(false);
+				DoExportSelected(false, lang);
 				mainPage.getShell().forceActive();
 			}
 		});
@@ -331,16 +332,16 @@ public class SpriteRenderer implements Renderer {
 	 * 
 	 * @param Binary
 	 */
-	protected void DoExportSelected(boolean Binary) {
+	protected void DoExportSelected(boolean Binary, Languages lang) {
 		TableItem selecteditems[] = SprTable.getSelection();
 		if (selecteditems == null) {
 			selecteditems = SprTable.getItems();
 		}
 		int width = Math.max(Integer.valueOf(SpriteWidth.getText()), 1);
 
-		String title = "Save sprites as bin";
+		String title = lang.Msg(Languages.MSG_EXPORTSELASBIN);
 		if (!Binary) {
-			title = "Save sprites as asm";
+			title = lang.Msg(Languages.MSG_EXPORTSELASASM);
 		}
 
 		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, title, new String[] { "*" },
@@ -396,14 +397,14 @@ public class SpriteRenderer implements Renderer {
 				}
 			} catch (FileNotFoundException e) {
 				MessageBox dialog = new MessageBox(page.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("Directory not found!");
+				dialog.setText(lang.Msg(Languages.MSG_ERRSAVING));
+				dialog.setMessage(lang.Msg(Languages.MSG_DIRNOTFOUND));
 				dialog.open();
 				e.printStackTrace();
 			} catch (IOException e) {
 				MessageBox dialog = new MessageBox(page.getShell(), SWT.ICON_ERROR | SWT.OK);
-				dialog.setText("Error saving file");
-				dialog.setMessage("IO error: " + e.getMessage());
+				dialog.setText(lang.Msg(Languages.MSG_ERRSAVING));
+				dialog.setMessage(lang.Msg(Languages.MSG_IOERROR) + ": " + e.getMessage());
 				dialog.open();
 				e.printStackTrace();
 			}

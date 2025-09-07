@@ -67,6 +67,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import hddEditor.libs.ASMLib;
+import hddEditor.libs.Languages;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.snapshots.MachineState;
 import hddEditor.libs.snapshots.readers.SNAfile;
@@ -105,7 +106,7 @@ public class SNARenderer extends RamDump {
 	 * @param loadAddr - Load address - Unused for the SNA renderer.
 	 * @param filename - Filename
 	 */
-	public void Render(Composite TargetPage, byte[] data, int loadAddr, String filename, IDEDosPartition targetpart) {
+	public void Render(Composite TargetPage, byte[] data, int loadAddr, String filename, IDEDosPartition targetpart, Languages lang) {
 		SNAfile snafile = new SNAfile(data);
 		
 		labels = new ArrayList<Label>();
@@ -117,9 +118,9 @@ public class SNARenderer extends RamDump {
 				new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 
 		if (snafile.MachineClass == MachineState.MT_48K) 
-			lbl.setText("48K SNA snapshot file: ");
+			lbl.setText(lang.Msg(Languages.MSG_48SNASNAPSHOT) + ": ");
 		else
-			lbl.setText("128K SNA snapshot file: ");
+			lbl.setText(lang.Msg(Languages.MSG_128SNASNAPSHOT) + ": ");
 		
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 4;
@@ -148,7 +149,7 @@ public class SNARenderer extends RamDump {
 
 		lbl = new Label(TargetPage, SWT.NONE);
 		labels.add(lbl);
-		lbl.setText("Flags: " + flags);
+		lbl.setText(lang.Msg(Languages.MSG_FLAGS)+": " + flags);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 2;
 		lbl.setLayoutData(gd);
@@ -157,7 +158,7 @@ public class SNARenderer extends RamDump {
 
 		lbl = new Label(TargetPage, SWT.NONE);
 		labels.add(lbl);
-		lbl.setText("Alt Flags: " + flags);
+		lbl.setText(lang.Msg(Languages.MSG_ALTFLAGS) + ": " + flags);
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 2;
 		lbl.setLayoutData(gd);
@@ -196,6 +197,6 @@ public class SNARenderer extends RamDump {
 			rawdata = snafile.RAM;
 		}
 		
-		super.Render(TargetPage, rawdata, loadAddr, snafile.MachineClass != MachineState.MT_48K, snafile.IY(), RamBankOrder, filename,snafile,targetpart);
+		super.Render(TargetPage, rawdata, loadAddr, snafile.MachineClass != MachineState.MT_48K, snafile.IY(), RamBankOrder, filename,snafile,targetpart, lang);
 	}
 }

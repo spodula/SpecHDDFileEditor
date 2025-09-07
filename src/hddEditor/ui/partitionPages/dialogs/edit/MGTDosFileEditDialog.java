@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.MGT;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.MGTDosPartition;
@@ -43,8 +44,8 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 	public int NewFileType;
 	public boolean FileTypeHasChanged;
 
-	public MGTDosFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition) {
-		super(display, filesel, CurrentPartition);
+	public MGTDosFileEditDialog(Display display, FileSelectDialog filesel, IDEDosPartition CurrentPartition, Languages lang) {
+		super(display, filesel, CurrentPartition, lang);
 	}
 
 	@Override
@@ -61,7 +62,7 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 		Label lbl = new Label(shell, SWT.NONE);
 		FontData fontData = lbl.getFont().getFontData()[0];
 		Font boldFont = new Font(display, new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
-		lbl.setText(String.format("File Length: %d bytes (%X)", data.length, data.length));
+		lbl.setText(String.format(lang.Msg(Languages.MSG_FILELENGTHXX), data.length, data.length));
 		lbl.setFont(boldFont);
 
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -78,7 +79,7 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 		filetype.setLayoutData(gd);
 
 		Button SetFileType = new Button(shell, SWT.NONE);
-		SetFileType.setText("Update file type");
+		SetFileType.setText(lang.Msg(Languages.MSG_UPDATEFILETYPE));
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		SetFileType.setLayoutData(gd);
@@ -145,34 +146,34 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 				BasicRenderer CurrentRenderer = new BasicRenderer();
 				CurrentRenderer.RenderBasic(MainPage, data, null, mEnt.GetFilename(), mEnt.GetFileSize(),
 						mEnt.GetSpeccyBasicDetails().VarStart, mEnt.GetSpeccyBasicDetails().LineStart, filesel,
-						new BasicSave());
+						new BasicSave(), lang);
 			} else if (ftype == MGT.MGTFT_ZXNUMARRAY) {
 				NumericArrayRenderer CurrentRenderer = new NumericArrayRenderer();
 				CurrentRenderer.RenderNumericArray(MainPage, data, null, mEnt.GetFilename(),
-						"" + mEnt.GetSpeccyBasicDetails().VarName, filesel, null);
+						"" + mEnt.GetSpeccyBasicDetails().VarName, filesel, null, lang);
 			} else if (ftype == MGT.MGTFT_SAMSCREEN) {
 				MGTScreenRenderer CurrentRenderer = new MGTScreenRenderer();
-				CurrentRenderer.RenderScreen(MainPage, data, mEnt.GetFilename(), mEnt, filesel);
+				CurrentRenderer.RenderScreen(MainPage, data, mEnt.GetFilename(), mEnt, filesel, lang);
 			} else if (ftype == MGT.MGTFT_ZXSTRARRAY) {
 				CharArrayRenderer CurrentRenderer = new CharArrayRenderer();
 				CurrentRenderer.RenderCharArray(MainPage, data, null, mEnt.GetFilename(),
-						"" + mEnt.GetSpeccyBasicDetails().VarName, filesel, null);
+						"" + mEnt.GetSpeccyBasicDetails().VarName, filesel, null, lang);
 			} else if (ftype == MGT.MGTFT_ZX48SNA) {
 				MGT48kSnapshotRenderer CurrentRenderer = new MGT48kSnapshotRenderer();
-				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt, filesel);
+				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt, filesel, lang);
 			} else if (ftype == MGT.MGTFT_ZX128SNA) {
 				MGT128kSnapshotRenderer CurrentRenderer = new MGT128kSnapshotRenderer();
-				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt, filesel);
+				CurrentRenderer.RenderSnapshot(MainPage, data, mEnt.GetFilename(), mEnt, filesel, lang);
 			} else if (ftype == MGT.MGTFT_ZXEXE) {
 				MGTExecuteRenderer CurrentRenderer = new MGTExecuteRenderer();
-				CurrentRenderer.Render(MainPage, data, mEnt.GetFilename(), filesel);
+				CurrentRenderer.Render(MainPage, data, mEnt.GetFilename(), filesel, lang);
 			} else {
 				CodeRenderer CurrentRenderer = new CodeRenderer();
 				CurrentRenderer.RenderCode(MainPage, data, null, mEnt.GetFilename(), data.length, mEnt.GetLoadAddress(),
-						filesel, CurrentPartition, new CodeSave());
+						filesel, CurrentPartition, new CodeSave(), lang);
 			}
 		} catch (Exception E) {
-			System.out.println("Error Showing " + ThisEntry.GetFilename() + ": " + E.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_ERRORSHOWING) + ThisEntry.GetFilename() + ": " + E.getMessage());
 		}
 	}
 
@@ -184,7 +185,7 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 		public boolean DoSave(int valtype, String sValue, int Value) {
 			MGTDirectoryEntry direntry = (MGTDirectoryEntry) ThisEntry;
 
-			System.out.print("Load address: " + direntry.GetLoadAddress() + " -> ");
+			System.out.print(lang.Msg(Languages.MSG_CODELOADADD) + ": " + direntry.GetLoadAddress() + " -> ");
 			direntry.SetLoadAddress(Value);
 			System.out.println(direntry.GetLoadAddress());
 
@@ -192,7 +193,7 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 				((MGTDosPartition) CurrentPartition).SaveDirectoryEntry(direntry);
 				return true;
 			} catch (IOException e) {
-				System.out.println("Error updating directory entry");
+				System.out.println(lang.Msg(Languages.MSG_ERRORUPDATINGDIRENT));
 				e.printStackTrace();
 			}
 			return false;
@@ -208,11 +209,11 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 			MGTDirectoryEntry direntry = (MGTDirectoryEntry) ThisEntry;
 
 			if (valtype == 0) {
-				System.out.print("Start Line: " + direntry.GetStartLine() + " -> ");
+				System.out.print(lang.Msg(Languages.MSG_STARTLINE) + ": " + direntry.GetStartLine() + " -> ");
 				direntry.SetStartLine(Value);
 				System.out.println(direntry.GetStartLine());
 			} else {
-				System.out.print("Vars Offset: " + direntry.GetVar1() + " -> ");
+				System.out.print(lang.Msg(Languages.MSG_VARSTART) +  ": " + direntry.GetVar1() + " -> ");
 				direntry.SetVar1(Value);
 				System.out.println(direntry.GetVar1());
 			}
@@ -222,7 +223,7 @@ public class MGTDosFileEditDialog extends EditFileDialog {
 				return true;
 
 			} catch (IOException e) {
-				System.out.println("Error updating directory entry");
+				System.out.println(lang.Msg(Languages.MSG_ERRORUPDATINGDIRENT));
 				e.printStackTrace();
 			}
 			return false;

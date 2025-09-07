@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.partitions.cpm.Plus3DosFileHeader;
 import hddEditor.ui.partitionPages.dialogs.edit.callbacks.GenericSaveEvent;
@@ -30,8 +31,9 @@ public class NumericArrayRenderer extends FileRenderer {
 	 * render the array to the given composite.
 	 */
 	@Override
-	public void Render(Composite mainPage, byte data[], String Filename, FileSelectDialog filesel) {
+	public void Render(Composite mainPage, byte data[], String Filename, FileSelectDialog filesel, Languages lang) {
 		this.filesel = filesel;
+		this.lang = lang;
 		Plus3DosFileHeader p3d = new Plus3DosFileHeader(data);
 		String Varname ="A";
 		byte header[] = null;
@@ -44,7 +46,7 @@ public class NumericArrayRenderer extends FileRenderer {
 			System.arraycopy(data, 0x80, newdata, 0, newdata.length);
 		} 
 
-		RenderNumericArray(mainPage, newdata, header, Filename, Varname, filesel,null);
+		RenderNumericArray(mainPage, newdata, header, Filename, Varname, filesel,null, lang);
 	}
 
 
@@ -58,12 +60,12 @@ public class NumericArrayRenderer extends FileRenderer {
 	 * @param varname - Variable name.
 	 * @param saveevent - If not null, called when the variable name changes.
 	 */
-	public void RenderNumericArray(Composite mainPage, byte data[], byte header[], String Filename, String varname, FileSelectDialog filesel, GenericSaveEvent saveevent) {
-		super.Render(mainPage, data, Filename, filesel);
+	public void RenderNumericArray(Composite mainPage, byte data[], byte header[], String Filename, String varname, FileSelectDialog filesel, GenericSaveEvent saveevent, Languages lang) {
+		super.Render(mainPage, data, Filename, filesel, lang);
 
 
 		Label lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("Numeric array: ");
+		lbl.setText(lang.Msg(Languages.MSG_NUMARRAY) + ": ");
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.horizontalSpan = 4;
 		lbl.setLayoutData(gd);
@@ -72,7 +74,7 @@ public class NumericArrayRenderer extends FileRenderer {
 		gd.horizontalSpan = 1;
 
 		Button btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract array as text");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASTEXT));
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -87,7 +89,7 @@ public class NumericArrayRenderer extends FileRenderer {
 		});
 
 		btn = new Button(mainPage, SWT.NONE);
-		btn.setText("Extract file as Binary");
+		btn.setText(lang.Msg(Languages.MSG_EXTRACTASBIN));
 		btn.setLayoutData(gd);
 		btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -103,7 +105,7 @@ public class NumericArrayRenderer extends FileRenderer {
 
 		if (header != null) {
 			btn = new Button(mainPage, SWT.NONE);
-			btn.setText("Extract file as Binary Inc Header");
+			btn.setText(lang.Msg(Languages.MSG_EXTRACTASBINHEADER));
 			btn.setLayoutData(gd);
 			btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -126,7 +128,7 @@ public class NumericArrayRenderer extends FileRenderer {
 		new Label(mainPage, SWT.NONE);
 
 		lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("Variable: ");
+		lbl.setText(lang.Msg(Languages.MSG_VARNAME)+": ");
 
 		VariableEdit = new Text(mainPage, SWT.NONE);
 		VariableEdit.setText("");
@@ -139,7 +141,7 @@ public class NumericArrayRenderer extends FileRenderer {
 		DefaultBackgroundColor = lbl.getBackground();
 		if (saveevent != null) {
 			btn = new Button(mainPage, SWT.NONE);
-			btn.setText("Update Variable name");
+			btn.setText(lang.Msg(Languages.MSG_UPDVARNAME));
 			btn.setLayoutData(gd);
 			btn.addSelectionListener(new SelectionListener() {
 				@Override
@@ -185,7 +187,7 @@ public class NumericArrayRenderer extends FileRenderer {
 		}
 
 		lbl = new Label(mainPage, SWT.NONE);
-		lbl.setText("Dimensions: " + numDimensions);
+		lbl.setText(lang.Msg(Languages.MSG_DIMENSIONS) + ": " + numDimensions);
 
 		String s = varname + "(";
 		for (int dimnum = 0; dimnum < numDimensions; dimnum++) {
@@ -227,7 +229,7 @@ public class NumericArrayRenderer extends FileRenderer {
 				}
 				location = location + 5;
 			}
-			sb.append("\r\n");
+			sb.append(System.lineSeparator());
 			int diminc = Dimsizes.length - 2;
 			boolean doneInc = false;
 			while (!doneInc) {
@@ -263,7 +265,7 @@ public class NumericArrayRenderer extends FileRenderer {
 	 * @param varname - Variable name
 	 */
 	protected void DoSaveArrayAsText(byte[] data, Composite mainPage, String varname) {
-		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, "Save array as...", new String[] {"*"}, filename);
+		File Selected = filesel.AskForSingleFileSave(FileSelectDialog.FILETYPE_FILES, lang.Msg(Languages.MSG_SAVEARRAYAS) , new String[] {"*"}, filename);
 		
 		if (Selected != null) {
 			Speccy.DoSaveNumericArrayAsText(Selected, data, varname);

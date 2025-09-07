@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import hddEditor.libs.FileSelectDialog;
+import hddEditor.libs.Languages;
 import hddEditor.libs.SpeccyFileEncoders;
 import hddEditor.libs.TRDOS;
 import hddEditor.libs.partitions.TrDosPartition;
@@ -59,8 +60,8 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 	private final static char FILETYPE_SCREEN = 'S';
 
 
-	public AddFilesToTrDosPartition(Display display, FileSelectDialog fsd) {
-		super(display, fsd);
+	public AddFilesToTrDosPartition(Display display, FileSelectDialog fsd, Languages lang) {
+		super(display, fsd,lang);
 	}
 
 	public void Show(String Title, TrDosPartition partition) {
@@ -92,7 +93,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 		gd.widthHint = 200;
 
 		Button Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select Text BASIC file");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTTXTBASICFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -107,7 +108,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select binary BASIC file");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTBINBASICFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -122,7 +123,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select Code file");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTCODEFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -137,7 +138,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select image as screen$");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTIMAGEFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -152,7 +153,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select Numeric array");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTNUMFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -167,7 +168,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Select Character array");
+		Btn.setText(lang.Msg(Languages.MSG_SELECTCHARFILE));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -182,7 +183,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 		});
 
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Add Generic type ->");
+		Btn.setText(lang.Msg(Languages.MSG_ADDGENERICTYPE));
 		Btn.setLayoutData(gd);
 		GenericFileType = new Text(shell, SWT.BORDER);
 		GenericFileType.setText("#");
@@ -202,11 +203,11 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 		TableColumn tc3 = new TableColumn(DirectoryListing, SWT.LEFT);
 		TableColumn tc4 = new TableColumn(DirectoryListing, SWT.LEFT);
 		TableColumn tc5 = new TableColumn(DirectoryListing, SWT.LEFT);
-		tc1.setText("Filename");
-		tc2.setText("TR-Dos Filename");
-		tc3.setText("Type");
-		tc4.setText("Length");
-		tc5.setText("Flags");
+		tc1.setText(lang.Msg(Languages.MSG_FILENAME));
+		tc2.setText(lang.Msg(Languages.MSG_TRDOSFILENAME));
+		tc3.setText(lang.Msg(Languages.MSG_FILETYPE));
+		tc4.setText(lang.Msg(Languages.MSG_LENGTH));
+		tc5.setText(lang.Msg(Languages.MSG_FLAGS));
 		tc1.setWidth(250);
 		tc2.setWidth(150);
 		tc3.setWidth(150);
@@ -226,7 +227,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 		});
 
 		Label l = new Label(shell, SWT.LEFT);
-		l.setText("Defaults.");
+		l.setText(lang.Msg(Languages.MSG_DEFAULTS) + ".");
 		FontData fontData = l.getFont().getFontData()[0];
 		Font font = new Font(shell.getDisplay(), new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 		l.setFont(font);
@@ -235,7 +236,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 		l.setLayoutData(gd);
 		
 		l = new Label(shell, SWT.LEFT);
-		l.setText("Filename:");
+		l.setText(lang.Msg(Languages.MSG_FILENAME) + ":");
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.horizontalSpan = 1;
 		l.setLayoutData(gd);
@@ -261,22 +262,22 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 		});
 
 		l = new Label(shell, SWT.LEFT);
-		l.setText("BASIC files:");
+		l.setText(lang.Msg(Languages.MSG_BASICFILES) + ":");
 		l.setFont(font);
 
 		l = new Label(shell, SWT.LEFT);
-		l.setText("Line (32788 = none):");
+		l.setText(lang.Msg(Languages.MSG_STARTLINE) + " (32788 = none):");
 
 		StartLine = new Text(shell, SWT.BORDER);
 		StartLine.setText("32768");
 
 		new Label(shell, SWT.NONE);
 		l = new Label(shell, SWT.LEFT);
-		l.setText("Image files:");
+		l.setText(lang.Msg(Languages.MSG_IMAGEFILES) + ":");
 		l.setFont(font);
 
 		IsBWCheck = new Button(shell, SWT.CHECK);
-		IsBWCheck.setText("Monochrome");
+		IsBWCheck.setText(lang.Msg(Languages.MSG_MONOCHROME));
 		IsBWCheck.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -294,7 +295,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 		new Label(shell, SWT.NONE);
 
 		Label IntensityLabel = new Label(shell, SWT.LEFT);
-		IntensityLabel.setText("Cutoff: 100%");
+		IntensityLabel.setText(lang.Msg(Languages.MSG_CUTOFF) + ": ");
 
 		intensitySlider = new Slider(shell, SWT.HORIZONTAL | SWT.BORDER);
 		intensitySlider.setBounds(0, 0, 150, 40);
@@ -309,7 +310,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 			public void handleEvent(Event event) {
 				int perspectiveValue = intensitySlider.getMaximum() - intensitySlider.getSelection()
 						+ intensitySlider.getMinimum() - intensitySlider.getThumb();
-				IntensityLabel.setText("Cutoff: " + perspectiveValue + "%");
+				IntensityLabel.setText(lang.Msg(Languages.MSG_CUTOFF) + ": " + perspectiveValue + "%");
 				ReRenderImage();
 			}
 		});
@@ -334,7 +335,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Add files");
+		Btn.setText(lang.Msg(Languages.MSG_ADDGFILES));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -352,7 +353,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gd.widthHint = 200;
 		Btn = new Button(shell, SWT.PUSH);
-		Btn.setText("Cancel");
+		Btn.setText(lang.Msg(Languages.MSG_CANCEL));
 		Btn.setLayoutData(gd);
 		Btn.addSelectionListener(new SelectionListener() {
 			@Override
@@ -367,7 +368,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 		});
 
 		shell.pack();
-		IntensityLabel.setText("Cutoff: 50%");
+		IntensityLabel.setText(lang.Msg(Languages.MSG_CUTOFF) + ": 50%");
 	}
 
 	/**
@@ -435,7 +436,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 
 	@Override
 	protected void DoAddImageFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open image file",new String[] {"*"});
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES,lang.Msg(Languages.MSG_OPENIMGFILE),new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 
@@ -482,8 +483,8 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 					 */
 					item2.setText(values);
 					item2.setData(listitem);
-				} catch (IOException e) {
-					System.out.println("Failed to add " + filename.getAbsolutePath() + " " + e.getMessage());
+				} catch (IOException e) {		
+					System.out.println(String.format(lang.Msg(Languages.MSG_FAILEDTOADD), filename.getAbsolutePath()) + " " + e.getMessage());
 				}
 			}
 		}
@@ -543,7 +544,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 	}
 
 	protected void DoAddCodeFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file",new String[] {"*"});
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, lang.Msg(Languages.MSG_OPENCODE),new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				/*
@@ -560,7 +561,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 							is.close();
 					}
 				} catch (IOException e) {
-					System.out.println("Error loading file!");
+					System.out.println(lang.Msg(Languages.MSG_ERRREADNGFILE)+" \""+filename.getName()+"\"");
 				}
 
 				/*
@@ -597,23 +598,23 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 	@Override
 	protected void DoAddCharacterFiles() {
 		int filelimit = 16384;
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file",new String[] {"*"});
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, lang.Msg(Languages.MSG_OPENCSV),new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 				/*
 				 * Iterate all the selected files.
 				 */
+				String DosFileName = UniqueifyName(TRDOS.FixFullName(filename.getName()));
 				try {
 					byte ArrayAsBytes[] = SpeccyFileEncoders.EncodeCharacterArray(filename, filelimit);
 					/*
 					 * Create the text strings for the row.
 					 */
-					String DosFileName = UniqueifyName(TRDOS.FixFullName(filename.getName()));
 					TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 					String values[] = new String[5];
 					values[0] = filename.getAbsolutePath();
 					values[1] = DosFileName;
-					values[2] = "D (Character Array)";
+					values[2] = "D ("+lang.Msg(Languages.MSG_CHARARRAY)+")";
 					values[3] = String.valueOf(ArrayAsBytes.length);
 					values[4] = "";
 
@@ -632,7 +633,8 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 					item2.setText(values);
 					item2.setData(listitem);
 				} catch (IOException e) {
-					System.out.println("Failed to add " + filename.getAbsolutePath() + " " + e.getMessage());
+					System.out.println(String.format(lang.Msg(Languages.MSG_ERRORADDING),filename.getName(), 
+							DosFileName) + " " + e.getMessage());
 				}
 			}
 		}
@@ -642,21 +644,21 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 	@Override
 	protected void DoAddNumericArrays() {
 		int filelimit = 16384;
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file",new String[] {"*"});
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, lang.Msg(Languages.MSG_OPENCSV),new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
+				String DosFileName = UniqueifyName(TRDOS.FixFullName(filename.getName()));
 				try {
 					byte ArrayAsBytes[] = SpeccyFileEncoders.EncodeNumericArray(filename, filelimit);
 
 					/*
 					 * Create the row text items
 					 */
-					String DosFileName = UniqueifyName(TRDOS.FixFullName(filename.getName()));
 					TableItem item2 = new TableItem(DirectoryListing, SWT.NONE);
 					String values[] = new String[5];
 					values[0] = filename.getAbsolutePath();
 					values[1] = DosFileName;
-					values[2] = "(D) Number Array";
+					values[2] = "D ("+lang.Msg(Languages.MSG_NUMARRAY)+")";
 					values[3] = String.valueOf(ArrayAsBytes.length);
 					values[4] = "";
 
@@ -675,7 +677,8 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 					item2.setText(values);
 					item2.setData(listitem);
 				} catch (IOException e) {
-					System.out.println("Failed to add " + filename.getAbsolutePath() + " " + e.getMessage());
+					System.out.println(String.format(lang.Msg(Languages.MSG_ERRORADDING),filename.getName(), 
+							DosFileName) + " " + e.getMessage());
 				}
 			}
 		}
@@ -684,7 +687,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 	
 	@Override
 	protected void DoAddBinaryBasicFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file",new String[] {"*"});
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, lang.Msg(Languages.MSG_OPENBASICENCFILE),new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 
@@ -702,7 +705,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 							is.close();
 					}
 				} catch (IOException e) {
-					System.out.println("Error loading file!");
+					System.out.println(lang.Msg(Languages.MSG_ERRREADNGFILE)+" \""+filename.getName()+"\"");
 				}
 
 				/*
@@ -739,7 +742,7 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 
 	@Override
 	protected void DoAddTextBasicFiles() {
-		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, "Open CODE file",new String[] {"*"});
+		File Selected[] = fsd.AskForMultipleFileOpen(FileSelectDialog.FILETYPE_FILES, lang.Msg(Languages.MSG_OPENBASICTXTFILE),new String[] {"*"});
 		if ((Selected != null) && (Selected.length > 0)) {
 			for (File filename : Selected) {
 
@@ -806,8 +809,8 @@ public class AddFilesToTrDosPartition extends GenericAddPageDialog {
 					break;
 				}
 			} catch (Exception e) {
-				System.out.println(
-						"Error adding " + details.OriginalFilename + " as " + details.filename + " " + e.getMessage());
+				System.out.println(String.format(lang.Msg(Languages.MSG_ERRORADDING),details.OriginalFilename, 
+						details.filename) + " " + e.getMessage());
 				e.printStackTrace();
 			}
 		}
