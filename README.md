@@ -49,5 +49,18 @@ Alternatively, from the command line:
   
 Documentation:
 https://github.com/spodula/SpecHDDFileEditor/wiki
+
+Other useful classes:
+*   java -cp HDDEditorxxx.jar hddEditor.libs.disks.LINEAR.TZXFile [folder] [out.txt]
+* *     Produces a file contains the contents of every TZX file in the given folder
+
+*   java -cp HDDEditorxxx.jar hddEditor.libs.disks.LINEAR.TAPFile [folder] [out.txt]
+* *     Produces a file contains the contents of every TAP file in the given folder
+    
   
+  
+
+
+
+
 
