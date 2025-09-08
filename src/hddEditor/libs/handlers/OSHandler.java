@@ -40,25 +40,6 @@ public class OSHandler {
 	}
 
 	/**
-	 * Test harness
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		OSHandler h;
-		try {
-			Disk disk = new IDEDosDisk(new File("/data1/idedos.dsk"),0,0,0);
-			h = new OSHandler(disk);
-			System.out.println(h);
-			disk.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-
-	/**
 	 * Get the last partition with the given Partition type
 	 * 
 	 * @param PartType
