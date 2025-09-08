@@ -94,8 +94,8 @@ public class HDFUtils {
 			ATA_IDENTIFY[x++] = (byte) c;
 		}
 		// 35-5D Model number (40 ascii characters)
-		x = 0x36; // 0123456789012345678901234567890123456789
-		for (char c : "Created by V1.0 of RawHDDEditor-GDS 2022".toCharArray()) {
+		x = 0x36;   // 0123456789012345678901234567890123456789
+		for (char c : "Created b V1.12 of RawHDDEditor-GDS 2025".toCharArray()) {
 			ATA_IDENTIFY[x++] = (byte) c;
 		}
 		// 0x5e-5f MSB= vendor specific (Should be 0), LSB = max sectors transferred per
