@@ -46,7 +46,7 @@ import org.xml.sax.SAXException;
 
 
 public class ASMLib {
-	Languages lang;
+	protected Languages lang;
 	/** 
 	 * List of instructions
 	 */
