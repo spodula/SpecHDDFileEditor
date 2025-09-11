@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
@@ -29,8 +30,8 @@ public class TAPPartition extends IDEDosPartition {
 	 * @param DirentNum
 	 * @param Initialise
 	 */
-	public TAPPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise) {
-		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise);
+	public TAPPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise, Languages lang) {
+		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise, lang);
 		CanExport = true;
 	}
 
@@ -418,7 +419,7 @@ public class TAPPartition extends IDEDosPartition {
 						}
 
 						Speccy.SaveFileToDiskAdvanced(TargetFilename, entrydata, Rawentrydata, filelength,
-								SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName, actiontype);
+								SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName, actiontype, lang);
 					} catch (Exception E) {
 						System.out.println("\nError extracting " + TargetFilename + "For folder: " + folder + " - "
 								+ E.getMessage());
@@ -555,7 +556,7 @@ public class TAPPartition extends IDEDosPartition {
 		try {
 			tdf = new TAPFile(new File("/home/graham/x.tap"));
 
-			TAPPartition trp = new TAPPartition(0, tdf, new byte[64], 1, false);
+			TAPPartition trp = new TAPPartition(0, tdf, new byte[64], 1, false, new Languages());
 			System.out.println(trp);
 			// trp.MoveDirectoryEntryUp(trp.DirectoryEntries[0]);
 //			System.out.println(trp);

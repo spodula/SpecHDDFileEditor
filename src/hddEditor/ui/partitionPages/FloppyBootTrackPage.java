@@ -170,7 +170,7 @@ public class FloppyBootTrackPage extends GenericPage {
 				file.write((lang.Msg(Languages.MSG_ORG)+": 0xfe00" + System.lineSeparator()).getBytes());
 				file.write((lang.Msg(Languages.MSG_LENGTH)+": 512 bytes" + System.lineSeparator() + System.lineSeparator()).getBytes());
 				try {
-					ASMLib asm = new ASMLib();
+					ASMLib asm = new ASMLib(lang);
 					int loadedaddress = 0xfe00;
 					int realaddress = 0x0080;
 					try {
@@ -285,7 +285,7 @@ public class FloppyBootTrackPage extends GenericPage {
 		tc4.setWidth(40);
 		HexTable.setHeaderVisible(true);
 
-		ASMLib asm = new ASMLib();
+		ASMLib asm = new ASMLib(lang);
 		int loadedaddress = 0xfe00;
 		int realaddress = 0x0000;
 		int asmData[] = new int[5];

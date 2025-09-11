@@ -432,16 +432,16 @@ public class FileExportAllPartitionsForm {
 									byte cpmdata[] = file.GetFileRawData();
 									Speccy.SaveFileToDiskAdvanced(new File(asm, file.GetFilename()), data, cpmdata,
 											data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress,
-											"", GeneralUtils.EXPORT_TYPE_ASM);
+											"", GeneralUtils.EXPORT_TYPE_ASM, lang);
 									Speccy.SaveFileToDiskAdvanced(new File(cpm, file.GetFilename()), data, cpmdata,
 											data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress,
-											"", GeneralUtils.EXPORT_TYPE_RAWANDHEADER);
+											"", GeneralUtils.EXPORT_TYPE_RAWANDHEADER, lang);
 									Speccy.SaveFileToDiskAdvanced(new File(hex, file.GetFilename()), data, cpmdata,
 											data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress,
-											"", GeneralUtils.EXPORT_TYPE_HEX);
+											"", GeneralUtils.EXPORT_TYPE_HEX, lang);
 									Speccy.SaveFileToDiskAdvanced(new File(raw, file.GetFilename()), data, cpmdata,
 											data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress,
-											"", GeneralUtils.EXPORT_TYPE_RAW);
+											"", GeneralUtils.EXPORT_TYPE_RAW, lang);
 
 									Plus3DosFileHeader p3d = null;
 									if (PartClass.contains("PLUS3DOSPartition")) {
@@ -491,7 +491,7 @@ public class FileExportAllPartitionsForm {
 
 										Speccy.SaveFileToDiskAdvanced(new File(filefolder, file.GetFilename()), data,
 												cpmdata, filelength, SpeccyFileType, basicLine, basicVarsOffset,
-												codeLoadAddress, arrayVarName, actiontype);
+												codeLoadAddress, arrayVarName, actiontype, lang);
 										SysConfig = new FileWriter(new File(filefolder, "partition.index"), true);
 										try {
 											PrintWriter SysConfigp = new PrintWriter(SysConfig);

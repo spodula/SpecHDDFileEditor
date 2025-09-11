@@ -49,7 +49,7 @@ public class AssemblyRenderer implements Renderer {
 		tc4.setWidth(160);
 		AsmTable.setHeaderVisible(true);
 
-		ASMLib asm = new ASMLib();
+		ASMLib asm = new ASMLib(lang);
 		int loadedaddress = startaddress;
 		int realaddress = 0x0000;
 		int asmData[] = new int[5];

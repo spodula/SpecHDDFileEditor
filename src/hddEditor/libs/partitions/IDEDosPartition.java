@@ -30,6 +30,7 @@ import java.util.Comparator;
 
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.ModifiedEvent;
@@ -48,6 +49,8 @@ public class IDEDosPartition {
 	public byte RawPartition[] = null;
 
 	public boolean CanExport = false;
+	
+	protected Languages lang;
 
 	/**
 	 * Update and set the Partition name
@@ -298,12 +301,13 @@ public class IDEDosPartition {
 	 * @param RawDisk
 	 * @param RawPartition
 	 */
-	public IDEDosPartition(int DirentLocation, Disk RawDisk, byte RawPartition[], int DirentNum, boolean Initialise) {
+	public IDEDosPartition(int DirentLocation, Disk RawDisk, byte RawPartition[], int DirentNum, boolean Initialise, Languages lang) {
 		CanExport = false;
 		CurrentDisk = RawDisk;
 		this.DirentLocation = DirentLocation;
 		this.DirentNum = DirentNum;
 		this.RawPartition = RawPartition;
+		this.lang = lang;
 		PopulateData(RawPartition);
 		if (Initialise) {
 			SetSensibleDefaults();

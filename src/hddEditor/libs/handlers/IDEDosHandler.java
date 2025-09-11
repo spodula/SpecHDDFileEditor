@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.HDD.IDEDosDisk;
@@ -31,8 +32,8 @@ public class IDEDosHandler extends OSHandler {
 	 * @param disk
 	 * @throws IOException
 	 */
-	public IDEDosHandler(Disk disk) throws IOException {
-		super(disk);
+	public IDEDosHandler(Disk disk,Languages lang) throws IOException {
+		super(disk, lang);
 		LoadAndDecodePartitions();
 	}
 
@@ -67,7 +68,7 @@ public class IDEDosHandler extends OSHandler {
 				System.arraycopy(PartData, ptr, partitiondata, 0, 64);
 				int PartType = (partitiondata[0x10] & 0xff);
 				IDEDosPartition idp = GetNewPartitionByType(PartType, ptr, CurrentDisk, partitiondata, partnum++,
-						false);
+						false, lang);
 
 				if (PartType == 1) {
 					SystemPart = (SystemPartition) idp;
@@ -103,7 +104,7 @@ public class IDEDosHandler extends OSHandler {
 		IDEDosHandler h;
 		try {
 			IDEDosDisk disk = new IDEDosDisk(new File("/data1/IDEDOS/2gtest.img"),0,0,0);
-			h = new IDEDosHandler(disk);
+			h = new IDEDosHandler(disk,new Languages());
 			PLUS3DOSPartition p3d = (PLUS3DOSPartition) h.SystemPart.partitions[1];
 			System.out.println("---------------------");
 			System.out.println(p3d);
@@ -145,24 +146,24 @@ public class IDEDosHandler extends OSHandler {
 	 * @return
 	 */
 	public static IDEDosPartition GetNewPartitionByType(int PartType, int DirentLocation, Disk CurrentDisk,
-			byte partitiondata[], int partnum, boolean Initialise) {
+			byte partitiondata[], int partnum, boolean Initialise,Languages lang) {
 		IDEDosPartition idp = null;
 		try {
 			if (PartType == 1) {
-				idp = new SystemPartition(DirentLocation, CurrentDisk, partitiondata, partnum, Initialise);
+				idp = new SystemPartition(DirentLocation, CurrentDisk, partitiondata, partnum, Initialise, lang);
 			} else if (PartType == PLUSIDEDOS.PARTITION_SWAP) {
-				idp = new SwapPartition(DirentLocation, CurrentDisk, partitiondata, partnum, Initialise);
+				idp = new SwapPartition(DirentLocation, CurrentDisk, partitiondata, partnum, Initialise, lang);
 			} else if (PartType == PLUSIDEDOS.PARTITION_PLUS3DOS) {
-				idp = new PLUS3DOSPartition(DirentLocation, CurrentDisk, partitiondata, partnum, Initialise);
+				idp = new PLUS3DOSPartition(DirentLocation, CurrentDisk, partitiondata, partnum, Initialise, lang);
 			} else if (PartType == PLUSIDEDOS.PARTITION_UNKNOWN)  {
-				idp = new NonCPMDiskImagePartition(DirentLocation, CurrentDisk, partitiondata, partnum, Initialise);
+				idp = new NonCPMDiskImagePartition(DirentLocation, CurrentDisk, partitiondata, partnum, Initialise, lang);
 			} else if (PartType < 0x40 && PartType > 0x29) {
-				idp = new NonCPMDiskImagePartition(DirentLocation, CurrentDisk, partitiondata, partnum, Initialise);
+				idp = new NonCPMDiskImagePartition(DirentLocation, CurrentDisk, partitiondata, partnum, Initialise, lang);
 			} else if (PartType == PLUSIDEDOS.PARTITION_FREE) {
-				idp = new FreePartition(DirentLocation, CurrentDisk, partitiondata, partnum, Initialise);
+				idp = new FreePartition(DirentLocation, CurrentDisk, partitiondata, partnum, Initialise, lang);
 			} else {
 				// generic partition
-				idp = new IDEDosPartition(DirentLocation, CurrentDisk, partitiondata, partnum, Initialise);
+				idp = new IDEDosPartition(DirentLocation, CurrentDisk, partitiondata, partnum, Initialise, lang);
 			}
 		} catch (Exception E) {
 			E.printStackTrace();

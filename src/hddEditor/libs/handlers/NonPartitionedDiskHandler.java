@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FDD.BadDiskFileException;
@@ -21,8 +22,8 @@ import hddEditor.libs.partitions.MGTDosPartition;
 
 public class NonPartitionedDiskHandler extends OSHandler {
 
-	public NonPartitionedDiskHandler(Disk disk) throws IOException {
-		super(disk);
+	public NonPartitionedDiskHandler(Disk disk,Languages lang) throws IOException {
+		super(disk, lang);
 		CreateDummyPartitions();
 	}
 
@@ -36,7 +37,7 @@ public class NonPartitionedDiskHandler extends OSHandler {
 		// System partition:
 		byte rawData[] = PLUSIDEDOS.GetSystemPartition(CurrentDisk.GetNumCylinders(), CurrentDisk.GetNumHeads(),
 				CurrentDisk.GetNumSectors(), CurrentDisk.GetSectorSize(), false);
-		SystemPart = new SystemPartition(0, CurrentDisk, rawData, 0, false);
+		SystemPart = new SystemPartition(0, CurrentDisk, rawData, 0, false, lang);
 		SystemPart.SetName("Floppy disk");
 		SystemPart.DummySystemPartiton = true;
 		SystemPart.SetEndSector(
@@ -45,7 +46,7 @@ public class NonPartitionedDiskHandler extends OSHandler {
 		// Boot sector:
 
 		rawData = PLUSIDEDOS.MakeGenericIDEDOSPartition("Disk Boot track", PLUSIDEDOS.PARTITION_BOOT, 0, 0, 0, 0, 9);
-		FloppyBootTrack BootPart = new FloppyBootTrack(0, CurrentDisk, rawData, 0, false);
+		FloppyBootTrack BootPart = new FloppyBootTrack(0, CurrentDisk, rawData, 0, false, lang);
 		BootPart.SetName("Boot Track");
 		BootPart.SetEndSector((long) (BootPart.reservedTracks * CurrentDisk.GetNumSectors()));
 		int ActualReservedTracks = BootPart.reservedTracks;
@@ -137,7 +138,7 @@ public class NonPartitionedDiskHandler extends OSHandler {
 
 			String fn = CurrentDisk.GetFilename().toUpperCase();
 			if (fn.endsWith(".DSK")) {
-				PLUS3DOSPartition p3dp = new PLUS3DOSPartition(1, CurrentDisk, rawData, 1, false);
+				PLUS3DOSPartition p3dp = new PLUS3DOSPartition(1, CurrentDisk, rawData, 1, false, lang);
 				p3dp.SetEndSector((long) ((CurrentDisk.GetNumCylinders() - ActualReservedTracks)
 						* CurrentDisk.GetNumHeads() * CurrentDisk.GetNumSectors()));
 				p3dp.ReservedTracks = 0;
@@ -146,13 +147,13 @@ public class NonPartitionedDiskHandler extends OSHandler {
 				SystemPart.partitions[0] = SystemPart;
 				SystemPart.partitions[1] = BootPart;
 				if (!p3dp.IsValid) {
-					RawDiskData rdd = new RawDiskData(1, CurrentDisk, rawData, 1, false);
+					RawDiskData rdd = new RawDiskData(1, CurrentDisk, rawData, 1, false, lang);
 					SystemPart.partitions[2] = rdd;					
 				} else {
 					SystemPart.partitions[2] = p3dp;
 				}
 			} else if (fn.endsWith(".TRD")) {
-				TrDosPartition tdp = new TrDosPartition(1, CurrentDisk, rawData, 1, false);
+				TrDosPartition tdp = new TrDosPartition(1, CurrentDisk, rawData, 1, false, lang);
 				tdp.SetPartType(PLUSIDEDOS.PARTITION_DISK_TRDOS);
 				tdp.SetName("TR-DOS disk");
 				tdp.SetStartCyl(0);
@@ -161,7 +162,7 @@ public class NonPartitionedDiskHandler extends OSHandler {
 				SystemPart.partitions[0] = SystemPart;
 				SystemPart.partitions[1] = tdp;
 			} else if (fn.endsWith(".MGT")) {
-				MGTDosPartition mdp = new MGTDosPartition(1, CurrentDisk, rawData, 1, false);
+				MGTDosPartition mdp = new MGTDosPartition(1, CurrentDisk, rawData, 1, false, lang);
 				mdp.SetPartType(PLUSIDEDOS.PARTITION_DISK_PLUSD);
 				mdp.SetName("MGT/+D disk");
 				mdp.SetStartCyl(0);
@@ -170,7 +171,7 @@ public class NonPartitionedDiskHandler extends OSHandler {
 				SystemPart.partitions[0] = SystemPart;
 				SystemPart.partitions[1] = mdp;
 			} else if (fn.endsWith(".SCL")) {
-				TrDosPartition tdp = new TrDosPartition(1, CurrentDisk, rawData, 1, false);
+				TrDosPartition tdp = new TrDosPartition(1, CurrentDisk, rawData, 1, false, lang);
 				tdp.SetPartType(PLUSIDEDOS.PARTITION_DISK_TRDOS);
 				tdp.SetName("TR-DOS disk");
 				tdp.SetStartCyl(0);
@@ -179,7 +180,7 @@ public class NonPartitionedDiskHandler extends OSHandler {
 				SystemPart.partitions[0] = SystemPart;
 				SystemPart.partitions[1] = tdp;
 			} else {
-				NonCPMDiskImagePartition np3dp = new NonCPMDiskImagePartition(1, CurrentDisk, rawData, 1, false);
+				NonCPMDiskImagePartition np3dp = new NonCPMDiskImagePartition(1, CurrentDisk, rawData, 1, false, lang);
 				np3dp.SetPartType(PLUSIDEDOS.PARTITION_UNKNOWN);
 				np3dp.SetName("Disk data");
 				SystemPart.partitions = new IDEDosPartition[2];
@@ -187,7 +188,7 @@ public class NonPartitionedDiskHandler extends OSHandler {
 				SystemPart.partitions[1] = np3dp;
 			}
 		} catch (Exception E) {
-			NonCPMDiskImagePartition ncdip = new NonCPMDiskImagePartition(1, CurrentDisk, rawData, 1, false);
+			NonCPMDiskImagePartition ncdip = new NonCPMDiskImagePartition(1, CurrentDisk, rawData, 1, false, lang);
 			ncdip.SetPartType(PLUSIDEDOS.PARTITION_UNKNOWN);
 			ncdip.SetName("Disk data");
 			SystemPart.partitions = new IDEDosPartition[3];
@@ -221,7 +222,7 @@ public class NonPartitionedDiskHandler extends OSHandler {
 		NonPartitionedDiskHandler h;
 		try {
 			Disk disk = new TrDosDiskFile(new File("/home/graham/tmp/ufo.trd"));
-			h = new NonPartitionedDiskHandler(disk);
+			h = new NonPartitionedDiskHandler(disk, new Languages());
 			PLUS3DOSPartition p3d = (PLUS3DOSPartition) h.SystemPart.partitions[2];
 			System.out.println("---------------------");
 			System.out.println(p3d);

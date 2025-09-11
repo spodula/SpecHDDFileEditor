@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.TZX;
@@ -31,8 +32,8 @@ public class TZXPartition extends IDEDosPartition {
 	 * @param DirentNum
 	 * @param Initialise
 	 */
-	public TZXPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise) {
-		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise);
+	public TZXPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise,Languages lang) {
+		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise, lang);
 		CanExport = true;
 	}
 
@@ -473,7 +474,7 @@ public class TZXPartition extends IDEDosPartition {
 						}
 
 						Speccy.SaveFileToDiskAdvanced(TargetFilename, entrydata, Rawentrydata, filelength,
-								SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName, actiontype);
+								SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName, actiontype, lang);
 					} catch (Exception E) {
 						System.out.println("\nError extracting " + TargetFilename + "For folder: " + folder + " - "
 								+ E.getMessage());
@@ -613,7 +614,7 @@ public class TZXPartition extends IDEDosPartition {
 		try {
 			tzx = new TZXFile(new File(args[0]));
 
-			TZXPartition tzp = new TZXPartition(0, tzx, new byte[64], 1, false);
+			TZXPartition tzp = new TZXPartition(0, tzx, new byte[64], 1, false, new Languages());
 			System.out.println(tzp);
 			byte data[] = new byte[555];
 			tzp.AddCodeFile("CODEY.TST", 32000, data);

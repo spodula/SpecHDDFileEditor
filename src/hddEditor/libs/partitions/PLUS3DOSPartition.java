@@ -18,6 +18,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.partitions.cpm.CPMDirectoryEntry;
@@ -45,9 +46,9 @@ public class PLUS3DOSPartition extends CPMPartition {
 	 * @param RawPartition
 	 * @throws IOException
 	 */
-	public PLUS3DOSPartition(int tag, Disk disk, byte[] RawPartition, int DirentNum, boolean Initialise)
+	public PLUS3DOSPartition(int tag, Disk disk, byte[] RawPartition, int DirentNum, boolean Initialise,Languages lang)
 			throws IOException {
-		super(tag, disk, RawPartition, DirentNum, Initialise);
+		super(tag, disk, RawPartition, DirentNum, Initialise, lang);
 		CanExport = true;
 	}
 
@@ -357,7 +358,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 
 							Speccy.SaveFileToDiskAdvanced(TargetFilename, entrydata, Rawentrydata, filelength,
 									SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName,
-									actiontype);
+									actiontype, lang);
 						} catch (Exception E) {
 							System.out.println("\nError extracting " + TargetFilename + "For folder: " + folder + " - "
 									+ E.getMessage());

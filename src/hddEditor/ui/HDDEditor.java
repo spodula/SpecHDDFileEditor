@@ -507,7 +507,7 @@ public class HDDEditor {
 					((RawHDDFile) CurrentDisk).DiskBlockSize = ForceBlockSize;
 					System.out.println(String.format(lang.Msg(Languages.MSG_BLOCSZOVERRIDE),ForceBlockSize));
 				}
-				CurrentHandler = DiskUtils.GetHandlerForDisk(CurrentDisk);
+				CurrentHandler = DiskUtils.GetHandlerForDisk(CurrentDisk, lang);
 				UpdateDropdown();
 				shell.setText(selected.getName());
 				filesel.SetDefaultFolderForType(FileSelectDialog.FILETYPE_DRIVE, selected);
@@ -720,7 +720,7 @@ public class HDDEditor {
 						System.out.println("===============================================================");
 						System.out.println("Processing: " + file.getName());
 						System.out.println("===============================================================");
-						OSHandler handler = DiskUtils.LoadDiskDetails(file);
+						OSHandler handler = DiskUtils.LoadDiskDetails(file, new Languages());
 						if (handler != null) {
 							for (IDEDosPartition partition : handler.SystemPart.partitions) {
 								if (partition.GetPartType() == PLUSIDEDOS.PARTITION_CPM

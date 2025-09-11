@@ -45,7 +45,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 
-public class ASMLib { 
+public class ASMLib {
+	Languages lang;
 	/** 
 	 * List of instructions
 	 */
@@ -66,7 +67,8 @@ public class ASMLib {
 	/**
 	 * Load the opcode XML file.
 	 */
-	public ASMLib() {
+	public ASMLib(Languages lang) {
+		this.lang = lang;
 		try {
 			InputStream document = null;
 
@@ -144,16 +146,16 @@ public class ASMLib {
 			}
 
 		} catch (IOException e) {
-			System.out.println("Error initialising disassembly libarary. ");
-			System.out.println("IOException: " + e.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_ERRDISASSEM));
+			System.out.println(lang.Msg(Languages.MSG_IOEXCEPTION)+": "+e.getMessage());
 			e.printStackTrace();
 		} catch (SAXException e) {
-			System.out.println("Error initialising disassembly libarary. ");
-			System.out.println("SAXexception: " + e.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_ERRDISASSEM));
+			System.out.println(lang.Msg(Languages.MSG_SAXEXCEPTION)+": "+e.getMessage());
 			e.printStackTrace();
 		} catch (ParserConfigurationException e) {
-			System.out.println("Error initialising disassembly libarary. ");
-			System.out.println("ParserConfigurationException: " + e.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_ERRDISASSEM));
+			System.out.println(lang.Msg(Languages.MSG_XMLPARSERCONFIG)+": "+e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -204,7 +206,7 @@ public class ASMLib {
 			result.dataref = 0;
 			result.data = 0;
 			result.disp = 0;
-			result.instruction = "[Invalid]";
+			result.instruction = "["+lang.Msg(Languages.MSG_INVALID)+"]";
 		} else {
 			for (AsmInstruction instruction : possibilities) {
 				String digits = instruction.hex;
@@ -316,7 +318,7 @@ public class ASMLib {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		ASMLib z = new ASMLib();
+		ASMLib z = new ASMLib(new Languages());
 
 		System.out.println(z.decode(new int[] { 0xFF, 0x00, 0x00 }, 0x4088).toString());
 		System.out.println(z.decode(new int[] { 0xDD, 0xCB, 0x33 }, 0x4088).toString());

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import hddEditor.libs.CPM;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
@@ -71,8 +72,8 @@ public class CPMPartition extends IDEDosPartition {
 	 * @param DirentNum
 	 * @param Initialise
 	 */
-	public CPMPartition(int tag, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise) {
-		super(tag, RawDisk, RawPartition, DirentNum, Initialise);
+	public CPMPartition(int tag, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise,Languages lang) {
+		super(tag, RawDisk, RawPartition, DirentNum, Initialise, lang);
 		CanExport = true;
 	}
 
@@ -643,7 +644,7 @@ public class CPMPartition extends IDEDosPartition {
 						File TargetFilename = new File(folder, entry.GetFilename().trim());
 						byte file[] = entry.GetFileData();
 						Speccy.SaveFileToDiskAdvanced(TargetFilename, file, file, file.length, 3, 0, 0, 0, "A",
-								MiscAction);
+								MiscAction, lang);
 
 						SysConfig.write("<file>\n".toCharArray());
 						SysConfig.write(("  <filename>" + entry.GetFilename() + "</filename>\n").toCharArray());

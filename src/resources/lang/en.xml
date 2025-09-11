@@ -460,11 +460,11 @@
 	<msg id="526">File HW info.</msg>
 	<msg id="527">48K Z80 snapshot file</msg>
 	<msg id="528">128K Z80 snapshot file</msg>
-	<msg id="529"></msg>
-	<msg id="530"></msg>
-	<msg id="531"></msg>
-	<msg id="532"></msg>
-	<msg id="533"></msg>
+	<msg id="529">Opcode</msg>
+	<msg id="530">Error initialising disassembly libarary.</msg>
+	<msg id="531">IO Exception</msg>
+	<msg id="532">SAX exception</msg>
+	<msg id="533">XML Parser Configuration Exception</msg>
 	<msg id="534"></msg>
 	<msg id="535"></msg>
 	<msg id="536"></msg>

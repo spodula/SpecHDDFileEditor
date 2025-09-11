@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
@@ -202,8 +203,8 @@ public class SystemPartition extends IDEDosPartition {
 	 * @param disk
 	 * @param RawPartition
 	 */
-	public SystemPartition(int DirentLocation, Disk disk, byte[] RawPartition, int DirentNum, boolean Initialise) {
-		super(DirentLocation, disk, RawPartition, DirentNum, Initialise);
+	public SystemPartition(int DirentLocation, Disk disk, byte[] RawPartition, int DirentNum, boolean Initialise, Languages lang) {
+		super(DirentLocation, disk, RawPartition, DirentNum, Initialise, lang);
 		CanExport = true;
 	}
 
@@ -506,7 +507,7 @@ public class SystemPartition extends IDEDosPartition {
 
 						}
 						FoundPartiton = IDEDosHandler.GetNewPartitionByType(PartType, FoundPartiton.DirentLocation,
-								FoundPartiton.CurrentDisk, FoundPartiton.RawPartition, FoundPartiton.DirentNum, false);
+								FoundPartiton.CurrentDisk, FoundPartiton.RawPartition, FoundPartiton.DirentNum, false, lang);
 						partitions[FoundPartiton.DirentNum] = FoundPartiton;
 						FoundPartiton.SetName(partname);
 
@@ -543,7 +544,7 @@ public class SystemPartition extends IDEDosPartition {
 							System.arraycopy(FoundPartiton.RawPartition, 0, NewRawPartition, 0, NewRawPartition.length);
 
 							NewFreePartition = new FreePartition(FoundPartiton.DirentLocation + 0x40,
-									FoundPartiton.CurrentDisk, NewRawPartition, FoundPartiton.DirentNum + 1, false);
+									FoundPartiton.CurrentDisk, NewRawPartition, FoundPartiton.DirentNum + 1, false, lang);
 							// Update the cylinder
 							int NewTrack = FoundPartiton.GetStartCyl() + Tracks;
 							int NewHead = FoundPartiton.GetStartHead() + Heads;
@@ -585,7 +586,7 @@ public class SystemPartition extends IDEDosPartition {
 
 						// Re-create as the proper type
 						FoundPartiton = IDEDosHandler.GetNewPartitionByType(PartType, FoundPartiton.DirentLocation,
-								FoundPartiton.CurrentDisk, FoundPartiton.RawPartition, FoundPartiton.DirentNum, true);
+								FoundPartiton.CurrentDisk, FoundPartiton.RawPartition, FoundPartiton.DirentNum, true, lang);
 
 						partitions[FoundPartiton.DirentNum] = FoundPartiton;
 					}
@@ -623,7 +624,7 @@ public class SystemPartition extends IDEDosPartition {
 				part.SetPartType(PLUSIDEDOS.PARTITION_FREE);
 
 				IDEDosPartition NewFreePartition = IDEDosHandler.GetNewPartitionByType(PLUSIDEDOS.PARTITION_FREE,
-						part.DirentLocation, part.CurrentDisk, part.RawPartition, part.DirentNum, false);
+						part.DirentLocation, part.CurrentDisk, part.RawPartition, part.DirentNum, false, lang);
 
 				NewFreePartition.SetPartType(PLUSIDEDOS.PARTITION_FREE);
 

@@ -249,7 +249,7 @@ public class RawFloppyPage extends GenericPage {
 					sb.append(System.lineSeparator());
 					sb.append(lang.Msg(Languages.MSG_ASSEMBLY)+": " + System.lineSeparator());
 
-					ASMLib asm = new ASMLib();
+					ASMLib asm = new ASMLib(lang);
 					int loadedaddress = 0x0000;
 					int realaddress = 0x0080;
 					try {

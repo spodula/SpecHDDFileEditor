@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FDD.FloppyDisk;
@@ -20,8 +21,8 @@ import hddEditor.libs.disks.FDD.TrackInfo;
 public class RawDiskData extends IDEDosPartition {
 	TrackInfo tracks[];
 
-	public RawDiskData(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise) {
-		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise);
+	public RawDiskData(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise,Languages lang) {
+		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise, lang);
 		SetName("Floppy disk Raw data");
 		SetPartType(PLUSIDEDOS.PARTITION_RAWFDD);
 		CanExport = true;

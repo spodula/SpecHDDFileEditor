@@ -274,14 +274,14 @@ public class Speccy {
 	 * @param loadAddr
 	 * @throws IOException
 	 */
-	public static void DoSaveFileAsAsm(byte[] data, File filename, int loadAddr) {
+	public static void DoSaveFileAsAsm(byte[] data, File filename, int loadAddr, Languages lang) {
 		StringBuilder sb = new StringBuilder();
 		try {
 			String cr = System.lineSeparator();
 			sb.append("File: " + filename + cr);
 			sb.append("Org: " + loadAddr + cr);
 			sb.append("Length: " + data.length + cr + cr);
-			ASMLib asm = new ASMLib();
+			ASMLib asm = new ASMLib(lang);
 			int loadedaddress = loadAddr;
 			int realaddress = 0x0000;
 			try {
@@ -1677,7 +1677,7 @@ public class Speccy {
 	 */
 
 	public static void SaveFileToDisk(File targetFilename, byte[] data, int filelength, int speccyFileType,
-			int basicLine, int basicVarsOffset, int codeLoadAddress, String arrayVarName, boolean codeAsHex)
+			int basicLine, int basicVarsOffset, int codeLoadAddress, String arrayVarName, boolean codeAsHex,Languages lang)
 			throws IOException {
 
 		switch (speccyFileType) {
@@ -1691,10 +1691,10 @@ public class Speccy {
 			DoSaveCharArrayAsText(targetFilename, data, arrayVarName);
 			break;
 		case BASIC_CODE:
-			SaveCodeFile(targetFilename, data, codeLoadAddress, filelength, codeAsHex);
+			SaveCodeFile(targetFilename, data, codeLoadAddress, filelength, codeAsHex, lang);
 			break;
 		default:
-			SaveCodeFile(targetFilename, data, 0x10000 - filelength, filelength, codeAsHex);
+			SaveCodeFile(targetFilename, data, 0x10000 - filelength, filelength, codeAsHex, lang);
 			break;
 		}
 
@@ -1714,7 +1714,7 @@ public class Speccy {
 	 * @throws IOException
 	 */
 	private static void SaveCodeFile(File targetFilename, byte[] data, int codeLoadAddress, int filelength,
-			boolean OutAsHex) throws IOException {
+			boolean OutAsHex,Languages lang) throws IOException {
 		if ((filelength == 6912) && (codeLoadAddress == 16384)) {
 			ImageData image = Speccy.GetImageFromFileArray(data, 0);
 			ImageLoader imageLoader = new ImageLoader();
@@ -1738,7 +1738,7 @@ public class Speccy {
 				String hexdata = GeneralUtils.HexDump(data, 0, data.length, 0);
 				GeneralUtils.WriteBlockToDisk(hexdata.getBytes(), targetFilename);
 			} else {
-				DoSaveFileAsAsm(data, targetFilename, codeLoadAddress);
+				DoSaveFileAsAsm(data, targetFilename, codeLoadAddress, lang);
 			}
 		}
 	}
@@ -1865,7 +1865,7 @@ public class Speccy {
 	 */
 	public static void SaveFileToDiskAdvanced(File targetFilename, byte[] entrydata, byte[] rawdata, int filelength,
 			int speccyFileType, int basicLine, int basicVarsOffset, int codeLoadAddress, String arrayVarName,
-			int ActionType) {
+			int ActionType,Languages lang) {
 
 		int ImageFileTyp = -1;
 		switch (ActionType) {
@@ -1877,7 +1877,7 @@ public class Speccy {
 			GeneralUtils.WriteBlockToDisk(hexdata.getBytes(), targetFilename);
 			break;
 		case GeneralUtils.EXPORT_TYPE_ASM:
-			DoSaveFileAsAsm(entrydata, targetFilename, codeLoadAddress);
+			DoSaveFileAsAsm(entrydata, targetFilename, codeLoadAddress, lang);
 			break;
 		case GeneralUtils.EXPORT_TYPE_TXT:
 			SaveBasicFile(targetFilename, entrydata, basicLine, basicVarsOffset, filelength);

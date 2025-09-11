@@ -1,4 +1,5 @@
 package hddEditor.libs.partitions;
+import hddEditor.libs.Languages;
 import hddEditor.libs.disks.Disk;
 /**
  * Handler for Non CPM floppy disk images embedded onto the HD.  (Type 0x3x)
@@ -41,8 +42,8 @@ public class NonCPMDiskImagePartition extends IDEDosPartition {
 	 * @param disk
 	 * @param RawPartition
 	 */
-	public NonCPMDiskImagePartition(int tag, Disk disk, byte[] RawPartition,int DirentNum, boolean Initialise) {
-		super(tag, disk, RawPartition,DirentNum, Initialise);
+	public NonCPMDiskImagePartition(int tag, Disk disk, byte[] RawPartition,int DirentNum, boolean Initialise,Languages lang) {
+		super(tag, disk, RawPartition,DirentNum, Initialise, lang);
 		CanExport = false;
 
 	}

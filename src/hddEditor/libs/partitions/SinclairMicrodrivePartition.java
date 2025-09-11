@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
@@ -30,8 +31,8 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 	 * @throws IOException
 	 */
 	public SinclairMicrodrivePartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum,
-			boolean Initialise) throws IOException {
-		super(DirentLocation, RawDisk, RawPartition, DirentNum, false);
+			boolean Initialise,Languages lang) throws IOException {
+		super(DirentLocation, RawDisk, RawPartition, DirentNum, false, lang);
 		CanExport = true;
 	}
 
@@ -44,7 +45,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 		MDFMicrodriveFile tdf;
 		try {
 			tdf = new MDFMicrodriveFile(new File("/home/graham/demo.mdr"));
-			SinclairMicrodrivePartition trp = new SinclairMicrodrivePartition(0, tdf, new byte[64], 1, false);
+			SinclairMicrodrivePartition trp = new SinclairMicrodrivePartition(0, tdf, new byte[64], 1, false, new Languages());
 			System.out.println(tdf);
 //			trp.Files[0].RenameMicrodriveFile("Test2", tdf);
 //			trp.Files[0].RenameMicrodriveFile("demo", tdf);
@@ -619,7 +620,7 @@ public class SinclairMicrodrivePartition extends IDEDosPartition {
 						}
 
 						Speccy.SaveFileToDiskAdvanced(TargetFilename, entrydata, Rawentrydata, filelength,
-								SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName, actiontype);
+								SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName, actiontype, lang);
 					} catch (Exception E) {
 						System.out.println("\nError extracting " + TargetFilename + "For folder: " + folder + " - "
 								+ E.getMessage());

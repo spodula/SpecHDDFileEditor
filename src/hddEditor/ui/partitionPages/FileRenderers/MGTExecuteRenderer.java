@@ -167,7 +167,7 @@ public class MGTExecuteRenderer extends FileRenderer {
 				String.format(lang.Msg(Languages.MSG_SAVEXASASM), Origfilename), new String[] {"*.asm"}, Origfilename+".asm");
 		
 		if (Selected != null) {
-			Speccy.DoSaveFileAsAsm(data, Selected, loadAddr);
+			Speccy.DoSaveFileAsAsm(data, Selected, loadAddr, lang);
 		}
 		mainPage2.getShell().moveAbove(null);
 	}

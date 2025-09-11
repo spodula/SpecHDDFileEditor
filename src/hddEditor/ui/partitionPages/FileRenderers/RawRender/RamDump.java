@@ -137,7 +137,7 @@ public class RamDump implements Renderer {
 			}
 		});
 
-		if (!is128K && (cpustate != null)) {
+//		if (!is128K && (cpustate != null)) {
 			AddSnapshotBtn = new Button(TargetPage, SWT.NONE);
 			AddSnapshotBtn.setText(lang.Msg(Languages.MSG_CONVERTSNAPSHOT));
 			AddSnapshotBtn.addSelectionListener(new SelectionListener() {
@@ -151,7 +151,7 @@ public class RamDump implements Renderer {
 					widgetSelected(arg0);
 				}
 			});
-		}
+//		}
 
 		Label lbl = new Label(TargetPage, SWT.NONE);
 		labels.add(lbl);

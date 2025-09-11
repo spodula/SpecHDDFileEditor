@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
 
@@ -37,8 +38,8 @@ public class SwapPartition extends IDEDosPartition {
 	 * @param disk
 	 * @param RawPartition
 	 */
-	public SwapPartition(int tag, Disk disk, byte[] RawPartition, int DirentNum, boolean Initialise) {
-		super(tag, disk, RawPartition, DirentNum, Initialise);
+	public SwapPartition(int tag, Disk disk, byte[] RawPartition, int DirentNum, boolean Initialise,Languages lang) {
+		super(tag, disk, RawPartition, DirentNum, Initialise, lang);
 		CanExport = true;
 	}
 
@@ -97,7 +98,7 @@ public class SwapPartition extends IDEDosPartition {
 			byte data[] = GetAllDataInPartition();
 			
 			Speccy.SaveFileToDiskAdvanced(new File(folder,"swap.data"), data, data, BasicAction, CodeAction, ArrayAction, ScreenAction,
-					MiscAction, null, SwapAction);
+					MiscAction, null, SwapAction,lang);
 		} catch (IOException e) {
 			System.out.println("Error extracting files: " + e.getMessage());
 			e.printStackTrace();

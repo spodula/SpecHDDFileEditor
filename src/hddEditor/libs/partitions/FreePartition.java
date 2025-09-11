@@ -8,6 +8,7 @@ package hddEditor.libs.partitions;
  * See https://sinclair.wiki.zxnet.co.uk/wiki/IDEDOS#Partition%20Type%200xFF%20-%20Free%20Disk%20Space
  */
 
+import hddEditor.libs.Languages;
 import hddEditor.libs.disks.Disk;
 
 public class FreePartition extends IDEDosPartition {
@@ -21,8 +22,8 @@ public class FreePartition extends IDEDosPartition {
 	 * @param DirentNum
 	 * @param Initialise
 	 */
-	public FreePartition(int tag, Disk RawDisk, byte[] RawPartition,int DirentNum, boolean Initialise) {
-		super(tag, RawDisk, RawPartition,DirentNum,Initialise);
+	public FreePartition(int tag, Disk RawDisk, byte[] RawPartition,int DirentNum, boolean Initialise,Languages lang) {
+		super(tag, RawDisk, RawPartition,DirentNum,Initialise,lang);
 		CanExport = false;
 	}
 }

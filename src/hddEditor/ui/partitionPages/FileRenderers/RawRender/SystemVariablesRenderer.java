@@ -232,7 +232,7 @@ public class SystemVariablesRenderer implements Renderer {
 	 */
 	private String DecodeSubroutine(byte data[], int baseaddress, Languages lang) {
 		String result = "";
-		ASMLib asm = new ASMLib();
+		ASMLib asm = new ASMLib(lang);
 		int realaddress = 0x0000;
 		int asmData[] = new int[5];
 		try {

@@ -12,6 +12,7 @@ import hddEditor.libs.ASMLib;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.ASMLib.DecodedASM;
 import hddEditor.libs.CPM;
+import hddEditor.libs.Languages;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
 import hddEditor.libs.disks.FDD.FloppyDisk;
@@ -46,8 +47,8 @@ public class FloppyBootTrack extends IDEDosPartition {
 	
 	public boolean IsValidCPMFileStructure = true;
 	
-	public FloppyBootTrack(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise) {
-		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise);
+	public FloppyBootTrack(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise,Languages lang) {
+		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise, lang);
 		SetName("Floppy disk boot track.");
 		GetXDPBDetails();
 		CanExport = true;
@@ -232,7 +233,7 @@ public class FloppyBootTrack extends IDEDosPartition {
 				
 				wl(SysConfig,"\n\nBoot sector code:");
 				
-				ASMLib asm = new ASMLib();
+				ASMLib asm = new ASMLib(lang);
 				int loadedaddress = 0xfe00;
 				int realaddress = 0x0000;
 				int asmData[] = new int[5];
@@ -330,7 +331,7 @@ public class FloppyBootTrack extends IDEDosPartition {
 			}
 			
 			Speccy.SaveFileToDiskAdvanced(new File(folder,"boot.data"), data, data, BasicAction, CodeAction, ArrayAction, ScreenAction,
-					MiscAction, null, SwapAction);
+					MiscAction, null, SwapAction, lang);
 		} catch (IOException e) {
 			System.out.println("Error extracting bootsector: " + e.getMessage());
 			e.printStackTrace();

@@ -270,7 +270,7 @@ public class BasicRenderer implements Renderer {
 				Row = new TableItem(Listing, SWT.NONE);
 				Row.setText(details);
 
-				ASMLib asm = new ASMLib();
+				ASMLib asm = new ASMLib(lang);
 				int loadedaddress = baseaddress + rd.locationAddr;
 				int realaddress = 0x0000;
 				int asmData[] = new int[5];

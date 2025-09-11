@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.MGT;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
@@ -24,8 +25,8 @@ public class MGTDosPartition extends IDEDosPartition {
 	private int BAM_DIRECTORY = -2;
 
 
-	public MGTDosPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise) {
-		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise);
+	public MGTDosPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise,Languages lang) {
+		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise,lang);
 		CanExport = true;
 		IsValid = false;
 		try {
@@ -136,7 +137,7 @@ public class MGTDosPartition extends IDEDosPartition {
 		MGTDiskFile tdf;
 		try {
 			tdf = new MGTDiskFile(new File("/home/graham/Artist2.mgt"));
-			MGTDosPartition trp = new MGTDosPartition(0, tdf, new byte[64], 1, false);
+			MGTDosPartition trp = new MGTDosPartition(0, tdf, new byte[64], 1, false, new Languages());
 			System.out.println(trp);
 			byte data[] = new byte[4444];
 			trp.AddFile("testfile", 3, data, 1, 22222, 10);
@@ -496,7 +497,7 @@ public class MGTDosPartition extends IDEDosPartition {
 
 							Speccy.SaveFileToDiskAdvanced(TargetFilename, entry.GetFileData(), entry.GetFileData(),
 									filelength, SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress,
-									arrayVarName, actiontype);
+									arrayVarName, actiontype, lang);
 							System.out.println("Written " + entry.GetFilename().trim());
 						} catch (IOException e) {
 							System.out

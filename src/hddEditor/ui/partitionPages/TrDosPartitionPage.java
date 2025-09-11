@@ -217,14 +217,14 @@ public class TrDosPartitionPage extends GenericPage {
 
 									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(),
 											entry.GetFileData().length, sd.BasicType, sd.LineStart, sd.VarStart,
-											sd.LoadAddress, sd.VarName + "", actiontype);
+											sd.LoadAddress, sd.VarName + "", actiontype, lang);
 								} else if (exporttype == HDDEditor.DRAG_RAW) {
 									GeneralUtils.WriteBlockToDisk(entry.GetFileData(), f);
 								} else {
 									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
 									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(),
 											entry.GetFileData().length, sd.BasicType, sd.LineStart, sd.VarStart,
-											sd.LoadAddress, sd.VarName + "", GeneralUtils.EXPORT_TYPE_HEX);
+											sd.LoadAddress, sd.VarName + "", GeneralUtils.EXPORT_TYPE_HEX, lang);
 								}
 								File f1 = new File(f.getParent(), entry.GetFilename());
 								f.renameTo(f1);

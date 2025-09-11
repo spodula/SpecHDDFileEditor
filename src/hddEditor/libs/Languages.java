@@ -474,6 +474,11 @@ public class Languages {
 	public static int MSG_FILEHWINFO = 526;
 	public static int MSG_48Z80SNAPSHOT = 527;
 	public static int MSG_128Z80SNAPSHOT = 528;
+	public static int MSG_OPCODE = 529;
+	public static int MSG_ERRDISASSEM = 530;
+	public static int MSG_IOEXCEPTION = 531;
+	public static int MSG_SAXEXCEPTION = 532;
+	public static int MSG_XMLPARSERCONFIG  = 533;
 	
 	
 	
@@ -604,3 +609,4 @@ public class Languages {
 	
 	
 }
+

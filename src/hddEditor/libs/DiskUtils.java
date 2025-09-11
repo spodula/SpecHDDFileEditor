@@ -79,14 +79,14 @@ public class DiskUtils {
 	 * @return
 	 * @throws IOException
 	 */
-	public static OSHandler GetHandlerForDisk(Disk disk) throws IOException {
+	public static OSHandler GetHandlerForDisk(Disk disk,Languages lang) throws IOException {
 		OSHandler result = null;
 		if (disk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_HDD) {
-			result = new IDEDosHandler(disk);
+			result = new IDEDosHandler(disk, lang);
 		} else if (disk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_FDD) {
-			result = new NonPartitionedDiskHandler(disk);
+			result = new NonPartitionedDiskHandler(disk, lang);
 		} else if (disk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_LINEAR) {
-			result = new LinearTapeHandler(disk);
+			result = new LinearTapeHandler(disk, lang);
 		} else {
 			throw new IOException("Error opennining file, cannot find handler for disk "+disk.GetFilename());
 		}
@@ -96,11 +96,11 @@ public class DiskUtils {
 	/**
 	 * 
 	 */
-	public static OSHandler LoadDiskDetails(File sourcefile) {
+	public static OSHandler LoadDiskDetails(File sourcefile,Languages lang) {
 		try {
 			Disk CurrentDisk = DiskUtils.GetCorrectDiskFromFile(sourcefile);
 			if (CurrentDisk != null) {
-				OSHandler CurrentHandler = DiskUtils.GetHandlerForDisk(CurrentDisk);
+				OSHandler CurrentHandler = DiskUtils.GetHandlerForDisk(CurrentDisk,lang);
 				return(CurrentHandler);
 			}
 			return(null);

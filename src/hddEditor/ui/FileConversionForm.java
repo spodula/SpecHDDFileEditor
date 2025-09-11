@@ -53,7 +53,7 @@ public class FileConversionForm {
 	private FileSelectDialog fsd = null;
 	
 	//Language
-	Languages lang;
+	Languages lang; 
 	
 	/**
 	 * Constructor

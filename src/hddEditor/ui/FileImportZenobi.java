@@ -424,7 +424,7 @@ public class FileImportZenobi {
 				CurrentSourceDisk.close();
 			}
 			CurrentSourceDisk = DiskUtils.GetCorrectDiskFromFile(selected);
-			CurrentSourceHandler = DiskUtils.GetHandlerForDisk(CurrentSourceDisk);
+			CurrentSourceHandler = DiskUtils.GetHandlerForDisk(CurrentSourceDisk, lang);
 			String entries[] = null;
 
 			// Create a list of all partitions. Note this only really applies in the case of

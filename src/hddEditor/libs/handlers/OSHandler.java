@@ -3,12 +3,8 @@ package hddEditor.libs.handlers;
  * base object of the OS handler. 
  */
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
+import hddEditor.libs.Languages;
 import hddEditor.libs.disks.Disk;
-import hddEditor.libs.disks.HDD.IDEDosDisk;
 import hddEditor.libs.partitions.IDEDosPartition;
 import hddEditor.libs.partitions.SystemPartition;
 
@@ -19,14 +15,16 @@ public class OSHandler {
 	// Storage for the System partition
 	public SystemPartition SystemPart = null;
 	
-	//Disk being accesses
-	Disk CurrentDisk = null;
+	//Disk being accessed
+	protected Disk CurrentDisk = null;
+	
+	protected Languages lang;
 	
 	/**
 	 * Constructor
 	 * @param disk
 	 */
-	public OSHandler(Disk disk) {
+	public OSHandler(Disk disk, Languages lang) {
 		CurrentDisk = disk;
 	}
 

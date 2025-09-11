@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import hddEditor.libs.GeneralUtils;
+import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
 import hddEditor.libs.disks.Disk;
 import hddEditor.libs.disks.FileEntry;
@@ -47,8 +48,8 @@ public class TrDosPartition extends IDEDosPartition {
 
 	public TrdDirectoryEntry DirectoryEntries[] = null;
 
-	public TrDosPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise) {
-		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise);
+	public TrDosPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise,Languages lang) {
+		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise, lang);
 		IsValid = false;
 		CanExport = true;
 		try {
@@ -154,7 +155,7 @@ public class TrDosPartition extends IDEDosPartition {
 		TrDosDiskFile tdf;
 		try {
 			tdf = new TrDosDiskFile(new File("/home/graham/tmp/ufo.trd"));
-			TrDosPartition trp = new TrDosPartition(0, tdf, new byte[64], 1, false);
+			TrDosPartition trp = new TrDosPartition(0, tdf, new byte[64], 1, false, new Languages());
 			System.out.println(trp);
 		} catch (IOException | BadDiskFileException e) {
 			e.printStackTrace();
@@ -593,7 +594,7 @@ public class TrDosPartition extends IDEDosPartition {
 
 							Speccy.SaveFileToDiskAdvanced(TargetFilename, entry.GetFileData(), entry.GetFileData(),
 									filelength, SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress,
-									arrayVarName, actiontype);
+									arrayVarName, actiontype, lang);
 							System.out.println("Written " + entry.GetFilename().trim());
 						} catch (IOException e) {
 							System.out
