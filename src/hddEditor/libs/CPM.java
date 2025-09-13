@@ -6,19 +6,7 @@ package hddEditor.libs;
 
 
 public class CPM {
-	//Definitions of the bytes 0xfe00-0xfe0a for Amstrad CPM disks
-	public static String datadesc[] = {
-			"defb %d ; Disk type",
-			"defb %d ; Sidedness",
-			"defb %d ; Tracks per side",
-			"defb %d ; Sectors per track",
-			"defb %d ; Sector size shift",
-			"defb %d ; Reserved tracks",
-			"defb %d ; Block size shift",
-			"defb %d ; # Directory blocks",
-			"defb %d ; RW gap length",
-			"defb %d ; Format gap length",
-		};
+
 	
 	
 	/**

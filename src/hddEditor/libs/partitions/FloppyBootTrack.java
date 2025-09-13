@@ -20,6 +20,19 @@ import hddEditor.libs.disks.FDD.Sector;
 import hddEditor.libs.disks.FDD.TrackInfo;
 
 public class FloppyBootTrack extends IDEDosPartition {
+	private static int[] AMSHDRDescriptions = {
+			Languages.MSG_CPMDISKTYPE,
+			Languages.MSG_CPMSIDENESS,
+			Languages.MSG_CPMTPS,
+			Languages.MSG_CPMSPT,
+			Languages.MSG_CPMSSHIFT,
+			Languages.MSG_CPMRESERVED,
+			Languages.MSG_CPMBLOCKSZS,
+			Languages.MSG_CPMDIRBLOCKS,
+			Languages.MSG_CPMRWGAP,
+			Languages.MSG_FORMATGAP
+	};
+		
 
 	public int disktype = 0; // 0=SS SD 3= DSDD
 	public int numsectors = 0; // Sectors per track (9)
@@ -259,11 +272,8 @@ public class FloppyBootTrack extends IDEDosPartition {
 						if (loadedaddress < 0xfe10) {
 							if (loadedaddress < 0xfe0a) {
 								decLen = 1;
-								String dc[] = CPM.datadesc[loadedaddress-0xfe00].split(";");
-								
-								decStr = dc[0];
-								decStr = String.format(decStr, asmData[0] & 0xff);
-								chrdata = "; "+dc[1].trim();
+								String label = lang.Msg(AMSHDRDescriptions[loadedaddress-0xfe00]);
+								decStr = String.format("defb %d ; %s", asmData[0] & 0xff, label);
 							} else if (loadedaddress < 0xfe0f) {
 								decLen = 5;
 								decStr = "defb ";
@@ -272,11 +282,11 @@ public class FloppyBootTrack extends IDEDosPartition {
 									s = s + ", "+String.valueOf(i);
 								}
 								decStr = decStr +s.substring(2);
-								chrdata = "; Reserved";
+								chrdata = "; "+lang.Msg(Languages.MSG_RESERVED);
 							} else {
 								decLen = 1;
 								decStr = String.format("defb %d", asmData[0] & 0xff);
-								chrdata = "; Checksum";
+								chrdata = "; "+lang.Msg(Languages.MSG_CHECKSUM);
 							}
 						} else {
 							// decode instruction
@@ -321,7 +331,7 @@ public class FloppyBootTrack extends IDEDosPartition {
 
 					} // while
 				} catch (Exception E) {
-					System.out.println("Error at: " + realaddress + "(" + loadedaddress + ")");
+					System.out.println(String.format(lang.Msg(Languages.MSG_ERRORATXX),realaddress, loadedaddress));
 					System.out.println(E.getMessage());
 					E.printStackTrace();
 				}
@@ -333,11 +343,9 @@ public class FloppyBootTrack extends IDEDosPartition {
 			Speccy.SaveFileToDiskAdvanced(new File(folder,"boot.data"), data, data, BasicAction, CodeAction, ArrayAction, ScreenAction,
 					MiscAction, null, SwapAction, lang);
 		} catch (IOException e) {
-			System.out.println("Error extracting bootsector: " + e.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_ERREXTRACTBOOT)+": " + e.getMessage());
 			e.printStackTrace();
 		}
-
 	}
-	
 	
 }

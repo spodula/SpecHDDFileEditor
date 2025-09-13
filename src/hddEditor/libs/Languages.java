@@ -480,6 +480,17 @@ public class Languages {
 	public static int MSG_SAXEXCEPTION = 532;
 	public static int MSG_XMLPARSERCONFIG  = 533;
 	
+	public static int MSG_CPMDISKTYPE = 534;
+	public static int MSG_CPMSIDENESS = 535;
+	public static int MSG_CPMTPS = 536;
+	public static int MSG_CPMSPT = 537;
+	public static int MSG_CPMSSHIFT = 538;
+	public static int MSG_CPMRESERVED = 539;
+	public static int MSG_CPMBLOCKSZS = 540;
+	public static int MSG_CPMDIRBLOCKS = 541;
+	public static int MSG_CPMRWGAP = 542;
+	public static int MSG_FORMATGAP = 543;
+	public static int MSG_ERREXTRACTBOOT = 544;
 	
 	
 	
