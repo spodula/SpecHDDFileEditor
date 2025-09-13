@@ -195,8 +195,9 @@ public class FloppyBootTrackPage extends GenericPage {
 							if (loadedaddress < 0xfe10) {
 								if (loadedaddress < 0xfe0a) {
 									decLen = 1;
-									decStr = CPM.datadesc[loadedaddress-0xfe00];
-									decStr = String.format(decStr, asmData[0] & 0xff);
+									String label = lang.Msg(CPM.AMSHDRDescriptions[loadedaddress - 0xfe00]);
+									decStr = String.format("defb %d ; %s", asmData[0] & 0xff, label);
+									
 								} else if (loadedaddress < 0xfe0f) {
 									decLen = 5;
 									decStr = "DEFB ";
@@ -311,8 +312,8 @@ public class FloppyBootTrackPage extends GenericPage {
 				if (loadedaddress < 0xfe10) {
 					if (loadedaddress < 0xfe0a) {
 						decLen = 1;
-						decStr = CPM.datadesc[loadedaddress-0xfe00];
-						decStr = String.format(decStr, asmData[0] & 0xff);
+						String label = lang.Msg(CPM.AMSHDRDescriptions[loadedaddress - 0xfe00]);
+						decStr = String.format("defb %d ; %s", asmData[0] & 0xff, label);
 					} else if (loadedaddress < 0xfe0f) {
 						decLen = 5;
 						decStr = "DEFB ";

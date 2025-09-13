@@ -1,4 +1,5 @@
 package hddEditor.libs.partitions;
+
 /**
  * Implementation of a partition representing the boot track
  * for a CPM or CPM-like disk. Particularly the Amstrad variant.
@@ -20,20 +21,6 @@ import hddEditor.libs.disks.FDD.Sector;
 import hddEditor.libs.disks.FDD.TrackInfo;
 
 public class FloppyBootTrack extends IDEDosPartition {
-	private static int[] AMSHDRDescriptions = {
-			Languages.MSG_CPMDISKTYPE,
-			Languages.MSG_CPMSIDENESS,
-			Languages.MSG_CPMTPS,
-			Languages.MSG_CPMSPT,
-			Languages.MSG_CPMSSHIFT,
-			Languages.MSG_CPMRESERVED,
-			Languages.MSG_CPMBLOCKSZS,
-			Languages.MSG_CPMDIRBLOCKS,
-			Languages.MSG_CPMRWGAP,
-			Languages.MSG_FORMATGAP
-	};
-		
-
 	public int disktype = 0; // 0=SS SD 3= DSDD
 	public int numsectors = 0; // Sectors per track (9)
 	public int sectorPow = 0; // Sector size represented by its (power of 2)+7, (usually 2 meaning 512 bytes)
@@ -55,26 +42,28 @@ public class FloppyBootTrack extends IDEDosPartition {
 	public int maxDirEnts = 0; // Max number of entries in the directory
 	public int diskSize = 0; // Calculated max disk space in Kbytes
 	public int BlockIDWidth = 1; // If a disk has > 256 blocks, DIRENTS are 2 bytes rather than 1.
-	
-	public String Identifiedby="";
-	
+
+	public String Identifiedby = "";
+
 	public boolean IsValidCPMFileStructure = true;
-	
-	public FloppyBootTrack(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise,Languages lang) {
+
+	public FloppyBootTrack(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise,
+			Languages lang) {
 		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise, lang);
 		SetName("Floppy disk boot track.");
 		GetXDPBDetails();
 		CanExport = true;
-	}	
-	
+	}
+
 	public void GetXDPBDetails() {
-		int reservedtracks=1;
-		
+		int reservedtracks = 1;
+
 		FloppyDisk fdd = (FloppyDisk) CurrentDisk;
 		try {
-			byte BootSect[] = fdd.GetBytesStartingFromSector(0, (fdd.GetSectorSize() * fdd.diskTracks[0].Sectors.length) * reservedtracks);
+			byte BootSect[] = fdd.GetBytesStartingFromSector(0,
+					(fdd.GetSectorSize() * fdd.diskTracks[0].Sectors.length) * reservedtracks);
 			TrackInfo Track0 = fdd.diskTracks[0];
-			
+
 			if (Track0.minsectorID == 1) { // first sector=1 PCW/+3
 				// if we have an invalid bootsector fiddle the data
 				// fix GDS 22 Dec 2021 - Valid values for byte 1 are 0-3 only. This makes the
@@ -140,15 +129,14 @@ public class FloppyBootTrack extends IDEDosPartition {
 				fiddleByte = 0;
 				Identifiedby = "Format values (Amstrad default #2)";
 			}
-			
+
 			// calculate the checksum
 			checksum = 0;
 			for (int i = 0; i < BootSect.length; i++) {
 				int b = (int) BootSect[i] & 0xff;
 				checksum = (int) (checksum + b) & 0xff;
 			}
-			
-			
+
 			IsValidCPMFileStructure = true;
 			// +3 disk sectors are always 512. If they are not, something funky is
 			// happening so don't try to parse directory entries. So check first 10 or so
@@ -157,7 +145,8 @@ public class FloppyBootTrack extends IDEDosPartition {
 			// the file.
 			// GDS 7 Feb 2022 - Fixed bubble bobble image where blank tracks are not on the
 			// disk.
-			// GDS 8 Feb 2022 - Fixed KSFT SP7 image where track 0 contains protection. Should start from valid tracks
+			// GDS 8 Feb 2022 - Fixed KSFT SP7 image where track 0 contains protection.
+			// Should start from valid tracks
 			for (int tracknum = reservedTracks; tracknum < Math.min(20, fdd.diskTracks.length); tracknum++) {
 				TrackInfo tr = fdd.diskTracks[tracknum];
 				if (tr != null) {
@@ -168,8 +157,8 @@ public class FloppyBootTrack extends IDEDosPartition {
 					}
 				}
 			}
-			
-			maxblocks = ( fdd.diskTracks.length - reservedTracks) * fdd.NumHeads * numsectors * sectorSize / blockSize;
+
+			maxblocks = (fdd.diskTracks.length - reservedTracks) * fdd.NumHeads * numsectors * sectorSize / blockSize;
 			reservedblocks = dirBlocks;
 			maxDirEnts = dirBlocks * blockSize / 32;
 			BlockIDWidth = 1;
@@ -177,7 +166,7 @@ public class FloppyBootTrack extends IDEDosPartition {
 				BlockIDWidth = 2;
 			}
 			diskSize = blockSize * (maxblocks - reservedblocks) / 1024;
-			
+
 		} catch (IOException e) {
 			System.out.println("FloppyBootTrack: cannot load first track...");
 		}
@@ -188,7 +177,7 @@ public class FloppyBootTrack extends IDEDosPartition {
 	 * 
 	 * @return
 	 */
-	@Override	
+	@Override
 	public FileEntry[] GetFileList() {
 		return null;
 	}
@@ -202,7 +191,7 @@ public class FloppyBootTrack extends IDEDosPartition {
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
 			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted)
 			throws IOException {
-		
+
 		try {
 			FileWriter SysConfig = new FileWriter(new File(folder, "boot.info"));
 			if (progress != null) {
@@ -221,31 +210,31 @@ public class FloppyBootTrack extends IDEDosPartition {
 				} else if (cs == 255) {
 					ChecksumStatus = "Bootable PCW8256 disk";
 				}
-				
-				wl(SysConfig,"Format: " + diskformat + " (" + disktype + ")");
-				wl(SysConfig,"Sectors: " + numsectors);
-				wl(SysConfig,"Sector size: " + sectorSize + " (" + sectorPow + ")");
-				wl(SysConfig,"Reserved Tracks: " + reservedTracks);
-				
-				wl(SysConfig,"Block size: " + blockSize + " (" + blockPow + ")");
-				wl(SysConfig,"Directory blocks: " + dirBlocks);
-				wl(SysConfig,"R/W Gap: " + rwGapLength);
-				wl(SysConfig,"Format Gap: " + fmtGapLength);
-				
-				wl(SysConfig,"Checksum+fb: " + cs);
-				wl(SysConfig,"Bootable?: " + ChecksumStatus);
-				wl(SysConfig,"Max CPM Blocks: " + maxblocks);
-				wl(SysConfig,"Reserved blocks: " + reservedblocks);
-				
-				wl(SysConfig,"Max Dirents: " + maxDirEnts);
-				wl(SysConfig,"Bytes per block ID: " + BlockIDWidth);
-				wl(SysConfig,"Disk size: " + diskSize + "k");
-				wl(SysConfig,"Sector range: " + Disk.diskTracks[0].minsectorID + "-" + Disk.diskTracks[0].maxsectorID);
-				
-				wl(SysConfig,"Identification type: "+Identifiedby);
-				
-				wl(SysConfig,"\n\nBoot sector code:");
-				
+
+				wl(SysConfig, "Format: " + diskformat + " (" + disktype + ")");
+				wl(SysConfig, "Sectors: " + numsectors);
+				wl(SysConfig, "Sector size: " + sectorSize + " (" + sectorPow + ")");
+				wl(SysConfig, "Reserved Tracks: " + reservedTracks);
+
+				wl(SysConfig, "Block size: " + blockSize + " (" + blockPow + ")");
+				wl(SysConfig, "Directory blocks: " + dirBlocks);
+				wl(SysConfig, "R/W Gap: " + rwGapLength);
+				wl(SysConfig, "Format Gap: " + fmtGapLength);
+
+				wl(SysConfig, "Checksum+fb: " + cs);
+				wl(SysConfig, "Bootable?: " + ChecksumStatus);
+				wl(SysConfig, "Max CPM Blocks: " + maxblocks);
+				wl(SysConfig, "Reserved blocks: " + reservedblocks);
+
+				wl(SysConfig, "Max Dirents: " + maxDirEnts);
+				wl(SysConfig, "Bytes per block ID: " + BlockIDWidth);
+				wl(SysConfig, "Disk size: " + diskSize + "k");
+				wl(SysConfig, "Sector range: " + Disk.diskTracks[0].minsectorID + "-" + Disk.diskTracks[0].maxsectorID);
+
+				wl(SysConfig, "Identification type: " + Identifiedby);
+
+				wl(SysConfig, "\n\nBoot sector code:");
+
 				ASMLib asm = new ASMLib(lang);
 				int loadedaddress = 0xfe00;
 				int realaddress = 0x0000;
@@ -266,27 +255,27 @@ public class FloppyBootTrack extends IDEDosPartition {
 								chrdata = chrdata + "?";
 							}
 						}
-						
-						int decLen=0;
-						String decStr="";
+
+						int decLen = 0;
+						String decStr = "";
 						if (loadedaddress < 0xfe10) {
 							if (loadedaddress < 0xfe0a) {
 								decLen = 1;
-								String label = lang.Msg(AMSHDRDescriptions[loadedaddress-0xfe00]);
+								String label = lang.Msg(CPM.AMSHDRDescriptions[loadedaddress - 0xfe00]);
 								decStr = String.format("defb %d ; %s", asmData[0] & 0xff, label);
 							} else if (loadedaddress < 0xfe0f) {
 								decLen = 5;
 								decStr = "defb ";
 								String s = "";
-								for(int i:asmData) {
-									s = s + ", "+String.valueOf(i);
+								for (int i : asmData) {
+									s = s + ", " + String.valueOf(i);
 								}
-								decStr = decStr +s.substring(2);
-								chrdata = "; "+lang.Msg(Languages.MSG_RESERVED);
+								decStr = decStr + s.substring(2);
+								chrdata = "; " + lang.Msg(Languages.MSG_RESERVED);
 							} else {
 								decLen = 1;
 								decStr = String.format("defb %d", asmData[0] & 0xff);
-								chrdata = "; "+lang.Msg(Languages.MSG_CHECKSUM);
+								chrdata = "; " + lang.Msg(Languages.MSG_CHECKSUM);
 							}
 						} else {
 							// decode instruction
@@ -300,7 +289,7 @@ public class FloppyBootTrack extends IDEDosPartition {
 						for (int j = 0; j < decLen; j++) {
 							hex = hex + String.format("%02X", asmData[j]) + " ";
 						}
-						
+
 						String dta[] = new String[4];
 						dta[0] = String.format("%04X", loadedaddress);
 						dta[1] = hex;
@@ -312,26 +301,26 @@ public class FloppyBootTrack extends IDEDosPartition {
 						}
 
 						char dt[] = new char[250];
-						for(int i=0;i<250;i++) {
-							dt[i]=' ';
+						for (int i = 0; i < 250; i++) {
+							dt[i] = ' ';
 						}
 						System.arraycopy(dta[0].toCharArray(), 0, dt, 0, dta[0].length());
 						System.arraycopy(dta[1].toCharArray(), 0, dt, 6, dta[1].length());
 						System.arraycopy(dta[2].toCharArray(), 0, dt, 22, dta[2].length());
-						System.arraycopy(dta[3].toCharArray(), 0, dt, 42, Math.min(dta[3].length(),200));
-						
+						System.arraycopy(dta[3].toCharArray(), 0, dt, 42, Math.min(dta[3].length(), 200));
+
 						if (loadedaddress == 0xfe10) {
-							wl(SysConfig,"");
+							wl(SysConfig, "");
 						}
-						
-						wl(SysConfig,new String(dt).trim());
+
+						wl(SysConfig, new String(dt).trim());
 
 						realaddress = realaddress + decLen;
 						loadedaddress = loadedaddress + decLen;
 
 					} // while
 				} catch (Exception E) {
-					System.out.println(String.format(lang.Msg(Languages.MSG_ERRORATXX),realaddress, loadedaddress));
+					System.out.println(String.format(lang.Msg(Languages.MSG_ERRORATXX), realaddress, loadedaddress));
 					System.out.println(E.getMessage());
 					E.printStackTrace();
 				}
@@ -339,13 +328,13 @@ public class FloppyBootTrack extends IDEDosPartition {
 			} finally {
 				SysConfig.close();
 			}
-			
-			Speccy.SaveFileToDiskAdvanced(new File(folder,"boot.data"), data, data, BasicAction, CodeAction, ArrayAction, ScreenAction,
-					MiscAction, null, SwapAction, lang);
+
+			Speccy.SaveFileToDiskAdvanced(new File(folder, "boot.data"), data, data, BasicAction, CodeAction,
+					ArrayAction, ScreenAction, MiscAction, null, SwapAction, lang);
 		} catch (IOException e) {
-			System.out.println(lang.Msg(Languages.MSG_ERREXTRACTBOOT)+": " + e.getMessage());
+			System.out.println(lang.Msg(Languages.MSG_ERREXTRACTBOOT) + ": " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
-	
+
 }

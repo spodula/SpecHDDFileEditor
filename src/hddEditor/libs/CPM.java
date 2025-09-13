@@ -6,6 +6,18 @@ package hddEditor.libs;
 
 
 public class CPM {
+	public static int[] AMSHDRDescriptions = {
+			Languages.MSG_CPMDISKTYPE,
+			Languages.MSG_CPMSIDENESS,
+			Languages.MSG_CPMTPS,
+			Languages.MSG_CPMSPT,
+			Languages.MSG_CPMSSHIFT,
+			Languages.MSG_CPMRESERVED,
+			Languages.MSG_CPMBLOCKSZS,
+			Languages.MSG_CPMDIRBLOCKS,
+			Languages.MSG_CPMRWGAP,
+			Languages.MSG_FORMATGAP
+	};
 
 	
 	
