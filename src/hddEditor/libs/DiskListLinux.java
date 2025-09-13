@@ -1,9 +1,10 @@
 package hddEditor.libs;
-
 /*-
  * Get a disk list along with details for Linux. This does not seen to require root privileges, although to 
  * actually access any of the returned devices, you probably will. 
  * This is a massive hack....
+ * 
+ *
  *
  * It makes use of the following in sysfs:
  * 
@@ -82,45 +83,47 @@ public class DiskListLinux {
 					// try to populate more fieldss
 					for (RawDiskItem p : disks) {
 						// model
-						byte data[] = GeneralUtils.ReadFileIntoArray("/sys/block/" + p.name + "/device/model");
-						p.model = new String(data).trim();
-						// vendor
-						data = GeneralUtils.ReadFileIntoArray("/sys/block/" + p.name + "/device/vendor");
-						p.Vendor = new String(data).trim();
-						// size
-						data = GeneralUtils.ReadFileIntoArray("/sys/block/" + p.name + "/size");
-						p.realsz = Long.valueOf(new String(data).trim()) * 512;
+						if (new File("/sys/block/" + p.name + "/device").exists()) {
+							byte data[] = GeneralUtils.ReadFileIntoArray("/sys/block/" + p.name + "/device/model");
+							p.model = new String(data).trim();
+							// vendor
+							data = GeneralUtils.ReadFileIntoArray("/sys/block/" + p.name + "/device/vendor");
+							p.Vendor = new String(data).trim();
+							// size
+							data = GeneralUtils.ReadFileIntoArray("/sys/block/" + p.name + "/size");
+							p.realsz = Long.valueOf(new String(data).trim()) * 512;
 
-						// logical block size. Note, this sometimes had a header, so just extract the
-						// number in the file.
-						data = GeneralUtils
-								.ReadFileIntoArray("/sys/class/block/" + p.name + "/queue/logical_block_size");
-						String lbsString = new String(data).trim();
-						String NumbersOnly = "";
-						// Extract any numbers
-						for (char c : lbsString.toCharArray()) {
-							if (c >= '0' && c <= '9')
-								NumbersOnly = NumbersOnly + c;
-						}
-						// and set it as block size.
-						p.BlockSize = Integer.parseInt(NumbersOnly);
+							// logical block size. Note, this sometimes had a header, so just extract the
+							// number in the file.
+							data = GeneralUtils
+									.ReadFileIntoArray("/sys/class/block/" + p.name + "/queue/logical_block_size");
+							String lbsString = new String(data).trim();
+							String NumbersOnly = "";
+							// Extract any numbers
+							for (char c : lbsString.toCharArray()) {
+								if (c >= '0' && c <= '9')
+									NumbersOnly = NumbersOnly + c;
+							}
+							// and set it as block size.
+							p.BlockSize = Integer.parseInt(NumbersOnly);
 
-						// Extract the symbolic link information. This will contain ATA or USB
-						// This is useful for telling USB drives from internal drives.
-						File f = new File("/sys/block", p.name);
-						String pth = f.getCanonicalPath().toLowerCase();
-						if (pth.contains("/usb")) {
-							p.driveType = "usb";
-						} else if (pth.contains("/ata")) {
-							p.driveType = "ata";
-						} else if (pth.contains("/scsi")) {
-							p.driveType = "scsi";
-						} else {
-							p.driveType = "unknown";
-						}
+							// Extract the symbolic link information. This will contain ATA or USB
+							// This is useful for telling USB drives from internal drives.
+							File f = new File("/sys/block", p.name);
+							String pth = f.getCanonicalPath().toLowerCase();
+							if (pth.contains("/usb")) {
+								p.driveType = "usb";
+							} else if (pth.contains("/ata")) {
+								p.driveType = "ata";
+							} else if (pth.contains("/scsi")) {
+								p.driveType = "scsi";
+							} else {
+								p.driveType = "unknown";
+							}
 
-						if (GeneralUtils.IsLinuxRoot()) {
-							p = GetCHSLinux(p);
+							if (GeneralUtils.IsLinuxRoot()) {
+								p = GetCHSLinux(p);
+							}
 						}
 					}
 				} catch (IOException e) {
@@ -139,12 +142,11 @@ public class DiskListLinux {
 		for (RawDiskItem d : disks) {
 			System.out.println(d);
 		}
-		
+
 	}
 
 	/**
-	 * This will only run under root. It requires hdparm.
-	 * What a hack.
+	 * This will only run under root. It requires hdparm. What a hack.
 	 */
 	private RawDiskItem GetCHSLinux(RawDiskItem rdi) {
 		// Excecute the wmic command to get details
@@ -172,7 +174,7 @@ public class DiskListLinux {
 						al.add(line);
 					}
 				}
-				for (String s:al) {
+				for (String s : al) {
 					System.out.println(s);
 				}
 			} finally {
@@ -192,16 +194,16 @@ public class DiskListLinux {
 			String str[] = line.split(" ");
 			try {
 				if (str[0].toLowerCase().startsWith("cylinders")) {
-					rdi.Cyls = Integer.valueOf(str[1]); 
+					rdi.Cyls = Integer.valueOf(str[1]);
 				}
 				if (str[0].toLowerCase().startsWith("heads")) {
-					rdi.Heads = Integer.valueOf(str[1]); 
+					rdi.Heads = Integer.valueOf(str[1]);
 				}
 				if (str[0].toLowerCase().startsWith("sectors")) {
-					rdi.Sectors = Integer.valueOf(str[1]); 
+					rdi.Sectors = Integer.valueOf(str[1]);
 				}
 			} catch (ArrayIndexOutOfBoundsException e) {
-				
+
 			}
 		}
 		return (rdi);
