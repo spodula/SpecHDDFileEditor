@@ -491,6 +491,17 @@ public class Languages {
 	public static int MSG_CPMRWGAP = 542;
 	public static int MSG_FORMATGAP = 543;
 	public static int MSG_ERREXTRACTBOOT = 544;
+	public static int MSG_FLOPPYBOOTTRACK = 545;
+	public static int MSG_IDAMSTRAD = 546;
+	public static int MSG_IDFORMAT1 = 547;
+	public static int MSG_IDFORMAT2 = 548;
+	public static int MSG_IDFORMAT3 = 549;
+	public static int MSG_CPMFORMNAMEPCW = 550;
+	public static int MSG_CPMFORMNAMECPCSYS = 551;
+	public static int MSG_CPMFORMNAMECPCDAT = 552;
+	public static int MSG_ERRCANTLOAD1STTR = 553;
+
+	
 	
 	
 	

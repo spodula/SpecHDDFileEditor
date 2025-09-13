@@ -50,7 +50,7 @@ public class FloppyBootTrack extends IDEDosPartition {
 	public FloppyBootTrack(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise,
 			Languages lang) {
 		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise, lang);
-		SetName("Floppy disk boot track.");
+		SetName(lang.Msg(Languages.MSG_FLOPPYBOOTTRACK));
 		GetXDPBDetails();
 		CanExport = true;
 	}
@@ -81,7 +81,7 @@ public class FloppyBootTrack extends IDEDosPartition {
 					rwGapLength = BootSect[8] & 0xff;
 					fmtGapLength = BootSect[9] & 0xff;
 					fiddleByte = (int) (BootSect[15] & 0xff);
-					Identifiedby = "Amstrad Boot Data in bootsector";
+					Identifiedby = lang.Msg(Languages.MSG_IDAMSTRAD);
 				} else {
 					// Get physical values from the AMS disk wrapper and the count of sectors we
 					// actually loaded.
@@ -97,11 +97,11 @@ public class FloppyBootTrack extends IDEDosPartition {
 					rwGapLength = 42;
 					fmtGapLength = 82;
 					fiddleByte = 0;
-					Identifiedby = "Format values (Amstrad default #0)";
+					Identifiedby = lang.Msg(Languages.MSG_IDFORMAT1);
 				}
-				diskformat = "PCW/+3";
+				diskformat = lang.Msg(Languages.MSG_CPMFORMNAMECPCDAT);
 			} else if (Track0.minsectorID == 0x41) { // CPC system disk
-				diskformat = "CPC System";
+				diskformat = lang.Msg(Languages.MSG_CPMFORMNAMECPCSYS);
 				disktype = 0;
 				numsectors = Track0.Sectors.length;
 				sectorPow = 2;
@@ -113,9 +113,9 @@ public class FloppyBootTrack extends IDEDosPartition {
 				rwGapLength = 0x2a;
 				fmtGapLength = 0x52;
 				fiddleByte = 0;
-				Identifiedby = "Format values (Amstrad default #1)";
+				Identifiedby = lang.Msg(Languages.MSG_IDFORMAT2);
 			} else if (Track0.minsectorID == 0xC1) { // CPC data disk. (No boot track)
-				diskformat = "CPC Data";
+				diskformat = lang.Msg(Languages.MSG_CPMFORMNAMECPCDAT);
 				disktype = 0;
 				numsectors = Track0.Sectors.length;
 				sectorPow = 2;
@@ -127,7 +127,7 @@ public class FloppyBootTrack extends IDEDosPartition {
 				rwGapLength = 0x2a;
 				fmtGapLength = 0x52;
 				fiddleByte = 0;
-				Identifiedby = "Format values (Amstrad default #2)";
+				Identifiedby = lang.Msg(Languages.MSG_IDFORMAT3);
 			}
 
 			// calculate the checksum
@@ -168,7 +168,7 @@ public class FloppyBootTrack extends IDEDosPartition {
 			diskSize = blockSize * (maxblocks - reservedblocks) / 1024;
 
 		} catch (IOException e) {
-			System.out.println("FloppyBootTrack: cannot load first track...");
+			System.out.println(lang.Msg(Languages.MSG_ERRCANTLOAD1STTR));
 		}
 	}
 
@@ -195,45 +195,45 @@ public class FloppyBootTrack extends IDEDosPartition {
 		try {
 			FileWriter SysConfig = new FileWriter(new File(folder, "boot.info"));
 			if (progress != null) {
-				progress.Callback(1, 0, "Floppy boot track...");
+				progress.Callback(1, 0, lang.Msg(Languages.MSG_FLOPPYBOOTTRACK)+"...");
 			}
 			byte data[] = GetAllDataInPartition();
 			FloppyDisk Disk = (FloppyDisk) CurrentDisk;
 			try {
 
-				String ChecksumStatus = "Not bootable";
+				String ChecksumStatus = lang.Msg(Languages.MSG_NOTBOOTABLE);
 				int cs = (checksum + fiddleByte) & 0xff;
 				if (cs == 3) {
-					ChecksumStatus = "Bootable +3 disk";
+					ChecksumStatus = lang.Msg(Languages.MSG_BPLUS3DPS);
 				} else if (cs == 1) {
-					ChecksumStatus = "Bootable PCW9512 disk";
+					ChecksumStatus = lang.Msg(Languages.MSG_BPCW9512);
 				} else if (cs == 255) {
-					ChecksumStatus = "Bootable PCW8256 disk";
+					ChecksumStatus = lang.Msg(Languages.MSG_BPCW8256);
 				}
 
-				wl(SysConfig, "Format: " + diskformat + " (" + disktype + ")");
-				wl(SysConfig, "Sectors: " + numsectors);
-				wl(SysConfig, "Sector size: " + sectorSize + " (" + sectorPow + ")");
-				wl(SysConfig, "Reserved Tracks: " + reservedTracks);
+				wl(SysConfig, lang.Msg(Languages.MSG_FORMAT) + ": " + diskformat + " (" + disktype + ")");
+				wl(SysConfig, lang.Msg(Languages.MSG_SECTORS) + ": " + numsectors);
+				wl(SysConfig, lang.Msg(Languages.MSG_SECTSZ) + ": " + sectorSize + " (" + sectorPow + ")");
+				wl(SysConfig, lang.Msg(Languages.MSG_RESERVEDTR) + ": " + reservedTracks);
 
-				wl(SysConfig, "Block size: " + blockSize + " (" + blockPow + ")");
-				wl(SysConfig, "Directory blocks: " + dirBlocks);
-				wl(SysConfig, "R/W Gap: " + rwGapLength);
-				wl(SysConfig, "Format Gap: " + fmtGapLength);
+				wl(SysConfig, lang.Msg(Languages.MSG_BLOCKSZ) + ": " + blockSize + " (" + blockPow + ")");
+				wl(SysConfig, lang.Msg(Languages.MSG_DIRBLOCKS) + ": " + dirBlocks);
+				wl(SysConfig, lang.Msg(Languages.MSG_RWGAP) + ": " + rwGapLength);
+				wl(SysConfig, lang.Msg(Languages.MSG_FMTGAP) + ": " + fmtGapLength);
 
-				wl(SysConfig, "Checksum+fb: " + cs);
-				wl(SysConfig, "Bootable?: " + ChecksumStatus);
-				wl(SysConfig, "Max CPM Blocks: " + maxblocks);
-				wl(SysConfig, "Reserved blocks: " + reservedblocks);
+				wl(SysConfig, lang.Msg(Languages.MSG_CSUM) + ": " + cs);
+				wl(SysConfig, lang.Msg(Languages.MSG_BOOTABLE) + ": " + ChecksumStatus);
+				wl(SysConfig, lang.Msg(Languages.MSG_MAXCPMB) + ": " + maxblocks);
+				wl(SysConfig, lang.Msg(Languages.MSG_RESERVEDB) + ": " + reservedblocks);
 
-				wl(SysConfig, "Max Dirents: " + maxDirEnts);
-				wl(SysConfig, "Bytes per block ID: " + BlockIDWidth);
-				wl(SysConfig, "Disk size: " + diskSize + "k");
-				wl(SysConfig, "Sector range: " + Disk.diskTracks[0].minsectorID + "-" + Disk.diskTracks[0].maxsectorID);
+				wl(SysConfig, lang.Msg(Languages.MSG_MAXDIRENTS) + ": " + maxDirEnts);
+				wl(SysConfig, lang.Msg(Languages.MSG_BPB) + ": " + BlockIDWidth);
+				wl(SysConfig, lang.Msg(Languages.MSG_DISKSZ) + ": " + diskSize + "k");
+				wl(SysConfig, lang.Msg(Languages.MSG_SECTORR) + ": " + Disk.diskTracks[0].minsectorID + "-" + Disk.diskTracks[0].maxsectorID);
 
-				wl(SysConfig, "Identification type: " + Identifiedby);
+				wl(SysConfig, lang.Msg(Languages.MSG_IDTYPE) + ": " + Identifiedby);
 
-				wl(SysConfig, "\n\nBoot sector code:");
+				wl(SysConfig, "\n\n"+lang.Msg(Languages.MSG_BOOTSECTCODE) + ":");
 
 				ASMLib asm = new ASMLib(lang);
 				int loadedaddress = 0xfe00;

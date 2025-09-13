@@ -32,7 +32,8 @@ public class TZXPartition extends IDEDosPartition {
 	 * @param DirentNum
 	 * @param Initialise
 	 */
-	public TZXPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise,Languages lang) {
+	public TZXPartition(int DirentLocation, Disk RawDisk, byte[] RawPartition, int DirentNum, boolean Initialise,
+			Languages lang) {
 		super(DirentLocation, RawDisk, RawPartition, DirentNum, Initialise, lang);
 		CanExport = true;
 	}
@@ -70,8 +71,9 @@ public class TZXPartition extends IDEDosPartition {
 				System.out.println("Processing block " + tb.BlockNumber);
 
 				if (tb.data != null) {
-					if ((tb.blocktype == TZX.TZX_STANDARDSPEED_DATABLOCK) && ( tb.blockdata.length>0) && (tb.blockdata[0] == 0)) {
-						
+					if ((tb.blocktype == TZX.TZX_STANDARDSPEED_DATABLOCK) && (tb.blockdata.length > 0)
+							&& (tb.blockdata[0] == 0)) {
+
 						if (lastblock != null) {
 							// create orphan header block.
 							TzxDirectoryEntry tde = new TzxDirectoryEntry(lastblock, null);
@@ -83,30 +85,35 @@ public class TZXPartition extends IDEDosPartition {
 							// create merged block
 							TzxDirectoryEntry tde = new TzxDirectoryEntry(tb, lastblock);
 							/**
-							 * This is a a hack for the case when the actual data in a data block
-							 * is longer than what is reported in the header block. 
+							 * This is a a hack for the case when the actual data in a data block is longer
+							 * than what is reported in the header block.
 							 * 
-							 * If this is left un-fixed, it will cause the checksums to fail (As the checksum byte
-							 * is the last byte in the REPORTED length rather the ACTUAL length).
-							 *  
-							 * This will cause the data in the file to be treated as raw data and the header and checksum bytes
-							 * wont be stripped off.
+							 * If this is left un-fixed, it will cause the checksums to fail (As the
+							 * checksum byte is the last byte in the REPORTED length rather the ACTUAL
+							 * length).
 							 * 
-							 *  This doesn't affect the rom loader as it just loads the correct amount of data from a block.
+							 * This will cause the data in the file to be treated as raw data and the header
+							 * and checksum bytes wont be stripped off.
+							 * 
+							 * This doesn't affect the rom loader as it just loads the correct amount of
+							 * data from a block.
 							 */
 							if (lastblock.IsValidHeader()) {
-								ExtendedSpeccyBasicDetails ebd = (ExtendedSpeccyBasicDetails)lastblock.DecodeHeader();
+								ExtendedSpeccyBasicDetails ebd = (ExtendedSpeccyBasicDetails) lastblock.DecodeHeader();
 								if (ebd.filelength != tde.DataBlock.data.length) {
-									System.out.println("Warning: data block length of "+tde.DataBlock.data.length+" Does not match reported length of "+ebd.filelength+" Correcting");
-									//extract the data
+									System.out.println("Warning: data block length of " + tde.DataBlock.data.length
+											+ " Does not match reported length of " + ebd.filelength + " Correcting");
+									// extract the data
 									byte data[] = new byte[ebd.filelength];
-									System.arraycopy(tde.DataBlock.data, 1, data, 0, Math.min(ebd.filelength,tde.DataBlock.data.length-1));
-									
-									byte blockdata[] = new byte[ebd.filelength+2];
-									System.arraycopy(tde.DataBlock.data, 0, blockdata, 0, Math.min(blockdata.length,tde.DataBlock.data.length));
-									
+									System.arraycopy(tde.DataBlock.data, 1, data, 0,
+											Math.min(ebd.filelength, tde.DataBlock.data.length - 1));
+
+									byte blockdata[] = new byte[ebd.filelength + 2];
+									System.arraycopy(tde.DataBlock.data, 0, blockdata, 0,
+											Math.min(blockdata.length, tde.DataBlock.data.length));
+
 									// Now the raw block
-									byte rawdata[] = new byte[blockdata.length+ 5];
+									byte rawdata[] = new byte[blockdata.length + 5];
 									rawdata[0] = TZX.TZX_STANDARDSPEED_DATABLOCK;
 									rawdata[1] = lastblock.rawdata[1];
 									rawdata[2] = lastblock.rawdata[2];
@@ -115,12 +122,11 @@ public class TZXPartition extends IDEDosPartition {
 									System.arraycopy(blockdata, 0, rawdata, 5, blockdata.length);
 									tb.rawdata = rawdata;
 									tb.blockdata = blockdata;
-									tb.data = data;									
+									tb.data = data;
 									tde = new TzxDirectoryEntry(tb, lastblock);
 								}
-							} 
+							}
 							dirents.add(tde);
-							
 
 							lastblock = null;
 						} else {
@@ -474,7 +480,8 @@ public class TZXPartition extends IDEDosPartition {
 						}
 
 						Speccy.SaveFileToDiskAdvanced(TargetFilename, entrydata, Rawentrydata, filelength,
-								SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName, actiontype, lang);
+								SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName, actiontype,
+								lang);
 					} catch (Exception E) {
 						System.out.println("\nError extracting " + TargetFilename + "For folder: " + folder + " - "
 								+ E.getMessage());
@@ -609,23 +616,24 @@ public class TZXPartition extends IDEDosPartition {
 	public static void main(String[] args) {
 		if (args.length != 1) {
 			System.out.println("Expecting: <testtzxfile>");
-		}
-		TZXFile tzx;
-		try {
-			tzx = new TZXFile(new File(args[0]));
+		} else {
+			TZXFile tzx;
+			try {
+				tzx = new TZXFile(new File(args[0]));
 
-			TZXPartition tzp = new TZXPartition(0, tzx, new byte[64], 1, false, new Languages());
-			System.out.println(tzp);
-			byte data[] = new byte[555];
-			tzp.AddCodeFile("CODEY.TST", 32000, data);
+				TZXPartition tzp = new TZXPartition(0, tzx, new byte[64], 1, false, new Languages());
+				System.out.println(tzp);
+				byte data[] = new byte[555];
+				tzp.AddCodeFile("CODEY.TST", 32000, data);
 
-			tzp.MoveDirectoryEntryUp(tzp.DirectoryEntries[0]);
-			System.out.println(tzp);
-			tzp.MoveDirectoryEntryDown(tzp.DirectoryEntries[0]);
-			System.out.println(tzp);
+				tzp.MoveDirectoryEntryUp(tzp.DirectoryEntries[0]);
+				System.out.println(tzp);
+				tzp.MoveDirectoryEntryDown(tzp.DirectoryEntries[0]);
+				System.out.println(tzp);
 
-		} catch (IOException | BadDiskFileException e) {
-			e.printStackTrace();
+			} catch (IOException | BadDiskFileException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

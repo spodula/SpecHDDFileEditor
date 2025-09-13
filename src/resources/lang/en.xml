@@ -477,11 +477,33 @@
 	<msg id="542">RW gap length</msg>
 	<msg id="543">Format gap length</msg>
 	<msg id="544">Error extractiung bootsector</msg>
-	<msg id="545"></msg>
-	<msg id="546"></msg>
-	<msg id="547"></msg>
-	<msg id="548"></msg>
-	<msg id="549"></msg>
+	<msg id="545">Floppy disk boot track.</msg>
+	<msg id="546">Amstrad Boot Data in bootsector</msg>
+	<msg id="547">Format values (Amstrad default #0)</msg>
+	<msg id="548">Format values (Amstrad default #1)</msg>
+	<msg id="549">Format values (Amstrad default #2)</msg>
+	
+	<msg id="550">PCW/+3</msg>
+	<msg id="551">CPC System</msg>
+	<msg id="552">CPC Data</msg>
+	<msg id="553">FloppyBootTrack: cannot load first track...</msg>
+	<msg id="554"></msg>
+	<msg id="555"></msg>
+	<msg id="556"></msg>
+	<msg id="557"></msg>
+	<msg id="558"></msg>
+	<msg id="559"></msg>
+	
+	<msg id="560"></msg>
+	<msg id="561"></msg>
+	<msg id="562"></msg>
+	<msg id="563"></msg>
+	<msg id="564"></msg>
+	<msg id="565"></msg>
+	<msg id="566"></msg>
+	<msg id="567"></msg>
+	<msg id="568"></msg>
+	<msg id="569"></msg>
 
 
 

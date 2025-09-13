@@ -486,7 +486,7 @@ public class TAPFile implements Disk {
 							} else {
 								for (TAPBlock block : mdt.Blocks) {
 									if (block.DecodeHeader() != null) {
-										pr.print("Blocks: " + block.blocknum+ "\\" + (block.blocknum + 1) + " ");
+										pr.print("Blocks: " + block.blocknum + "\\" + (block.blocknum + 1) + " ");
 
 										ExtendedSpeccyBasicDetails ebd = block.DecodeHeader();
 										String s = "  '" + ebd.filename + "' " + ebd.BasicTypeString() + " ("
