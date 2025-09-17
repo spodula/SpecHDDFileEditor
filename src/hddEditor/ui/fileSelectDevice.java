@@ -16,6 +16,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
 import hddEditor.libs.DiskListLinux;
+import hddEditor.libs.DiskListWindows;
 import hddEditor.libs.Languages;
 import hddEditor.libs.RawDiskItem;
 
@@ -35,8 +36,13 @@ public class fileSelectDevice {
 		this.display = display;
 		this.lang = lang;
 		
-		DiskListLinux dll = new DiskListLinux();
-		this.disks = dll.disks;
+		if (System.getProperty("os.name").toUpperCase().contains("LINUX")) {
+			DiskListLinux dll = new DiskListLinux(lang);
+			this.disks = dll.disks;
+		} else {
+			DiskListWindows dlw = new DiskListWindows(lang);
+			this.disks = dlw.disks;
+		}
 	}
 	
 	/**

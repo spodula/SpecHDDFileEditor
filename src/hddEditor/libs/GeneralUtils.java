@@ -287,6 +287,10 @@ public class GeneralUtils {
 		return (output.trim().equals("0"));
 	}
 	
+	/**
+	 * Check if we are in the Windows Administrator group.
+	 * @return
+	 */
 	public static boolean IsWindowsAdministrator() {
 		if (!System.getProperty("os.name").toUpperCase().contains("WIN")) {
 			return(false);
@@ -299,6 +303,22 @@ public class GeneralUtils {
 	    }
 	    return false;
 	}
+
 	
+	/**
+	 * Get the calling methods name.
+	 * Sourced from https://stackoverflow.com/questions/442747/getting-the-name-of-the-currently-executing-method
+	 * by Basil Bourque
+	 * 
+	 * @param depth
+	 * @return
+	 */
+	public static String getMethodName()
+	{
+	    return StackWalker.getInstance()
+                .walk(s -> s.skip(1).findFirst())
+                .get()
+                .getMethodName();
+	}
 	
 }

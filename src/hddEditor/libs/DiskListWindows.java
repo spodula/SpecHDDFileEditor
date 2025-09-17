@@ -21,9 +21,9 @@ public class DiskListWindows {
 	public String errors[] = null;
 
 
-	public DiskListWindows() {
+	public DiskListWindows(Languages lang) {
 		if (!System.getProperty("os.name").toUpperCase().contains("WIN")) {
-			String err = "Cannot use DiskListWindows, os.name returns " + System.getProperty("os.name");
+			String err = String.format(lang.Msg(Languages.MSG_NOTWINDOWS), System.getProperty("os.name"));
 			System.err.println(err);
 			this.disks = new RawDiskItem[0];
 			this.errors = new String[] { err };
@@ -142,7 +142,7 @@ public class DiskListWindows {
 	}
 
 	public static void main(String args[]) {
-		DiskListWindows dlw = new DiskListWindows();
+		DiskListWindows dlw = new DiskListWindows(new Languages());
 		for (RawDiskItem d : dlw.disks) {
 			System.out.println(d);
 		}

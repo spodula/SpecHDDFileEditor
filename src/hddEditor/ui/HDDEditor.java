@@ -113,6 +113,7 @@ public class HDDEditor {
 	 * Make the menus
 	 */
 	private void MakeMenus() {
+		
 		lang = new Languages();
 		
 		Label label = new Label(shell, SWT.CENTER);

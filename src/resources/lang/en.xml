@@ -476,7 +476,7 @@
 	<msg id="541"># Directory blocks</msg>
 	<msg id="542">RW gap length</msg>
 	<msg id="543">Format gap length</msg>
-	<msg id="544">Error extractiung bootsector</msg>
+	<msg id="544">Error extracting bootsector</msg>
 	<msg id="545">Floppy disk boot track.</msg>
 	<msg id="546">Amstrad Boot Data in bootsector</msg>
 	<msg id="547">Format values (Amstrad default #0)</msg>
@@ -487,9 +487,9 @@
 	<msg id="551">CPC System</msg>
 	<msg id="552">CPC Data</msg>
 	<msg id="553">FloppyBootTrack: cannot load first track...</msg>
-	<msg id="554"></msg>
-	<msg id="555"></msg>
-	<msg id="556"></msg>
+	<msg id="554">Cannot use DiskListLinux, os.name returns %s</msg>
+	<msg id="555">Error fetching drive list, Cant read /proc/partitions. Is this linux?</msg>
+	<msg id="556">Cannot use DiskListWindows, os.name returns %s</msg>
 	<msg id="557"></msg>
 	<msg id="558"></msg>
 	<msg id="559"></msg>
@@ -505,6 +505,16 @@
 	<msg id="568"></msg>
 	<msg id="569"></msg>
 
+	<msg id="570"></msg>
+	<msg id="571"></msg>
+	<msg id="572"></msg>
+	<msg id="573"></msg>
+	<msg id="574"></msg>
+	<msg id="575"></msg>
+	<msg id="576"></msg>
+	<msg id="577"></msg>
+	<msg id="578"></msg>
+	<msg id="579"></msg>
 
 
 	<msg id="1300">Amstrad +3 DSK file</msg>

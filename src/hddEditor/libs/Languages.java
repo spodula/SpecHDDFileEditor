@@ -500,6 +500,9 @@ public class Languages {
 	public static int MSG_CPMFORMNAMECPCSYS = 551;
 	public static int MSG_CPMFORMNAMECPCDAT = 552;
 	public static int MSG_ERRCANTLOAD1STTR = 553;
+	public static int MSG_NOTLINUX = 554;
+	public static int MSG_ERRNOPROCPART = 555;
+	public static int MSG_NOTWINDOWS = 556;
 
 	
 	

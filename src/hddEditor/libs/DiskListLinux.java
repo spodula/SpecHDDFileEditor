@@ -33,9 +33,9 @@ public class DiskListLinux {
 	/**
 	 * Constructor, load the drives
 	 */
-	public DiskListLinux() {
+	public DiskListLinux(Languages lang) {
 		if (!System.getProperty("os.name").toUpperCase().contains("LINUX")) {
-			String err = "Cannot use DiskListLinux, os.name returns " + System.getProperty("os.name");
+			String err = String.format(lang.Msg(Languages.MSG_NOTLINUX), System.getProperty("os.name"));
 			System.err.println(err);
 			this.disks = new RawDiskItem[0];
 		} else {
@@ -128,7 +128,7 @@ public class DiskListLinux {
 					}
 				} catch (IOException e) {
 					System.out.println(e.getMessage());
-					System.out.println("Error fetching drive list, Cant read /proc/partitions. Is this linux?");
+					System.out.println(lang.Msg(Languages.MSG_ERRNOPROCPART));
 				} finally {
 					try {
 						br.close();
@@ -136,7 +136,7 @@ public class DiskListLinux {
 					}
 				}
 			} catch (FileNotFoundException e) {
-				System.out.println("Error fetching drive list, cant open /proc/partitions. Is this linux?");
+				System.out.println(lang.Msg(Languages.MSG_ERRNOPROCPART));
 			}
 		}
 		for (RawDiskItem d : disks) {
@@ -210,7 +210,7 @@ public class DiskListLinux {
 	}
 
 	public static void main(String args[]) {
-		DiskListLinux dll = new DiskListLinux();
+		DiskListLinux dll = new DiskListLinux(new Languages());
 		for (RawDiskItem d : dll.disks) {
 			System.out.println(d);
 		}
