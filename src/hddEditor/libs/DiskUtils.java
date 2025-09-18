@@ -28,12 +28,13 @@ public class DiskUtils {
 	/**
 	 * Try to identify the Disk format and return the disk
 	 * 
-	 * @param selected
+	 * @param file
+	 * @param lang
 	 * @return
 	 * @throws IOException 
 	 * @throws BadDiskFileException
 	 */
-	public static Disk GetCorrectDiskFromFile(File file) throws IOException {
+	public static Disk GetCorrectDiskFromFile(File file,Languages lang) throws IOException {
 		Disk result = null;
 		try {
 			if (new IDEDosDisk().IsMyFileType(file)) {
@@ -54,8 +55,8 @@ public class DiskUtils {
 				result = new TAPFile(file);
 			} else if (new TZXFile().IsMyFileType(file)) {
 				result = new TZXFile(file);
-			} else {
-				throw new IOException("Error decoding file, File " + file.getAbsolutePath() + " is not a supported file type.");
+			} else {				 
+				throw new IOException(String.format(lang.Msg(Languages.MSG_ERRUNRECOGNISED),file.getAbsolutePath()));
 			}
 			/*
 			 * System.out.println("Cylinders " + result.GetNumCylinders());
@@ -63,10 +64,10 @@ public class DiskUtils {
 			 * System.out.println("SPT " + result.GetNumSectors());
 			 */
 			if (result != null)
-				System.out.println("Using " + result.getClass().getName());
+				System.out.println(lang.Msg(Languages.MSG_USING) + " " + result.getClass().getName());
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new IOException("Error openning file \""+file.getAbsolutePath()+"\": "+e.getMessage());
+			throw new IOException(String.format(lang.Msg(Languages.MSG_ERRORLOADING),file.getAbsolutePath()) + ": "+e.getMessage());
 		}
 
 		return result;
@@ -76,6 +77,7 @@ public class DiskUtils {
 	 * Get the high level handler for the disk. (Provides access to files) 
 	 * 
 	 * @param disk
+	 * @param lang
 	 * @return
 	 * @throws IOException
 	 */
@@ -88,17 +90,21 @@ public class DiskUtils {
 		} else if (disk.GetMediaType() == PLUSIDEDOS.MEDIATYPE_LINEAR) {
 			result = new LinearTapeHandler(disk, lang);
 		} else {
-			throw new IOException("Error opennining file, cannot find handler for disk "+disk.GetFilename());
+			throw new IOException(String.format(lang.Msg(Languages.MSG_ERRNOFILEHANDLER),disk.GetFilename()));
 		}
 		return(result);
 	}
 	
 	/**
+	 * Load the given disk and return an OS handler object.
 	 * 
+	 * @param sourcefile
+	 * @param lang
+	 * @return
 	 */
 	public static OSHandler LoadDiskDetails(File sourcefile,Languages lang) {
 		try {
-			Disk CurrentDisk = DiskUtils.GetCorrectDiskFromFile(sourcefile);
+			Disk CurrentDisk = DiskUtils.GetCorrectDiskFromFile(sourcefile, lang);
 			if (CurrentDisk != null) {
 				OSHandler CurrentHandler = DiskUtils.GetHandlerForDisk(CurrentDisk,lang);
 				return(CurrentHandler);
@@ -110,5 +116,4 @@ public class DiskUtils {
 			return(null);			
 		}
 	}
-
 }

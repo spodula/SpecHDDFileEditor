@@ -502,7 +502,7 @@ public class HDDEditor {
 			if (CurrentDisk != null) {
 				CurrentDisk.close();
 			}
-			CurrentDisk = DiskUtils.GetCorrectDiskFromFile(selected);
+			CurrentDisk = DiskUtils.GetCorrectDiskFromFile(selected, lang);
 			if (CurrentDisk != null) {
 				if (RawHDDFile.class.isAssignableFrom(CurrentDisk.getClass()) && (ForceBlockSize != 0)) {
 					((RawHDDFile) CurrentDisk).DiskBlockSize = ForceBlockSize;

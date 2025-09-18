@@ -316,7 +316,7 @@ public class FileImportForm {
 			if (CurrentSourceDisk != null) {
 				CurrentSourceDisk.close();
 			}
-			CurrentSourceDisk = DiskUtils.GetCorrectDiskFromFile(selected);
+			CurrentSourceDisk = DiskUtils.GetCorrectDiskFromFile(selected, lang);
 			CurrentSourceHandler = DiskUtils.GetHandlerForDisk(CurrentSourceDisk, lang);
 			String entries[] = null;
 

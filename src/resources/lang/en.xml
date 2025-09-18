@@ -490,9 +490,9 @@
 	<msg id="554">Cannot use DiskListLinux, os.name returns %s</msg>
 	<msg id="555">Error fetching drive list, Cant read /proc/partitions. Is this linux?</msg>
 	<msg id="556">Cannot use DiskListWindows, os.name returns %s</msg>
-	<msg id="557"></msg>
-	<msg id="558"></msg>
-	<msg id="559"></msg>
+	<msg id="557">Error decoding file, File %s is not a supported file type.</msg>
+	<msg id="558">Using</msg>
+	<msg id="559">Error opening file, cannot find handler for disk %s</msg>
 	
 	<msg id="560"></msg>
 	<msg id="561"></msg>

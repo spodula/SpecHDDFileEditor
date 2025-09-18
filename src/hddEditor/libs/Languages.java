@@ -503,6 +503,9 @@ public class Languages {
 	public static int MSG_NOTLINUX = 554;
 	public static int MSG_ERRNOPROCPART = 555;
 	public static int MSG_NOTWINDOWS = 556;
+	public static int MSG_ERRUNRECOGNISED = 557;
+	public static int MSG_USING = 558;
+	public static int MSG_ERRNOFILEHANDLER = 559;
 
 	
 	
