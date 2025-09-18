@@ -108,6 +108,10 @@ public class HDDEditor {
 	// Used to stop the file change check pestering the user when the have cancelled
 	// the dialog
 	public boolean DontAskReload = false;
+	
+	public HDDEditor() {
+		lang = new Languages();
+	}
 
 	/**
 	 * Make the menus
@@ -324,6 +328,9 @@ public class HDDEditor {
 		shell.setMenuBar(menuBar);
 	}
 
+	/**
+	 * 
+	 */
 	protected void ShowOpenZenobi() {
 		String current = PartitionDropdown.getText();
 		if (current != null) {
@@ -386,7 +393,6 @@ public class HDDEditor {
 	 */
 
 	public void MakeForm() {
-
 		display = new Display();
 		shell = new Shell(display);
 		filesel = new FileSelectDialog(shell, lang);
