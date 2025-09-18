@@ -494,9 +494,9 @@
 	<msg id="558">Using</msg>
 	<msg id="559">Error opening file, cannot find handler for disk %s</msg>
 	
-	<msg id="560"></msg>
-	<msg id="561"></msg>
-	<msg id="562"></msg>
+	<msg id="560">Using %s for defaults file.</msg>
+	<msg id="561">No folder defaults found.</msg>
+	<msg id="562">Failed to save folder defaults. (%s)</msg>
 	<msg id="563"></msg>
 	<msg id="564"></msg>
 	<msg id="565"></msg>

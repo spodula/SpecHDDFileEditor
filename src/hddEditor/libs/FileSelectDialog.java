@@ -44,14 +44,17 @@ public class FileSelectDialog {
 
 	private Shell shell = null;
 	
+	private Languages lang;
+	
 	/**
 	 * 
 	 */
-	public FileSelectDialog(Shell shell) {
+	public FileSelectDialog(Shell shell, Languages lang) {
+		this.lang  = lang;
 		this.DialogType = DIALOGTYPE_SWT;
 		this.shell = shell;
 		this.Defaults = new File(".", "folders.defaults");
-		System.out.println("Using " + Defaults.getAbsolutePath() + " for defaults file.");
+		System.out.println(String.format(lang.Msg(Languages.MSG_USINGDEFAULTS),Defaults.getAbsolutePath()));
 		this.DefaultFolders = new File[NUMDIRTYPES];
 		File f = new File(".");
 		for (int i = 0; i < NUMDIRTYPES; i++) {
@@ -84,7 +87,7 @@ public class FileSelectDialog {
 				}
 			} catch (IOException E) {
 				// just eat any exception
-				System.out.println("No folder defaults found.");
+				System.out.println(lang.Msg(Languages.MSG_ERRNODEFAULTS));
 			}
 		}
 	}
@@ -107,9 +110,10 @@ public class FileSelectDialog {
 				outputStream.close();
 			}
 		} catch (FileNotFoundException e) {
-			System.out.println("Failed to save folder defaults. (" + e.getMessage() + ")");
+			
+			System.out.println(String.format(lang.Msg(Languages.MSG_ERRFAILEDTOSAVEDEFAULTS),e.getMessage()));
 		} catch (IOException e) {
-			System.out.println("Failed to save folder defaults. (" + e.getMessage() + ")");
+			System.out.println(String.format(lang.Msg(Languages.MSG_ERRFAILEDTOSAVEDEFAULTS),e.getMessage()));
 		}
 	}
 

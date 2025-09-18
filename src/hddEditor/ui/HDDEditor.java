@@ -389,7 +389,7 @@ public class HDDEditor {
 
 		display = new Display();
 		shell = new Shell(display);
-		filesel = new FileSelectDialog(shell);
+		filesel = new FileSelectDialog(shell, lang);
 		shell.setSize(920, 864);
 		shell.addDisposeListener(new DisposeListener() {
 			@Override

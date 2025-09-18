@@ -506,6 +506,9 @@ public class Languages {
 	public static int MSG_ERRUNRECOGNISED = 557;
 	public static int MSG_USING = 558;
 	public static int MSG_ERRNOFILEHANDLER = 559;
+	public static int MSG_USINGDEFAULTS = 560;
+	public static int MSG_ERRNODEFAULTS = 561;
+	public static int MSG_ERRFAILEDTOSAVEDEFAULTS = 562;
 
 	
 	
