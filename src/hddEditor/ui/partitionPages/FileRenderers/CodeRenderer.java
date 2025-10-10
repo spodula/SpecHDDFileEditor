@@ -346,7 +346,15 @@ public class CodeRenderer extends FileRenderer {
 				Renderers.add(renderer);
 
 				byte data1[] = new byte[0xc000];
-				System.arraycopy(data, 0, data1, loadAddr-0x4000, Math.min(0xc000 - 0x1b00, data.length));
+				int start = loadAddr - 0x4000;
+				int length = Math.min(0xc000 - 0x1b00, data.length);
+				//Cut off all data in the ROM area.
+				if (start <0) {
+					length = length + start;
+					start = 0;
+				}
+				
+				System.arraycopy(data, 0, data1, start, length);
 
 				renderer.Render(MainPage, data1, loadAddr, false, 0x5c3a, new int[0], filename, null, null, lang);
 			} else if (s.equals(CODETYPES[10])) {
