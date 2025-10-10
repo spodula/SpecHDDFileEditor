@@ -6,6 +6,9 @@ package hddEditor.ui;
  * Main UI.
  */
 
+//TODO: Add FNT support
+//TODO: Add UDG support
+
 import java.io.File;
 
 import java.io.IOException;
