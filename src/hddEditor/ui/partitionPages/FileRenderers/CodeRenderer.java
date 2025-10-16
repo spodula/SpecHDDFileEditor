@@ -345,16 +345,12 @@ public class CodeRenderer extends FileRenderer {
 				RamDump renderer = new RamDump();
 				Renderers.add(renderer);
 
+				byte data2[] = new byte[0x10000];
+				System.arraycopy(data, 0, data2, loadAddr, Math.min(0x10000-loadAddr,data.length));
+
 				byte data1[] = new byte[0xc000];
-				int start = loadAddr - 0x4000;
-				int length = Math.min(0xc000 - 0x1b00, data.length);
-				//Cut off all data in the ROM area.
-				if (start <0) {
-					length = length + start;
-					start = 0;
-				}
-				
-				System.arraycopy(data, 0, data1, start, length);
+				System.arraycopy(data2, 0x4000, data1, 0,0xc000);
+
 
 				renderer.Render(MainPage, data1, loadAddr, false, 0x5c3a, new int[0], filename, null, null, lang);
 			} else if (s.equals(CODETYPES[10])) {
