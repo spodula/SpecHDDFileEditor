@@ -182,14 +182,14 @@ public class TAPPartitionPage extends GenericPage {
 
 									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(),
 											entry.GetFileData().length, sd.BasicType, sd.LineStart, sd.VarStart,
-											sd.LoadAddress, sd.VarName + "", actiontype, lang);
+											sd.LoadAddress, sd.VarName + "", actiontype, lang, ParentComp.getDisplay());
 								} else if (exporttype == HDDEditor.DRAG_RAW) {
 									GeneralUtils.WriteBlockToDisk(entry.GetFileData(), f);
 								} else {
 									SpeccyBasicDetails sd = entry.GetSpeccyBasicDetails();
 									Speccy.SaveFileToDiskAdvanced(f, entry.GetFileData(), entry.GetFileData(),
 											entry.GetFileData().length, sd.BasicType, sd.LineStart, sd.VarStart,
-											sd.LoadAddress, sd.VarName + "", GeneralUtils.EXPORT_TYPE_HEX, lang);
+											sd.LoadAddress, sd.VarName + "", GeneralUtils.EXPORT_TYPE_HEX, lang, ParentComp.getDisplay());
 								}
 								File f1 = new File(f.getParent(), entry.GetFilename());
 								f.renameTo(f1);

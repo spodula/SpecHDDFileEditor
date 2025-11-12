@@ -35,6 +35,7 @@ import hddEditor.ui.partitionPages.FileRenderers.RawRender.SNARenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.SPRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.SZXSnapshotRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.BinaryRenderer;
+import hddEditor.ui.partitionPages.FileRenderers.RawRender.FontRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.RamDump;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.ScreenRenderer;
 import hddEditor.ui.partitionPages.FileRenderers.RawRender.SpriteRenderer;
@@ -53,7 +54,7 @@ public class CodeRenderer extends FileRenderer {
 
 	// Rendering options
 	private String[] CODETYPES = { "Binary", "Screen", "Assembly", "SNA file", "Z80 file", "48k Ram Dump", ".SP file",
-			"ASCII Text", "Sprite", "48K ram dump (At loaded address)", "SZX file" };
+			"ASCII Text", "Sprite", "48K ram dump (At loaded address)", "SZX file", "Bitmap Font file" };
 
 	/**
 	 * 
@@ -275,6 +276,9 @@ public class CodeRenderer extends FileRenderer {
 		if (Filename.toUpperCase().trim().endsWith(".SZX")) {
 			CodeTypeDropDown.setText(CODETYPES[10]);
 		}
+		if (Filename.toUpperCase().trim().endsWith(".FNT")) {
+			CodeTypeDropDown.setText(CODETYPES[11]);
+		}
 
 		CodeTypeComboChanged(data, loadAddr);
 
@@ -357,6 +361,10 @@ public class CodeRenderer extends FileRenderer {
 				SZXSnapshotRenderer renderer = new SZXSnapshotRenderer();
 				Renderers.add(renderer);
 				renderer.Render(MainPage, data, loadAddr, filename, part, lang);
+			} else if (s.equals(CODETYPES[11])) {
+				FontRenderer renderer = new FontRenderer();
+				Renderers.add(renderer);
+				renderer.Render(MainPage, data);
 			} else {
 				BinaryRenderer renderer = new BinaryRenderer();
 				Renderers.add(renderer);

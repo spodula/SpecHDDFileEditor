@@ -35,6 +35,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.eclipse.swt.widgets.Display;
+
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
@@ -359,7 +361,7 @@ public class SystemPartition extends IDEDosPartition {
 
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted)
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction)
 			throws IOException {
 		FileWriter SysConfig = new FileWriter(new File(folder, "system.config"));
 		try {

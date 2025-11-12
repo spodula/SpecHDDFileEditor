@@ -9,9 +9,13 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.widgets.Display;
 
 import hddEditor.libs.ASMLib.DecodedASM;
 
@@ -47,11 +51,11 @@ public class Speccy {
 	public static final int BASIC_CHRARRAY = 0x02;
 	public static final int BASIC_CODE = 0x03;
 
-	//File type names.
+	// File type names.
 	public static final String[] filetypeNames = { "Basic", "Numeric array", "Character array", "Code" };
 
 	/**
-	 * Decode the given speccy filetype into its name. 
+	 * Decode the given speccy filetype into its name.
 	 * 
 	 * @param filetype
 	 * @return
@@ -252,7 +256,8 @@ public class Speccy {
 	}
 
 	/**
-	 * Set the bytes from the given value into the given character array At position "loc". 
+	 * Set the bytes from the given value into the given character array At position
+	 * "loc".
 	 * 
 	 * @param data
 	 * @param loc
@@ -695,10 +700,9 @@ public class Speccy {
 	}
 
 	/**
-	 * Handler for type 2 variables (Strings) 
-	 * Variable name is parsed from the original marker (first 5 bytes) + 0x40 
-	 * [1..2] String length lsb first 
-	 * [3..x] Characters making up the string.
+	 * Handler for type 2 variables (Strings) Variable name is parsed from the
+	 * original marker (first 5 bytes) + 0x40 [1..2] String length lsb first [3..x]
+	 * Characters making up the string.
 	 * 
 	 * @param sb
 	 * @param keys
@@ -732,9 +736,9 @@ public class Speccy {
 	}
 
 	/**
-	 * Handler for type 3 variables (Numbers with a one character name) 
-	 * Variable name is parsed from the original marker (first 5 bytes) + 0x40 
-	 * [01-05] Speccy floating point representation of the value.
+	 * Handler for type 3 variables (Numbers with a one character name) Variable
+	 * name is parsed from the original marker (first 5 bytes) + 0x40 [01-05] Speccy
+	 * floating point representation of the value.
 	 * 
 	 * @param sb
 	 * @param keys
@@ -1182,6 +1186,60 @@ public class Speccy {
 			}
 		}
 		return (imageData);
+	}
+
+	/**
+	 * Render a file as a bitmap font file to an image.
+	 * 
+	 * @param data - Data to render
+	 * @param font - Text font
+	 * @param disp - Display
+	 * @return
+	 */
+	public static Image RenderDataAsFontBlock(byte data[], Font font, Display disp) {
+		byte fnt[] = new byte[768];
+		System.arraycopy(data, 0, fnt, 0, Math.min(fnt.length, data.length));
+
+		PaletteData palette = new PaletteData(0xFF, 0xFF00, 0xFF0000);
+		ImageData imageData = new ImageData(265, 113, 24, palette);
+
+		int x = 8;
+		int y = 17;
+		int ptr = 0;
+		while (ptr < fnt.length) {
+			for (int row = 0; row < 8; row++) {
+				int byt = data[ptr++];
+				for (int pixel = 0; pixel < 8; pixel++) {
+					if ((byt & 0x80) == 0x80) {
+						imageData.setPixel(x + pixel, y + row, 0x000000);
+					} else {
+						imageData.setPixel(x + pixel, y + row, 0xffffff);
+					}
+					byt = byt << 1;
+				}
+			}
+			x = x + 16;
+			if (x >= 256) {
+				y = y + 16;
+				x = 8;
+			}
+		}
+
+		ImageData imageData2 = imageData.scaledTo(imageData.width * 2, imageData.height * 2);
+
+		Image img = new Image(disp, imageData2);
+		GC gc = new GC(img);
+		gc.setForeground(disp.getSystemColor(SWT.COLOR_BLACK));
+		gc.setBackground(disp.getSystemColor(SWT.COLOR_YELLOW));
+		gc.setFont(font);
+		for (int i = 0; i < 16; i++) {
+			gc.drawText(String.format("0%X", i), 16 + (i * 32), 1);
+		}
+		for (int i = 0; i < 6; i++) {
+			gc.drawText(String.format("%X0", i + 2), 0, 33 + (i * 32));
+		}
+
+		return (img);
 	}
 
 	/**
@@ -1677,8 +1735,8 @@ public class Speccy {
 	 */
 
 	public static void SaveFileToDisk(File targetFilename, byte[] data, int filelength, int speccyFileType,
-			int basicLine, int basicVarsOffset, int codeLoadAddress, String arrayVarName, boolean codeAsHex,Languages lang)
-			throws IOException {
+			int basicLine, int basicVarsOffset, int codeLoadAddress, String arrayVarName, boolean codeAsHex,
+			Languages lang) throws IOException {
 
 		switch (speccyFileType) {
 		case BASIC_BASIC:
@@ -1701,10 +1759,10 @@ public class Speccy {
 	}
 
 	/**
-	 * Save the given data as a CODE file to the disk. 
-	 * If this is a screen file, will save as a PNG file.
-	 * Otherwise, it will saved as either RAW binary data (OutAsHex=false) 
-	 * or as a HEX dump, indexed to codeLoadAddress, (OutAsHex=true)
+	 * Save the given data as a CODE file to the disk. If this is a screen file,
+	 * will save as a PNG file. Otherwise, it will saved as either RAW binary data
+	 * (OutAsHex=false) or as a HEX dump, indexed to codeLoadAddress,
+	 * (OutAsHex=true)
 	 * 
 	 * @param targetFilename
 	 * @param data
@@ -1714,7 +1772,7 @@ public class Speccy {
 	 * @throws IOException
 	 */
 	private static void SaveCodeFile(File targetFilename, byte[] data, int codeLoadAddress, int filelength,
-			boolean OutAsHex,Languages lang) throws IOException {
+			boolean OutAsHex, Languages lang) throws IOException {
 		if ((filelength == 6912) && (codeLoadAddress == 16384)) {
 			ImageData image = Speccy.GetImageFromFileArray(data, 0);
 			ImageLoader imageLoader = new ImageLoader();
@@ -1722,7 +1780,7 @@ public class Speccy {
 			int filetyp = SWT.IMAGE_PNG;
 			FileOutputStream file;
 			try {
-				file = new FileOutputStream(targetFilename+".png");
+				file = new FileOutputStream(targetFilename + ".png");
 				imageLoader.save(file, filetyp);
 				file.close();
 			} catch (FileNotFoundException e) {
@@ -1865,7 +1923,7 @@ public class Speccy {
 	 */
 	public static void SaveFileToDiskAdvanced(File targetFilename, byte[] entrydata, byte[] rawdata, int filelength,
 			int speccyFileType, int basicLine, int basicVarsOffset, int codeLoadAddress, String arrayVarName,
-			int ActionType,Languages lang) {
+			int ActionType, Languages lang, Display disp) {
 
 		int ImageFileTyp = -1;
 		switch (ActionType) {
@@ -1884,6 +1942,9 @@ public class Speccy {
 			break;
 		case GeneralUtils.EXPORT_TYPE_RAWANDHEADER:
 			GeneralUtils.WriteBlockToDisk(rawdata, targetFilename);
+			break;
+		case GeneralUtils.EXPORT_TYPE_FONTIMG:
+			SaveFontImage(disp, targetFilename, entrydata);
 			break;
 		case GeneralUtils.EXPORT_TYPE_CSV:
 			if (speccyFileType == BASIC_NUMARRAY) {
@@ -1919,6 +1980,25 @@ public class Speccy {
 				System.out.println("Error closing " + targetFilename.getAbsolutePath());
 				e.printStackTrace();
 			}
+		}
+	}
+
+	private static void SaveFontImage(Display disp, File targetFilename, byte[] entrydata) {
+		Font font = new Font(disp, "Tahoma", 9, SWT.BOLD);
+		Image img = Speccy.RenderDataAsFontBlock(entrydata,font, disp); 
+		
+		ImageLoader imageLoader = new ImageLoader();
+		imageLoader.data = new ImageData[] { img.getImageData() };
+		FileOutputStream file;
+		try {
+			file = new FileOutputStream(targetFilename);
+			imageLoader.save(file, SWT.IMAGE_PNG);
+			file.close();
+		} catch (Exception E) {
+			System.out.println("---------------------------------------------------------");
+			System.out.println("Error extracting Font image file " + targetFilename.getName());
+			System.out.println("Error: " + E.getMessage());
+			E.printStackTrace();
 		}
 	}
 

@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.eclipse.swt.widgets.Display;
 
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Languages;
@@ -532,7 +533,7 @@ public class ScriptRunner {
 
 						Speccy.SaveFileToDiskAdvanced(new File(TargetFolder, entry.GetFilename().trim()), filedata,
 								rawdata, filelength, SpeccyFileType, basicline, basicVarsOffset, codeLoadAddress,
-								arrayVarName, actiontype, lang);
+								arrayVarName, actiontype, lang, new Display() );
 						System.out.println("Written " + entry.GetFilename().trim());
 					} catch (Exception E) {
 						System.out.println("Error writing: '" + entry.GetFilename() + "'" + E.getMessage());

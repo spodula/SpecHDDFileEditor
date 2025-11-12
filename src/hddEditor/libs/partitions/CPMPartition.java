@@ -12,6 +12,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.eclipse.swt.widgets.Display;
+
 import hddEditor.libs.CPM;
 import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
@@ -627,7 +629,7 @@ public class CPMPartition extends IDEDosPartition {
 
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted)
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction)
 			throws IOException {
 		try {
 			FileWriter SysConfig = new FileWriter(new File(folder, "partition.index"));
@@ -644,7 +646,7 @@ public class CPMPartition extends IDEDosPartition {
 						File TargetFilename = new File(folder, entry.GetFilename().trim());
 						byte file[] = entry.GetFileData();
 						Speccy.SaveFileToDiskAdvanced(TargetFilename, file, file, file.length, 3, 0, 0, 0, "A",
-								MiscAction, lang);
+								MiscAction, lang, disp);
 
 						SysConfig.write("<file>\n".toCharArray());
 						SysConfig.write(("  <filename>" + entry.GetFilename() + "</filename>\n").toCharArray());

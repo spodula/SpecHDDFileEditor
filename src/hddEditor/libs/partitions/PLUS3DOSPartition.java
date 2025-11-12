@@ -17,6 +17,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.eclipse.swt.widgets.Display;
+
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Languages;
 import hddEditor.libs.Speccy;
@@ -299,7 +301,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted)
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction)
 			throws IOException {
 		try {
 			FileWriter SysConfig = new FileWriter(new File(folder, "partition.index"));
@@ -351,6 +353,8 @@ public class PLUS3DOSPartition extends CPMPartition {
 								} else if ((filelength == 6912)) { // { "PNG", "GIF", "JPEG", "Raw",
 																	// "Raw+Header", "Hex", "Assembly" };
 									actiontype = ScreenAction;
+								} else if (entry.GetFilename().trim().endsWith(".FNT")) {
+									actiontype = FontAction;
 								} else { // CODE Options: { "Raw", "Raw+Header", "Assembly", "Hex" };
 									actiontype = CodeAction;
 								}
@@ -358,7 +362,7 @@ public class PLUS3DOSPartition extends CPMPartition {
 
 							Speccy.SaveFileToDiskAdvanced(TargetFilename, entrydata, Rawentrydata, filelength,
 									SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName,
-									actiontype, lang);
+									actiontype, lang, disp);
 						} catch (Exception E) {
 							System.out.println("\nError extracting " + TargetFilename + "For folder: " + folder + " - "
 									+ E.getMessage());

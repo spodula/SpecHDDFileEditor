@@ -28,6 +28,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.eclipse.swt.widgets.Display;
+
 import hddEditor.libs.PLUSIDEDOS;
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Languages;
@@ -455,7 +457,7 @@ public class IDEDosPartition {
 	 * @throws IOException
 	 */
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted)
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction)
 			throws IOException {
 		System.out
 				.println("Class " + this.getClass().getName() + " does not support ExtractPartitiontoFolderAdvanced.");

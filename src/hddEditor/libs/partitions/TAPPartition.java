@@ -5,6 +5,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.eclipse.swt.widgets.Display;
+
 import hddEditor.libs.GeneralUtils;
 import hddEditor.libs.Languages;
 import hddEditor.libs.PLUSIDEDOS;
@@ -351,7 +353,7 @@ public class TAPPartition extends IDEDosPartition {
 
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted)
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction)
 			throws IOException {
 		FileWriter SysConfig;
 		try {
@@ -413,13 +415,15 @@ public class TAPPartition extends IDEDosPartition {
 																								// "Raw+Header", "Hex",
 																								// "Assembly" };
 								actiontype = ScreenAction;
+							} else if (filelength == 768) {
+								actiontype = FontAction;
 							} else { // CODE Options: { "Raw", "Raw+Header", "Assembly", "Hex" };
 								actiontype = CodeAction;
 							}
 						}
 
 						Speccy.SaveFileToDiskAdvanced(TargetFilename, entrydata, Rawentrydata, filelength,
-								SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName, actiontype, lang);
+								SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName, actiontype, lang, disp);
 					} catch (Exception E) {
 						System.out.println("\nError extracting " + TargetFilename + "For folder: " + folder + " - "
 								+ E.getMessage());
