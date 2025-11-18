@@ -1208,7 +1208,7 @@ public class Speccy {
 		int ptr = 0;
 		while (ptr < fnt.length) {
 			for (int row = 0; row < 8; row++) {
-				int byt = data[ptr++];
+				int byt = fnt[ptr++];
 				for (int pixel = 0; pixel < 8; pixel++) {
 					if ((byt & 0x80) == 0x80) {
 						imageData.setPixel(x + pixel, y + row, 0x000000);
