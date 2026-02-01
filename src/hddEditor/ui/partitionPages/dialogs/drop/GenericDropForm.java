@@ -105,9 +105,9 @@ public class GenericDropForm {
 
 	protected NewFileListItem details = null;
 
-	protected String[] genericfiletypes = new String[] { "Basic (text)", "Basic (Encoded)", "Code", "Code (screen$)",
-			"Character Array (text)", "Character Array (encoded)", "Numeric Array (text)", "Numeric Array (encoded)",
-			"image (PNG, gif or jpg)", "Raw" };
+//	private String[] genericfiletypes = new String[] { "Basic (text)", "Basic (Encoded)", "Code", "Code (screen$)",
+//			"Character Array (text)", "Character Array (encoded)", "Numeric Array (text)", "Numeric Array (encoded)",
+//			"image (PNG, gif or jpg)", "Raw" };
 
 	/*
 	 * Current partition.
@@ -175,6 +175,11 @@ public class GenericDropForm {
 	 * @return
 	 */
 	protected String[] GetSupportedFileTypes() {
+		String genericfiletypes[] = new String[10];
+		for (int i=0;i<genericfiletypes.length;i++) {
+			genericfiletypes[i] = lang.Msg(i+570);
+		}
+		
 		return (genericfiletypes);
 	}
 

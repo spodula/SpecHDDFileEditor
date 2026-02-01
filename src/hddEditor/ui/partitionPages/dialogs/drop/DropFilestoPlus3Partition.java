@@ -289,8 +289,9 @@ public class DropFilestoPlus3Partition extends GenericDropForm {
 	 */
 	@Override
 	protected String[] GetSupportedFileTypes() {
-		String result[] = new String[genericfiletypes.length + 1];
-		System.arraycopy(genericfiletypes, 0, result, 0, genericfiletypes.length);
+		String gft[] = super.GetSupportedFileTypes();
+		String result[] = new String[gft.length + 1];
+		System.arraycopy(gft, 0, result, 0, gft.length);
 		result[result.length - 1] = lang.Msg(Languages.MSG_FILEWPLUS3DOSHDR);
 		return (result);
 	}

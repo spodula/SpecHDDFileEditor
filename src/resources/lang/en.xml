@@ -505,16 +505,27 @@
 	<msg id="568"></msg>
 	<msg id="569"></msg>
 
-	<msg id="570"></msg>
-	<msg id="571"></msg>
-	<msg id="572"></msg>
-	<msg id="573"></msg>
-	<msg id="574"></msg>
-	<msg id="575"></msg>
-	<msg id="576"></msg>
-	<msg id="577"></msg>
-	<msg id="578"></msg>
-	<msg id="579"></msg>
+	<msg id="570">Basic (text)</msg>
+	<msg id="571">Basic (Encoded)</msg>
+	<msg id="572">Code</msg>
+	<msg id="573">Code (screen$)</msg>
+	<msg id="574">Character Array (text)</msg>
+	<msg id="575">Character Array (encoded)</msg>
+	<msg id="576">Numeric Array (text)</msg>
+	<msg id="577">Numeric Array (encoded)</msg>
+	<msg id="578">Image (PNG, gif or jpg)</msg>
+	<msg id="579">Raw</msg>
+
+	<msg id="580"></msg>
+	<msg id="581"></msg>
+	<msg id="582"></msg>
+	<msg id="583"></msg>
+	<msg id="584"></msg>
+	<msg id="585"></msg>
+	<msg id="586"></msg>
+	<msg id="587"></msg>
+	<msg id="588"></msg>
+	<msg id="589"></msg>
 
 
 	<msg id="1300">Amstrad +3 DSK file</msg>
