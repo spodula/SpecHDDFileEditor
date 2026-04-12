@@ -1196,15 +1196,15 @@ public class Speccy {
 	 * @param disp - Display
 	 * @return
 	 */
-	public static Image RenderDataAsFontBlock(byte data[], Font font, Display disp) {
+	public static Image RenderDataAsFontBlock(byte data[], Font font, Display disp, String filename) {
 		byte fnt[] = new byte[768];
 		System.arraycopy(data, 0, fnt, 0, Math.min(fnt.length, data.length));
 
 		PaletteData palette = new PaletteData(0xFF, 0xFF00, 0xFF0000);
-		ImageData imageData = new ImageData(265, 113, 24, palette);
+		ImageData imageData = new ImageData(265, 129, 24, palette);
 
 		int x = 8;
-		int y = 17;
+		int y = 32;
 		int ptr = 0;
 		while (ptr < fnt.length) {
 			for (int row = 0; row < 8; row++) {
@@ -1232,16 +1232,88 @@ public class Speccy {
 		gc.setForeground(disp.getSystemColor(SWT.COLOR_BLACK));
 		gc.setBackground(disp.getSystemColor(SWT.COLOR_YELLOW));
 		gc.setFont(font);
-		for (int i = 0; i < 16; i++) {
-			gc.drawText(String.format("0%X", i), 16 + (i * 32), 1);
+		for (int idx = 0; idx < 16; idx++) {
+			gc.drawText(String.format("0%X", idx), + (idx * 32), 32);
 		}
-		for (int i = 0; i < 6; i++) {
-			gc.drawText(String.format("%X0", i + 2), 0, 33 + (i * 32));
+		for (int idx = 0; idx < 6; idx++) {
+			gc.drawText(String.format("%X0", idx + 2), 0, 64 + (idx * 32));
 		}
+
+		gc.setForeground(disp.getSystemColor(SWT.COLOR_BLACK));
+		gc.setBackground(disp.getSystemColor(SWT.COLOR_GREEN));
+		gc.drawText(String.format("Font file "+filename), 180, 8);
+		
+		return (img);
+	}
+
+	/**
+	 * Render a file as a bitmap font file to an image.
+	 * 
+	 * @param data - Data to render
+	 * @param font - Text font
+	 * @param disp - Display
+	 * @return
+	 */
+	public static Image RenderDataAsUDGBlock(byte data[], Font font, Display disp, String filename) {
+		byte fnt[] = new byte[168];
+		System.arraycopy(data, 0, fnt, 0, Math.min(fnt.length, data.length));
+
+		PaletteData palette = new PaletteData(0xFF, 0xFF00, 0xFF0000);
+		ImageData imageData = new ImageData(265, 100, 24, palette);
+		String letters ="ABCDEFGHIJKLMNOPQRSTU";
+
+		int x = 3;
+		int y = 16;
+		int ptr = 0;
+		while (ptr < fnt.length) {
+			for (int row = 0; row < 8; row++) {
+				int byt = fnt[ptr++];
+				for (int pixel = 0; pixel < 8; pixel++) {
+					if ((byt & 0x80) == 0x80) {
+						imageData.setPixel(x + pixel+40, y + row, 0x000000);
+					} else {
+						imageData.setPixel(x + pixel+40, y + row, 0xffffff);
+					}
+					byt = byt << 1;
+				}
+			}
+			x = x + 53;
+			if (x > (imageData.width - 53+16) ) {
+				x = 3;
+				y = y +16 ;
+			}
+		} 
+
+		ImageData imageData2 = imageData.scaledTo(imageData.width * 2, imageData.height * 2);
+
+		Image img = new Image(disp, imageData2);
+		GC gc = new GC(img);
+		gc.setForeground(disp.getSystemColor(SWT.COLOR_BLACK));
+		gc.setBackground(disp.getSystemColor(SWT.COLOR_YELLOW));
+		gc.setFont(font);
+		x = 3;
+		y = 32;
+		for (int udgnum=0;udgnum<letters.length();udgnum++) {
+			char c = letters.charAt(udgnum);
+			int value = udgnum + 0x90;
+
+			gc.drawText(String.format("%c     ", c), x, y);
+			gc.drawText(String.format("CHR$(%d)", value,value), x+16, y);
+			
+			x = x + 106;
+			if (x > (imageData2.width - 106+16) ) {
+				x = 3;
+				y = y +32;
+			}
+		}
+		gc.setForeground(disp.getSystemColor(SWT.COLOR_BLACK));
+		gc.setBackground(disp.getSystemColor(SWT.COLOR_GREEN));
+		gc.drawText(String.format("UDG file "+filename), 180, 8);
 
 		return (img);
 	}
 
+	
 	/**
 	 * Try to tokenise a the given basic line.
 	 * 
@@ -1923,7 +1995,7 @@ public class Speccy {
 	 */
 	public static void SaveFileToDiskAdvanced(File targetFilename, byte[] entrydata, byte[] rawdata, int filelength,
 			int speccyFileType, int basicLine, int basicVarsOffset, int codeLoadAddress, String arrayVarName,
-			int ActionType, Languages lang, Display disp) {
+			int ActionType, Languages lang, Display disp, String filename) {
 
 		int ImageFileTyp = -1;
 		switch (ActionType) {
@@ -1944,7 +2016,10 @@ public class Speccy {
 			GeneralUtils.WriteBlockToDisk(rawdata, targetFilename);
 			break;
 		case GeneralUtils.EXPORT_TYPE_FONTIMG:
-			SaveFontImage(disp, targetFilename, entrydata);
+			SaveFontImage(disp, targetFilename, entrydata, filename);
+			break;
+		case GeneralUtils.EXPORT_TYPE_UDGIMG:
+			SaveUDGImage(disp, targetFilename, entrydata, filename);
 			break;
 		case GeneralUtils.EXPORT_TYPE_CSV:
 			if (speccyFileType == BASIC_NUMARRAY) {
@@ -1983,9 +2058,9 @@ public class Speccy {
 		}
 	}
 
-	private static void SaveFontImage(Display disp, File targetFilename, byte[] entrydata) {
+	private static void SaveFontImage(Display disp, File targetFilename, byte[] entrydata,String filename) {
 		Font font = new Font(disp, "Tahoma", 9, SWT.BOLD);
-		Image img = Speccy.RenderDataAsFontBlock(entrydata,font, disp); 
+		Image img = Speccy.RenderDataAsFontBlock(entrydata,font, disp, filename); 
 		
 		ImageLoader imageLoader = new ImageLoader();
 		imageLoader.data = new ImageData[] { img.getImageData() };
@@ -2001,5 +2076,25 @@ public class Speccy {
 			E.printStackTrace();
 		}
 	}
+
+	private static void SaveUDGImage(Display disp, File targetFilename, byte[] entrydata,String filename) {
+		Font font = new Font(disp, "Tahoma", 9, SWT.BOLD);
+		Image img = Speccy.RenderDataAsUDGBlock(entrydata,font, disp, filename); 
+		
+		ImageLoader imageLoader = new ImageLoader();
+		imageLoader.data = new ImageData[] { img.getImageData() };
+		FileOutputStream file;
+		try {
+			file = new FileOutputStream(targetFilename);
+			imageLoader.save(file, SWT.IMAGE_PNG);
+			file.close();
+		} catch (Exception E) {
+			System.out.println("---------------------------------------------------------");
+			System.out.println("Error extracting Font image file " + targetFilename.getName());
+			System.out.println("Error: " + E.getMessage());
+			E.printStackTrace();
+		}
+	}
+
 
 }

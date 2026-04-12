@@ -414,7 +414,7 @@ public class TZXPartition extends IDEDosPartition {
 
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction)
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction, int UDGAction)
 			throws IOException {
 		FileWriter SysConfig;
 		try {
@@ -478,6 +478,9 @@ public class TZXPartition extends IDEDosPartition {
 								actiontype = ScreenAction;
 							} else if (filelength == 768) {
 								actiontype = FontAction;
+							} else if (entry.GetFilename().toUpperCase().endsWith("UDG") || filelength == 168) {
+								actiontype = UDGAction;
+								
 							} else { // CODE Options: { "Raw", "Raw+Header", "Assembly", "Hex" };
 								actiontype = CodeAction;
 							}
@@ -485,7 +488,7 @@ public class TZXPartition extends IDEDosPartition {
 
 						Speccy.SaveFileToDiskAdvanced(TargetFilename, entrydata, Rawentrydata, filelength,
 								SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress, arrayVarName, actiontype,
-								lang, disp);
+								lang, disp, entry.GetFilename());
 					} catch (Exception E) {
 						System.out.println("\nError extracting " + TargetFilename + "For folder: " + folder + " - "
 								+ E.getMessage());

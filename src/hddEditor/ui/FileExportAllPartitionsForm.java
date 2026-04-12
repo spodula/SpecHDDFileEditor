@@ -50,6 +50,7 @@ public class FileExportAllPartitionsForm {
 	private Combo UnknownTargetFileType = null;
 	private Combo SwapTargetFileType = null;
 	private Combo FontTargetFileType = null;
+	private Combo UDGTargetFileType = null;
 
 	// Result to return.
 	private String result = null;
@@ -62,6 +63,7 @@ public class FileExportAllPartitionsForm {
 	private String UnknownEntries[] = { "Hex", "Raw", "Assembly" };
 	private String SwapEntries[] = { "Hex", "Raw" };
 	private String FontEntries[] = { "Font preview","Hex", "Raw" };
+	private String UDGEntries[] = { "UDG preview","Hex", "Raw" };
 
 	// Disk
 	private IDEDosPartition ThisDisk;
@@ -198,7 +200,14 @@ public class FileExportAllPartitionsForm {
 		FontTargetFileType.setText(FontEntries[0]);
 		new Label(shell, SWT.NONE);
 		new Label(shell, SWT.NONE);
-
+		
+		lbl = new Label(shell, SWT.NONE);
+		lbl.setText("UDG file:");
+		UDGTargetFileType = new Combo(shell, SWT.CHECK);
+		UDGTargetFileType.setItems(UDGEntries);
+		UDGTargetFileType.setText(UDGEntries[0]);
+		new Label(shell, SWT.NONE);
+		new Label(shell, SWT.NONE);
 		
 		lbl = new Label(shell, SWT.NONE);
 		lbl.setText("Unidentified file:");
@@ -347,28 +356,28 @@ public class FileExportAllPartitionsForm {
 
 			if (!SpecialExportFBN.getSelection()) {
 				DoExportFlags(GeneralUtils.EXPORT_TYPE_TXT, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_CSV,
-						GeneralUtils.EXPORT_TYPE_PNG, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX,GeneralUtils.EXPORT_TYPE_FONTIMG,
+						GeneralUtils.EXPORT_TYPE_PNG, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX,GeneralUtils.EXPORT_TYPE_FONTIMG,GeneralUtils.EXPORT_TYPE_UDGIMG,
 						TargetFolder);
 				File asm = new File(TargetFolder, "ASM");
 				asm.mkdir();
 				DoExportFlags(GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM,GeneralUtils.EXPORT_TYPE_ASM,
 						GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM, GeneralUtils.EXPORT_TYPE_ASM,
-						asm.getAbsolutePath());
+						GeneralUtils.EXPORT_TYPE_ASM, asm.getAbsolutePath());
 				File cpm = new File(TargetFolder, "CPM");
 				cpm.mkdir();
 				DoExportFlags(GeneralUtils.EXPORT_TYPE_RAWANDHEADER, GeneralUtils.EXPORT_TYPE_RAWANDHEADER,GeneralUtils.EXPORT_TYPE_RAWANDHEADER,
 						GeneralUtils.EXPORT_TYPE_RAWANDHEADER, GeneralUtils.EXPORT_TYPE_RAWANDHEADER,
-						GeneralUtils.EXPORT_TYPE_RAWANDHEADER, GeneralUtils.EXPORT_TYPE_RAWANDHEADER,
+						GeneralUtils.EXPORT_TYPE_RAWANDHEADER, GeneralUtils.EXPORT_TYPE_RAWANDHEADER,GeneralUtils.EXPORT_TYPE_RAWANDHEADER, 
 						cpm.getAbsolutePath());
 				File hex = new File(TargetFolder, "HEX");
 				hex.mkdir();
 				DoExportFlags(GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX,GeneralUtils.EXPORT_TYPE_HEX,
-						GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX,
+						GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX, GeneralUtils.EXPORT_TYPE_HEX,GeneralUtils.EXPORT_TYPE_HEX, 
 						hex.getAbsolutePath());
 				File raw = new File(TargetFolder, "RAW");
 				raw.mkdir();
 				DoExportFlags(GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW,GeneralUtils.EXPORT_TYPE_RAW,
-						GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW,
+						GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW, GeneralUtils.EXPORT_TYPE_RAW,GeneralUtils.EXPORT_TYPE_RAW,
 						raw.getAbsolutePath());
 				return true;
 			} else {
@@ -377,6 +386,7 @@ public class FileExportAllPartitionsForm {
 				int ArrayType = TextToIndex(ArrayTargetFileType.getText(), GeneralUtils.MasterList);
 				int ScreenType = TextToIndex(ScreenTargetFileType.getText(), GeneralUtils.MasterList);
 				int FontType = TextToIndex(FontTargetFileType.getText(), GeneralUtils.MasterList);
+				int UDGType  = TextToIndex(UDGTargetFileType.getText(), GeneralUtils.MasterList);
 				int UnknownType = TextToIndex(UnknownTargetFileType.getText(), GeneralUtils.MasterList);
 
 				PartitionExportProgress pep = new PartitionExportProgress(shell.getDisplay(), lang);
@@ -444,16 +454,16 @@ public class FileExportAllPartitionsForm {
 									byte cpmdata[] = file.GetFileRawData();
 									Speccy.SaveFileToDiskAdvanced(new File(asm, file.GetFilename()), data, cpmdata,
 											data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress,
-											"", GeneralUtils.EXPORT_TYPE_ASM, lang, display);
+											"", GeneralUtils.EXPORT_TYPE_ASM, lang, display,file.GetFilename());
 									Speccy.SaveFileToDiskAdvanced(new File(cpm, file.GetFilename()), data, cpmdata,
 											data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress,
-											"", GeneralUtils.EXPORT_TYPE_RAWANDHEADER, lang, display);
+											"", GeneralUtils.EXPORT_TYPE_RAWANDHEADER, lang, display,file.GetFilename());
 									Speccy.SaveFileToDiskAdvanced(new File(hex, file.GetFilename()), data, cpmdata,
 											data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress,
-											"", GeneralUtils.EXPORT_TYPE_HEX, lang, display);
+											"", GeneralUtils.EXPORT_TYPE_HEX, lang, display,file.GetFilename());
 									Speccy.SaveFileToDiskAdvanced(new File(raw, file.GetFilename()), data, cpmdata,
 											data.length, sbd.BasicType, sbd.LineStart, sbd.VarStart, sbd.LoadAddress,
-											"", GeneralUtils.EXPORT_TYPE_RAW, lang, display);
+											"", GeneralUtils.EXPORT_TYPE_RAW, lang, display,file.GetFilename());
 
 									Plus3DosFileHeader p3d = null;
 									if (PartClass.contains("PLUS3DOSPartition")) {
@@ -498,6 +508,8 @@ public class FileExportAllPartitionsForm {
 												actiontype = ScreenType;
 											} else if (filelength == 768) { // {  };
 												actiontype = FontType;
+											} else if (file.GetFilename().toUpperCase().endsWith("UDG") || filelength == 168) {
+												actiontype = UDGType;
 											} else { // CODE Options: { "Raw", "Raw+Header", "Assembly", "Hex" };
 												actiontype = CodeType;
 											}
@@ -505,7 +517,7 @@ public class FileExportAllPartitionsForm {
 
 										Speccy.SaveFileToDiskAdvanced(new File(filefolder, file.GetFilename()), data,
 												cpmdata, filelength, SpeccyFileType, basicLine, basicVarsOffset,
-												codeLoadAddress, arrayVarName, actiontype, lang, display);
+												codeLoadAddress, arrayVarName, actiontype, lang, display,file.GetFilename());
 										SysConfig = new FileWriter(new File(filefolder, "partition.index"), true);
 										try {
 											PrintWriter SysConfigp = new PrintWriter(SysConfig);
@@ -603,8 +615,9 @@ public class FileExportAllPartitionsForm {
 		int UnknownType = TextToIndex(UnknownTargetFileType.getText(), GeneralUtils.MasterList);
 		int SwapType = TextToIndex(SwapTargetFileType.getText(), GeneralUtils.MasterList);
 		int FontType = TextToIndex(FontTargetFileType.getText(), GeneralUtils.MasterList);
+		int UDGType = TextToIndex(UDGTargetFileType.getText(), GeneralUtils.MasterList);
 		String TargetFolder = Targetfile.getText();
-		return (DoExportFlags(BasicType, CodeType, ArrayType, ScreenType, UnknownType,FontType, SwapType, TargetFolder));
+		return (DoExportFlags(BasicType, CodeType, ArrayType, ScreenType, UnknownType,SwapType, FontType,UDGType, TargetFolder));
 	}
 
 	/**
@@ -619,7 +632,7 @@ public class FileExportAllPartitionsForm {
 	 * @return
 	 */
 	protected boolean DoExportFlags(int BasicType, int CodeType, int ArrayType, int ScreenType, int UnknownType,
-			int SwapType,int FontType, String TargetFolder) {
+			int SwapType,int FontType, int UDGType, String TargetFolder) {
 		PartitionExportProgress pep = new PartitionExportProgress(shell.getDisplay(), lang);
 		try {
 			pep.Show("Exporting Partition " + ThisDisk.GetName(), "Partition:", "File:");
@@ -651,7 +664,7 @@ public class FileExportAllPartitionsForm {
 									pep.setMessage2(text);
 									return (pep.IsCancelled());
 								}
-							}, IncludeDeleted.getSelection(), display, FontType);
+							}, IncludeDeleted.getSelection(), display, FontType, UDGType);
 
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -676,6 +689,7 @@ public class FileExportAllPartitionsForm {
 		int UnknownType = TextToIndex(UnknownTargetFileType.getText(), GeneralUtils.MasterList);
 		int SwapType = TextToIndex(SwapTargetFileType.getText(), GeneralUtils.MasterList);
 		int FontType = TextToIndex(FontTargetFileType.getText(), GeneralUtils.MasterList);
+		int UDGType = TextToIndex(UDGTargetFileType.getText(), GeneralUtils.MasterList);
 
 		System.out.println("Basic type: " + BasicType + " " + GeneralUtils.MasterList[BasicType]);
 		System.out.println("Code type: " + CodeType + " " + GeneralUtils.MasterList[CodeType]);
@@ -684,6 +698,7 @@ public class FileExportAllPartitionsForm {
 		System.out.println("Unknown type: " + UnknownType + " " + GeneralUtils.MasterList[UnknownType]);
 		System.out.println("Swap partition: " + SwapType + " " + GeneralUtils.MasterList[SwapType]);
 		System.out.println("Font type: " + FontType + " " + GeneralUtils.MasterList[FontType]);
+		System.out.println("UDG type: " + UDGType + " " + GeneralUtils.MasterList[FontType]);
 
 		SystemPartition sp = (SystemPartition) ThisDisk;
 
@@ -729,7 +744,7 @@ public class FileExportAllPartitionsForm {
 										pep.setMessage2(text);
 										return (pep.IsCancelled());
 									}
-								}, IncludeDeleted.getSelection(), display,FontType);
+								}, IncludeDeleted.getSelection(), display,FontType, UDGType);
 
 //						long finish = System.currentTimeMillis();
 //						System.out.println(String.valueOf(finish - start) + "ms");

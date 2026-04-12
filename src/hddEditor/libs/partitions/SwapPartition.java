@@ -79,7 +79,7 @@ public class SwapPartition extends IDEDosPartition {
 
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction)
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction, int UDGAction)
 			throws IOException {
 		// ExtractPartitiontoFolder(folder, SwapAction==GeneralUtils.EXPORT_TYPE_RAW,
 		// false, progress);
@@ -100,7 +100,7 @@ public class SwapPartition extends IDEDosPartition {
 			byte data[] = GetAllDataInPartition();
 			
 			Speccy.SaveFileToDiskAdvanced(new File(folder,"swap.data"), data, data, BasicAction, CodeAction, ArrayAction, ScreenAction,
-					MiscAction, null, SwapAction,lang, disp);
+					MiscAction, null, SwapAction,lang, disp, "");
 		} catch (IOException e) {
 			System.out.println("Error extracting files: " + e.getMessage());
 			e.printStackTrace();

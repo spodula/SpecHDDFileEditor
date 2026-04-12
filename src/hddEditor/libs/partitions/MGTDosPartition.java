@@ -443,7 +443,7 @@ public class MGTDosPartition extends IDEDosPartition {
 	 */
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction) throws IOException {
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction, int UDGAction) throws IOException {
 		FileWriter SysConfig;
 		try {
 			SysConfig = new FileWriter(new File(folder, "partition.index"));
@@ -487,6 +487,8 @@ public class MGTDosPartition extends IDEDosPartition {
 								actiontype = CodeAction;
 								if (filelength==6912) {
 									actiontype = ScreenAction;
+								} else if (entry.GetFilename().toUpperCase().endsWith("UDG") || filelength == 168) {
+									actiontype = UDGAction;
 								}
 								break;
 							default:
@@ -499,7 +501,7 @@ public class MGTDosPartition extends IDEDosPartition {
 
 							Speccy.SaveFileToDiskAdvanced(TargetFilename, entry.GetFileData(), entry.GetFileData(),
 									filelength, SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress,
-									arrayVarName, actiontype, lang, disp);
+									arrayVarName, actiontype, lang, disp, entry.GetFilename());
 							System.out.println("Written " + entry.GetFilename().trim());
 						} catch (IOException e) {
 							System.out

@@ -542,7 +542,7 @@ public class TrDosPartition extends IDEDosPartition {
 	 */
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction)
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction, int UDGAction)
 			throws IOException {
 		FileWriter SysConfig;
 		try {
@@ -593,10 +593,21 @@ public class TrDosPartition extends IDEDosPartition {
 								basicVarsOffset = entry.GetVar2();
 
 							}
-
+							
+							if ((filelength == 6912) && (codeLoadAddress == 16384)) { // { "PNG", "GIF", "JPEG",
+								// "Raw",
+								// "Raw+Header", "Hex",
+								// "Assembly" };
+									actiontype = ScreenAction;
+							} else if (filelength == 768) {
+								actiontype = FontAction;
+							} else if (entry.GetFilename().toUpperCase().endsWith("UDG") || filelength == 168) {
+								actiontype = UDGAction;
+							}
+							
 							Speccy.SaveFileToDiskAdvanced(TargetFilename, entry.GetFileData(), entry.GetFileData(),
 									filelength, SpeccyFileType, basicLine, basicVarsOffset, codeLoadAddress,
-									arrayVarName, actiontype, lang, disp);
+									arrayVarName, actiontype, lang, disp, entry.GetFilename());
 							System.out.println("Written " + entry.GetFilename().trim());
 						} catch (IOException e) {
 							System.out

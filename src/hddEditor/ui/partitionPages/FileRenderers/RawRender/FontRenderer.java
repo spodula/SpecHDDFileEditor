@@ -24,9 +24,9 @@ public class FontRenderer implements Renderer {
 		}
 	}
 
-	public void Render(Composite TargetPage, byte data[]) {
+	public void Render(Composite TargetPage, byte data[], String filename) {
 		Font font = new Font(TargetPage.getDisplay(), "Tahoma", 9, SWT.BOLD);
-		Image img = Speccy.RenderDataAsFontBlock(data,font, TargetPage.getDisplay()); 
+		Image img = Speccy.RenderDataAsFontBlock(data,font, TargetPage.getDisplay(), filename); 
 		
 		Label lbl = new Label(TargetPage, SWT.NONE);
 		lbl.setImage(img);

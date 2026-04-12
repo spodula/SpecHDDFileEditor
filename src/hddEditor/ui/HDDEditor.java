@@ -6,9 +6,6 @@ package hddEditor.ui;
  * Main UI.
  */
 
-//TODO: Add FNT support
-//TODO: Add UDG support
-
 import java.io.File;
 
 import java.io.IOException;
@@ -70,7 +67,7 @@ public class HDDEditor {
 	public Disk CurrentDisk = null;
 	public OSHandler CurrentHandler = null;
 	public IDEDosPartition CurrentSelectedPartition = null;
-
+	
 	// Language
 	public Languages lang = null;
 	

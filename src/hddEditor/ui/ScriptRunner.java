@@ -533,7 +533,7 @@ public class ScriptRunner {
 
 						Speccy.SaveFileToDiskAdvanced(new File(TargetFolder, entry.GetFilename().trim()), filedata,
 								rawdata, filelength, SpeccyFileType, basicline, basicVarsOffset, codeLoadAddress,
-								arrayVarName, actiontype, lang, new Display() );
+								arrayVarName, actiontype, lang, new Display(), entry.GetFilename() );
 						System.out.println("Written " + entry.GetFilename().trim());
 					} catch (Exception E) {
 						System.out.println("Error writing: '" + entry.GetFilename() + "'" + E.getMessage());

@@ -361,7 +361,7 @@ public class SystemPartition extends IDEDosPartition {
 
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction)
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction, int UDGAction)
 			throws IOException {
 		FileWriter SysConfig = new FileWriter(new File(folder, "system.config"));
 		try {

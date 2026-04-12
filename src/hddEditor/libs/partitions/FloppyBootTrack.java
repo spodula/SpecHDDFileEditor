@@ -191,7 +191,7 @@ public class FloppyBootTrack extends IDEDosPartition {
 
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction)
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction, int UDGAction)
 			throws IOException {
 
 		try {
@@ -332,7 +332,7 @@ public class FloppyBootTrack extends IDEDosPartition {
 			}
 
 			Speccy.SaveFileToDiskAdvanced(new File(folder, "boot.data"), data, data, BasicAction, CodeAction,
-					ArrayAction, ScreenAction, MiscAction, null, SwapAction, lang, disp);
+					ArrayAction, ScreenAction, MiscAction, null, SwapAction, lang, disp, "");
 		} catch (IOException e) {
 			System.out.println(lang.Msg(Languages.MSG_ERREXTRACTBOOT) + ": " + e.getMessage());
 			e.printStackTrace();

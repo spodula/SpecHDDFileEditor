@@ -629,7 +629,7 @@ public class CPMPartition extends IDEDosPartition {
 
 	@Override
 	public void ExtractPartitiontoFolderAdvanced(File folder, int BasicAction, int CodeAction, int ArrayAction,
-			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction)
+			int ScreenAction, int MiscAction, int SwapAction, ProgressCallback progress, boolean IncludeDeleted, Display disp, int FontAction, int UDGAction)
 			throws IOException {
 		try {
 			FileWriter SysConfig = new FileWriter(new File(folder, "partition.index"));
@@ -646,7 +646,7 @@ public class CPMPartition extends IDEDosPartition {
 						File TargetFilename = new File(folder, entry.GetFilename().trim());
 						byte file[] = entry.GetFileData();
 						Speccy.SaveFileToDiskAdvanced(TargetFilename, file, file, file.length, 3, 0, 0, 0, "A",
-								MiscAction, lang, disp);
+								MiscAction, lang, disp, entry.GetFilename());
 
 						SysConfig.write("<file>\n".toCharArray());
 						SysConfig.write(("  <filename>" + entry.GetFilename() + "</filename>\n").toCharArray());

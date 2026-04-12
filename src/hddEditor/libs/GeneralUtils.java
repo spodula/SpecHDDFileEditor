@@ -24,8 +24,9 @@ public class GeneralUtils {
 	public static final int EXPORT_TYPE_JPG = 7;
 	public static final int EXPORT_TYPE_RAWANDHEADER = 8;
 	public static final int EXPORT_TYPE_FONTIMG = 9;
+	public static final int EXPORT_TYPE_UDGIMG = 10;
 
-	public static String MasterList[] = { "Raw", "Text", "Hex", "Assembly", "CSV", "PNG", "GIF", "JPEG", "Raw+Header", "Font preview" };
+	public static String MasterList[] = { "Raw", "Text", "Hex", "Assembly", "CSV", "PNG", "GIF", "JPEG", "Raw+Header", "Font preview", "UDG preview"};
 
 	/**
 	 * Get size as either k or m depending on size.
