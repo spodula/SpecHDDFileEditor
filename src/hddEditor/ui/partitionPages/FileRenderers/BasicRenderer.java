@@ -34,6 +34,7 @@ public class BasicRenderer extends FileRenderer {
 	public Table Listing = null;
 	public Table Variables = null;
 	public Label VarLBL = null;
+	private hddEditor.ui.partitionPages.FileRenderers.RawRender.BasicRenderer BasRenderer = null;
 
 	private Color DefaultBackgroundColor;
 
@@ -129,6 +130,15 @@ public class BasicRenderer extends FileRenderer {
 								VariableStartEdit.setBackground(new Color(mainPage.getDisplay(), 255, 0, 0));
 							} else {
 								VariableStartEdit.setBackground(DefaultBackgroundColor);
+								//Update program listing
+								BasRenderer.DisposeRenderer();
+								BasRenderer = new hddEditor.ui.partitionPages.FileRenderers.RawRender.BasicRenderer();
+								BasRenderer.AddBasicFile(mainPage, data, filelength, sai, false, lang);
+
+								Listing = BasRenderer.Listing;
+								Variables = BasRenderer.Variables;
+
+								mainPage.pack();
 							}
 
 						} catch (NumberFormatException e) {
@@ -220,11 +230,12 @@ public class BasicRenderer extends FileRenderer {
 		StartLineEdit.setText(String.valueOf(Startline));
 		VariableStartEdit.setText(String.valueOf(VariablesOffset));
 
-		hddEditor.ui.partitionPages.FileRenderers.RawRender.BasicRenderer br = new hddEditor.ui.partitionPages.FileRenderers.RawRender.BasicRenderer();
-		br.AddBasicFile(mainpage, data, filelength, VariablesOffset, false, lang);
+		
+		BasRenderer = new hddEditor.ui.partitionPages.FileRenderers.RawRender.BasicRenderer();
+		BasRenderer.AddBasicFile(mainpage, data, filelength, VariablesOffset, false, lang);
 
-		Listing = br.Listing;
-		Variables = br.Variables;
+		Listing = BasRenderer.Listing;
+		Variables = BasRenderer.Variables;
 
 		this.MainPage.pack();
 	}

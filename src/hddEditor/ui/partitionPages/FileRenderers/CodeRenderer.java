@@ -124,6 +124,8 @@ public class CodeRenderer extends FileRenderer {
 								StartAddress.setBackground(new Color(mainPage.getDisplay(), 255,0,0));
 							} else {
 								StartAddress.setBackground(DefaultBackgroundColor);
+								//update code with new start address
+								CodeTypeComboChanged(data,sai);
 							}
 							
 						} catch (NumberFormatException e) {
