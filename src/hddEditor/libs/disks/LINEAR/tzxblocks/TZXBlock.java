@@ -63,7 +63,7 @@ public class TZXBlock {
 		}
 		return (result);
 	}
-
+	
 	public boolean IsValidHeader() {
 		boolean result = false;
 		if ((blocktype == TZX.TZX_STANDARDSPEED_DATABLOCK) && (blockdata != null) && (blockdata.length > 16)
@@ -76,6 +76,7 @@ public class TZXBlock {
 		}
 		return (result);
 	}
+	
 
 	/**
 	 * Check to see if the block has a valid checksum The Speccy rom loader puts a

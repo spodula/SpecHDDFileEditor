@@ -560,6 +560,11 @@ public class Languages {
 		}
 	}
 
+	/**
+	 * Get the message given a particular message ID
+	 * @param msg
+	 * @return
+	 */
 	public String Msg(int msg) {
 		String result = Messages.get(msg);
 		if (result == null) {
@@ -571,13 +576,19 @@ public class Languages {
 		return (result);
 	}
 
+	/**
+	 * Load the given language table. 
+	 * @param lang - abbrev of language 
+	 * @return	-TRUE if successfully loaded, FALSE otherwise
+	 */
 	private boolean load(String lang) {
 		Messages = new Hashtable<Integer, String>();
 		try {
 			InputStream document = null;
 
+
 			if (IsInJar()) {
-				document = getClass().getResourceAsStream("lang/" + lang + ".xml");
+				document = getClass().getResourceAsStream("/lang/" + lang + ".xml");
 			} else {
 				File file = new File("src/resources/lang", lang + ".xml");
 				document = new FileInputStream(file);
