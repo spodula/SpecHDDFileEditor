@@ -284,7 +284,7 @@ public class Z80file extends MachineState {
 			SnapSpecific.put("Joystick", "Kempston");
 			break;
 		case 3:
-			SnapSpecific.put("Joystick", "Sinclair IF2 left");
+			SnapSpecific.put("Joystick", "Sinclair IF2 left"); 
 			break;
 		case 4:
 			SnapSpecific.put("Joystick", "Sinclair IF2 Right");
@@ -417,6 +417,7 @@ public class Z80file extends MachineState {
 					if (page.get128Page() == pagedram)
 						System.arraycopy(page.Data, 0, RAM, 0x8000, 0x4000);
 				} else {
+					System.out.println(page.Pagenum );
 					if (page.Pagenum == 4)
 						System.arraycopy(page.Data, 0, RAM, 0x4000, 0x4000);
 					if (page.Pagenum == 5)

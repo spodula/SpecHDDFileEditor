@@ -26,6 +26,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
@@ -45,6 +46,9 @@ public class RamDump implements Renderer {
 	private ArrayList<Renderer> Renderers = null;
 	private Button ExtractBtn = null;
 	private Button AddSnapshotBtn = null;
+	private Button ExtractBasic = null;
+	private Button ExtractCode = null;
+	private Button ExtractScreen = null;
 	private Composite Targetpg = null;
 	private byte rawdata[] = null;
 	private String fName = null;
@@ -107,6 +111,13 @@ public class RamDump implements Renderer {
 		fName = filename;
 		IYReg = IY;
 		this.i128BankOrder = i128BankOrder;
+		// check for BASIC.
+		int diff = 0x4000;
+
+		int PROG = (data[0x5c54 - diff] & 0xff) * 256 + (data[0x5c53 - diff] & 0xff);
+		int VARS = (data[0x5c4c - diff] & 0xff) * 256 + (data[0x5c4b - diff] & 0xff);
+		int E_LINE = (data[0x5c5a - diff] & 0xff) * 256 + (data[0x5c59 - diff] & 0xff);
+		int RAMTOP = (data[0x5cb3 - diff] & 0xff) * 256 + (data[0x5cb2 - diff] & 0xff);
 
 		byte screen[] = new byte[0x1b00];
 		for (int i = 0; i < 0x1800; i++)
@@ -115,12 +126,28 @@ public class RamDump implements Renderer {
 			screen[i] = 0b00111000;
 		System.arraycopy(data, 0x00, screen, 0, Math.min(0x1b00, data.length));
 
+
 		ScreenRenderer ScrRenderer = new ScreenRenderer();
 		Renderers.add(ScrRenderer);
 		ScrRenderer.Render(TargetPage, screen);
 
+		GridData gd1 = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd1.minimumHeight = 192;
+		gd1.minimumWidth = 256;
+		gd1.horizontalSpan = 2;
+		gd1.verticalSpan = 4;
+		gd1.horizontalAlignment = SWT.CENTER;
+
+		ScrRenderer.ImageLabels.get(0).setLayoutData(gd1);
+
+		GridData BtnGD = new GridData(SWT.FILL, SWT.FILL, true, true);
+		BtnGD.horizontalSpan = 1;
+		BtnGD.verticalSpan = 1;
+
 		ExtractBtn = new Button(TargetPage, SWT.NONE);
+		ExtractBtn.setLayoutData(BtnGD);
 		ExtractBtn.setText(lang.Msg(Languages.MSG_EXTRACTDISK));
+		ExtractBtn.setToolTipText("Extract file to disk splitting into parts");
 		ExtractBtn.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -137,21 +164,69 @@ public class RamDump implements Renderer {
 			}
 		});
 
-//		if (!is128K && (cpustate != null)) {
-			AddSnapshotBtn = new Button(TargetPage, SWT.NONE);
-			AddSnapshotBtn.setText(lang.Msg(Languages.MSG_CONVERTSNAPSHOT));
-			AddSnapshotBtn.addSelectionListener(new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					doConvertSnaToLoadableFiles(cpustate, targetpartition, filename);
-				}
+		AddSnapshotBtn = new Button(TargetPage, SWT.NONE);
+		AddSnapshotBtn.setLayoutData(BtnGD);
+		AddSnapshotBtn.setText(lang.Msg(Languages.MSG_CONVERTSNAPSHOT));
+		AddSnapshotBtn.setToolTipText("Convert Snapshot into loadable files (Only works reliably on 48K)");
+		AddSnapshotBtn.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				doConvertSnaToLoadableFiles(cpustate, targetpartition, filename);
+			}
 
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					widgetSelected(arg0);
-				}
-			});
-//		}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				widgetSelected(arg0);
+			}
+		});
+		AddSnapshotBtn.setEnabled(cpustate != null);
+		ExtractBasic = new Button(TargetPage, SWT.NONE);
+		ExtractBasic.setLayoutData(BtnGD);
+		ExtractBasic.setText("Extract basic");
+		ExtractBasic.setToolTipText("Extract BASIC part of file to seperate file");
+		ExtractBasic.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				DoExtractBasicFromRamdump(targetpartition, filename, BasicData,VarsOffset); 
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				widgetSelected(arg0);
+			}
+		});
+		ExtractCode = new Button(TargetPage, SWT.NONE);
+		ExtractCode.setLayoutData(BtnGD);
+		ExtractCode.setText("Extract Non-basic");
+		ExtractCode.setToolTipText("Extract All memory after RAMTOP to file");
+		ExtractCode.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				DoExtractCodeFromRamdump(targetpartition, filename, data, RAMTOP); 
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				widgetSelected(arg0);
+			}
+		});
+
+		ExtractScreen = new Button(TargetPage, SWT.NONE);
+		ExtractScreen.setLayoutData(BtnGD);
+		ExtractScreen.setText("Extract Screen");
+		ExtractScreen.setToolTipText("Extract Screen data to a seperate .SCR file");
+		ExtractScreen.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				DoExtractScreenFromRamdump(targetpartition, filename, screen); 
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				widgetSelected(arg0);
+			}
+		});
+
 
 		Label lbl = new Label(TargetPage, SWT.NONE);
 		labels.add(lbl);
@@ -159,12 +234,6 @@ public class RamDump implements Renderer {
 		Font boldFont = new Font(lbl.getShell().getDisplay(),
 				new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 
-		// check for BASIC.
-		int diff = 0x4000;
-
-		int PROG = (data[0x5c54 - diff] & 0xff) * 256 + (data[0x5c53 - diff] & 0xff);
-		int VARS = (data[0x5c4c - diff] & 0xff) * 256 + (data[0x5c4b - diff] & 0xff);
-		int E_LINE = (data[0x5c5a - diff] & 0xff) * 256 + (data[0x5c59 - diff] & 0xff);
 
 		// some basic checking.
 		HasBasic = false;
@@ -185,6 +254,11 @@ public class RamDump implements Renderer {
 			SVR.AddSysVars(TargetPage, SysVars, false, false, lang);
 			HasBasic = true;
 		}
+
+		ExtractBasic.setEnabled(HasBasic);
+		ExtractCode.setEnabled(HasBasic);
+		ExtractScreen.setEnabled(HasBasic);
+
 
 		if (is128K) {
 			lbl.setText(String.format(lang.Msg(Languages.MSG_CONVERTSNAPSHOT),i128BankOrder[2]));
@@ -211,8 +285,8 @@ public class RamDump implements Renderer {
 
 				lbl = new Label(TargetPage, SWT.NONE);
 				labels.add(lbl);
-				
-				
+
+
 				lbl.setText(String.format(lang.Msg(Languages.MSG_RAMBANKMSG),rambank, startAddress, startAddress+0x3fff));
 				gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 				gd.horizontalSpan = 4;
@@ -235,6 +309,75 @@ public class RamDump implements Renderer {
 			BinaryRenderer BinRenderer = new BinaryRenderer();
 			Renderers.add(BinRenderer);
 			BinRenderer.Render(TargetPage, memdata, 0x4000, 200, lang);
+		}
+	}
+
+	protected void DoExtractScreenFromRamdump(IDEDosPartition targetpartition, String filename, byte[] data) {
+		// save BASIC
+		if (data != null) {
+			String fn = filename;
+			if (fn.contains(".")) {
+				fn = fn.substring(0,fn.indexOf('.'));
+			}
+			fn = fn + ".SCR";
+
+			targetpartition.UniqueifyFileNameIfRequired(fn);
+
+			byte[] newfile = new byte[6912];
+			System.arraycopy(data, 0, newfile, 0, newfile.length);
+
+			try {
+				targetpartition.AddCodeFile(fn,6912,newfile);
+			} catch (IOException e) {
+				System.out.println("Cannot add CODE file: "+e.getMessage());
+			}
+		}
+	}
+
+	protected void DoExtractCodeFromRamdump(IDEDosPartition targetpartition, String filename, byte[] data, int Ramtop) {
+		// save Ram outside of the basic area
+		if (data != null) {
+			String fn = filename;
+			if (fn.contains(".")) {
+				fn = fn.substring(0,fn.indexOf('.'));
+			}
+			fn = fn + ".RAM";
+
+			targetpartition.UniqueifyFileNameIfRequired(fn);
+			int newfilelength = 0xffff-Ramtop;
+
+			byte[] newfile = new byte[newfilelength];
+			int datastart = Ramtop+1-0x4000;
+			int datalength = data.length-datastart;
+
+
+			System.arraycopy(data, datastart, newfile, 0, datalength);
+
+			try {
+				targetpartition.AddCodeFile(fn,Ramtop+1,newfile);
+			} catch (IOException e) {
+				System.out.println("Cannot add CODE file: "+e.getMessage());
+			}
+		}
+	}
+
+	protected void DoExtractBasicFromRamdump(IDEDosPartition targetpartition, String filename, byte[] BasicData, int varsoffset) {
+
+		// save BASIC
+		if (BasicData != null) {
+			String fn = filename;
+			if (fn.contains(".")) {
+				fn = fn.substring(0,fn.indexOf('.'));
+			}
+			fn = fn + ".BAS";
+
+			targetpartition.UniqueifyFileNameIfRequired(fn);
+
+			try {
+				targetpartition.AddBasicFile(fn, BasicData, 32768, VarsOffset);
+			} catch (IOException e) {
+				System.out.println("Cannot add basic file: "+e.getMessage());
+			}
 		}
 	}
 
@@ -458,4 +601,6 @@ public class RamDump implements Renderer {
 		}
 		return (EndOfAnyBasic);
 	}
+
+
 }

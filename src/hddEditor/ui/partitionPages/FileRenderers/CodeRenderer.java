@@ -338,11 +338,11 @@ public class CodeRenderer extends FileRenderer {
 			} else if (s.equals(CODETYPES[5])) {
 				RamDump renderer = new RamDump();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a, new int[0], filename, null, null, lang);
+				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a, new int[0], filename, null, part, lang);
 			} else if (s.equals(CODETYPES[6])) {
 				RamDump renderer = new SPRenderer();
 				Renderers.add(renderer);
-				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a, new int[0], filename, null, null, lang);
+				renderer.Render(MainPage, data, loadAddr, false, 0x5c3a, new int[0], filename, null, part, lang);
 			} else if (s.equals(CODETYPES[7])) {
 				TextRenderer renderer = new TextRenderer();
 				Renderers.add(renderer);
@@ -362,7 +362,7 @@ public class CodeRenderer extends FileRenderer {
 				System.arraycopy(data2, 0x4000, data1, 0,0xc000);
 
 
-				renderer.Render(MainPage, data1, loadAddr, false, 0x5c3a, new int[0], filename, null, null, lang);
+				renderer.Render(MainPage, data1, loadAddr, false, 0x5c3a, new int[0], filename, null, part, lang);
 			} else if (s.equals(CODETYPES[10])) {
 				SZXSnapshotRenderer renderer = new SZXSnapshotRenderer();
 				Renderers.add(renderer);

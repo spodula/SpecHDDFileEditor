@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Label;
 import hddEditor.libs.Speccy;
 
 public class ScreenRenderer implements Renderer {
-	ArrayList<Label> ImageLabels=null;
+	public ArrayList<Label> ImageLabels=null;
 
 	public void DisposeRenderer() {
 		if (ImageLabels != null) {
